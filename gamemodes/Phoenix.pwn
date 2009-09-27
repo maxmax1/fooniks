@@ -28,7 +28,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	1
+#define SCRIPT_REVISION 	4
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"root"
@@ -70,24 +70,26 @@ public OnGameModeInit()
 	new Connection = mysql_connect(MYSQL_HOST, MYSQL_USER, MYSQL_DB, MYSQL_PASSWORD);
 	if(!Connection)
 	{
-		printf("\t\t* %s - %s", SCRIPT_NAME, LANG_FAILED_TO_CONNECT);
+		printf(LANG_FAILED_TO_CONNECT, SCRIPT_NAME);
 		SendRconCommand("exit");
 		return 1;
 	}
-	printf("\t\t* %s - %s", SCRIPT_NAME, LANG_CONNECTED);
+	printf(LANG_CONNECTED, SCRIPT_NAME);
 
 	new string[24]; // 24 should be enough.
 	format(string, 24, "%s %s r%d", SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION);
 	SetGameModeText(string);
-	printf("\t\t* %s-%sr%s-%s %s.", SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION, SCRIPTER_NAME, LANG_LOADED);
-	format(WelcomeStr, 32, "%s %s-%sr%s-%s", LANG_WELCOME_TO, SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION, SCRIPTER_NAME);
+	
+	printf(LANG_LOADED, SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION, SCRIPTER_NAME);
+	
+	format(WelcomeStr, 32, LANG_WELCOME_TO, SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION, SCRIPTER_NAME);
 	
 	return 1;
 }
 
 public OnGameModeExit()
 {
-	printf("\t\t* %s-%sr%s-%s %s.", SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION, SCRIPTER_NAME, LANG_UNLOADED);
+	printf(LANG_UNLOADED, SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION, SCRIPTER_NAME);
 	return 1;
 }
 
