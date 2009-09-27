@@ -28,7 +28,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	7
+#define SCRIPT_REVISION 	8
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"root"
