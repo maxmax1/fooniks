@@ -350,3 +350,40 @@ v0.3-beta-RC7, (C)2005-2009 SA-MP Team
 [22:12:27] 		* Phoenix - Connected to mysql DB.
 [22:12:27] 		* Phoenix-0.1r30-Jyrno42 Loaded.
 [22:12:27] 		 Started Loading Vehicles.
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3-beta-RC7, (C)2005-2009 SA-MP Team
+
+[22:44:00] filterscripts = ""  (string)
+[22:44:00] 
+[22:44:00] Server Plugins
+[22:44:00] --------------
+[22:44:00]  Loading plugin: mysql
+[22:44:00] 
+
+  > MySQL plugin loaded on. |
+
+[22:44:00]   Loaded.
+[22:44:00]  Loaded 1 plugins.
+
+[22:44:00] 
+[22:44:00] Filter Scripts
+[22:44:00] ---------------
+[22:44:00]   Loaded 0 filter scripts.
+
+[22:44:01] 		* Phoenix - Failed to connect to mysql DB.
+[22:44:01] FIREBIRDIE HAS MAIN()
+[22:44:01] --- Server Shutting Down.
+[22:44:01] Started Saving all vehicles.
+[22:44:01] Saving all before server shutdown.
+[22:44:01] All vehicles saved.
+[22:44:01] 		* Phoenix-0.1r33-Jyrno42 UnLoaded.
+[22:44:01] 
+
+  > MySQL plugin unloaded.
+

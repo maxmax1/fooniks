@@ -54,6 +54,7 @@
 	#define VEHICLE_SAVE_THREAD     2
 	#define CHECK_CHARACTER_THREAD	3
 	#define GET_USERINFO_THREAD	    4
+	#define FETCH_UINFO_THREAD      5
 
 #define VEHICLE_DELAY 60000
 
@@ -79,8 +80,9 @@ new WelcomeStr[32];
     /*
          *  THREADS Vars
          */
-	new Active_Check_Character_Thread = -1;
-	new Get_Userinfo_Thread    = -1;
+	new Active_Check_Character_Thread	= -1;
+	new Get_Userinfo_Thread				= -1;
+	new Fetch_UInfo_Thread				= -1;
 
 
 enum pInf
@@ -88,13 +90,15 @@ enum pInf
 	uSqlId,
 	uUserName[20],	
 	uPassWordHash[64],
-	uSalt[10],	
-	pCharName,
+	uSalt[10],
+	pLoggedIn,
+	pCharName[30],
 	pSqlId,
 	pAdmin,
 	pJob,
 	pMember,
-	pLeader
+	pLeader,
+	pModel
 };
 new pInfo[MAX_PLAYERS][pInf];
 
@@ -148,6 +152,8 @@ forward CheckCharacterFinish(playerid);
 forward GetUserInfo(playerid);
 forward GetUserInfoFinish(playerid);
 forward AuthenticateUser(playerid, givenPassword[]);
+forward FetchCharacterInformation(playerid);
+forward FetchCharacterInformationFinish(playerid);
 
 /*
 *    MAIN()
@@ -262,6 +268,10 @@ public OnPlayerConnect(playerid)
 	SendClientMessage(playerid, COLOR_YELLOW, WelcomeStr);
 	InfoBarTimer[playerid] = -1;
 	CheckCharacter(playerid);
+
+	pInfo[playerid][pLoggedIn] = false;
+	GetPlayerName(playerid, pInfo[playerid][pCharName], 30);
+
 	ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
 	return 1;
 }
@@ -316,7 +326,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		if(response == 0)
 		{
 			SendClientMessage(playerid, COLOR_RED, LANG_MUST_LOGIN);
-			return Kick(playerid);
+			return ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
 		}
 		else
 		{
@@ -325,6 +335,16 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		}
 	}
 	return 1;
+}
+public OnPlayerRequestSpawn(playerid)
+{
+    if( !pInfo[playerid][pLoggedIn] )
+    {
+        SendClientMessage(playerid, COLOR_RED, LANG_MUST_LOGIN);
+        ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
+    
+    }
+    return 1;
 }
 
 /*
@@ -673,13 +693,53 @@ public AuthenticateUser(playerid, givenPassword[])
 	if(strcmp(pInfo[playerid][uPassWordHash], PasswordHash(givenPassword, pInfo[playerid][uSalt]), true) != 0) // wrong Password
 	{
 		SendClientMessage(playerid, COLOR_RED, LANG_WRONG_PASSWORD);
+		ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
+	}
+	else
+	{
+		FetchCharacterInformation(playerid);
+		pInfo[playerid][pLoggedIn] = true;
+		SendClientMessage(playerid, COLOR_RED, LANG_LOGGED_IN);
+	}
+	return 1;
+}
+public FetchCharacterInformation(playerid)
+{
+	if(Fetch_UInfo_Thread != -1) // thread is busy, lets attemp again in 1 second.
+	{
+		SetTimerEx("FetchUserInformation", 1000, 0, "i", playerid);
+		return 1;
+	}
+	Fetch_UInfo_Thread = playerid;
+
+	new query[86];
+	format(query, 86, "SELECT model FROM user WHERE userid = '%d' LIMIT 1", pInfo[playerid][uSqlId]);
+	mysql_query(query, FETCH_UINFO_THREAD);
+	SetTimerEx("FetchCharacterInformationFinish", 5000, 0, "i", playerid);
+	return 1;
+
+}
+public FetchCharacterInformationFinish(playerid)
+{
+	if(Fetch_UInfo_Thread != playerid) return 1;
+	mysql_store_result();
+
+	if(mysql_num_rows() < 1)
+	{
+		SendClientMessage(playerid, COLOR_RED, LANG_NOUSER);
 		Kick(playerid);
 	}
 	else
 	{
-		// TODO: FetchCharacterInformation(playerid);
-		SendClientMessage(playerid, COLOR_RED, LANG_LOGGED_IN);
+		new Field[64], Data[128];
+		mysql_fetch_row(Data);
+
+		mysql_fetch_field_row(Field, "model");
+		pInfo[playerid][pModel] = strval(Field);
+		
+		mysql_free_result();
 	}
+	Fetch_UInfo_Thread = -1;
 	return 1;
 }
 
