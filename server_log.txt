@@ -133,3 +133,51 @@ v0.3-beta-RC7, (C)2005-2009 SA-MP Team
 
   > MySQL plugin unloaded.
 
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3-beta-RC7, (C)2005-2009 SA-MP Team
+
+[20:46:18] filterscripts = ""  (string)
+[20:46:18] 
+[20:46:18] Server Plugins
+[20:46:18] --------------
+[20:46:18]  Loading plugin: mysql
+[20:46:21]   Failed.
+[20:46:21]  Loaded 0 plugins.
+
+[20:46:21] 
+[20:46:21] Filter Scripts
+[20:46:21] ---------------
+[20:46:21]   Loaded 0 filter scripts.
+
+[20:46:21] Script[gamemodes/Phoenix.amx]: Run time error 19: "File or function is not found"
+[20:46:24] --- Server Shutting Down.
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3-beta-RC7, (C)2005-2009 SA-MP Team
+
+[20:46:26] filterscripts = ""  (string)
+[20:46:26] 
+[20:46:26] Server Plugins
+[20:46:26] --------------
+[20:46:26]  Loading plugin: mysql
+[20:46:29]   Failed.
+[20:46:29]  Loaded 0 plugins.
+
+[20:46:29] 
+[20:46:29] Filter Scripts
+[20:46:29] ---------------
+[20:46:29]   Loaded 0 filter scripts.
+
+[20:46:29] Script[gamemodes/Phoenix.amx]: Run time error 19: "File or function is not found"
+[20:46:50] --- Server Shutting Down.

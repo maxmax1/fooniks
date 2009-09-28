@@ -62,6 +62,9 @@
 #define COLOR_RED 0xAA3333AA
 #define COLOR_GREEN 0x33AA33AA
 
+/* DialogIDs */
+#define DIALOG_LOGIN 2009
+
 /*
 *    GLOBAL VARIABLES
 */
@@ -240,6 +243,7 @@ public OnPlayerConnect(playerid)
 {
 	SendClientMessage(playerid, COLOR_YELLOW, WelcomeStr);
 	InfoBarTimer[playerid] = -1;
+	ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
 	return 1;
 }
 
@@ -266,8 +270,8 @@ public OnPlayerSpawn(playerid)
 
 public OnPlayerStateChange(playerid, newstate, oldstate)
 {
-	if(newstate == PLAYER_STATE_DRIVER) 			OnDriverEnterVehicle(playerid);
-	else if(newstate == PLAYER_STATE_ONFOOT) 		OnDriverExitVehicle(playerid);
+	if(newstate == PLAYER_STATE_DRIVER) 										OnDriverEnterVehicle(playerid);
+	else if(oldstate == PLAYER_STATE_DRIVER && newstate == PLAYER_STATE_ONFOOT) OnDriverExitVehicle(playerid);
 }
 
 public OnVehicleDeath(vehicleid)
