@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"40"
+#define SCRIPT_REVISION 	"41"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -720,7 +720,7 @@ public FetchCharacterInformation(playerid)
 	Fetch_UInfo_Thread = playerid;
 
 	new query[86];
-	format(query, 86, "SELECT model FROM user WHERE userid = '%d' LIMIT 1", pInfo[playerid][uSqlId]);
+	format(query, 86, "SELECT * FROM %scharacters WHERE userid = '%d' LIMIT 1", MYSQL_PREFIX, pInfo[playerid][uSqlId]);
 	mysql_query(query, FETCH_UINFO_THREAD);
 	SetTimerEx("FetchCharacterInformationFinish", 5000, 0, "i", playerid);
 	return 1;
