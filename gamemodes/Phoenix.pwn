@@ -17,6 +17,8 @@
 *    EXTERNAL CREDITS
 *
 *        External Credit #1 - Simon, IsValidSkin
+*        External Credit #2 - Alex "Y_Less" Cole, MD5 Core
+*        External Credit #3 - Alex "Y_Less" Cole, Y_SERVER
 *
 */
 
@@ -26,6 +28,8 @@
 
 #include <a_samp>
 #include <a_mysql>
+#include <md5_core>  // author: Alex "Y_Less" Cole, External Credit #2
+#include <Y_server>  // author: Alex "Y_Less" Cole, External Credit #3
 #include <phoenix_Core>
 #include <phoenix_Lang>
 #include <phoenix_RealCarnames>
@@ -36,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"30"
+#define SCRIPT_REVISION 	"33"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -46,9 +50,10 @@
     /*
          *  THREADS IDs
          */
-	#define VEHICLE_LOAD_THREAD 1
-	#define VEHICLE_SAVE_THREAD 2
-	#define CHECK_USER_THREAD	3
+	#define VEHICLE_LOAD_THREAD     1
+	#define VEHICLE_SAVE_THREAD     2
+	#define CHECK_CHARACTER_THREAD	3
+	#define GET_USERINFO_THREAD	    4
 
 #define VEHICLE_DELAY 60000
 
@@ -74,13 +79,16 @@ new WelcomeStr[32];
     /*
          *  THREADS Vars
          */
-	new Check_User_Thread = -1;
+	new Check_Character_Thread = -1;
+	new Get_Userinfo_Thread    = -1;
 
 
 enum pInf
 {
 	uSqlId,
-	uUserName,	
+	uUserName[20],	
+	uPassWordHash[64],
+	uSalt[10],	
 	pCharName,
 	pSqlId,
 	pAdmin,
@@ -135,8 +143,11 @@ forward OnDriverEnterVehicle(playerid);
 forward OnDriverExitVehicle(playerid);
 forward ShowSpeedo(playerid);
 forward OnSpeedoUpdate(playerid);
-forward CheckUser(playerid);
-forward CheckUserFinish(playerid);
+forward CheckCharacter(playerid);
+forward CheckCharacterFinish(playerid);
+forward GetUserInfo(playerid);
+forward GetUserInfoFinish(playerid);
+forward AuthenticateUser(playerid, givenPassword[]);
 
 /*
 *    MAIN()
@@ -182,6 +193,13 @@ stock IsGroupMember(playerid)
 	new ret = pInfo[playerid][pMember];
 	if(pInfo[playerid][pLeader] > 0) ret = pInfo[playerid][pLeader];
 	return ret;
+}
+
+stock PasswordHash(password[], salt[])
+{
+	new string[128];
+	format(string, 128, "%s%s", strtolower(MD5_Hash(password)), strtolower(MD5_Hash(salt)));
+	return strtolower(MD5_Hash(string));
 }
 
 /*
@@ -305,9 +323,9 @@ public OnQueryFinish(query[], resultid)
 		}
 		else VEHICLE_SAVE_NEXT = 0;
 	}
-	else if( resultid == CHECK_USER_THREAD )
+	else if( resultid == CHECK_CHARACTER_THREAD )
 	{
-		CheckUserFinish(Check_User_Thread);
+		CheckCharacterFinish(Check_Character_Thread);
 	}
 }
 
@@ -388,6 +406,7 @@ public LoadAllVehiclesFinish()
 	}
 	LOADED_VEHICLES = vId+1;
 	printf("\t\t %d Vehicles Loaded.", LOADED_VEHICLES);
+	mysql_free_result();
 }
 
 public SaveAllVehicles(closingdown)
@@ -532,30 +551,29 @@ public OnSpeedoUpdate(playerid)
 	}
 }
 
-public CheckUser(playerid)
+public CheckCharacter(playerid)
 {
-	if(Check_User_Thread != -1) // thread is busy, lets attemp again in 1 second.
+	if(Check_Character_Thread != -1) // thread is busy, lets attemp again in 1 second.
 	{
-		SetTimerEx("CheckUser", 1000, 0, "i", playerid);
+		SetTimerEx("CheckCharacter", 1000, 0, "i", playerid);
 		return 1;
 	}
-	Check_User_Thread = playerid;
+	Check_Character_Thread = playerid;
 	new pName[MAX_PLAYER_NAME], eName[32], query[86];
 	GetPlayerName(playerid, pName, MAX_PLAYER_NAME);
 	mysql_real_escape_string(pName, eName);
 	format(query, 86, "SELECT id, userid FROM %s_characters WHERE name = '%s' LIMIT 1", MYSQL_PREFIX, eName);	
-	mysql_query(query, CHECK_USER_THREAD);
+	mysql_query(query, CHECK_CHARACTER_THREAD);
 	return 1;
 }
 
-public CheckUserFinish(playerid)
+public CheckCharacterFinish(playerid)
 {
-	Check_User_Thread = -1;
 	mysql_store_result();	
 	
 	if(mysql_num_rows() < 1)
 	{
-		SendClientMessage(playerid, COLOR_RED, LANG_NOUSER);
+		SendClientMessage(playerid, COLOR_RED, LANG_NOCHARACTER);
 		Kick(playerid);
 	}
 	else
@@ -568,10 +586,71 @@ public CheckUserFinish(playerid)
 		
 		mysql_fetch_field_row(Field, "userid");
 		pInfo[playerid][uSqlId] = strval(Field);
+		mysql_free_result();
+		
+		GetUserInfo(playerid);
 	}	
+	Check_Character_Thread = -1;
 	return 1;
 }
 
+public GetUserInfo(playerid)
+{
+	if(Get_Userinfo_Thread != -1) // thread is busy, lets attemp again in 1 second.
+	{
+		SetTimerEx("GetUserInfo", 1000, 0, "i", playerid);
+		return 1;
+	}
+	Get_Userinfo_Thread = playerid;
+	
+	new query[86];
+	format(query, 86, "SELECT username, password, salt FROM user WHERE userid = '%d' LIMIT 1", pInfo[playerid][uSqlId]);
+	mysql_query(query, GET_USERINFO_THREAD);
+	return 1;
+}
+
+public GetUserInfoFinish(playerid)
+{
+	mysql_store_result();	
+	
+	if(mysql_num_rows() < 1)
+	{
+		SendClientMessage(playerid, COLOR_RED, LANG_NOUSER);
+		Kick(playerid);
+	}
+	else
+	{
+		new Field[64], Data[128];
+		mysql_fetch_row(Data);
+		
+		mysql_fetch_field_row(Field, "username");
+		strmid(pInfo[playerid][uUserName], Field, 0, strlen(Field), 255);
+		
+		mysql_fetch_field_row(Field, "password");
+		strmid(pInfo[playerid][uPassWordHash], Field, 0, strlen(Field), 255);
+		
+		mysql_fetch_field_row(Field, "salt");
+		strmid(pInfo[playerid][uSalt], Field, 0, strlen(Field), 255);
+		mysql_free_result();
+	}	
+	Get_Userinfo_Thread = -1;
+	return 1;
+}
+
+public AuthenticateUser(playerid, givenPassword[])
+{
+	if(strcmp(pInfo[playerid][uPassWordHash], givenPassword, true) != 0) // wrong Password
+	{
+		SendClientMessage(playerid, COLOR_RED, LANG_WRONG_PASSWORD);
+		Kick(playerid);
+	}
+	else
+	{
+		// TODO: FetchCharacterInformation(playerid);
+		SendClientMessage(playerid, COLOR_RED, LANG_LOGGED_IN);
+	}
+	return 1;
+}
 
 /*
 *    EOF
