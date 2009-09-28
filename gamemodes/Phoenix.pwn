@@ -551,7 +551,8 @@ public CheckUserFinish(playerid)
 	
 	if(mysql_num_rows() < 1)
 	{
-		// Pole userit, kickime vms.
+		SendClientMessage(playerid, COLOR_RED, LANG_NOUSER);
+		Kick(playerid);
 	}
 	else
 	{
