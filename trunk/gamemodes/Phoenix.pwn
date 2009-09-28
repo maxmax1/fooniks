@@ -36,16 +36,22 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"27"
+#define SCRIPT_REVISION 	"30"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
 #define MYSQL_DB			"estrpco_portal"
 #define MYSQL_PREFIX		"ph_"
 
+    /*
+         *  THREADS IDs
+         */
+	#define VEHICLE_LOAD_THREAD 1
+	#define VEHICLE_SAVE_THREAD 2
+	#define CHECK_USER_THREAD	3
+
 #define VEHICLE_DELAY 60000
-#define VEHICLE_LOAD_THREAD 1
-#define VEHICLE_SAVE_THREAD 2
+
 #define VEHICLE_GROUP			0	// Gängid, Grupeeringud
 #define VEHICLE_JOB				1	// Tööd
 #define VEHICLE_BUYABLE			2	// Ostetav masin
@@ -62,21 +68,24 @@
 
 new WelcomeStr[32];
 
+    /*
+         *  THREADS Vars
+         */
+	new Check_User_Thread = -1;
+
+
 enum pInf
 {
+	uSqlId,
+	uUserName,	
+	pCharName,
+	pSqlId,
 	pAdmin,
 	pJob,
 	pMember,
 	pLeader
 };
-new PlayerInfo[MAX_PLAYERS][pInf];
-
-IsGroupMember(playerid)
-{
-	new ret = PlayerInfo[playerid][pMember];
-	if(PlayerInfo[playerid][pLeader] > 0) ret = PlayerInfo[playerid][pLeader];
-	return ret;
-}
+new pInfo[MAX_PLAYERS][pInf];
 
 new Text:  InfoBar[MAX_PLAYERS];
 new 	   InfoBarTimer[MAX_PLAYERS];
@@ -123,6 +132,8 @@ forward OnDriverEnterVehicle(playerid);
 forward OnDriverExitVehicle(playerid);
 forward ShowSpeedo(playerid);
 forward OnSpeedoUpdate(playerid);
+forward CheckUser(playerid);
+forward CheckUserFinish(playerid);
 
 /*
 *    MAIN()
@@ -161,6 +172,13 @@ stock IsValidSkin(skinid) // author: Simon, External Credit #1
     for (new i = 0; i < MAX_BAD_SKINS; i++) { if (skinid == badSkins[i]) return false; }
     #undef MAX_BAD_SKINS
     return 1;
+}
+
+stock IsGroupMember(playerid)
+{
+	new ret = pInfo[playerid][pMember];
+	if(pInfo[playerid][pLeader] > 0) ret = pInfo[playerid][pLeader];
+	return ret;
 }
 
 /*
@@ -231,7 +249,7 @@ public OnPlayerRequestClass(playerid)
 	SetPlayerPos(playerid, 			1492.5065, 1007.7800, 10.8203);
 	SetPlayerFacingAngle(playerid, 90);
 	
-	SetPlayerCameraPos(playerid, 	1488.0547, 1007.2191, 7.8203);
+	SetPlayerCameraPos(playerid, 	1488.0547, 1007.2191, 9.8203);
 	SetPlayerCameraLookAt(playerid, 1492.5065, 1007.7800, 10.8203);
 	return 1;
 }
@@ -282,6 +300,10 @@ public OnQueryFinish(query[], resultid)
 			VEHICLE_SAVE_NEXT++;
 		}
 		else VEHICLE_SAVE_NEXT = 0;
+	}
+	else if( resultid == CHECK_USER_THREAD )
+	{
+		CheckUserFinish(Check_User_Thread);
 	}
 }
 
@@ -429,7 +451,7 @@ public OnDriverEnterVehicle(playerid)
 		else if	(Vehicles[vId][vType] == VEHICLE_JOB)
 		{
 			if(Vehicles[vId][vOwner] == 0) Remove = false;
-			else if(PlayerInfo[playerid][pJob] != Vehicles[vId][vOwner]) Remove = true;
+			else if(pInfo[playerid][pJob] != Vehicles[vId][vOwner]) Remove = true;
 		}
 		else if	(Vehicles[vId][vType] == VEHICLE_BUYABLE)
 		{
@@ -450,8 +472,8 @@ public OnDriverEnterVehicle(playerid)
 		}
 		else
 		{
-			if(PlayerInfo[playerid][pAdmin] < 1) Remove = true;
-			else if(PlayerInfo[playerid][pAdmin] < Vehicles[vId][vOwner]) Remove = true;
+			if(pInfo[playerid][pAdmin] < 1) Remove = true;
+			else if(pInfo[playerid][pAdmin] < Vehicles[vId][vOwner]) Remove = true;
 		}
 	}
 	
@@ -505,6 +527,46 @@ public OnSpeedoUpdate(playerid)
 		KillTimer(InfoBarTimer[playerid]);
 	}
 }
+
+public CheckUser(playerid)
+{
+	if(Check_User_Thread != -1) // thread is busy, lets attemp again in 1 second.
+	{
+		SetTimerEx("CheckUser", 1000, 0, "i", playerid);
+		return 1;
+	}
+	Check_User_Thread = playerid;
+	new pName[MAX_PLAYER_NAME], eName[32], query[86];
+	GetPlayerName(playerid, pName, MAX_PLAYER_NAME);
+	mysql_real_escape_string(pName, eName);
+	format(query, 86, "SELECT id, userid FROM %s_characters WHERE name = '%s' LIMIT 1", MYSQL_PREFIX, eName);	
+	mysql_query(query, CHECK_USER_THREAD);
+	return 1;
+}
+
+public CheckUserFinish(playerid)
+{
+	Check_User_Thread = -1;
+	mysql_store_result();	
+	
+	if(mysql_num_rows() < 1)
+	{
+		// Pole userit, kickime vms.
+	}
+	else
+	{
+		new Field[64], Data[128];
+		mysql_fetch_row(Data);
+		
+		mysql_fetch_field_row(Field, "id");
+		pInfo[playerid][pSqlId] = strval(Field);
+		
+		mysql_fetch_field_row(Field, "userid");
+		pInfo[playerid][uSqlId] = strval(Field);
+	}	
+	return 1;
+}
+
 
 /*
 *    EOF
