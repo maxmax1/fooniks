@@ -26,3 +26,4 @@
 #define LANG_DIALOG_LOGIN_EXITBUTTON		"Välju"
 #define LANG_LOGGED_IN                "Edukalt sisse logitud."
 #define LANG_WRONG_PASSWORD               "Vale parool!"
+#define LANG_MUST_LOGIN               "Mängimiseks pead sisse logima!"

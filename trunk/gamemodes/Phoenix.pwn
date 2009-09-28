@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"33"
+#define SCRIPT_REVISION 	"36"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -79,7 +79,7 @@ new WelcomeStr[32];
     /*
          *  THREADS Vars
          */
-	new Check_Character_Thread = -1;
+	new Active_Check_Character_Thread = -1;
 	new Get_Userinfo_Thread    = -1;
 
 
@@ -245,7 +245,7 @@ public OnGameModeInit()
 	
 	ShowNameTags(1);
 	SetNameTagDrawDistance(40.0);
-	
+	Active_Check_Character_Thread = -1;	
 	return 1;
 }
 
@@ -303,9 +303,28 @@ public OnVehicleDeath(vehicleid)
 	}
 	SetVehicleToRespawn(vehicleid);
 }
+
 public OnRconCommand(cmd[])
 {
 	if( strcmp(cmd, "gmx", true) == 0 ) OnGameModeExit();
+}
+
+public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
+{
+	if(dialogid == DIALOG_LOGIN)
+	{
+		if(response == 0)
+		{
+			SendClientMessage(playerid, COLOR_RED, LANG_MUST_LOGIN);
+			return Kick(playerid);
+		}
+		else
+		{
+			AuthenticateUser(playerid, inputtext);
+			return 1;
+		}
+	}
+	return 1;
 }
 
 /*
@@ -330,7 +349,7 @@ public OnQueryFinish(query[], resultid)
 	}
 	else if( resultid == CHECK_CHARACTER_THREAD )
 	{
-		CheckCharacterFinish(Check_Character_Thread);
+		CheckCharacterFinish(Active_Check_Character_Thread);
 	}
 }
 
@@ -558,22 +577,27 @@ public OnSpeedoUpdate(playerid)
 
 public CheckCharacter(playerid)
 {
-	if(Check_Character_Thread != -1) // thread is busy, lets attemp again in 1 second.
+	if(Active_Check_Character_Thread != -1) // thread is busy, lets attemp again in 1 second.
 	{
 		SetTimerEx("CheckCharacter", 1000, 0, "i", playerid);
 		return 1;
 	}
-	Check_Character_Thread = playerid;
-	new pName[MAX_PLAYER_NAME], eName[32], query[86];
-	GetPlayerName(playerid, pName, MAX_PLAYER_NAME);
-	mysql_real_escape_string(pName, eName);
-	format(query, 86, "SELECT id, userid FROM %s_characters WHERE name = '%s' LIMIT 1", MYSQL_PREFIX, eName);	
-	mysql_query(query, CHECK_CHARACTER_THREAD);
+	else
+	{
+		Active_Check_Character_Thread = playerid;
+		new pName[MAX_PLAYER_NAME], eName[32], query[86];
+		GetPlayerName(playerid, pName, MAX_PLAYER_NAME);
+		mysql_real_escape_string(pName, eName);
+		format(query, 86, "SELECT id, userid FROM %scharacters WHERE name = '%s' LIMIT 0, 1", MYSQL_PREFIX, eName);	
+		mysql_query(query, CHECK_CHARACTER_THREAD);
+		SetTimerEx("CheckCharacterFinish", 5000, 0, "i", playerid);
+	}
 	return 1;
 }
 
 public CheckCharacterFinish(playerid)
 {
+	if(Active_Check_Character_Thread != playerid) return 1;
 	mysql_store_result();	
 	
 	if(mysql_num_rows() < 1)
@@ -595,7 +619,7 @@ public CheckCharacterFinish(playerid)
 		
 		GetUserInfo(playerid);
 	}	
-	Check_Character_Thread = -1;
+	Active_Check_Character_Thread = -1;
 	return 1;
 }
 
@@ -611,11 +635,13 @@ public GetUserInfo(playerid)
 	new query[86];
 	format(query, 86, "SELECT username, password, salt FROM user WHERE userid = '%d' LIMIT 1", pInfo[playerid][uSqlId]);
 	mysql_query(query, GET_USERINFO_THREAD);
+	SetTimerEx("GetUserInfoFinish", 5000, 0, "i", playerid);
 	return 1;
 }
 
 public GetUserInfoFinish(playerid)
 {
+	if(Get_Userinfo_Thread != playerid) return 1;
 	mysql_store_result();	
 	
 	if(mysql_num_rows() < 1)
@@ -644,7 +670,7 @@ public GetUserInfoFinish(playerid)
 
 public AuthenticateUser(playerid, givenPassword[])
 {
-	if(strcmp(pInfo[playerid][uPassWordHash], givenPassword, true) != 0) // wrong Password
+	if(strcmp(pInfo[playerid][uPassWordHash], PasswordHash(givenPassword, pInfo[playerid][uSalt]), true) != 0) // wrong Password
 	{
 		SendClientMessage(playerid, COLOR_RED, LANG_WRONG_PASSWORD);
 		Kick(playerid);
