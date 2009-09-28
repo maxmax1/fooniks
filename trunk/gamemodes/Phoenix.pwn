@@ -294,6 +294,8 @@ public OnPlayerSpawn(playerid)
 	
 	SetPlayerPos(playerid, 1464.2166,1025.3540,10.8203);
 	SetPlayerFacingAngle(playerid, 270);
+	
+	SetPlayerSkin(playerid, pInfo[playerid][pModel]);
 	return 1;
 }
 
