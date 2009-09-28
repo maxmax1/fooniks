@@ -1,0 +1,20 @@
+
+--------------------------
+Exception At Address: 0x00403394
+
+Registers:
+EAX: 0x00000052	EBX: 0x00F37E2C	ECX: 0x00000000	EDX: 0x00000000
+ESI: 0x00E25458	EDI: 0x00000031	EBP: 0x0137FEB4	ESP: 0x0137FE78
+EFLAGS: 0x00010202
+
+Stack:
+
+--------------------------
+Exception At Address: 0x00403394
+
+Registers:
+EAX: 0x00000052	EBX: 0x00F37E2C	ECX: 0x00000000	EDX: 0x00000000
+ESI: 0x00E25458	EDI: 0x00000031	EBP: 0x0137FEB4	ESP: 0x0137FE78
+EFLAGS: 0x00010202
+
+Stack:

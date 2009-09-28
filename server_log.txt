@@ -181,3 +181,172 @@ v0.3-beta-RC7, (C)2005-2009 SA-MP Team
 
 [20:46:29] Script[gamemodes/Phoenix.amx]: Run time error 19: "File or function is not found"
 [20:46:50] --- Server Shutting Down.
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3-beta-RC7, (C)2005-2009 SA-MP Team
+
+[21:44:48] filterscripts = ""  (string)
+[21:44:48] 
+[21:44:48] Server Plugins
+[21:44:48] --------------
+[21:44:48]  Loading plugin: mysql
+[21:44:48] 
+
+  > MySQL plugin loaded on. |
+
+[21:44:48]   Loaded.
+[21:44:48]  Loaded 1 plugins.
+
+[21:44:48] 
+[21:44:48] Filter Scripts
+[21:44:48] ---------------
+[21:44:48]   Loaded 0 filter scripts.
+
+[21:44:49] 		* Phoenix - Failed to connect to mysql DB.
+[21:44:49] FIREBIRDIE HAS MAIN()
+[21:44:49] --- Server Shutting Down.
+[21:44:49] Started Saving all vehicles.
+[21:44:49] Saving all before server shutdown.
+[21:44:49] All vehicles saved.
+[21:44:49] 		* Phoenix-0.1r30-Jyrno42 UnLoaded.
+[21:44:49] 
+
+  > MySQL plugin unloaded.
+
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3-beta-RC7, (C)2005-2009 SA-MP Team
+
+[21:44:51] filterscripts = ""  (string)
+[21:44:51] 
+[21:44:51] Server Plugins
+[21:44:51] --------------
+[21:44:51]  Loading plugin: mysql
+[21:44:51] 
+
+  > MySQL plugin loaded on. |
+
+[21:44:51]   Loaded.
+[21:44:51]  Loaded 1 plugins.
+
+[21:44:51] 
+[21:44:51] Filter Scripts
+[21:44:51] ---------------
+[21:44:51]   Loaded 0 filter scripts.
+
+[21:44:52] 		* Phoenix - Failed to connect to mysql DB.
+[21:44:52] FIREBIRDIE HAS MAIN()
+[21:44:52] --- Server Shutting Down.
+[21:44:52] Started Saving all vehicles.
+[21:44:52] Saving all before server shutdown.
+[21:44:52] All vehicles saved.
+[21:44:52] 		* Phoenix-0.1r30-Jyrno42 UnLoaded.
+[21:44:52] 
+
+  > MySQL plugin unloaded.
+
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3-beta-RC7, (C)2005-2009 SA-MP Team
+
+[21:56:28] filterscripts = ""  (string)
+[21:56:28] 
+[21:56:28] Server Plugins
+[21:56:28] --------------
+[21:56:28]  Loading plugin: mysql
+[21:56:28] 
+
+  > MySQL plugin loaded on. |
+
+[21:56:28]   Loaded.
+[21:56:28]  Loaded 1 plugins.
+
+[21:56:28] 
+[21:56:28] Filter Scripts
+[21:56:28] ---------------
+[21:56:28]   Loaded 0 filter scripts.
+
+[21:56:29] 		* Phoenix - Failed to connect to mysql DB.
+[21:56:29] FIREBIRDIE HAS MAIN()
+[21:56:29] --- Server Shutting Down.
+[21:56:29] Started Saving all vehicles.
+[21:56:29] Saving all before server shutdown.
+[21:56:29] All vehicles saved.
+[21:56:29] 		* Phoenix-0.1r30-Jyrno42 UnLoaded.
+[21:56:29] 
+
+  > MySQL plugin unloaded.
+
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3-beta-RC7, (C)2005-2009 SA-MP Team
+
+[22:09:44] filterscripts = ""  (string)
+[22:09:44] 
+[22:09:44] Server Plugins
+[22:09:44] --------------
+[22:09:44]  Loading plugin: mysql
+[22:09:44] 
+
+  > MySQL plugin loaded on. |
+
+[22:09:44]   Loaded.
+[22:09:44]  Loaded 1 plugins.
+
+[22:09:44] 
+[22:09:44] Filter Scripts
+[22:09:44] ---------------
+[22:09:44]   Loaded 0 filter scripts.
+
+[22:09:54] 		* Phoenix - Connected to mysql DB.
+[22:09:54] 		* Phoenix-0.1r30-Jyrno42 Loaded.
+[22:09:54] 		 Started Loading Vehicles.
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3-beta-RC7, (C)2005-2009 SA-MP Team
+
+[22:12:27] filterscripts = ""  (string)
+[22:12:27] 
+[22:12:27] Server Plugins
+[22:12:27] --------------
+[22:12:27]  Loading plugin: mysql
+[22:12:27] 
+
+  > MySQL plugin loaded on. |
+
+[22:12:27]   Loaded.
+[22:12:27]  Loaded 1 plugins.
+
+[22:12:27] 
+[22:12:27] Filter Scripts
+[22:12:27] ---------------
+[22:12:27]   Loaded 0 filter scripts.
+
+[22:12:27] 		* Phoenix - Connected to mysql DB.
+[22:12:27] 		* Phoenix-0.1r30-Jyrno42 Loaded.
+[22:12:27] 		 Started Loading Vehicles.
