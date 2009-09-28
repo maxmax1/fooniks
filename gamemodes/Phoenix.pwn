@@ -14,6 +14,13 @@
 */
 
 /*
+*    EXTERNAL CREDITS
+*
+*        External Credit #1 - Simon, IsValidSkin
+*
+*/
+
+/*
 *    INCLUDES
 */
 
@@ -29,9 +36,9 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"26"
+#define SCRIPT_REVISION 	"27"
 
-#define MYSQL_HOST			"80.79.119.221"//"localhost"
+#define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
 #define MYSQL_DB			"estrpco_portal"
 #define MYSQL_PREFIX		"ph_"
@@ -145,6 +152,17 @@ stock VehPos(vId)
 	GetVehicleZAngle(Vehicles[vId][vSampId], Vehicles[vId][vAngZ]);
 }
 
+stock IsValidSkin(skinid) // author: Simon, External Credit #1
+{
+    #define	MAX_BAD_SKINS 22
+    new badSkins[MAX_BAD_SKINS] =
+    { 3, 4, 5, 6, 8, 42, 65, 74, 86, 119, 149, 208, 268, 273, 289 };
+    if (skinid < 0 || skinid > 299) return false;
+    for (new i = 0; i < MAX_BAD_SKINS; i++) { if (skinid == badSkins[i]) return false; }
+    #undef MAX_BAD_SKINS
+    return 1;
+}
+
 /*
 *    NATIVES
 */
@@ -162,13 +180,17 @@ public OnGameModeInit()
 	printf(LANG_CONNECTED, SCRIPT_NAME);
 
 	new string[24]; // 24 should be enough.
-	format(string, 24, "%s %s r%d", SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION);
+	format(string, 24, "%s %s r%s", SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION);
 	SetGameModeText(string);
 	
 	printf(LANG_LOADED, SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION, SCRIPTER_NAME);
 	format(WelcomeStr, 32, LANG_WELCOME_TO, SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION, SCRIPTER_NAME);
 	
-	AddPlayerClass(0, 0, 0, 15.3746, 269.1425, 0, 0, 0, 0, 0, 0);
+	for(new i = 0; i < 299; i++)
+	{
+		if(IsValidSkin(i)) AddPlayerClass(i, 1492.5065, 1007.7800, 10.8203, 90, 0, 0, 0, 0, 0, 0);
+	}
+	
 	LoadAllVehiclesStart();
 	
 	for(new td; td < MAX_PLAYERS; td++)
@@ -181,6 +203,9 @@ public OnGameModeInit()
 		TextDrawFont(InfoBar[td],1);
 		TextDrawSetOutline(InfoBar[td],0);
 	}
+	
+	ShowNameTags(1);
+	SetNameTagDrawDistance(40.0);
 	
 	return 1;
 }
@@ -200,6 +225,27 @@ public OnPlayerConnect(playerid)
 	return 1;
 }
 
+public OnPlayerRequestClass(playerid)
+{
+	SetPlayerVirtualWorld(playerid, playerid);
+	SetPlayerPos(playerid, 			1492.5065, 1007.7800, 10.8203);
+	SetPlayerFacingAngle(playerid, 90);
+	
+	SetPlayerCameraPos(playerid, 	1488.0547, 1007.2191, 7.8203);
+	SetPlayerCameraLookAt(playerid, 1492.5065, 1007.7800, 10.8203);
+	return 1;
+}
+
+public OnPlayerSpawn(playerid)
+{
+	SetCameraBehindPlayer(playerid);
+	SetPlayerVirtualWorld(playerid, 0);
+	
+	SetPlayerPos(playerid, 1464.2166,1025.3540,10.8203);
+	SetPlayerFacingAngle(playerid, 270);
+	return 1;
+}
+
 public OnPlayerStateChange(playerid, newstate, oldstate)
 {
 	if(newstate == PLAYER_STATE_DRIVER) 			OnDriverEnterVehicle(playerid);
@@ -208,8 +254,13 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
 
 public OnVehicleDeath(vehicleid)
 {
+	new vSqlId = GetVehicleSqlId(vehicleid);
+	if(vSqlId != -1)
+	{
+		Vehicles[vSqlId][vDeaths]++;
+		SetTimerEx("SetVehicleSpawn", 500, 0, "d", vSqlId);
+	}
 	SetVehicleToRespawn(vehicleid);
-	SetTimerEx("SetVehicleSpawn", 500, 0, "d", GetVehicleSqlId(vehicleid));
 }
 
 /*
