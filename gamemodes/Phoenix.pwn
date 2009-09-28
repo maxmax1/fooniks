@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"36"
+#define SCRIPT_REVISION 	"38"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -370,6 +370,10 @@ public OnQueryFinish(query[], resultid)
 	else if( resultid == CHECK_CHARACTER_THREAD )
 	{
 		CheckCharacterFinish(Active_Check_Character_Thread);
+	}
+	else if( resultid == FETCH_UINFO_THREAD )
+	{
+		FetchCharacterInformationFinish(Fetch_UInfo_Thread);
 	}
 }
 
