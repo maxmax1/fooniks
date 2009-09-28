@@ -303,6 +303,10 @@ public OnVehicleDeath(vehicleid)
 	}
 	SetVehicleToRespawn(vehicleid);
 }
+public OnRconCommand(cmd[])
+{
+	if( strcmp(cmd, "gmx", true) == 0 ) OnGameModeExit();
+}
 
 /*
 *    PUBLICS
