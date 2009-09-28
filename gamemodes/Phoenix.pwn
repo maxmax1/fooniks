@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"38"
+#define SCRIPT_REVISION 	"40"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -706,6 +706,7 @@ public AuthenticateUser(playerid, givenPassword[])
 		FetchCharacterInformation(playerid);
 		pInfo[playerid][pLoggedIn] = true;
 		SendClientMessage(playerid, COLOR_RED, LANG_LOGGED_IN);
+		SpawnPlayer(playerid);
 	}
 	return 1;
 }
