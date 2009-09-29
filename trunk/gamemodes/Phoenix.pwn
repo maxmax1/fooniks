@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"51"
+#define SCRIPT_REVISION 	"52"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -359,9 +359,8 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			SendClientMessage(playerid, COLOR_RED, LANG_MUST_LOGIN);
 			
-			new string[64];
-			format(string, 64, LANG_DIALOG_LOGIN_INFO, pInfo[playerid][uUserName]);
-			ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, string, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
+			SendClientMessage(playerid, COLOR_GREEN, "Nägemist!");
+			Kick(playerid);
 			return 1;
 		}
 		else
