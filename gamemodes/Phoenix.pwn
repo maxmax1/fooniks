@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"50"
+#define SCRIPT_REVISION 	"51"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -551,7 +551,7 @@ public OnDriverEnterVehicle(playerid)
 	new Remove = false, Freeze = false;
 	new string[128];
 	
-	if(vId == -1) Remove = false;
+	if(vId == -1) Remove = true;
 	else
 	{
 		if		(Vehicles[vId][vType] == VEHICLE_GROUP)
