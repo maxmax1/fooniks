@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"45"
+#define SCRIPT_REVISION 	"47"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -236,6 +236,7 @@ public OnGameModeInit()
 		return 1;
 	}
 	printf(LANG_CONNECTED, SCRIPT_NAME);
+	mysql_debug(1);
 
 	new string[24]; // 24 should be enough.
 	format(string, 24, "%s %s r%s", SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION);
@@ -296,7 +297,6 @@ public OnPlayerDisconnect(playerid)
 
 public OnPlayerRequestClass(playerid)
 {
-    ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
 	SetPlayerVirtualWorld(playerid, playerid);
 	SetPlayerPos(playerid, 			1492.5065, 1007.7800, 10.8203);
 	SetPlayerFacingAngle(playerid, 90);
@@ -711,6 +711,7 @@ public GetUserInfoFinish(playerid)
 		strmid(pInfo[playerid][uSalt], Field, 0, strlen(Field), 255);
 		mysql_free_result();
 	}	
+	ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
 	Get_Userinfo_Thread = -1;
 	return 1;
 }
@@ -720,6 +721,7 @@ public AuthenticateUser(playerid, givenPassword[])
 	new string[256];
 	format(string, 256, "%s", PasswordHash(givenPassword, pInfo[playerid][uSalt]));
 	new strC = strcmp(pInfo[playerid][uPassWordHash], string, true);
+	
 
 	if(strC != 0) // wrong Password
 	{
@@ -729,9 +731,6 @@ public AuthenticateUser(playerid, givenPassword[])
 	else
 	{
 	    FetchCharacterInformation(playerid);
-		SendClientMessage(playerid, COLOR_GREEN, LANG_LOGGED_IN);
-		pInfo[playerid][pLoggedIn] = 1;
-		SpawnPlayer(playerid);
 	}
 	return 1;
 }
@@ -746,7 +745,7 @@ public FetchCharacterInformation(playerid)
 	Fetch_UInfo_Thread = playerid;
 
 	new query[86];
-	format(query, 86, "SELECT * FROM %scharacters WHERE userid = '%d' LIMIT 0, 1", MYSQL_PREFIX, pInfo[playerid][uSqlId]);
+	format(query, 86, "SELECT * FROM %scharacters WHERE id = '%d' LIMIT 0, 1", MYSQL_PREFIX, pInfo[playerid][pSqlId]);
 	mysql_query(query, FETCH_UINFO_THREAD);
 	SetTimerEx("FetchCharacterInformationFinish", 5000, 0, "i", playerid);
 	return 1;
@@ -786,6 +785,9 @@ public FetchCharacterInformationFinish(playerid)
 		
 		mysql_free_result();
 	}
+	SendClientMessage(playerid, COLOR_GREEN, LANG_LOGGED_IN);
+	pInfo[playerid][pLoggedIn] = 1;
+	SpawnPlayer(playerid);
 	Fetch_UInfo_Thread = -1;
 	return 1;
 }
