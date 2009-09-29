@@ -21,7 +21,7 @@
 #define LANG_NOCHARACTER			"Sellise nimega karakterit ei ole!"
 #define LANG_NOUSER				"Sellise nimega kasutajat ei ole!"
 #define LANG_DIALOG_LOGIN_CAPTION		"Palun logige sisse!"
-#define LANG_DIALOG_LOGIN_INFO			"Sisesta parool:"
+#define LANG_DIALOG_LOGIN_INFO			"Tere, %s.\n Sisesta parool:"
 #define LANG_DIALOG_LOGIN_LOGINBUTTON		"Logi Sisse!"
 #define LANG_DIALOG_LOGIN_EXITBUTTON		"Välju"
 #define LANG_LOGGED_IN                "Edukalt sisse logitud."
