@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"42"
+#define SCRIPT_REVISION 	"43"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -98,7 +98,15 @@ enum pInf
 	pJob,
 	pMember,
 	pLeader,
-	pModel
+	pModel,
+	
+	Float:pPosX,
+	Float:pPosY,
+	Float:pPosZ,
+	Float:pAngle,
+	Float:pHealth,
+	pVW,
+	pInterior
 };
 new pInfo[MAX_PLAYERS][pInf];
 
@@ -291,13 +299,14 @@ public OnPlayerRequestClass(playerid)
 
 public OnPlayerSpawn(playerid)
 {
-	SetCameraBehindPlayer(playerid);
-	SetPlayerVirtualWorld(playerid, 0);
-	
-	SetPlayerPos(playerid, 1464.2166,1025.3540,10.8203);
-	SetPlayerFacingAngle(playerid, 270);
-	
+    SetPlayerPos(playerid, pInfo[playerid][pPosX],pInfo[playerid][pPosY],pInfo[playerid][pPosZ]+1);
+	SetPlayerVirtualWorld(playerid, pInfo[playerid][pVW]);
+	SetPlayerInterior(playerid,pInfo[playerid][pInterior]);
+	SetPlayerFacingAngle(playerid, pInfo[playerid][pAngle]);
 	SetPlayerSkin(playerid, pInfo[playerid][pModel]);
+	SetPlayerHealth(playerid, pInfo[playerid][pHealth]);
+	
+	SetCameraBehindPlayer(playerid);
 	return 1;
 }
 
@@ -748,8 +757,23 @@ public FetchCharacterInformationFinish(playerid)
 	{
 		new Field[64], Data[128];
 		mysql_fetch_row(Data);
+		
 		mysql_fetch_field_row(Field, "model");
 		pInfo[playerid][pModel] = strval(Field);
+		mysql_fetch_field_row(Field, "posX");
+		pInfo[playerid][pPosX] = floatstr(Field);
+		mysql_fetch_field_row(Field, "posY");
+		pInfo[playerid][pPosY] = floatstr(Field);
+		mysql_fetch_field_row(Field, "posZ");
+		pInfo[playerid][pPosZ] = floatstr(Field);
+		mysql_fetch_field_row(Field, "angle");
+		pInfo[playerid][pAngle] = floatstr(Field);
+		mysql_fetch_field_row(Field, "VirtualWorld");
+		pInfo[playerid][pVW] = strval(Field);
+		mysql_fetch_field_row(Field, "interior");
+		pInfo[playerid][pInterior] = strval(Field);
+		mysql_fetch_field_row(Field, "health");
+		pInfo[playerid][pHealth] = floatstr(Field);
 		
 		mysql_free_result();
 	}
@@ -762,10 +786,22 @@ public UpdatePlayer(playerid)
 	if(!pInfo[playerid][pLoggedIn]) return 1;
 	new query[128];
 	
-	format(query, 128, "UPDATE %scharacters SET money = '%d', model = '%d' WHERE id = '%d'",
+	GetPlayerPos(playerid, pInfo[playerid][pPosX], pInfo[playerid][pPosY], pInfo[playerid][pPosZ]);
+	GetPlayerFacingAngle(playerid, pInfo[playerid][pAngle]);
+	GetPlayerHealth(playerid, pInfo[playerid][pHealth]);
+	
+	format(query, 128, "UPDATE %scharacters SET money = '%d', model = '%d', posX = '%f', posY = '%f', posZ = '%f', angle = '%f', VirtualWorld = '%d', interior = '%d', health = '%d WHERE id = '%d'",
 		MYSQL_PREFIX,
 		
 		GetPlayerMoney(playerid),
+		pInfo[playerid][pModel],
+		pInfo[playerid][pPosX],
+		pInfo[playerid][pPosY],
+		pInfo[playerid][pPosZ],
+		pInfo[playerid][pAngle],
+		pInfo[playerid][pVW],
+		pInfo[playerid][pInterior],
+		pInfo[playerid][pHealth],
 		
 		pInfo[playerid][pSqlId]);
 	mysql_query(query);
