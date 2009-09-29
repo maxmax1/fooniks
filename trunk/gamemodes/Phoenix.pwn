@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"47"
+#define SCRIPT_REVISION 	"48"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -195,6 +195,14 @@ stock VehPos(vId)
 	GetVehicleZAngle(Vehicles[vId][vSampId], Vehicles[vId][vAngZ]);
 }
 
+stock VehPosd(vId)
+{
+	Vehicles[vId][vPosX] = Vehicles[vId][vPosXd];
+	Vehicles[vId][vPosY] = Vehicles[vId][vPosZd];
+	Vehicles[vId][vPosZ] = Vehicles[vId][vPosYd];
+	Vehicles[vId][vAngZ] = Vehicles[vId][vAngZd];
+}
+
 stock IsValidSkin(skinid) // author: Simon, External Credit #1
 {
     #define	MAX_BAD_SKINS 22
@@ -327,13 +335,15 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
 
 public OnVehicleDeath(vehicleid)
 {
+	SetVehicleToRespawn(vehicleid);
+	
 	new vSqlId = GetVehicleSqlId(vehicleid);
 	if(vSqlId != -1)
 	{
 		Vehicles[vSqlId][vDeaths]++;
+		VehPosd(vSqlId);
 		SetTimerEx("SetVehicleSpawn", 500, 0, "d", vSqlId);
 	}
-	SetVehicleToRespawn(vehicleid);
 }
 
 public OnRconCommand(cmd[])
