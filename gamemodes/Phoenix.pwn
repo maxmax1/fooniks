@@ -164,6 +164,9 @@ forward FetchCharacterInformation(playerid);
 forward FetchCharacterInformationFinish(playerid);
 forward UpdatePlayer(playerid);
 forward UpdateAllPlayers();
+forward UpdatePlayerInt(sqlid, data[], value);
+forward UpdatePlayerFlo(sqlid, data[], Float:value);
+forward UpdatePlayerStr(sqlid, data[], value[]);
 /*
 *    MAIN()
 */
@@ -726,7 +729,7 @@ public AuthenticateUser(playerid, givenPassword[])
 	else
 	{
 	    FetchCharacterInformation(playerid);
-		SendClientMessage(playerid, COLOR_RED, LANG_LOGGED_IN);
+		SendClientMessage(playerid, COLOR_GREEN, LANG_LOGGED_IN);
 		pInfo[playerid][pLoggedIn] = 1;
 		SpawnPlayer(playerid);
 	}
@@ -790,27 +793,23 @@ public FetchCharacterInformationFinish(playerid)
 public UpdatePlayer(playerid)
 {
 	if(!pInfo[playerid][pLoggedIn]) return 1;
-	new query[128];
 	
 	GetPlayerPos(playerid, pInfo[playerid][pPosX], pInfo[playerid][pPosY], pInfo[playerid][pPosZ]);
 	GetPlayerFacingAngle(playerid, pInfo[playerid][pAngle]);
 	GetPlayerHealth(playerid, pInfo[playerid][pHealth]);
 	
-	format(query, 128, "UPDATE %scharacters SET money = '%d', model = '%d', posX = '%f', posY = '%f', posZ = '%f', angle = '%f', VirtualWorld = '%d', interior = '%d', health = '%d WHERE id = '%d'",
-		MYSQL_PREFIX,
-		
-		GetPlayerMoney(playerid),
-		pInfo[playerid][pModel],
-		pInfo[playerid][pPosX],
-		pInfo[playerid][pPosY],
-		pInfo[playerid][pPosZ],
-		pInfo[playerid][pAngle],
-		pInfo[playerid][pVW],
-		pInfo[playerid][pInterior],
-		pInfo[playerid][pHealth],
-		
-		pInfo[playerid][pSqlId]);
-	mysql_query(query);
+	new sqlid = pInfo[playerid][pSqlId];
+	
+	UpdatePlayerInt(sqlid, "money", GetPlayerMoney(playerid));
+	UpdatePlayerInt(sqlid, "model", pInfo[playerid][pModel]);
+	UpdatePlayerFlo(sqlid, "posX", pInfo[playerid][pPosX]);
+	UpdatePlayerFlo(sqlid, "posY", pInfo[playerid][pPosY]);
+	UpdatePlayerFlo(sqlid, "posZ", pInfo[playerid][pPosZ]);
+	UpdatePlayerFlo(sqlid, "angle", pInfo[playerid][pAngle]);
+	UpdatePlayerInt(sqlid, "VirtualWorld", pInfo[playerid][pVW]);
+	UpdatePlayerInt(sqlid, "interior", pInfo[playerid][pInterior]);
+	UpdatePlayerFlo(sqlid, "health", pInfo[playerid][pHealth]);
+
 	return 1;
 }
 
@@ -821,6 +820,25 @@ public UpdateAllPlayers()
 	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] )
 	    UpdatePlayer(i);
 	}
+}
+
+public UpdatePlayerInt(sqlid, data[], value)
+{
+    new query[128];
+    format(query, 128, "UPDATE %scharacters SET %s = '%i' WHERE id = '%d'", MYSQL_PREFIX, data, value, sqlid);
+    mysql_query(query);
+}
+public UpdatePlayerFlo(sqlid, data[], Float:value)
+{
+    new query[128];
+    format(query, 128, "UPDATE %scharacters SET %s = '%f' WHERE id = '%d'", MYSQL_PREFIX, data, value, sqlid);
+    mysql_query(query);
+}
+public UpdatePlayerStr(sqlid, data[], value[])
+{
+    new query[128];
+    format(query, 128, "UPDATE %scharacters SET %s = '%s' WHERE id = '%d'", MYSQL_PREFIX, data, value, sqlid);
+    mysql_query(query);
 }
 
 /*
