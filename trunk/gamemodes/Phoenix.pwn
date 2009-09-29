@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"43"
+#define SCRIPT_REVISION 	"45"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -283,8 +283,6 @@ public OnPlayerConnect(playerid)
 
 	pInfo[playerid][pLoggedIn] = 0;
 	GetPlayerName(playerid, pInfo[playerid][pCharName], 30);
-
-	ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
 	return 1;
 }
 
@@ -295,6 +293,7 @@ public OnPlayerDisconnect(playerid)
 
 public OnPlayerRequestClass(playerid)
 {
+    ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
 	SetPlayerVirtualWorld(playerid, playerid);
 	SetPlayerPos(playerid, 			1492.5065, 1007.7800, 10.8203);
 	SetPlayerFacingAngle(playerid, 90);
