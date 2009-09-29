@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"55"
+#define SCRIPT_REVISION 	"56"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -409,6 +409,15 @@ public OnPlayerPickUpPickup(playerid, pickupid)
 		GivePlayerWeapon(playerid, 37, 100);
 
 	return 1;
+}
+
+public OnPlayerDeath(playerid, killerid, reason)
+{
+	pInfo[playerid][pPosX] = 1464.7747;
+	pInfo[playerid][pPosY] = 1034.7531;
+	pInfo[playerid][pPosZ] = 10.8203;
+	pInfo[playerid][pAngle] = 268.2924;
+	pInfo[playerid][pHealth] = 100;
 }
 
 /*
