@@ -13,7 +13,7 @@
 *    The Initial Developers of the Original Code are Jyrno42 and 13th.
 */
 
-#define LANG_WELCOME_TO				"Tere Tulemast %s-%sr%s-%s"
+#define LANG_WELCOME_TO				"Tere Tulemast %s-%sr%s-%s, Palun oota..."
 #define LANG_FAILED_TO_CONNECT			"\t\t* %s - Failed to connect to mysql DB."
 #define LANG_CONNECTED				"\t\t* %s - Connected to mysql DB."
 #define LANG_LOADED				"\t\t* %s-%sr%s-%s Loaded."

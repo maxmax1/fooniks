@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"53"
+#define SCRIPT_REVISION 	"54"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -75,7 +75,7 @@
 *    GLOBAL VARIABLES
 */
 
-new WelcomeStr[32];
+new WelcomeStr[64];
 
     /*
          *  THREADS Vars
@@ -251,7 +251,7 @@ public OnGameModeInit()
 	SetGameModeText(string);
 	
 	printf(LANG_LOADED, SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION, SCRIPTER_NAME);
-	format(WelcomeStr, 32, LANG_WELCOME_TO, SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION, SCRIPTER_NAME);
+	format(WelcomeStr, 64, LANG_WELCOME_TO, SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION, SCRIPTER_NAME);
 	
 	AddPlayerClass(0, 1492.5065, 1007.7800, 10.8203, 90, 0, 0, 0, 0, 0, 0);
 	
@@ -708,10 +708,8 @@ public GetUserInfoFinish(playerid)
 {
 	if(Get_Userinfo_Thread != playerid) return 1;
 	
-	if(mysql_store_result())
-	{
-		mysql_store_result();	
-		
+	if(mysql_store_result() == 1)
+	{		
 		if(mysql_num_rows() < 1)
 		{
 			SendClientMessage(playerid, COLOR_RED, LANG_NOUSER);
@@ -778,7 +776,7 @@ public FetchCharacterInformationFinish(playerid)
 {
 	if(Fetch_UInfo_Thread != playerid) return 1;
 	
-	if(mysql_store_result())
+	if(mysql_store_result() == 1)
 	{
 		if(mysql_num_rows() < 1)
 		{
