@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"52"
+#define SCRIPT_REVISION 	"53"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -661,27 +661,29 @@ public CheckCharacter(playerid)
 public CheckCharacterFinish(playerid)
 {
 	if(Active_Check_Character_Thread != playerid) return 1;
-	mysql_store_result();	
 	
-	if(mysql_num_rows() < 1)
+	if(mysql_store_result())
 	{
-		SendClientMessage(playerid, COLOR_RED, LANG_NOCHARACTER);
-		Kick(playerid);
+		if(mysql_num_rows() < 1)
+		{
+			SendClientMessage(playerid, COLOR_RED, LANG_NOCHARACTER);
+			Kick(playerid);
+		}
+		else
+		{
+			new Field[64], Data[128];
+			mysql_fetch_row(Data);
+			
+			mysql_fetch_field_row(Field, "id");
+			pInfo[playerid][pSqlId] = strval(Field);
+			
+			mysql_fetch_field_row(Field, "userid");
+			pInfo[playerid][uSqlId] = strval(Field);
+			mysql_free_result();
+			
+			GetUserInfo(playerid);
+		}	
 	}
-	else
-	{
-		new Field[64], Data[128];
-		mysql_fetch_row(Data);
-		
-		mysql_fetch_field_row(Field, "id");
-		pInfo[playerid][pSqlId] = strval(Field);
-		
-		mysql_fetch_field_row(Field, "userid");
-		pInfo[playerid][uSqlId] = strval(Field);
-		mysql_free_result();
-		
-		GetUserInfo(playerid);
-	}	
 	Active_Check_Character_Thread = -1;
 	return 1;
 }
@@ -705,29 +707,33 @@ public GetUserInfo(playerid)
 public GetUserInfoFinish(playerid)
 {
 	if(Get_Userinfo_Thread != playerid) return 1;
-	mysql_store_result();	
 	
-	if(mysql_num_rows() < 1)
+	if(mysql_store_result())
 	{
-		SendClientMessage(playerid, COLOR_RED, LANG_NOUSER);
-		Kick(playerid);
+		mysql_store_result();	
+		
+		if(mysql_num_rows() < 1)
+		{
+			SendClientMessage(playerid, COLOR_RED, LANG_NOUSER);
+			Kick(playerid);
+		}
+		else
+		{
+			new Field[64], Data[128];
+			mysql_fetch_row(Data);
+			
+			mysql_fetch_field_row(Field, "username");
+			strmid(pInfo[playerid][uUserName], Field, 0, strlen(Field), 255);
+			
+			mysql_fetch_field_row(Field, "password");
+			strmid(pInfo[playerid][uPassWordHash], Field, 0, strlen(Field), 255);
+			
+			mysql_fetch_field_row(Field, "salt");
+			strmid(pInfo[playerid][uSalt], Field, 0, strlen(Field), 255);
+			mysql_free_result();
+		}	
+		ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
 	}
-	else
-	{
-		new Field[64], Data[128];
-		mysql_fetch_row(Data);
-		
-		mysql_fetch_field_row(Field, "username");
-		strmid(pInfo[playerid][uUserName], Field, 0, strlen(Field), 255);
-		
-		mysql_fetch_field_row(Field, "password");
-		strmid(pInfo[playerid][uPassWordHash], Field, 0, strlen(Field), 255);
-		
-		mysql_fetch_field_row(Field, "salt");
-		strmid(pInfo[playerid][uSalt], Field, 0, strlen(Field), 255);
-		mysql_free_result();
-	}	
-	ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
 	Get_Userinfo_Thread = -1;
 	return 1;
 }
@@ -771,39 +777,42 @@ public FetchCharacterInformation(playerid)
 public FetchCharacterInformationFinish(playerid)
 {
 	if(Fetch_UInfo_Thread != playerid) return 1;
-	mysql_store_result();
-	if(mysql_num_rows() < 1)
+	
+	if(mysql_store_result())
 	{
-		SendClientMessage(playerid, COLOR_RED, LANG_NOUSER);
-		Kick(playerid);
+		if(mysql_num_rows() < 1)
+		{
+			SendClientMessage(playerid, COLOR_RED, LANG_NOUSER);
+			Kick(playerid);
+		}
+		else
+		{
+			new Field[64], Data[128];
+			mysql_fetch_row(Data);
+			
+			mysql_fetch_field_row(Field, "model");
+			pInfo[playerid][pModel] = strval(Field);
+			mysql_fetch_field_row(Field, "posX");
+			pInfo[playerid][pPosX] = floatstr(Field);
+			mysql_fetch_field_row(Field, "posY");
+			pInfo[playerid][pPosY] = floatstr(Field);
+			mysql_fetch_field_row(Field, "posZ");
+			pInfo[playerid][pPosZ] = floatstr(Field);
+			mysql_fetch_field_row(Field, "angle");
+			pInfo[playerid][pAngle] = floatstr(Field);
+			mysql_fetch_field_row(Field, "VirtualWorld");
+			pInfo[playerid][pVW] = strval(Field);
+			mysql_fetch_field_row(Field, "interior");
+			pInfo[playerid][pInterior] = strval(Field);
+			mysql_fetch_field_row(Field, "health");
+			pInfo[playerid][pHealth] = floatstr(Field);
+			
+			mysql_free_result();
+			SendClientMessage(playerid, COLOR_GREEN, LANG_LOGGED_IN);
+			pInfo[playerid][pLoggedIn] = 1;
+			SpawnPlayer(playerid);
+		}
 	}
-	else
-	{
-		new Field[64], Data[128];
-		mysql_fetch_row(Data);
-		
-		mysql_fetch_field_row(Field, "model");
-		pInfo[playerid][pModel] = strval(Field);
-		mysql_fetch_field_row(Field, "posX");
-		pInfo[playerid][pPosX] = floatstr(Field);
-		mysql_fetch_field_row(Field, "posY");
-		pInfo[playerid][pPosY] = floatstr(Field);
-		mysql_fetch_field_row(Field, "posZ");
-		pInfo[playerid][pPosZ] = floatstr(Field);
-		mysql_fetch_field_row(Field, "angle");
-		pInfo[playerid][pAngle] = floatstr(Field);
-		mysql_fetch_field_row(Field, "VirtualWorld");
-		pInfo[playerid][pVW] = strval(Field);
-		mysql_fetch_field_row(Field, "interior");
-		pInfo[playerid][pInterior] = strval(Field);
-		mysql_fetch_field_row(Field, "health");
-		pInfo[playerid][pHealth] = floatstr(Field);
-		
-		mysql_free_result();
-	}
-	SendClientMessage(playerid, COLOR_GREEN, LANG_LOGGED_IN);
-	pInfo[playerid][pLoggedIn] = 1;
-	SpawnPlayer(playerid);
 	Fetch_UInfo_Thread = -1;
 	return 1;
 }
