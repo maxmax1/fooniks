@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"49"
+#define SCRIPT_REVISION 	"50"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -306,11 +306,11 @@ public OnPlayerDisconnect(playerid)
 public OnPlayerRequestClass(playerid)
 {
 	SetPlayerVirtualWorld(playerid, playerid);
-	SetPlayerPos(playerid, 			1492.5065, 1007.7800, 10.8203);
+	SetPlayerPos(playerid, 			1668.3400, 1392.7003, 15.4365);
 	SetPlayerFacingAngle(playerid, 90);
 	
-	SetPlayerCameraPos(playerid, 	1488.0547, 1007.2191, 9.8203);
-	SetPlayerCameraLookAt(playerid, 1492.5065, 1007.7800, 10.8203);
+	SetPlayerCameraPos(playerid, 	1730.4994, 1431.5691, 23.7563);
+	SetPlayerCameraLookAt(playerid, 1679.3628, 1401.7775, 29.8623);
 	return 1;
 }
 
@@ -551,7 +551,7 @@ public OnDriverEnterVehicle(playerid)
 	new Remove = false, Freeze = false;
 	new string[128];
 	
-	if(vId == -1) Remove = true;
+	if(vId == -1) Remove = false;
 	else
 	{
 		if		(Vehicles[vId][vType] == VEHICLE_GROUP)
