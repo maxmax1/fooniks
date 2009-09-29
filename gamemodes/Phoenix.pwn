@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"54"
+#define SCRIPT_REVISION 	"55"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -84,6 +84,7 @@ new WelcomeStr[64];
 	new Get_Userinfo_Thread				= -1;
 	new Fetch_UInfo_Thread				= -1;
 
+new ChainsawPickup,	EaglePickup, SawnoffPickup, MP5Pickup, AKPickup, FlamePickup;
 
 enum pInf
 {
@@ -275,6 +276,13 @@ public OnGameModeInit()
 	
 	SetTimer("UpdateAllPlayers", 1000*60*15, true);
 	
+	ChainsawPickup = CreatePickup(341 , 2, 1494.3976,1013,10.8203, 0); // chainsaw
+	EaglePickup = CreatePickup(348 , 2, 1494.3976,1015,10.8203, 0); // eagle
+	SawnoffPickup = CreatePickup(350 , 2, 1494.3976,1017,10.8203, 0); // sawnoff
+	MP5Pickup = CreatePickup(353 , 2, 1494.3976,1019,10.8203, 0); // mp5
+	AKPickup = CreatePickup(355 , 2, 1494.3976,1021,10.8203, 0); // AK
+	FlamePickup = CreatePickup(361 , 2, 1494.3976,1023,10.8203, 0); // flamethrower
+	
 	return 1;
 }
 
@@ -383,6 +391,24 @@ public OnPlayerRequestSpawn(playerid)
 		return 0;    
     }
     return 1;
+}
+
+public OnPlayerPickUpPickup(playerid, pickupid)
+{
+	if( pickupid == ChainsawPickup )
+		GivePlayerWeapon(playerid, 9, 100);
+	if( pickupid == EaglePickup )
+		GivePlayerWeapon(playerid, 24, 100);
+	if( pickupid == SawnoffPickup )
+		GivePlayerWeapon(playerid, 26, 100);
+	if( pickupid == MP5Pickup )
+		GivePlayerWeapon(playerid, 29, 100);
+	if( pickupid == AKPickup )
+		GivePlayerWeapon(playerid, 30, 100);
+	if( pickupid == FlamePickup )
+		GivePlayerWeapon(playerid, 37, 100);
+
+	return 1;
 }
 
 /*
@@ -550,7 +576,7 @@ public OnDriverEnterVehicle(playerid)
 	new Remove = false, Freeze = false;
 	new string[128];
 	
-	if(vId == -1) Remove = true;
+	if(vId == -1) return 1;
 	else
 	{
 		if		(Vehicles[vId][vType] == VEHICLE_GROUP)
@@ -600,6 +626,7 @@ public OnDriverEnterVehicle(playerid)
 		format(string, 128, "%s", CarNames[Vehicles[vId][vModel] - 400]);
 		GameTextForPlayer(playerid, string, 6000, 1);
 	}
+	return 1;
 }
 
 public OnDriverExitVehicle(playerid)
