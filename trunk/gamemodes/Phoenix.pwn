@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"41"
+#define SCRIPT_REVISION 	"42"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -154,6 +154,7 @@ forward GetUserInfoFinish(playerid);
 forward AuthenticateUser(playerid, givenPassword[]);
 forward FetchCharacterInformation(playerid);
 forward FetchCharacterInformationFinish(playerid);
+forward UpdatePlayer(playerid);
 
 /*
 *    MAIN()
@@ -201,11 +202,12 @@ stock IsGroupMember(playerid)
 	return ret;
 }
 
-stock PasswordHash(password[], salt[])
+PasswordHash(password[], salt[])
 {
-	new string[128];
-	format(string, 128, "%s%s", strtolower(MD5_Hash(password)), strtolower(MD5_Hash(salt)));
-	return strtolower(MD5_Hash(string));
+	new string[256];
+	format(string, 256, "%s%s", strtolower(MD5_Hash(password)), salt);
+	format(string, 256, "%s", strtolower(MD5_Hash(string)));
+	return string;
 }
 
 /*
@@ -269,7 +271,7 @@ public OnPlayerConnect(playerid)
 	InfoBarTimer[playerid] = -1;
 	CheckCharacter(playerid);
 
-	pInfo[playerid][pLoggedIn] = false;
+	pInfo[playerid][pLoggedIn] = 0;
 	GetPlayerName(playerid, pInfo[playerid][pCharName], 30);
 
 	ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
@@ -344,7 +346,7 @@ public OnPlayerRequestSpawn(playerid)
     {
         SendClientMessage(playerid, COLOR_RED, LANG_MUST_LOGIN);
         ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
-    
+		return 0;    
     }
     return 1;
 }
@@ -443,6 +445,7 @@ public LoadAllVehiclesFinish()
 		
 		mysql_fetch_field_row(Field, "vHealth");
 		Vehicles[vId][vHealth] = floatstr(Field);
+		if(Vehicles[vId][vHealth] < 400.0) Vehicles[vId][vHealth] = 450.0;
 		
 		Vehicles[vId][vSampId] = AddStaticVehicleEx(Vehicles[vId][vModel], 
 													Vehicles[vId][vPosXd],
@@ -696,20 +699,25 @@ public GetUserInfoFinish(playerid)
 
 public AuthenticateUser(playerid, givenPassword[])
 {
-	if(strcmp(pInfo[playerid][uPassWordHash], PasswordHash(givenPassword, pInfo[playerid][uSalt]), true) != 0) // wrong Password
+	new string[256];
+	format(string, 256, "%s", PasswordHash(givenPassword, pInfo[playerid][uSalt]));
+	new strC = strcmp(pInfo[playerid][uPassWordHash], string, true);
+
+	if(strC != 0) // wrong Password
 	{
 		SendClientMessage(playerid, COLOR_RED, LANG_WRONG_PASSWORD);
 		ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
 	}
 	else
 	{
-		FetchCharacterInformation(playerid);
-		pInfo[playerid][pLoggedIn] = true;
 		SendClientMessage(playerid, COLOR_RED, LANG_LOGGED_IN);
+		pInfo[playerid][pLoggedIn] = 1;
 		SpawnPlayer(playerid);
+		FetchCharacterInformation(playerid);
 	}
 	return 1;
 }
+
 public FetchCharacterInformation(playerid)
 {
 	if(Fetch_UInfo_Thread != -1) // thread is busy, lets attemp again in 1 second.
@@ -720,17 +728,17 @@ public FetchCharacterInformation(playerid)
 	Fetch_UInfo_Thread = playerid;
 
 	new query[86];
-	format(query, 86, "SELECT * FROM %scharacters WHERE userid = '%d' LIMIT 1", MYSQL_PREFIX, pInfo[playerid][uSqlId]);
+	format(query, 86, "SELECT * FROM %scharacters WHERE userid = '%d' LIMIT 0, 1", MYSQL_PREFIX, pInfo[playerid][uSqlId]);
 	mysql_query(query, FETCH_UINFO_THREAD);
 	SetTimerEx("FetchCharacterInformationFinish", 5000, 0, "i", playerid);
 	return 1;
 
 }
+
 public FetchCharacterInformationFinish(playerid)
 {
 	if(Fetch_UInfo_Thread != playerid) return 1;
 	mysql_store_result();
-
 	if(mysql_num_rows() < 1)
 	{
 		SendClientMessage(playerid, COLOR_RED, LANG_NOUSER);
@@ -740,13 +748,27 @@ public FetchCharacterInformationFinish(playerid)
 	{
 		new Field[64], Data[128];
 		mysql_fetch_row(Data);
-
 		mysql_fetch_field_row(Field, "model");
 		pInfo[playerid][pModel] = strval(Field);
 		
 		mysql_free_result();
 	}
 	Fetch_UInfo_Thread = -1;
+	return 1;
+}
+
+public UpdatePlayer(playerid)
+{
+	if(!pInfo[playerid][pLoggedIn]) return 1;
+	new query[128];
+	
+	format(query, 128, "UPDATE %scharacters SET money = '%d', model = '%d' WHERE id = '%d'",
+		MYSQL_PREFIX,
+		
+		GetPlayerMoney(playerid),
+		
+		pInfo[playerid][pSqlId]);
+	mysql_query(query);
 	return 1;
 }
 
