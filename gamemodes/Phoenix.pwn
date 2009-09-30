@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"60"
+#define SCRIPT_REVISION 	"61"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -78,8 +78,8 @@
 #define PLAYER_COLOR 0xFFFF0000
 
 #define COLOR_CHAT_IC 0xf2ffacAA
-#define COLOR_CHAT_OOC_GLOBAL 0xacfff6AA
-#define COLOR_CHAT_OOC_LOCAL 0x17cdb9AA
+#define COLOR_CHAT_OOC_GLOBAL 0x8cf8ffAA
+#define COLOR_CHAT_OOC_LOCAL 0xf2ffacAA
 #define COLOR_CHAT_ME 0xda92e5AA
 #define COLOR_CHAT_SHOUT 0xd7ff00AA
 
@@ -476,7 +476,7 @@ dcmd_b(playerid, params[])
 	new text[STRING_LENGHT], str[STRING_LENGHT], pName[30];
 	sscanf(params, "s", text);
 	GetPlayerName(playerid, pName, sizeof(pName));
-	format(str, sizeof(str), "(( %s: %s ))", pName, text);
+	format(str, sizeof(str), "%s OOC:(( %s ))", pName, text);
 	SCMTAInPlayerRadius(playerid, CHAT_RADIUS, COLOR_CHAT_OOC_LOCAL, str);
 }
 dcmd_me(playerid, params[])
