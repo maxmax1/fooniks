@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"57"
+#define SCRIPT_REVISION 	"58"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -270,7 +270,8 @@ public OnGameModeInit()
 		TextDrawSetOutline(InfoBar[td],0);
 	}
 	
-	ShowNameTags(1);
+	ShowNameTags(0);
+	LimitGlobalChatRadius(20);
 	SetNameTagDrawDistance(40.0);
 	Active_Check_Character_Thread = -1;	
 	
@@ -331,6 +332,7 @@ public OnPlayerSpawn(playerid)
 	SetPlayerFacingAngle(playerid, pInfo[playerid][pAngle]);
 	SetPlayerSkin(playerid, pInfo[playerid][pModel]);
 	SetPlayerHealth(playerid, pInfo[playerid][pHealth]);
+	SetPlayerColor(playerid, COLOR_YELLOW);
 	
 	SetCameraBehindPlayer(playerid);
 	return 1;
@@ -419,6 +421,17 @@ public OnPlayerDeath(playerid, killerid, reason)
 	pInfo[playerid][pPosZ] = 10.8203;
 	pInfo[playerid][pAngle] = 268.2924;
 	pInfo[playerid][pHealth] = 100;
+}
+
+public OnPlayerText(playerid, text[])
+{
+	new delay = ( strlen(text) * 300 );
+	new pName[32];
+	GetPlayerName(playerid, pName, sizeof(pName));
+	new str[255];
+	format(str, sizeof(str),"%s:  %s", pName, text);
+	SetPlayerChatBubble(playerid, str, COLOR_YELLOW, 20, delay);
+	return 1;
 }
 
 /*
