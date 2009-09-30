@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"62"
+#define SCRIPT_REVISION 	"63"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -235,6 +235,13 @@ stock IsGroupMember(playerid)
 	return ret;
 }
 
+stock showLogin(playerid)
+{
+	new string[64];
+	format(string, 64, LANG_DIALOG_LOGIN_INFO, pInfo[playerid][uUserName]);
+	ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, string, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
+}
+
 PasswordHash(password[], salt[])
 {
 	new string[STRING_LENGHT];
@@ -398,9 +405,7 @@ public OnPlayerRequestSpawn(playerid)
     {
         SendClientMessage(playerid, COLOR_RED, LANG_MUST_LOGIN);
 		
-		new string[64];
-		format(string, 64, LANG_DIALOG_LOGIN_INFO, pInfo[playerid][uUserName]);
-		ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, string, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
+		showLogin(playerid);
 		return 0;    
     }
     return 1;
@@ -827,7 +832,7 @@ public GetUserInfo(playerid)
 			strmid(pInfo[playerid][uSalt], Field, 0, strlen(Field), STRING_LENGHT);
 			mysql_free_result();
 		}	
-		ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
+		showLogin(playerid);
 		return 1;
 	}
 	SendClientMessage(playerid, COLOR_RED, LANG_NOUSER);
@@ -845,7 +850,7 @@ public AuthenticateUser(playerid, givenPassword[])
 	if(strC != 0) // wrong Password
 	{
 		SendClientMessage(playerid, COLOR_RED, LANG_WRONG_PASSWORD);
-		ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
+		showLogin(playerid);
 	}
 	else
 	{
