@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"63"
+#define SCRIPT_REVISION 	"64"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -316,12 +316,12 @@ public OnGameModeExit()
 
 public OnPlayerConnect(playerid)
 {
+    GetPlayerName(playerid, pInfo[playerid][pCharName], 30);
 	SendClientMessage(playerid, COLOR_YELLOW, WelcomeStr);
 	InfoBarTimer[playerid] = -1;
 	CheckCharacter(playerid);
 
 	pInfo[playerid][pLoggedIn] = 0;
-	GetPlayerName(playerid, pInfo[playerid][pCharName], 30);
 	return 1;
 }
 
@@ -441,10 +441,8 @@ public OnPlayerDeath(playerid, killerid, reason)
 public OnPlayerText(playerid, text[])
 {
 	new delay = ( strlen(text) * 150 ) + 2000;
-	new pName[32];
-	GetPlayerName(playerid, pName, sizeof(pName));
 	new str[STRING_LENGHT];
-	format(str, sizeof(str),"%s:  %s", pName, text);
+	format(str, sizeof(str),"%s:  %s", pInfo[playerid][pCharName], text);
 	SetPlayerChatBubble(playerid, str, COLOR_CHAT_IC, CHAT_RADIUS, delay);
 	SCMTAInPlayerRadius(playerid,CHAT_RADIUS, COLOR_CHAT_IC, str);
 	return 0;
@@ -464,35 +462,48 @@ public OnPlayerCommandText(playerid, cmdtext[])
 
 dcmd_o(playerid, params[])
 {
-	new text[STRING_LENGHT], str[STRING_LENGHT], pName[30];
+	new text[STRING_LENGHT], str[STRING_LENGHT];
 	sscanf(params, "s", text);
-	GetPlayerName(playerid, pName, sizeof(pName));
-	format(str, sizeof(str), "(( %s: %s ))", pName, text);
+	
+	if(strlen(text) == 0) return SendClientMessage(playerid, COLOR_RED, "KASUTUS: /o tekst");
+
+	format(str, sizeof(str), "(( %s: %s ))", pInfo[playerid][pCharName], text);
 	SendClientMessageToAll(COLOR_CHAT_OOC_GLOBAL, str);
+	return 1;
 }
 dcmd_b(playerid, params[])
 {
-	new text[STRING_LENGHT], str[STRING_LENGHT], pName[30];
+	new text[STRING_LENGHT], str[STRING_LENGHT];
 	sscanf(params, "s", text);
-	GetPlayerName(playerid, pName, sizeof(pName));
-	format(str, sizeof(str), "%s OOC:(( %s ))", pName, text);
+
+	if(strlen(text) == 0) return SendClientMessage(playerid, COLOR_RED, "KASUTUS: /b tekst");
+
+	format(str, sizeof(str), "%s OOC:(( %s ))", pInfo[playerid][pCharName], text);
 	SCMTAInPlayerRadius(playerid, CHAT_RADIUS, COLOR_CHAT_OOC_LOCAL, str);
+	return 1;
 }
 dcmd_me(playerid, params[])
 {
 	new text[STRING_LENGHT];
 	sscanf(params, "s", text);
+
+	if(strlen(text) == 0) return SendClientMessage(playerid, COLOR_RED, "KASUTUS: /me tekst");
+
 	SendEmote(playerid, text);
+	return 1;
 }
 dcmd_s(playerid, params[])
 {
-	new text[STRING_LENGHT], str[STRING_LENGHT], pName[30];
+	new text[STRING_LENGHT], str[STRING_LENGHT];
 	sscanf(params, "s", text);
+
+	if(strlen(text) == 0) return SendClientMessage(playerid, COLOR_RED, "KASUTUS: /s tekst");
+
 	new delay = ( strlen(text) * 150 ) + 2000;
-	GetPlayerName(playerid, pName, sizeof(pName));
-	format(str, sizeof(str), "%s karjub: %s", pName, text);
-	SetPlayerChatBubble(playerid, str, COLOR_CHAT_IC, CHAT_RADIUS_SHOUT, delay);
+	format(str, sizeof(str), "%s karjub: %s", pInfo[playerid][pCharName], text);
+	SetPlayerChatBubble(playerid, str, COLOR_CHAT_SHOUT, CHAT_RADIUS_SHOUT, delay);
 	SCMTAInPlayerRadius(playerid,CHAT_RADIUS_SHOUT, COLOR_CHAT_SHOUT, str);
+	return 1;
 }
 
 /*
@@ -501,10 +512,9 @@ dcmd_s(playerid, params[])
 
 public SendEmote(playerid, emote[])
 {
-	new Float:PlayerLocX, Float:PlayerLocY, Float:PlayerLocZ, str[STRING_LENGHT], pName[30];
+	new Float:PlayerLocX, Float:PlayerLocY, Float:PlayerLocZ, str[STRING_LENGHT];
 	GetPlayerPos(playerid, PlayerLocX, PlayerLocY, PlayerLocZ);
-	GetPlayerName(playerid, pName, sizeof(pName));
-	format(str, sizeof(str),"*%s %s*", pName, emote);
+	format(str, sizeof(str),"*%s %s*", pInfo[playerid][pCharName], emote);
 	for( new i = 0; i <= MAX_PLAYERS; i++ )
 	{
 	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] )
@@ -779,9 +789,8 @@ public OnSpeedoUpdate(playerid)
 
 public CheckCharacter(playerid)
 {
-	new pName[MAX_PLAYER_NAME], eName[32], query[86];
-	GetPlayerName(playerid, pName, MAX_PLAYER_NAME);
-	mysql_real_escape_string(pName, eName);
+	new eName[32], query[86];
+	mysql_real_escape_string(pInfo[playerid][pCharName], eName);
 	format(query, 86, "SELECT id, userid FROM %scharacters WHERE name = '%s' LIMIT 0, 1", MYSQL_PREFIX, eName);	
 	mysql_query(query);
 		
