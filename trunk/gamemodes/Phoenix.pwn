@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"61"
+#define SCRIPT_REVISION 	"62"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -54,9 +54,7 @@
          */
 	#define VEHICLE_LOAD_THREAD     1
 	#define VEHICLE_SAVE_THREAD     2
-	#define CHECK_CHARACTER_THREAD	3
-	#define GET_USERINFO_THREAD	    4
-	#define FETCH_UINFO_THREAD      5
+	#define FETCH_UINFO_THREAD      3
 
 #define VEHICLE_DELAY 60000
 #define SQL_FINISH_TIME 1000
@@ -95,9 +93,7 @@ new WelcomeStr[64];
     /*
          *  THREADS Vars
          */
-	new Active_Check_Character_Thread	= -1;
-	new Get_Userinfo_Thread				= -1;
-	new Fetch_UInfo_Thread				= -1;
+	new Fetch_UInfo_Thread = -1;
 
 new ChainsawPickup,	EaglePickup, SawnoffPickup, MP5Pickup, AKPickup, FlamePickup;
 
@@ -288,9 +284,7 @@ public OnGameModeInit()
 	
 	ShowNameTags(0);
 	LimitGlobalChatRadius(CHAT_RADIUS);
-	SetNameTagDrawDistance(40.0);
-	Active_Check_Character_Thread = -1;	
-	
+	SetNameTagDrawDistance(40.0);	
 	
 	SetTimer("UpdateAllPlayers", 1000*60*15, true);
 	
@@ -548,10 +542,6 @@ public OnQueryFinish(query[], resultid)
 		}
 		else VEHICLE_SAVE_NEXT = 0;
 	}
-	else if( resultid == CHECK_CHARACTER_THREAD )
-	{
-		CheckCharacterFinish(Active_Check_Character_Thread);
-	}
 	else if( resultid == FETCH_UINFO_THREAD )
 	{
 		FetchCharacterInformationFinish(Fetch_UInfo_Thread);
@@ -784,36 +774,15 @@ public OnSpeedoUpdate(playerid)
 
 public CheckCharacter(playerid)
 {
-	if(Active_Check_Character_Thread != -1) // thread is busy, lets attemp again in 1 second.
-	{
-		SetTimerEx("CheckCharacter", 1000, 0, "i", playerid);
-		return 1;
-	}
-	else
-	{
-		Active_Check_Character_Thread = playerid;
-		new pName[MAX_PLAYER_NAME], eName[32], query[86];
-		GetPlayerName(playerid, pName, MAX_PLAYER_NAME);
-		mysql_real_escape_string(pName, eName);
-		format(query, 86, "SELECT id, userid FROM %scharacters WHERE name = '%s' LIMIT 0, 1", MYSQL_PREFIX, eName);	
-		mysql_query(query, CHECK_CHARACTER_THREAD);
-		SetTimerEx("CheckCharacterFinish", SQL_FINISH_TIME, 0, "i", playerid);
-	}
-	return 1;
-}
-
-public CheckCharacterFinish(playerid)
-{
-	if(Active_Check_Character_Thread != playerid) return 1;
-	
+	new pName[MAX_PLAYER_NAME], eName[32], query[86];
+	GetPlayerName(playerid, pName, MAX_PLAYER_NAME);
+	mysql_real_escape_string(pName, eName);
+	format(query, 86, "SELECT id, userid FROM %scharacters WHERE name = '%s' LIMIT 0, 1", MYSQL_PREFIX, eName);	
+	mysql_query(query);
+		
 	if(mysql_store_result())
 	{
-		if(mysql_num_rows() < 1)
-		{
-			SendClientMessage(playerid, COLOR_RED, LANG_NOCHARACTER);
-			Kick(playerid);
-		}
-		else
+		if(mysql_num_rows() > 0)
 		{
 			new Field[64], Data[128];
 			mysql_fetch_row(Data);
@@ -826,40 +795,24 @@ public CheckCharacterFinish(playerid)
 			mysql_free_result();
 			
 			GetUserInfo(playerid);
+			return 1;
 		}	
 	}
-	Active_Check_Character_Thread = -1;
+	
+	SendClientMessage(playerid, COLOR_RED, LANG_NOCHARACTER);
+	Kick(playerid);
 	return 1;
 }
 
 public GetUserInfo(playerid)
 {
-	if(Get_Userinfo_Thread != -1) // thread is busy, lets attemp again in 1 second.
-	{
-		SetTimerEx("GetUserInfo", 1000, 0, "i", playerid);
-		return 1;
-	}
-	Get_Userinfo_Thread = playerid;
-	
 	new query[86];
 	format(query, 86, "SELECT username, password, salt FROM user WHERE userid = '%d' LIMIT 1", pInfo[playerid][uSqlId]);
-	mysql_query(query, GET_USERINFO_THREAD);
-	SetTimerEx("GetUserInfoFinish", SQL_FINISH_TIME, 0, "i", playerid);
-	return 1;
-}
+	mysql_query(query);
 
-public GetUserInfoFinish(playerid)
-{
-	if(Get_Userinfo_Thread != playerid) return 1;
-	
 	if(mysql_store_result() == 1)
 	{		
-		if(mysql_num_rows() < 1)
-		{
-			SendClientMessage(playerid, COLOR_RED, LANG_NOUSER);
-			Kick(playerid);
-		}
-		else
+		if(mysql_num_rows() > 0)
 		{
 			new Field[64], Data[128];
 			mysql_fetch_row(Data);
@@ -875,8 +828,10 @@ public GetUserInfoFinish(playerid)
 			mysql_free_result();
 		}	
 		ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
+		return 1;
 	}
-	Get_Userinfo_Thread = -1;
+	SendClientMessage(playerid, COLOR_RED, LANG_NOUSER);
+	Kick(playerid);
 	return 1;
 }
 
@@ -924,7 +879,7 @@ public FetchCharacterInformationFinish(playerid)
 	{
 		if(mysql_num_rows() < 1)
 		{
-			SendClientMessage(playerid, COLOR_RED, LANG_NOUSER);
+			SendClientMessage(playerid, COLOR_RED, LANG_NOCHARACTER);
 			Kick(playerid);
 		}
 		else
