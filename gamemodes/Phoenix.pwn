@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"56"
+#define SCRIPT_REVISION 	"57"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -57,6 +57,7 @@
 	#define FETCH_UINFO_THREAD      5
 
 #define VEHICLE_DELAY 60000
+#define SQL_FINISH_TIME 1000
 
 #define VEHICLE_GROUP			0	// Gängid, Grupeeringud
 #define VEHICLE_JOB				1	// Tööd
@@ -689,7 +690,7 @@ public CheckCharacter(playerid)
 		mysql_real_escape_string(pName, eName);
 		format(query, 86, "SELECT id, userid FROM %scharacters WHERE name = '%s' LIMIT 0, 1", MYSQL_PREFIX, eName);	
 		mysql_query(query, CHECK_CHARACTER_THREAD);
-		SetTimerEx("CheckCharacterFinish", 5000, 0, "i", playerid);
+		SetTimerEx("CheckCharacterFinish", SQL_FINISH_TIME, 0, "i", playerid);
 	}
 	return 1;
 }
@@ -736,7 +737,7 @@ public GetUserInfo(playerid)
 	new query[86];
 	format(query, 86, "SELECT username, password, salt FROM user WHERE userid = '%d' LIMIT 1", pInfo[playerid][uSqlId]);
 	mysql_query(query, GET_USERINFO_THREAD);
-	SetTimerEx("GetUserInfoFinish", 5000, 0, "i", playerid);
+	SetTimerEx("GetUserInfoFinish", SQL_FINISH_TIME, 0, "i", playerid);
 	return 1;
 }
 
@@ -803,7 +804,7 @@ public FetchCharacterInformation(playerid)
 	new query[86];
 	format(query, 86, "SELECT * FROM %scharacters WHERE id = '%d' LIMIT 0, 1", MYSQL_PREFIX, pInfo[playerid][pSqlId]);
 	mysql_query(query, FETCH_UINFO_THREAD);
-	SetTimerEx("FetchCharacterInformationFinish", 5000, 0, "i", playerid);
+	SetTimerEx("FetchCharacterInformationFinish", SQL_FINISH_TIME, 0, "i", playerid);
 	return 1;
 
 }
