@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"59"
+#define SCRIPT_REVISION 	"60"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -61,6 +61,9 @@
 #define VEHICLE_DELAY 60000
 #define SQL_FINISH_TIME 1000
 #define CHAT_RADIUS 25
+#define CHAT_RADIUS_SHOUT 40
+
+#define STRING_LENGHT 256
 
 #define VEHICLE_GROUP			0	// Gängid, Grupeeringud
 #define VEHICLE_JOB				1	// Tööd
@@ -76,7 +79,9 @@
 
 #define COLOR_CHAT_IC 0xf2ffacAA
 #define COLOR_CHAT_OOC_GLOBAL 0xacfff6AA
-#define COLOR_CHAT_OOC_LOCAL 0xacd5ffAA
+#define COLOR_CHAT_OOC_LOCAL 0x17cdb9AA
+#define COLOR_CHAT_ME 0xda92e5AA
+#define COLOR_CHAT_SHOUT 0xd7ff00AA
 
 /* DialogIDs */
 #define DIALOG_LOGIN 2009
@@ -157,6 +162,8 @@ new Vehicles[700][vInf];
 /*
 *    FORWARDS
 */
+forward SendEmote(playerid, emote[]);
+forward SCMTAInPlayerRadius(playerid, radius, color, message[]);
 forward LoadAllVehiclesStart();
 forward LoadAllVehiclesFinish();
 forward SaveAllVehicles(closingdown);
@@ -234,9 +241,9 @@ stock IsGroupMember(playerid)
 
 PasswordHash(password[], salt[])
 {
-	new string[256];
-	format(string, 256, "%s%s", strtolower(MD5_Hash(password)), salt);
-	format(string, 256, "%s", strtolower(MD5_Hash(string)));
+	new string[STRING_LENGHT];
+	format(string, STRING_LENGHT, "%s%s", strtolower(MD5_Hash(password)), salt);
+	format(string, STRING_LENGHT, "%s", strtolower(MD5_Hash(string)));
 	return string;
 }
 
@@ -434,13 +441,14 @@ public OnPlayerDeath(playerid, killerid, reason)
 
 public OnPlayerText(playerid, text[])
 {
-	new delay = ( strlen(text) * 300 );
+	new delay = ( strlen(text) * 150 ) + 2000;
 	new pName[32];
 	GetPlayerName(playerid, pName, sizeof(pName));
-	new str[255];
+	new str[STRING_LENGHT];
 	format(str, sizeof(str),"%s:  %s", pName, text);
 	SetPlayerChatBubble(playerid, str, COLOR_CHAT_IC, CHAT_RADIUS, delay);
-	return 1;
+	SCMTAInPlayerRadius(playerid,CHAT_RADIUS, COLOR_CHAT_IC, str);
+	return 0;
 }
 
 /*
@@ -449,24 +457,81 @@ public OnPlayerText(playerid, text[])
 public OnPlayerCommandText(playerid, cmdtext[])
 {
 	dcmd(o, 1, cmdtext);
-	//dcmd(b, 1, cmdtext);
+	dcmd(b, 1, cmdtext);
+	dcmd(me, 2, cmdtext);
+	dcmd(s, 1, cmdtext);
 	return 1;
 }
 
 dcmd_o(playerid, params[])
 {
-	new text[255], str[255], pName[30];
+	new text[STRING_LENGHT], str[STRING_LENGHT], pName[30];
 	sscanf(params, "s", text);
 	GetPlayerName(playerid, pName, sizeof(pName));
 	format(str, sizeof(str), "(( %s: %s ))", pName, text);
 	SendClientMessageToAll(COLOR_CHAT_OOC_GLOBAL, str);
+}
+dcmd_b(playerid, params[])
+{
+	new text[STRING_LENGHT], str[STRING_LENGHT], pName[30];
+	sscanf(params, "s", text);
+	GetPlayerName(playerid, pName, sizeof(pName));
+	format(str, sizeof(str), "(( %s: %s ))", pName, text);
+	SCMTAInPlayerRadius(playerid, CHAT_RADIUS, COLOR_CHAT_OOC_LOCAL, str);
+}
+dcmd_me(playerid, params[])
+{
+	new text[STRING_LENGHT];
+	sscanf(params, "s", text);
+	SendEmote(playerid, text);
+}
+dcmd_s(playerid, params[])
+{
+	new text[STRING_LENGHT], str[STRING_LENGHT], pName[30];
+	sscanf(params, "s", text);
+	new delay = ( strlen(text) * 150 ) + 2000;
+	GetPlayerName(playerid, pName, sizeof(pName));
+	format(str, sizeof(str), "%s karjub: %s", pName, text);
+	SetPlayerChatBubble(playerid, str, COLOR_CHAT_IC, CHAT_RADIUS_SHOUT, delay);
+	SCMTAInPlayerRadius(playerid,CHAT_RADIUS_SHOUT, COLOR_CHAT_SHOUT, str);
 }
 
 /*
 *    PUBLICS
 */
 
-//public SendClientMessageToAllInPlayerRadius(
+public SendEmote(playerid, emote[])
+{
+	new Float:PlayerLocX, Float:PlayerLocY, Float:PlayerLocZ, str[STRING_LENGHT], pName[30];
+	GetPlayerPos(playerid, PlayerLocX, PlayerLocY, PlayerLocZ);
+	GetPlayerName(playerid, pName, sizeof(pName));
+	format(str, sizeof(str),"*%s %s*", pName, emote);
+	for( new i = 0; i <= MAX_PLAYERS; i++ )
+	{
+	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] )
+	    {
+	        if( IsPlayerInRangeOfPoint(i, CHAT_RADIUS, PlayerLocX, PlayerLocY, PlayerLocZ) )
+	        {
+				SendClientMessage(i, COLOR_CHAT_ME, str);
+	        }
+	    }
+	}
+}
+public SCMTAInPlayerRadius(playerid, radius, color, message[])
+{
+	new Float:PlayerLocX, Float:PlayerLocY, Float:PlayerLocZ;
+	GetPlayerPos(playerid, PlayerLocX, PlayerLocY, PlayerLocZ);
+	for( new i = 0; i <= MAX_PLAYERS; i++ )
+	{
+	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] )
+	    {
+	        if( IsPlayerInRangeOfPoint(i, radius, PlayerLocX, PlayerLocY, PlayerLocZ) )
+	        {
+				SendClientMessage(i, color, message);
+	        }
+	    }
+	}
+}
 
 public OnQueryFinish(query[], resultid)
 {
@@ -800,13 +865,13 @@ public GetUserInfoFinish(playerid)
 			mysql_fetch_row(Data);
 			
 			mysql_fetch_field_row(Field, "username");
-			strmid(pInfo[playerid][uUserName], Field, 0, strlen(Field), 255);
+			strmid(pInfo[playerid][uUserName], Field, 0, strlen(Field), STRING_LENGHT);
 			
 			mysql_fetch_field_row(Field, "password");
-			strmid(pInfo[playerid][uPassWordHash], Field, 0, strlen(Field), 255);
+			strmid(pInfo[playerid][uPassWordHash], Field, 0, strlen(Field), STRING_LENGHT);
 			
 			mysql_fetch_field_row(Field, "salt");
-			strmid(pInfo[playerid][uSalt], Field, 0, strlen(Field), 255);
+			strmid(pInfo[playerid][uSalt], Field, 0, strlen(Field), STRING_LENGHT);
 			mysql_free_result();
 		}	
 		ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, LANG_DIALOG_LOGIN_INFO, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
@@ -817,8 +882,8 @@ public GetUserInfoFinish(playerid)
 
 public AuthenticateUser(playerid, givenPassword[])
 {
-	new string[256];
-	format(string, 256, "%s", PasswordHash(givenPassword, pInfo[playerid][uSalt]));
+	new string[STRING_LENGHT];
+	format(string, STRING_LENGHT, "%s", PasswordHash(givenPassword, pInfo[playerid][uSalt]));
 	new strC = strcmp(pInfo[playerid][uPassWordHash], string, true);
 	
 
@@ -919,7 +984,7 @@ public UpdatePlayer(playerid)
 
 public UpdateAllPlayers()
 {
-	for( new i = 0; i <= GetMaxPlayers(); i++ )
+	for( new i = 0; i <= MAX_PLAYERS; i++ )
 	{
 	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] )
 	    UpdatePlayer(i);
