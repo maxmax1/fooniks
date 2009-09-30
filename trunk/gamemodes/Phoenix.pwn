@@ -26,6 +26,8 @@
 *    INCLUDES
 */
 
+#define dcmd(%1,%2,%3) if (!strcmp((%3)[1], #%1, true, (%2)) && ((((%3)[(%2) + 1] == '\0') && (dcmd_%1(playerid, ""))) || (((%3)[(%2) + 1] == ' ') && (dcmd_%1(playerid, (%3)[(%2) + 2]))))) return 1
+
 #include <a_samp>
 #include <a_mysql>
 #include <md5_core>  // author: Alex "Y_Less" Cole, External Credit #2
@@ -40,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"58"
+#define SCRIPT_REVISION 	"59"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -58,6 +60,7 @@
 
 #define VEHICLE_DELAY 60000
 #define SQL_FINISH_TIME 1000
+#define CHAT_RADIUS 25
 
 #define VEHICLE_GROUP			0	// Gängid, Grupeeringud
 #define VEHICLE_JOB				1	// Tööd
@@ -68,6 +71,12 @@
 #define COLOR_YELLOW		0xFFFF00AA
 #define COLOR_RED 0xAA3333AA
 #define COLOR_GREEN 0x33AA33AA
+
+#define PLAYER_COLOR 0xFFFF0000
+
+#define COLOR_CHAT_IC 0xf2ffacAA
+#define COLOR_CHAT_OOC_GLOBAL 0xacfff6AA
+#define COLOR_CHAT_OOC_LOCAL 0xacd5ffAA
 
 /* DialogIDs */
 #define DIALOG_LOGIN 2009
@@ -271,7 +280,7 @@ public OnGameModeInit()
 	}
 	
 	ShowNameTags(0);
-	LimitGlobalChatRadius(20);
+	LimitGlobalChatRadius(CHAT_RADIUS);
 	SetNameTagDrawDistance(40.0);
 	Active_Check_Character_Thread = -1;	
 	
@@ -332,7 +341,7 @@ public OnPlayerSpawn(playerid)
 	SetPlayerFacingAngle(playerid, pInfo[playerid][pAngle]);
 	SetPlayerSkin(playerid, pInfo[playerid][pModel]);
 	SetPlayerHealth(playerid, pInfo[playerid][pHealth]);
-	SetPlayerColor(playerid, COLOR_YELLOW);
+	SetPlayerColor(playerid, PLAYER_COLOR);
 	
 	SetCameraBehindPlayer(playerid);
 	return 1;
@@ -430,14 +439,34 @@ public OnPlayerText(playerid, text[])
 	GetPlayerName(playerid, pName, sizeof(pName));
 	new str[255];
 	format(str, sizeof(str),"%s:  %s", pName, text);
-	SetPlayerChatBubble(playerid, str, COLOR_YELLOW, 20, delay);
+	SetPlayerChatBubble(playerid, str, COLOR_CHAT_IC, CHAT_RADIUS, delay);
 	return 1;
+}
+
+/*
+*    COMMANDS
+*/
+public OnPlayerCommandText(playerid, cmdtext[])
+{
+	dcmd(o, 1, cmdtext);
+	//dcmd(b, 1, cmdtext);
+	return 1;
+}
+
+dcmd_o(playerid, params[])
+{
+	new text[255], str[255], pName[30];
+	sscanf(params, "s", text);
+	GetPlayerName(playerid, pName, sizeof(pName));
+	format(str, sizeof(str), "(( %s: %s ))", pName, text);
+	SendClientMessageToAll(COLOR_CHAT_OOC_GLOBAL, str);
 }
 
 /*
 *    PUBLICS
 */
 
+//public SendClientMessageToAllInPlayerRadius(
 
 public OnQueryFinish(query[], resultid)
 {
