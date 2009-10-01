@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"64"
+#define SCRIPT_REVISION 	"66"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -430,7 +430,10 @@ public OnPlayerDeath(playerid, killerid, reason)
 	pInfo[playerid][pPosZ] = 24.7299;
 	pInfo[playerid][pAngle] = 180;
 	pInfo[playerid][pHealth] = 100;
-	SpawnPlayer(playerid);
+	pInfo[playerid][pVW] = 0;
+	pInfo[playerid][pInterior] = 0;
+	
+	return 1;
 }
 
 public OnPlayerText(playerid, text[])
