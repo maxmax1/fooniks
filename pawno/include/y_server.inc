@@ -1050,16 +1050,25 @@ Notes:
 
 stock sscanf(string[], format[], {Float,_}:...)
 {
-	if (isnull(string))
-	{
-		return format[0];
-	}
+	#if defined isnull
+		if (isnull(string))
+	#else
+		if (string[0] == 0 || (string[0] == 1 && string[1] == 0))
+	#endif
+		{
+			return format[0];
+		}
+	#pragma tabsize 4
 	new
 		formatPos = 0,
 		stringPos = 0,
 		paramPos = 2,
 		paramCount = numargs(),
 		delim = ' ';
+	while (string[stringPos] && string[stringPos] <= ' ')
+	{
+		stringPos++;
+	}
 	while (paramPos < paramCount && string[stringPos])
 	{
 		switch (format[formatPos++])
@@ -1082,7 +1091,7 @@ stock sscanf(string[], format[], {Float,_}:...)
 				do
 				{
 					stringPos++;
-					if (ch >= '0' && ch <= '9')
+					if ('0' <= ch <= '9')
 					{
 						num = (num * 10) + (ch - '0');
 					}
@@ -1097,10 +1106,11 @@ stock sscanf(string[], format[], {Float,_}:...)
 			case 'h', 'x':
 			{
 				new
-					ch,
-					num = 0;
-				while ((ch = string[stringPos]) > ' ' && ch != delim)
+					num = 0,
+					ch = string[stringPos];
+				do
 				{
+					stringPos++;
 					switch (ch)
 					{
 						case 'x', 'X':
@@ -1126,6 +1136,7 @@ stock sscanf(string[], format[], {Float,_}:...)
 						}
 					}
 				}
+				while ((ch = string[stringPos]) > ' ' && ch != delim);
 				setarg(paramPos, 0, num);
 			}
 			case 'c':
@@ -1140,6 +1151,87 @@ stock sscanf(string[], format[], {Float,_}:...)
 			{
 				delim = format[formatPos++];
 				continue;
+			}
+			case '\'':
+			{
+				new
+					end = formatPos - 1,
+					ch;
+				while ((ch = format[++end]) && ch != '\'') {}
+				if (!ch)
+				{
+					return -1;
+				}
+				format[end] = '\0';
+				if ((ch = strfind(string, format[formatPos], false, stringPos)) == -1)
+				{
+					if (format[end + 1])
+					{
+						return -1;
+					}
+					return 0;
+				}
+				format[end] = '\'';
+				stringPos = ch + (end - formatPos);
+				formatPos = end + 1;
+			}
+			case 'u':
+			{
+				new
+					end = stringPos - 1,
+					id = 0,
+					bool:num = true,
+					ch;
+				while ((ch = string[++end]) && ch != delim)
+				{
+					if (num)
+					{
+						if ('0' <= ch <= '9')
+						{
+							id = (id * 10) + (ch - '0');
+						}
+						else
+						{
+							num = false;
+						}
+					}
+				}
+				if (num && IsPlayerConnected(id))
+				{
+					setarg(paramPos, 0, id);
+				}
+				else
+				{
+					#if !defined foreach
+						#define foreach(%1,%2) for (new %2 = 0; %2 < MAX_PLAYERS; %2++) if (IsPlayerConnected(%2))
+						#define __SSCANF_FOREACH__
+					#endif
+					string[end] = '\0';
+					num = false;
+					new
+						name[MAX_PLAYER_NAME];
+					id = end - stringPos;
+					foreach (Player, playerid)
+					{
+						GetPlayerName(playerid, name, sizeof (name));
+						if (!strcmp(name, string[stringPos], true, id))
+						{
+							setarg(paramPos, 0, playerid);
+							num = true;
+							break;
+						}
+					}
+					if (!num)
+					{
+						setarg(paramPos, 0, INVALID_PLAYER_ID);
+					}
+					string[end] = ch;
+					#if defined __SSCANF_FOREACH__
+						#undef foreach
+						#undef __SSCANF_FOREACH__
+					#endif
+				}
+				stringPos = end;
 			}
 			case 's', 'z':
 			{
@@ -1182,8 +1274,21 @@ stock sscanf(string[], format[], {Float,_}:...)
 		}
 		paramPos++;
 	}
-	while (format[formatPos] == 'z') formatPos++;
-	if (format[formatPos] > ' ') return format[formatPos];
+	do
+	{
+		if ((delim = format[formatPos++]) > ' ')
+		{
+			if (delim == '\'')
+			{
+				while ((delim = format[formatPos++]) && delim != '\'') {}
+			}
+			else if (delim != 'z')
+			{
+				return delim;
+			}
+		}
+	}
+	while (delim > ' ');
 	return 0;
 }
 
