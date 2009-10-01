@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"67"
+#define SCRIPT_REVISION 	"68"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -80,9 +80,12 @@
 #define COLOR_CHAT_OOC_LOCAL 0xf2ffacAA
 #define COLOR_CHAT_ME 0xda92e5AA
 #define COLOR_CHAT_SHOUT 0xd7ff00AA
+#define COLOR_CHAT_ES 0xfffc00AA
 
 /* DialogIDs */
 #define DIALOG_LOGIN 2009
+#define DIALOG_PLAYER 2010
+#define DIALOG_SENDES 2011
 
 /*
 *    GLOBAL VARIABLES
@@ -118,7 +121,9 @@ enum pInf
 	Float:pAngle,
 	Float:pHealth,
 	pVW,
-	pInterior
+	pInterior,
+	
+	SelectedPlayer
 };
 new pInfo[MAX_PLAYERS][pInf];
 
@@ -158,6 +163,8 @@ new Vehicles[700][vInf];
 /*
 *    FORWARDS
 */
+forward SendEs(playerid);
+forward ForwardEs(playerid, message[]);
 forward SendEmote(playerid, emote[]);
 forward SCMTAInPlayerRadius(playerid, radius, color, message[]);
 forward LoadAllVehiclesStart();
@@ -253,6 +260,7 @@ PasswordHash(password[], salt[])
 /*
 *    NATIVES
 */
+
 
 public OnGameModeInit()
 {
@@ -396,6 +404,34 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			return 1;
 		}
 	}
+	else if( dialogid == DIALOG_PLAYER )
+	{
+	    if( response == 0 )
+	    {
+	        return 1;
+	    }
+	    else if( listitem == 0 )
+	    {
+			SendEs(playerid);
+	    }
+	}
+	else if( dialogid == DIALOG_SENDES )
+	{
+	    if( strlen(inputtext) == 0 )
+		{
+		    SendClientMessage(playerid, COLOR_RED, "Tühja erasõnumit ei saa saata!");
+		    SendEs(playerid);
+		}
+		else
+		{
+		    if( IsPlayerConnected(pInfo[playerid][SelectedPlayer]) && pInfo[pInfo[playerid][SelectedPlayer]][pLoggedIn] )
+		    {
+				ForwardEs(playerid, inputtext);
+		    }
+			else
+			SendClientMessage(playerid, COLOR_RED, "Mängijat ei ole (enam) online!");
+		}
+	}
 	return 1;
 }
 public OnPlayerRequestSpawn(playerid)
@@ -446,7 +482,12 @@ public OnPlayerText(playerid, text[])
 	SCMTAInPlayerRadius(playerid,CHAT_RADIUS, COLOR_CHAT_IC, str);
 	return 0;
 }
-
+public OnPlayerClickPlayer(playerid, clickedplayerid, source)
+{
+    pInfo[playerid][SelectedPlayer] = clickedplayerid;
+	ShowPlayerDialog( playerid, DIALOG_PLAYER, DIALOG_STYLE_LIST, "Mängija Valikud", "Erasõnum", "Ok", "Välju");
+	return 1;
+}
 /*
 *    COMMANDS
 */
@@ -456,6 +497,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(b, 1, cmdtext);
 	dcmd(me, 2, cmdtext);
 	dcmd(s, 1, cmdtext);
+	dcmd(es, 2, cmdtext);
 	return 1;
 }
 
@@ -504,10 +546,32 @@ dcmd_s(playerid, params[])
 	SCMTAInPlayerRadius(playerid,CHAT_RADIUS_SHOUT, COLOR_CHAT_SHOUT, str);
 	return 1;
 }
-
+dcmd_es(playerid, params[])
+{
+	new selplayer;
+	sscanf(params, "u", selplayer);
+	pInfo[playerid][SelectedPlayer] = selplayer;
+	SendEs(playerid);
+}
 /*
 *    PUBLICS
 */
+
+public SendEs(playerid)
+{
+	new str[STRING_LENGHT];
+	format(str, sizeof(str),"Saada erasõnum mängijale: %s", pInfo[pInfo[playerid][SelectedPlayer]][pCharName]);
+	ShowPlayerDialog(playerid, DIALOG_SENDES, DIALOG_STYLE_INPUT,"Erasõnum", str, "Saada", "Välju");
+}
+public ForwardEs(playerid, message[])
+{
+	new str[STRING_LENGHT];
+	
+	format(str, sizeof(str),"-> %s: %s", pInfo[pInfo[playerid][SelectedPlayer]][pCharName], message);
+	SendClientMessage(playerid, COLOR_CHAT_ES, str);
+	format(str, sizeof(str),"<- %s: %s", pInfo[playerid][pCharName], message);
+	SendClientMessage(pInfo[playerid][SelectedPlayer], COLOR_CHAT_ES, str);
+}
 
 public SendEmote(playerid, emote[])
 {
