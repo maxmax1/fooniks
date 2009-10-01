@@ -95,7 +95,7 @@ new WelcomeStr[64];
          */
 	new Fetch_UInfo_Thread = -1;
 
-new ChainsawPickup,	EaglePickup, SawnoffPickup, MP5Pickup, AKPickup, FlamePickup;
+new EaglePickup, SawnoffPickup, MP5Pickup, AKPickup;
 
 enum pInf
 {
@@ -295,12 +295,10 @@ public OnGameModeInit()
 	
 	SetTimer("UpdateAllPlayers", 1000*60*15, true);
 	
-	ChainsawPickup = CreatePickup(341 , 2, 1494.3976,1013,10.8203, 0); // chainsaw
-	EaglePickup = CreatePickup(348 , 2, 1494.3976,1015,10.8203, 0); // eagle
-	SawnoffPickup = CreatePickup(350 , 2, 1494.3976,1017,10.8203, 0); // sawnoff
-	MP5Pickup = CreatePickup(353 , 2, 1494.3976,1019,10.8203, 0); // mp5
-	AKPickup = CreatePickup(355 , 2, 1494.3976,1021,10.8203, 0); // AK
-	FlamePickup = CreatePickup(361 , 2, 1494.3976,1023,10.8203, 0); // flamethrower
+	EaglePickup = CreatePickup(348 , 2, 2394.2112,-1206.5466,27.8595, 0); // eagle
+	SawnoffPickup = CreatePickup(350 , 2, 2505.4795,-1117.3652,56.2031, 0); // sawnoff
+	MP5Pickup = CreatePickup(353 , 2, 2526.4465,-1237.0942,43.6563, 0); // mp5
+	AKPickup = CreatePickup(355 , 2, 2345.6289,-1364.8751,28.0859, 0); // AK
 	
 	return 1;
 }
@@ -413,8 +411,6 @@ public OnPlayerRequestSpawn(playerid)
 
 public OnPlayerPickUpPickup(playerid, pickupid)
 {
-	if( pickupid == ChainsawPickup )
-		GivePlayerWeapon(playerid, 9, 100);
 	if( pickupid == EaglePickup )
 		GivePlayerWeapon(playerid, 24, 100);
 	if( pickupid == SawnoffPickup )
@@ -423,19 +419,18 @@ public OnPlayerPickUpPickup(playerid, pickupid)
 		GivePlayerWeapon(playerid, 29, 100);
 	if( pickupid == AKPickup )
 		GivePlayerWeapon(playerid, 30, 100);
-	if( pickupid == FlamePickup )
-		GivePlayerWeapon(playerid, 37, 100);
 
 	return 1;
 }
 
 public OnPlayerDeath(playerid, killerid, reason)
 {
-	pInfo[playerid][pPosX] = 1464.7747;
-	pInfo[playerid][pPosY] = 1034.7531;
-	pInfo[playerid][pPosZ] = 10.8203;
-	pInfo[playerid][pAngle] = 268.2924;
+	pInfo[playerid][pPosX] = 2420.3459;
+	pInfo[playerid][pPosY] = -1229.8799;
+	pInfo[playerid][pPosZ] = 24.7299;
+	pInfo[playerid][pAngle] = 180;
 	pInfo[playerid][pHealth] = 100;
+	SpawnPlayer(playerid);
 }
 
 public OnPlayerText(playerid, text[])
