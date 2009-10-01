@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"66"
+#define SCRIPT_REVISION 	"67"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -370,6 +370,7 @@ public OnVehicleDeath(vehicleid)
 		VehPosd(vSqlId);
 		SetTimerEx("SetVehicleSpawn", 500, 0, "d", vSqlId);
 	}
+	return 1;
 }
 
 public OnRconCommand(cmd[])
@@ -901,6 +902,8 @@ public FetchCharacterInformationFinish(playerid)
 			
 			mysql_fetch_field_row(Field, "model");
 			pInfo[playerid][pModel] = strval(Field);
+			mysql_fetch_field_row(Field, "money");
+			GivePlayerMoney(playerid, strval(Field));
 			mysql_fetch_field_row(Field, "posX");
 			pInfo[playerid][pPosX] = floatstr(Field);
 			mysql_fetch_field_row(Field, "posY");
