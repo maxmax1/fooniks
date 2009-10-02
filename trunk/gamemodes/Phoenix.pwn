@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"68"
+#define SCRIPT_REVISION 	"70"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -498,6 +498,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(me, 2, cmdtext);
 	dcmd(s, 1, cmdtext);
 	dcmd(es, 2, cmdtext);
+	dcmd(mj, 2, cmdtext);
 	return 1;
 }
 
@@ -552,6 +553,17 @@ dcmd_es(playerid, params[])
 	sscanf(params, "u", selplayer);
 	pInfo[playerid][SelectedPlayer] = selplayer;
 	SendEs(playerid);
+}
+
+dcmd_mj(playerid, params[])
+{
+	#pragma unused params
+	new Float: vx, Float: vy, Float: vz;
+	GetPlayerVelocity(playerid, vx, vy, vz);
+	vz += 10.0;
+	GetPlayerVelocity(playerid, vx, vy, vz);
+	SendEmote(playerid, "hüppab jube kõrgele.");
+	return 1;
 }
 /*
 *    PUBLICS
