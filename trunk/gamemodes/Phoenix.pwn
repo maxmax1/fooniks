@@ -1058,7 +1058,7 @@ public FetchCharacterInformation(playerid)
 {
 	if(Fetch_UInfo_Thread != -1) // thread is busy, lets attemp again in 1 second.
 	{
-		SetTimerEx("FetchUserInformation", 1000, 0, "i", playerid);
+		SetTimerEx("FetchCharacterInformation", 1000, 0, "i", playerid);
 		return 1;
 	}
 	Fetch_UInfo_Thread = playerid;
@@ -1084,7 +1084,7 @@ public FetchCharacterInformationFinish(playerid)
 		}
 		else
 		{
-			new Field[64], Data[128];
+			new Field[64], Data[1024];
 			mysql_fetch_row(Data);
 			
 			mysql_fetch_field_row(Field, "model");
