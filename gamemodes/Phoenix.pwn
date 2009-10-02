@@ -82,6 +82,7 @@
 #define COLOR_CHAT_SHOUT 0xd7ff00AA
 #define COLOR_CHAT_ES 0xfffc00AA
 #define COLOR_ADMINMSG 0xff3c00AA
+#define COLOR_ADMINCHAT 0xffa800AA
 
 /* DialogIDs */
 #define DIALOG_LOGIN 2009
@@ -167,6 +168,7 @@ new Vehicles[700][vInf];
 /*
 *    FORWARDS
 */
+forward SendAdminChat(playerid, text[]);
 forward ShowBanDialog(playerid);
 forward ShowKickDialog(playerid);
 forward WarpPlayerToPlayer(WarpWho, WarpTo);
@@ -556,6 +558,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(msiia, 5, cmdtext);
 	dcmd(kick, 4, cmdtext);
 	dcmd(ban, 3, cmdtext);
+	dcmd(a, 1, cmdtext);
 	return 1;
 }
 
@@ -656,6 +659,14 @@ dcmd_ban(playerid, params[])
 	if( strlen(reason) == 0 ){ pInfo[playerid][SelectedPlayer] = selectedplayer; ShowBanDialog(playerid); return 1;}
     else BanPlayer(selectedplayer, playerid, reason);
     return 1;
+}
+dcmd_a(playerid, params[])
+{
+	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, "Sa pole admin!");
+	new str[STRING_LENGHT];
+	if( sscanf(params,"s",str) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /a [SÕNUM]");
+	SendAdminChat(playerid, str);
+	return 1;
 }
 /*
 *    PUBLICS
@@ -1181,6 +1192,16 @@ public ShowKickDialog(playerid)
 	new str[STRING_LENGHT];
 	format( str, sizeof(str), "Kicki %s", pInfo[pInfo[playerid][SelectedPlayer]][pCharName]);
 	ShowPlayerDialog(playerid, DIALOG_KICKPLAYER, DIALOG_STYLE_INPUT, str, "Sisesta põhjus:", "Kicki", "Lõpeta");
+}
+public SendAdminChat(playerid, text[])
+{
+	new str[STRING_LENGHT];
+	format( str, sizeof(str), "(%i)%s: %s", pInfo[playerid][pAdminLevel], pInfo[playerid][pCharName], text);
+	for( new i = 0; i <= MAX_PLAYERS; i++ )
+	{
+	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] && pInfo[i][pAdminLevel] > 0 )
+	    	SendClientMessage(i, COLOR_ADMINCHAT, str);
+	}
 }
 
 /*
