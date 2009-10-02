@@ -81,11 +81,14 @@
 #define COLOR_CHAT_ME 0xda92e5AA
 #define COLOR_CHAT_SHOUT 0xd7ff00AA
 #define COLOR_CHAT_ES 0xfffc00AA
+#define COLOR_ADMINMSG 0xff3c00AA
 
 /* DialogIDs */
 #define DIALOG_LOGIN 2009
 #define DIALOG_PLAYER 2010
 #define DIALOG_SENDES 2011
+#define DIALOG_BANPLAYER 2012
+#define DIALOG_KICKPLAYER 2013
 
 /*
 *    GLOBAL VARIABLES
@@ -114,6 +117,7 @@ enum pInf
 	pMember,
 	pLeader,
 	pModel,
+	pAdminLevel,
 	
 	Float:pPosX,
 	Float:pPosY,
@@ -163,6 +167,11 @@ new Vehicles[700][vInf];
 /*
 *    FORWARDS
 */
+forward ShowBanDialog(playerid);
+forward ShowKickDialog(playerid);
+forward WarpPlayerToPlayer(WarpWho, WarpTo);
+forward BanPlayer(playerid, banner, reason[]);
+forward KickPlayer(playerid, kicker, reason[]);
 forward SendEs(playerid);
 forward ForwardEs(playerid, message[]);
 forward SendEmote(playerid, emote[]);
@@ -410,9 +419,25 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	    {
 	        return 1;
 	    }
-	    else if( listitem == 0 )
+	    else if( listitem == 0 ) // Erasõnum
 	    {
 			SendEs(playerid);
+	    }
+	    else if( listitem == 1 ) // Tele Siia
+	    {
+	        WarpPlayerToPlayer(pInfo[playerid][SelectedPlayer], playerid);
+	    }
+	    else if( listitem == 2 ) // Tele Sinna
+	    {
+            WarpPlayerToPlayer(playerid, pInfo[playerid][SelectedPlayer]);
+	    }
+	    else if( listitem == 3 ) // Kick
+	    {
+	        ShowKickDialog(playerid);
+	    }
+	    else if( listitem == 4 ) // Ban
+	    {
+	        ShowBanDialog(playerid);
 	    }
 	}
 	else if( dialogid == DIALOG_SENDES )
@@ -431,6 +456,28 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			else
 			SendClientMessage(playerid, COLOR_RED, "Mängijat ei ole (enam) online!");
 		}
+	}
+	else if( dialogid == DIALOG_KICKPLAYER )
+	{
+	    if( response == 0 )
+	    {
+	        return 1;
+	    }
+	    else
+	    {
+	        KickPlayer(pInfo[playerid][SelectedPlayer], playerid, inputtext);
+	    }
+	}
+	else if( dialogid == DIALOG_BANPLAYER )
+	{
+	    if( response == 0 )
+	    {
+	        return 1;
+	    }
+	    else
+	    {
+	        BanPlayer(pInfo[playerid][SelectedPlayer], playerid, inputtext);
+	    }
 	}
 	return 1;
 }
@@ -485,7 +532,13 @@ public OnPlayerText(playerid, text[])
 public OnPlayerClickPlayer(playerid, clickedplayerid, source)
 {
     pInfo[playerid][SelectedPlayer] = clickedplayerid;
-	ShowPlayerDialog( playerid, DIALOG_PLAYER, DIALOG_STYLE_LIST, "Mängija Valikud", "Erasõnum", "Ok", "Välju");
+    new str[STRING_LENGHT];
+    str = "Erasõnum";
+
+	if( pInfo[playerid][pAdminLevel] > 0 )
+        format( str, sizeof(str), "%s\nTele Siia\nTele Sinna\nKicki\nBanni", str);
+
+	ShowPlayerDialog( playerid, DIALOG_PLAYER, DIALOG_STYLE_LIST, "Mängija Valikud", str, "Ok", "Välju");
 	return 1;
 }
 /*
@@ -499,6 +552,10 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(s, 1, cmdtext);
 	dcmd(es, 2, cmdtext);
 	dcmd(mj, 2, cmdtext);
+	dcmd(mjuurde, 7, cmdtext);
+	dcmd(msiia, 5, cmdtext);
+	dcmd(kick, 4, cmdtext);
+	dcmd(ban, 3, cmdtext);
 	return 1;
 }
 
@@ -549,10 +606,11 @@ dcmd_s(playerid, params[])
 }
 dcmd_es(playerid, params[])
 {
-	new selplayer;
-	sscanf(params, "u", selplayer);
+	new selplayer, text[STRING_LENGHT];
+	sscanf(params, "us", selplayer, text);
 	pInfo[playerid][SelectedPlayer] = selplayer;
-	SendEs(playerid);
+	if( strlen(text) > 0 ) ForwardEs(playerid, text);
+	else SendEs(playerid);
 }
 
 dcmd_mj(playerid, params[])
@@ -564,6 +622,40 @@ dcmd_mj(playerid, params[])
 	SetPlayerVelocity(playerid, vx, vy, vz);
 	SendEmote(playerid, "hüppab jube kõrgele.");
 	return 1;
+}
+dcmd_mjuurde(playerid, params[])
+{
+	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, "Sa pole admin!");
+	new selectedplayer;
+	if ( sscanf(params, "u", selectedplayer) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /mjuurde [ID/NIMI]");
+    WarpPlayerToPlayer(playerid, selectedplayer);
+    return 1;
+}
+dcmd_msiia(playerid, params[])
+{
+    if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, "Sa pole admin!");
+    new selectedplayer;
+    if ( sscanf(params, "u", selectedplayer) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /msiia [ID/NIMI]");
+    WarpPlayerToPlayer(selectedplayer, playerid);
+    return 1;
+}
+dcmd_kick(playerid, params[])
+{
+    if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, "Sa pole admin!");
+	new selectedplayer, reason[STRING_LENGHT];
+    sscanf(params, "us", selectedplayer, reason);
+    if( strlen(reason) == 0 ){ pInfo[playerid][SelectedPlayer] = selectedplayer; ShowKickDialog(playerid); return 1;}
+    else KickPlayer(selectedplayer, playerid, reason);
+    return 1;
+}
+dcmd_ban(playerid, params[])
+{
+    if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, "Sa pole admin!");
+    new selectedplayer, reason[STRING_LENGHT];
+    sscanf(params, "us", selectedplayer, reason);
+	if( strlen(reason) == 0 ){ pInfo[playerid][SelectedPlayer] = selectedplayer; ShowBanDialog(playerid); return 1;}
+    else BanPlayer(selectedplayer, playerid, reason);
+    return 1;
 }
 /*
 *    PUBLICS
@@ -994,6 +1086,8 @@ public FetchCharacterInformationFinish(playerid)
 			pInfo[playerid][pInterior] = strval(Field);
 			mysql_fetch_field_row(Field, "health");
 			pInfo[playerid][pHealth] = floatstr(Field);
+			mysql_fetch_field_row(Field, "adminLevel");
+			pInfo[playerid][pHealth] = strval(Field);
 			
 			mysql_free_result();
 			SendClientMessage(playerid, COLOR_GREEN, LANG_LOGGED_IN);
@@ -1024,6 +1118,7 @@ public UpdatePlayer(playerid)
 	UpdatePlayerInt(sqlid, "VirtualWorld", pInfo[playerid][pVW]);
 	UpdatePlayerInt(sqlid, "interior", pInfo[playerid][pInterior]);
 	UpdatePlayerFlo(sqlid, "health", pInfo[playerid][pHealth]);
+	UpdatePlayerInt(sqlid, "adminLevel", pInfo[playerid][pAdminLevel]);
 
 	return 1;
 }
@@ -1054,6 +1149,38 @@ public UpdatePlayerStr(sqlid, data[], value[])
     new query[128];
     format(query, 128, "UPDATE %scharacters SET %s = '%s' WHERE id = '%d'", MYSQL_PREFIX, data, value, sqlid);
     mysql_query(query);
+}
+public WarpPlayerToPlayer(WarpWho, WarpTo)
+{
+	new Float:WarpToX, Float:WarpToY, Float:WarpToZ;
+	GetPlayerPos(WarpTo, WarpToX, WarpToY, WarpToZ);
+	SetPlayerPos(WarpWho, WarpToX, WarpToY, WarpToZ);
+}
+public BanPlayer(playerid, banner, reason[])
+{
+	new str[STRING_LENGHT];
+	format(str, sizeof(str), "Administraator %s bannis kasutaja %s. Põhjus: %s", pInfo[banner][pCharName], pInfo[playerid][pCharName], reason);
+    SendClientMessageToAll(COLOR_ADMINMSG, str);
+	// Siia võiks mingi hea ban süsteemi teha :D
+}
+public KickPlayer(playerid, kicker, reason[])
+{
+	new str[STRING_LENGHT];
+	format(str, sizeof(str), "Administraator %s kickis kasutaja %s. Põhjus: %s", pInfo[kicker][pCharName], pInfo[playerid][pCharName], reason);
+	SendClientMessageToAll(COLOR_ADMINMSG, str);
+	Kick(playerid);
+}
+public ShowBanDialog(playerid)
+{
+	new str[STRING_LENGHT];
+	format( str, sizeof(str), "Banni %s", pInfo[pInfo[playerid][SelectedPlayer]][pCharName]);
+	ShowPlayerDialog(playerid, DIALOG_BANPLAYER, DIALOG_STYLE_INPUT, str, "Sisesta põhjus:", "Banni", "Lõpeta");
+}
+public ShowKickDialog(playerid)
+{
+	new str[STRING_LENGHT];
+	format( str, sizeof(str), "Kicki %s", pInfo[pInfo[playerid][SelectedPlayer]][pCharName]);
+	ShowPlayerDialog(playerid, DIALOG_KICKPLAYER, DIALOG_STYLE_INPUT, str, "Sisesta põhjus:", "Kicki", "Lõpeta");
 }
 
 /*
