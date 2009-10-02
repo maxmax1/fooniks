@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"73"
+#define SCRIPT_REVISION 	"74"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -62,6 +62,7 @@
 #define CHAT_RADIUS_SHOUT 40
 
 #define STRING_LENGHT 256
+#define MAX_QUERY 255
 
 #define VEHICLE_GROUP			0	// Gängid, Grupeeringud
 #define VEHICLE_JOB				1	// Tööd
@@ -199,6 +200,13 @@ forward UpdateAllPlayers();
 forward UpdatePlayerInt(sqlid, data[], value);
 forward UpdatePlayerFlo(sqlid, data[], Float:value);
 forward UpdatePlayerStr(sqlid, data[], value[]);
+
+forward MysqlUpdateBuild(query[], table[]);
+forward MysqlUpdateInt(query[], field[], value);
+forward MysqlUpdateFlo(query[], field[], Float: value);
+forward MysqlUpdateStr(query[], field[], value[]);
+forward MysqlUpdateFinish(query[], field[], value);
+
 /*
 *    MAIN()
 */
@@ -1120,16 +1128,24 @@ public UpdatePlayer(playerid)
 	
 	new sqlid = pInfo[playerid][pSqlId];
 	
-	UpdatePlayerInt(sqlid, "money", GetPlayerMoney(playerid));
-	UpdatePlayerInt(sqlid, "model", pInfo[playerid][pModel]);
-	UpdatePlayerFlo(sqlid, "posX", pInfo[playerid][pPosX]);
-	UpdatePlayerFlo(sqlid, "posY", pInfo[playerid][pPosY]);
-	UpdatePlayerFlo(sqlid, "posZ", pInfo[playerid][pPosZ]);
-	UpdatePlayerFlo(sqlid, "angle", pInfo[playerid][pAngle]);
-	UpdatePlayerInt(sqlid, "VirtualWorld", pInfo[playerid][pVW]);
-	UpdatePlayerInt(sqlid, "interior", pInfo[playerid][pInterior]);
-	UpdatePlayerFlo(sqlid, "health", pInfo[playerid][pHealth]);
-	UpdatePlayerInt(sqlid, "adminLevel", pInfo[playerid][pAdminLevel]);
+	new query[MAX_QUERY], table[32];
+	format(table, 32, "%scharacters", MYSQL_PREFIX);
+	
+	MysqlUpdateBuild(query, table);
+	
+	MysqlUpdateInt(query, "money", GetPlayerMoney(playerid));
+	MysqlUpdateInt(query, "model", pInfo[playerid][pModel]);
+	MysqlUpdateFlo(query, "posX", pInfo[playerid][pPosX]);
+	MysqlUpdateFlo(query, "posY", pInfo[playerid][pPosY]);
+	MysqlUpdateFlo(query, "posZ", pInfo[playerid][pPosZ]);
+	MysqlUpdateFlo(query, "angle", pInfo[playerid][pAngle]);
+
+	MysqlUpdateInt(query, "VirtualWorld", pInfo[playerid][pVW]);
+	MysqlUpdateInt(query, "interior", pInfo[playerid][pInterior]);
+	MysqlUpdateFlo(query, "health", pInfo[playerid][pHealth]);
+	MysqlUpdateInt(query, "adminLevel", pInfo[playerid][pAdminLevel]);
+	
+	MysqlUpdateFinish(query, "id", sqlid);
 
 	return 1;
 }
@@ -1143,30 +1159,59 @@ public UpdateAllPlayers()
 	}
 }
 
-public UpdatePlayerInt(sqlid, data[], value)
+public MysqlUpdateBuild(query[], table[])
 {
-    new query[128];
-    format(query, 128, "UPDATE %scharacters SET %s = '%i' WHERE id = '%d'", MYSQL_PREFIX, data, value, sqlid);
-    mysql_query(query);
+	format(query, MAX_QUERY, "UPDATE %s SET ", table);
+	return 1;
 }
-public UpdatePlayerFlo(sqlid, data[], Float:value)
+
+public MysqlUpdateInt(query[], field[], value)
 {
-    new query[128];
-    format(query, 128, "UPDATE %scharacters SET %s = '%f' WHERE id = '%d'", MYSQL_PREFIX, data, value, sqlid);
-    mysql_query(query);
+	new qLen = strlen(query);
+	if(qLen+50 < MAX_QUERY) // It 's safe to add.
+	{
+		format(query, MAX_QUERY, "%s %s = '%d', ", query, field, value);
+	}
+	return 1;
 }
-public UpdatePlayerStr(sqlid, data[], value[])
+
+public MysqlUpdateFlo(query[], field[], Float: value)
 {
-    new query[128];
-    format(query, 128, "UPDATE %scharacters SET %s = '%s' WHERE id = '%d'", MYSQL_PREFIX, data, value, sqlid);
-    mysql_query(query);
+	new qLen = strlen(query);
+	if(qLen+50 < MAX_QUERY) // It 's safe to add.
+	{
+		format(query, MAX_QUERY, "%s %s = '%f', ", query, field, value);
+	}
+	return 1;
 }
+
+public MysqlUpdateStr(query[], field[], value[])
+{
+	new qLen = strlen(query);
+	if(qLen+50 < MAX_QUERY) // It 's safe to add.
+	{
+		format(query, MAX_QUERY, "%s %s = '%s', ", query, field, value);
+	}
+	return 1;
+}
+
+public MysqlUpdateFinish(query[], field[], value)
+{
+	new qLen = strlen(query);
+	strdel(query, qLen-2, qLen); // remove the extra comma 
+	
+	format(query, MAX_QUERY, "%s WHERE %s = '%d'", query, field, value);
+	print(query);
+	mysql_query(query);
+}
+
 public WarpPlayerToPlayer(WarpWho, WarpTo)
 {
 	new Float:WarpToX, Float:WarpToY, Float:WarpToZ;
 	GetPlayerPos(WarpTo, WarpToX, WarpToY, WarpToZ);
 	SetPlayerPos(WarpWho, WarpToX, WarpToY, WarpToZ);
 }
+
 public BanPlayer(playerid, banner, reason[])
 {
 	new str[STRING_LENGHT];
@@ -1174,6 +1219,7 @@ public BanPlayer(playerid, banner, reason[])
     SendClientMessageToAll(COLOR_ADMINMSG, str);
 	// Siia võiks mingi hea ban süsteemi teha :D
 }
+
 public KickPlayer(playerid, kicker, reason[])
 {
 	new str[STRING_LENGHT];
@@ -1181,18 +1227,21 @@ public KickPlayer(playerid, kicker, reason[])
 	SendClientMessageToAll(COLOR_ADMINMSG, str);
 	Kick(playerid);
 }
+
 public ShowBanDialog(playerid)
 {
 	new str[STRING_LENGHT];
 	format( str, sizeof(str), "Banni %s", pInfo[pInfo[playerid][SelectedPlayer]][pCharName]);
 	ShowPlayerDialog(playerid, DIALOG_BANPLAYER, DIALOG_STYLE_INPUT, str, "Sisesta põhjus:", "Banni", "Lõpeta");
 }
+
 public ShowKickDialog(playerid)
 {
 	new str[STRING_LENGHT];
 	format( str, sizeof(str), "Kicki %s", pInfo[pInfo[playerid][SelectedPlayer]][pCharName]);
 	ShowPlayerDialog(playerid, DIALOG_KICKPLAYER, DIALOG_STYLE_INPUT, str, "Sisesta põhjus:", "Kicki", "Lõpeta");
 }
+
 public SendAdminChat(playerid, text[])
 {
 	new str[STRING_LENGHT];
