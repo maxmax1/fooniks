@@ -561,7 +561,7 @@ dcmd_mj(playerid, params[])
 	new Float: vx, Float: vy, Float: vz;
 	GetPlayerVelocity(playerid, vx, vy, vz);
 	vz += 10.0;
-	GetPlayerVelocity(playerid, vx, vy, vz);
+	SetPlayerVelocity(playerid, vx, vy, vz);
 	SendEmote(playerid, "hüppab jube kõrgele.");
 	return 1;
 }
