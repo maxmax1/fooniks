@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"75"
+#define SCRIPT_REVISION 	"76"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -964,6 +964,7 @@ public OnSpeedoUpdate(playerid)
 		{
 			vId = 200+playerid;
 			Vehicles[vId][vSampId] = GetPlayerVehicleID(playerid);
+			VehPos(vId);
 		}
 
 		new oSpeed = Vehicles[vId][vSpeed], Float: oHealth = Vehicles[vId][vHealth];
@@ -983,8 +984,10 @@ public OnSpeedoUpdate(playerid)
 		{
 			SendEmote(playerid, "lendab masina esiaknast välja");
 			
-			RemovePlayerFromVehicle(playerid);
+			SetPlayerPos(playerid, Vehicles[vId][vPosX], Vehicles[vId][vPosX], Vehicles[vId][vPosX]);
 			SetPlayerVelocity(playerid, oX, oY, oZ);
+			
+			Vehicles[vId][vSpeed] = 0;
 		}
 	}
 	else
