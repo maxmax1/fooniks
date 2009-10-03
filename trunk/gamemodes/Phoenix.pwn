@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"79"
+#define SCRIPT_REVISION 	"80"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -210,6 +210,7 @@ forward MysqlUpdateInt(query[], field[], value);
 forward MysqlUpdateFlo(query[], field[], Float: value);
 forward MysqlUpdateStr(query[], field[], value[]);
 forward MysqlUpdateFinish(query[], field[], value);
+forward Velocity(playerid, Float: X, Float: Y, Float: Z);
 
 /*
 *    MAIN()
@@ -987,9 +988,9 @@ public OnSpeedoUpdate(playerid)
 		if((oSpeed - Vehicles[vId][vSpeed]) > 50 && (oHealth - Vehicles[vId][vHealth]) > 50)
 		{
 			SendEmote(playerid, "lendab masina esiaknast välja");
-			
 			SetPlayerPos(playerid, Vehicles[vId][vPosX], Vehicles[vId][vPosY], Vehicles[vId][vPosZ]);
-			SetPlayerVelocity(playerid, oX, oY, oZ);
+			SetTimerEx("Velocity", 200, 0, "ifff", playerid, (oX>oY?oX+6:oY+2), (oY>oX?oY+6:oY+2), (oZ+5));			
+			ApplyAnimation(playerid, "CRACK", "crckdeth2", 4.0, 1, 1, 1, 1, 1);
 			Vehicles[vId][vSpeed] = 0;
 		}
 	}
@@ -1279,6 +1280,13 @@ public SendAdminChat(playerid, text[])
 	    	SendClientMessage(i, COLOR_ADMINCHAT, str);
 	}
 }
+
+public Velocity(playerid, Float: X, Float: Y, Float: Z)
+{
+	SetPlayerVelocity(playerid, X, Y, Z);
+	ApplyAnimation(playerid, "CRACK", "crckdeth2", 4.0, 1, 1, 1, 1, 1);
+}
+
 
 /*
 *    EOF
