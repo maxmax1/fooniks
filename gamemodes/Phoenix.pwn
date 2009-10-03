@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"74"
+#define SCRIPT_REVISION 	"75"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -153,6 +153,10 @@ enum vInf
 	Float: vPosX,
 	Float: vPosY,
 	Float: vPosZ,
+	vSpeed,
+	Float: vSpeedX,
+	Float: vSpeedY,
+	Float: vSpeedZ,
 	Float: vAngZ,
 	
 	vColor1,
@@ -884,7 +888,7 @@ public OnDriverEnterVehicle(playerid)
 	new Remove = false, Freeze = false;
 	new string[128];
 	
-	if(vId == -1) return 1;
+	if(vId == -1) Remove = false;
 	else
 	{
 		if		(Vehicles[vId][vType] == VEHICLE_GROUP)
@@ -956,15 +960,32 @@ public OnSpeedoUpdate(playerid)
 	if(IsPlayerConnected(playerid) && IsPlayerInAnyVehicle(playerid))
 	{
 		new vId = GetVehicleSqlId(GetPlayerVehicleID(playerid));
+		if(vId == -1)
+		{
+			vId = 200+playerid;
+			Vehicles[vId][vSampId] = GetPlayerVehicleID(playerid);
+		}
+
+		new oSpeed = Vehicles[vId][vSpeed], Float: oHealth = Vehicles[vId][vHealth];
+		new Float: oX = Vehicles[vId][vSpeedX], Float: oY = Vehicles[vId][vSpeedY], Float: oZ = Vehicles[vId][vSpeedZ];
+	
 		GetVehicleHealth(Vehicles[vId][vSampId], Vehicles[vId][vHealth]);
 		new hProtsenti = floatround((Vehicles[vId][vHealth] - 300) / 10);
 		new string[128], fuel[3] = "-";
 		
-		GetVehicleVelocity(Vehicles[vId][vSampId], Vehicles[vId][vPosX], Vehicles[vId][vPosY], Vehicles[vId][vPosZ]);
-		new Float: distance = floatabs(Vehicles[vId][vPosX]) + floatabs(Vehicles[vId][vPosY]) + floatabs(Vehicles[vId][vPosZ]);
-		new speed = floatround(distance * 175);
-		format(string,sizeof(string),"~y~~h~Bensiin: %s  ~y~~h~Kiirus: ~w~%i km/h  ~y~~h~Korras: ~w~%d", fuel, speed, hProtsenti);
+		GetVehicleVelocity(Vehicles[vId][vSampId], Vehicles[vId][vSpeedX], Vehicles[vId][vSpeedY], Vehicles[vId][vSpeedZ]);
+		new Float: distance = floatabs(Vehicles[vId][vSpeedX]) + floatabs(Vehicles[vId][vSpeedY]) + floatabs(Vehicles[vId][vSpeedZ]);
+		Vehicles[vId][vSpeed] = floatround(distance * 175);
+		format(string,sizeof(string),"~y~~h~Bensiin: %s  ~y~~h~Kiirus: ~w~%i km/h  ~y~~h~Korras: ~w~%d", fuel, Vehicles[vId][vSpeed], hProtsenti);
 		TextDrawSetString(InfoBar[playerid], string);
+		
+		if((oSpeed - Vehicles[vId][vSpeed]) > 50 && (oHealth - Vehicles[vId][vHealth]) > 50)
+		{
+			SendEmote(playerid, "lendab masina esiaknast välja");
+			
+			RemovePlayerFromVehicle(playerid);
+			SetPlayerVelocity(playerid, oX, oY, oZ);
+		}
 	}
 	else
 	{
