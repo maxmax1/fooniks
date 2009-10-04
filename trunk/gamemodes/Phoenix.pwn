@@ -1357,7 +1357,7 @@ public NPCHandle(playerid)
 		strmid(pInfo[playerid][pCharName], "Igor_Yakov", 0, 30);
 		return 1;
 	}
-	Kick(playerid);
+	//Kick(playerid);
 	return 0;
 }
 
