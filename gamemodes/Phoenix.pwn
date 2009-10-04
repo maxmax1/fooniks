@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"82"
+#define SCRIPT_REVISION 	"83"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -399,7 +399,8 @@ public OnPlayerSpawn(playerid)
 			new npcVeh = findBotAVehicle(NPC_IGOR);
 			if(npcVeh != -1)
 			{
-				PutPlayerInVehicle(playerid, npcVeh, 0);
+				SetPlayerSkin(playerid, 255);
+				PutPlayerInVehicle(playerid, Vehicles[npcVeh][vSampId], 0);
 				return 1;
 			}
 			Kick(playerid);
@@ -575,7 +576,7 @@ public OnPlayerText(playerid, text[])
 	new str[STRING_LENGHT];
 	format(str, sizeof(str),"%s:  %s", pInfo[playerid][pCharName], text);
 	SetPlayerChatBubble(playerid, str, COLOR_CHAT_IC, CHAT_RADIUS, delay);
-	SCMTAInPlayerRadius(playerid,CHAT_RADIUS, COLOR_CHAT_IC, str);
+	SCMTAInPlayerRadius(playerid, CHAT_RADIUS, COLOR_CHAT_IC, str);
 	return 0;
 }
 public OnPlayerClickPlayer(playerid, clickedplayerid, source)
@@ -615,9 +616,16 @@ dcmd_o(playerid, params[])
 	sscanf(params, "s", text);
 	
 	if(strlen(text) == 0) return SendClientMessage(playerid, COLOR_RED, "KASUTUS: /o tekst");
-
 	format(str, sizeof(str), "(( %s: %s ))", pInfo[playerid][pCharName], text);
-	SendClientMessageToAll(COLOR_CHAT_OOC_GLOBAL, str);
+	
+	for( new i = 0; i <= MAX_PLAYERS; i++ )
+	{
+	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] && !IsPlayerNPC(i) )
+	    {
+				SendClientMessage(i, COLOR_CHAT_OOC_GLOBAL, str);
+	    }
+	}
+	
 	return 1;
 }
 dcmd_b(playerid, params[])
@@ -651,7 +659,7 @@ dcmd_s(playerid, params[])
 	new delay = ( strlen(text) * 150 ) + 2000;
 	format(str, sizeof(str), "%s karjub: %s", pInfo[playerid][pCharName], text);
 	SetPlayerChatBubble(playerid, str, COLOR_CHAT_SHOUT, CHAT_RADIUS_SHOUT, delay);
-	SCMTAInPlayerRadius(playerid,CHAT_RADIUS_SHOUT, COLOR_CHAT_SHOUT, str);
+	SCMTAInPlayerRadius(playerid, CHAT_RADIUS_SHOUT, COLOR_CHAT_SHOUT, str);
 	return 1;
 }
 dcmd_es(playerid, params[])
@@ -757,13 +765,26 @@ public SCMTAInPlayerRadius(playerid, radius, color, message[])
 	GetPlayerPos(playerid, PlayerLocX, PlayerLocY, PlayerLocZ);
 	for( new i = 0; i <= MAX_PLAYERS; i++ )
 	{
-	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] || IsPlayerNPC(i) )
+	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] )
 	    {
 	        if( IsPlayerInRangeOfPoint(i, radius, PlayerLocX, PlayerLocY, PlayerLocZ) )
 	        {
 				SendClientMessage(i, color, message);
 	        }
 	    }
+		else if(IsPlayerNPC(i))
+		{
+			if(pInfo[i][npcId] == NPC_IGOR)
+			{
+				if(color == COLOR_CHAT_IC)
+				{
+					if(IsPlayerInVehicle(playerid, GetPlayerVehicleID(i)))
+					{
+						SendClientMessage(i, color, message);
+					}
+				}
+			}
+		}
 	}
 }
 
