@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"80"
+#define SCRIPT_REVISION 	"81"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -321,9 +321,9 @@ public OnGameModeInit()
 		TextDrawSetOutline(InfoBar[td],0);
 	}
 	
-	ShowNameTags(0);
+	ShowNameTags( 1 );
+	SetNameTagDrawDistance(7.5);
 	LimitGlobalChatRadius(CHAT_RADIUS);
-	SetNameTagDrawDistance(40.0);	
 	
 	SetTimer("UpdateAllPlayers", 1000*60*15, true);
 	
@@ -955,7 +955,7 @@ public ShowSpeedo(playerid)
 {
 	if(InfoBarTimer[playerid] != -1) return 0;
 	
-	InfoBarTimer[playerid] = SetTimerEx("OnSpeedoUpdate", 500, 1, "i", playerid);
+	InfoBarTimer[playerid] = SetTimerEx("OnSpeedoUpdate", 200, 1, "i", playerid);
 	TextDrawShowForPlayer(playerid, InfoBar[playerid]);	
 	return 1;
 }
@@ -987,9 +987,9 @@ public OnSpeedoUpdate(playerid)
 		
 		if((oSpeed - Vehicles[vId][vSpeed]) > 50 && (oHealth - Vehicles[vId][vHealth]) > 50)
 		{
-			SendEmote(playerid, "lendab masina esiaknast välja");
-			SetPlayerPos(playerid, Vehicles[vId][vPosX], Vehicles[vId][vPosY], Vehicles[vId][vPosZ]);
-			SetTimerEx("Velocity", 200, 0, "ifff", playerid, (oX>oY?oX+6:oY+2), (oY>oX?oY+6:oY+2), (oZ+5));			
+			SendEmote(playerid, "lendab masinast välja");
+			SetPlayerPos(playerid, Vehicles[vId][vPosX], Vehicles[vId][vPosY], Vehicles[vId][vPosZ]+2);
+			SetTimerEx("Velocity", 75, 0, "ifff", playerid, oX, oY, oZ);
 			ApplyAnimation(playerid, "CRACK", "crckdeth2", 4.0, 1, 1, 1, 1, 1);
 			Vehicles[vId][vSpeed] = 0;
 		}
