@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"81"
+#define SCRIPT_REVISION 	"82"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -92,6 +92,8 @@
 #define DIALOG_BANPLAYER 2012
 #define DIALOG_KICKPLAYER 2013
 
+#define NPC_IGOR 1
+
 /*
 *    GLOBAL VARIABLES
 */
@@ -129,7 +131,9 @@ enum pInf
 	pVW,
 	pInterior,
 	
-	SelectedPlayer
+	SelectedPlayer,
+	
+	npcId
 };
 new pInfo[MAX_PLAYERS][pInf];
 
@@ -211,6 +215,7 @@ forward MysqlUpdateFlo(query[], field[], Float: value);
 forward MysqlUpdateStr(query[], field[], value[]);
 forward MysqlUpdateFinish(query[], field[], value);
 forward Velocity(playerid, Float: X, Float: Y, Float: Z);
+forward NPCHandle(playerid);
 
 /*
 *    MAIN()
@@ -230,6 +235,15 @@ stock GetVehicleSqlId(vehicleid)
 	for(new i; i < LOADED_VEHICLES; i++)
 	{
 		if(Vehicles[i][vSampId] == vehicleid) return i;
+	}
+	return -1;
+}
+
+stock findBotAVehicle(botType)
+{
+	for(new i; i < LOADED_VEHICLES; i++)
+	{
+		if(Vehicles[i][vType] == VEHICLE_SPECIAL && Vehicles[i][vOwner] == botType) return i;
 	}
 	return -1;
 }
@@ -332,6 +346,8 @@ public OnGameModeInit()
 	MP5Pickup = CreatePickup(353 , 2, 2526.4465,-1237.0942,43.6563, 0); // mp5
 	AKPickup = CreatePickup(355 , 2, 2345.6289,-1364.8751,28.0859, 0); // AK
 	
+	ConnectNPC("Igor", "Igor_Takso");
+	
 	return 1;
 }
 
@@ -346,6 +362,8 @@ public OnGameModeExit()
 
 public OnPlayerConnect(playerid)
 {
+	if(IsPlayerNPC(playerid)) return NPCHandle(playerid);
+	
     GetPlayerName(playerid, pInfo[playerid][pCharName], 30);
 	SendClientMessage(playerid, COLOR_YELLOW, WelcomeStr);
 	InfoBarTimer[playerid] = -1;
@@ -362,6 +380,7 @@ public OnPlayerDisconnect(playerid)
 
 public OnPlayerRequestClass(playerid)
 {
+	if(IsPlayerNPC(playerid)) return 1;
 	SetPlayerVirtualWorld(playerid, playerid);
 	SetPlayerPos(playerid, 			1668.3400, 1392.7003, 15.4365);
 	SetPlayerFacingAngle(playerid, 90);
@@ -373,6 +392,20 @@ public OnPlayerRequestClass(playerid)
 
 public OnPlayerSpawn(playerid)
 {
+	if(IsPlayerNPC(playerid))
+	{
+		if(pInfo[playerid][npcId] == NPC_IGOR)
+		{
+			new npcVeh = findBotAVehicle(NPC_IGOR);
+			if(npcVeh != -1)
+			{
+				PutPlayerInVehicle(playerid, npcVeh, 0);
+				return 1;
+			}
+			Kick(playerid);
+		}
+	}
+
     SetPlayerPos(playerid, pInfo[playerid][pPosX],pInfo[playerid][pPosY],pInfo[playerid][pPosZ]+1);
 	SetPlayerVirtualWorld(playerid, pInfo[playerid][pVW]);
 	SetPlayerInterior(playerid,pInfo[playerid][pInterior]);
@@ -498,6 +531,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 }
 public OnPlayerRequestSpawn(playerid)
 {
+	if(IsPlayerNPC(playerid)) return 1;
     if( !pInfo[playerid][pLoggedIn] )
     {
         SendClientMessage(playerid, COLOR_RED, LANG_MUST_LOGIN);
@@ -723,7 +757,7 @@ public SCMTAInPlayerRadius(playerid, radius, color, message[])
 	GetPlayerPos(playerid, PlayerLocX, PlayerLocY, PlayerLocZ);
 	for( new i = 0; i <= MAX_PLAYERS; i++ )
 	{
-	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] )
+	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] || IsPlayerNPC(i) )
 	    {
 	        if( IsPlayerInRangeOfPoint(i, radius, PlayerLocX, PlayerLocY, PlayerLocZ) )
 	        {
@@ -1134,7 +1168,7 @@ public FetchCharacterInformationFinish(playerid)
 			mysql_fetch_field_row(Field, "health");
 			pInfo[playerid][pHealth] = floatstr(Field);
 			mysql_fetch_field_row(Field, "adminLevel");
-			pInfo[playerid][pHealth] = strval(Field);
+			pInfo[playerid][pAdminLevel] = strval(Field);
 			
 			mysql_free_result();
 			SendClientMessage(playerid, COLOR_GREEN, LANG_LOGGED_IN);
@@ -1287,6 +1321,18 @@ public Velocity(playerid, Float: X, Float: Y, Float: Z)
 	ApplyAnimation(playerid, "CRACK", "crckdeth2", 4.0, 1, 1, 1, 1, 1);
 }
 
+public NPCHandle(playerid)
+{
+	new pName[MAX_PLAYER_NAME];
+	GetPlayerName(playerid, pName, MAX_PLAYER_NAME);
+	if(!strcmp(pName, "Igor", true))
+	{
+		pInfo[playerid][npcId] = NPC_IGOR;
+		return 1;
+	}
+	Kick(playerid);
+	return 0;
+}
 
 /*
 *    EOF
