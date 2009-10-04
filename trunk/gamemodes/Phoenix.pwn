@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"84"
+#define SCRIPT_REVISION 	"85"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -574,7 +574,12 @@ public OnPlayerText(playerid, text[])
 {
 	new delay = ( strlen(text) * 150 ) + 2000;
 	new str[STRING_LENGHT];
-	format(str, sizeof(str),"%s:  %s", pInfo[playerid][pCharName], text);
+	format(str, sizeof(str),"%s:  %s", pInfo[playerid][pCharName], text);	
+	if(IsPlayerNPC(playerid))
+	{
+		format(str, sizeof(str),"Igor_Yakov:  %s", text);
+	}
+
 	SetPlayerChatBubble(playerid, str, COLOR_CHAT_IC, CHAT_RADIUS, delay);
 	SCMTAInPlayerRadius(playerid, CHAT_RADIUS, COLOR_CHAT_IC, str);
 	return 0;
@@ -772,7 +777,7 @@ public SCMTAInPlayerRadius(playerid, radius, color, message[])
 				SendClientMessage(i, color, message);
 	        }
 	    }
-		else if(IsPlayerNPC(i))
+		else if(IsPlayerNPC(i) && i != playerid)
 		{
 			if(pInfo[i][npcId] == NPC_IGOR)
 			{

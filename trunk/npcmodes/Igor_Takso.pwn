@@ -67,7 +67,7 @@ public OnNPCSpawn()
 public OnClientMessage(color, text[])
 {
 	new str[128];
-	if(strfind(text, "tere", true) != -1 || strfind(text, "igor", true))
+	if(strfind(text, "tere", true) != -1 || strfind(text, "igor", true) != -1)
 	{
 		SendChat("Tere jah.");
 		
@@ -75,10 +75,10 @@ public OnClientMessage(color, text[])
 		for(new i = 0; i < WAYPOINTS; i++)
 		{
 			if(strlen(string) > 90) continue;
-			format(string, 32, "%s %s", string, waypoints[i]);
+			format(string, 128, "%s %s", string, waypoints[i]);
 		}
 		
-		format(str, 32, "Kuhu sõidame? ((%s ))", string);
+		format(str, 128, "Kuhu sõidame? ((%s ))", string);
 		SendChat(str);
 	}
 	
