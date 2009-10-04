@@ -42,7 +42,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"83"
+#define SCRIPT_REVISION 	"84"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -1349,6 +1349,7 @@ public NPCHandle(playerid)
 	if(!strcmp(pName, "Igor", true))
 	{
 		pInfo[playerid][npcId] = NPC_IGOR;
+		strmid(pInfo[playerid][pCharName], "Igor_Yakov", 0, 30);
 		return 1;
 	}
 	Kick(playerid);
