@@ -1,34 +1,61 @@
 #include <a_npc>
 
-new cAction = 0;
+#define IDLE_FORMAT 	"%s_IDLE"
+#define TRAVEL_FORMAT 	"%s_TO_%s"
 
-#define LSPD_IDLE 			0
-#define LSPD_TO_UNITY 		1
-#define UNITY_IDLE 			2
-#define UNITY_TO_LSPD 		3
+#define WAYPOINTS		3
+
+#define ACTION_IDLE		0
+#define ACTION_DRIVING	1
+
+new cWaypoint = 0;
+new cTravelTo = 0;
+new cAction = ACTION_IDLE;
+
+new waypoints[WAYPOINTS][32] =
+{
+	"LSPD",
+	"UNITY",
+	"PIGPEN"
+};
+
+stock getRecFile(str[], point, nextPoint, action)
+{
+	if(action == ACTION_IDLE) format(str, 32, IDLE_FORMAT, waypoints[point]);
+	else format(str, 32, TRAVEL_FORMAT, waypoints[point], waypoints[nextPoint]);
+}
 
 main(){}
+
 public OnRecordingPlaybackEnd()
 {
-	if	 		(cAction == LSPD_IDLE) 		StartRecordingPlayback(1, "LSPD_IDLE");
-	else if		(cAction == UNITY_IDLE) 	StartRecordingPlayback(1, "UNITY_IDLE");
-	else if		(cAction == LSPD_TO_UNITY)
+	if(cAction == ACTION_IDLE) // We are Idle.
 	{
-		cAction = UNITY_IDLE;
-		StartRecordingPlayback(1, "UNITY_IDLE");
+		new str[32];
+		getRecFile(str, cWaypoint, cTravelTo, cAction);
+		StartRecordingPlayback(1, str);
 	}
-	else if		(cAction == UNITY_TO_LSPD)
+	else // we Were driving.
 	{
-		cAction = LSPD_IDLE;
-		StartRecordingPlayback(1, "LSPD_IDLE");
+		cWaypoint = cTravelTo;
+		cAction = ACTION_IDLE;
+		
+		new str[32];
+		getRecFile(str, cWaypoint, cTravelTo, cAction);
+		StartRecordingPlayback(1, str);
 	}
 }
 
 public OnNPCEnterVehicle(vehicleid, seatid)
 {
-	cAction = LSPD_IDLE;
-	StartRecordingPlayback(1, "LSPD_IDLE");
+	cWaypoint = 0;
+	cTravelTo = 0;
+	cAction = ACTION_IDLE;
+	new str[32];
+	getRecFile(str, cWaypoint, cTravelTo, cAction);
+	StartRecordingPlayback(1, str);
 }
+
 
 
 public OnNPCSpawn()
@@ -38,14 +65,23 @@ public OnNPCSpawn()
 
 public OnClientMessage(color, text[])
 {
-	if(cAction == LSPD_IDLE && strfind(text,"Unity") != -1)
+	new cmd = -1;
+	for(new i = 0; i < WAYPOINTS; i++)
 	{
-		cAction = LSPD_TO_UNITY;
-		StartRecordingPlayback(1, "LSPD_TO_UNITY");
+		if(strfind(text, waypoints[i], true) != -1) cmd = i;
 	}
-	else if(cAction == UNITY_IDLE && strfind(text,"LSPD") != -1)
+	
+	if(cmd != -1)
 	{
-		cAction = UNITY_TO_LSPD;
-		StartRecordingPlayback(1, "UNITY_TO_LSPD");
+		if(cAction == ACTION_IDLE)
+		{
+			cTravelTo = cmd;
+			cAction = ACTION_DRIVING;
+			
+			new str[32];
+			getRecFile(str, cWaypoint, cTravelTo, cAction);
+			StartRecordingPlayback(1, str);
+		}
+		else SendChat("Igor: Ma ole hetkel hõivatud!");
 	}
 }
