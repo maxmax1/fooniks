@@ -43,6 +43,7 @@ public OnRecordingPlaybackEnd()
 		new str[32];
 		getRecFile(str, cWaypoint, cTravelTo, cAction);
 		StartRecordingPlayback(1, str);
+		SendChat("jõudsime sihtkohta!");
 	}
 }
 
@@ -65,12 +66,27 @@ public OnNPCSpawn()
 
 public OnClientMessage(color, text[])
 {
+	new str[128];
+	if(strfind(text, "tere", true) != -1 || strfind(text, "igor", true))
+	{
+		SendChat("Tere jah.");
+		
+		new string[96];
+		for(new i = 0; i < WAYPOINTS; i++)
+		{
+			if(strlen(string) > 90) continue;
+			format(string, 32, "%s %s", string, waypoints[i]);
+		}
+		
+		format(str, 32, "Kuhu sõidame? ((%s ))", string);
+		SendChat(str);
+	}
+	
 	new cmd = -1;
 	for(new i = 0; i < WAYPOINTS; i++)
 	{
 		if(strfind(text, waypoints[i], true) != -1) cmd = i;
 	}
-	
 	if(cmd != -1)
 	{
 		if(cAction == ACTION_IDLE)
@@ -78,10 +94,10 @@ public OnClientMessage(color, text[])
 			cTravelTo = cmd;
 			cAction = ACTION_DRIVING;
 			
-			new str[32];
 			getRecFile(str, cWaypoint, cTravelTo, cAction);
 			StartRecordingPlayback(1, str);
+			SendChat("sõidame...");
 		}
-		else SendChat("Igor: Ma ole hetkel hõivatud!");
+		else SendChat("Ma ole hetkel hõivatud!");
 	}
 }
