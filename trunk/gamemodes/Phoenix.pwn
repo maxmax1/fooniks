@@ -59,7 +59,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"98"
+#define SCRIPT_REVISION 	"100"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -101,7 +101,8 @@
 #define COLOR_CHAT_ES 0xfffc00AA
 #define COLOR_ADMINMSG 0xff3c00AA
 #define COLOR_ADMINCHAT 0xffa800AA
-
+#define COLOR_TEATA 0xff0000AA
+#define COLOR_ADMIN_MESSAGE 0x0082fcAA
 /* DialogIDs */
 #define DIALOG_LOGIN 2009
 #define DIALOG_PLAYER 2010
@@ -214,6 +215,9 @@ new SkillDelay[MAX_PLAYERS][MAX_SKILLS];
 /*
 *    FORWARDS
 */
+forward SendTeata(playerid, text[]);
+forward SendAdminMessage(playerid, text[]);
+forward CheckFalseDeadPlayers(playerid);
 forward AddCarToSQL(model, Float:posX, Float:posY, Float:posZ, Float:angle);
 forward SendAdminChat(playerid, text[]);
 forward ShowBanDialog(playerid);
@@ -398,6 +402,7 @@ public OnGameModeInit()
 	LimitGlobalChatRadius(CHAT_RADIUS);
 	
 	SetTimer("UpdateAllPlayers", 1000*60*15, true);
+	SetTimer("CheckFalseDeadPlayers", 3000, true);
 	
 	PistolPickup = CreatePickup(346 , 2, 2394.2112,-1206.5466,27.8595, 0); // Pistol
 	SawnoffPickup = CreatePickup(350 , 2, 2505.4795,-1117.3652,56.2031, 0); // sawnoff
@@ -488,8 +493,6 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
 
 public OnVehicleDeath(vehicleid)
 {
-	SetVehicleToRespawn(vehicleid);
-	
 	new vSqlId = GetVehicleSqlId(vehicleid);
 	if(vSqlId != -1)
 	{
@@ -694,6 +697,8 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(ban, 3, cmdtext);
 	dcmd(a, 1, cmdtext);
 	dcmd(oskus, 5, cmdtext);
+	dcmd(teata, 5, cmdtext);
+	dcmd(am, 2, cmdtext);
 	
 	// ajutine
 	dcmd(kaklus, 6, cmdtext);
@@ -821,6 +826,21 @@ dcmd_oskus(playerid, params[])
 		format(string, 128, "Oskus: %s, Level: %d, XP: %d / %d", Skills[i][sName], level, pInfo[playerid][pSkill][i], xpNeeded);
 		SendClientMessage(playerid, COLOR_YELLOW, string);
 	}
+	return 1;
+}
+dcmd_teata(playerid, params[])
+{
+	new str[STRING_LENGHT];
+	if( sscanf(params,"s",str) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /teata [SÕNUM]");
+	SendTeata(playerid, str);
+	return 1;
+}
+dcmd_am(playerid, params[])
+{
+	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
+	new str[STRING_LENGHT];
+	if( sscanf(params,"s",str) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /am [SÕNUM]");
+	SendAdminChat(playerid, str);
 	return 1;
 }
 
@@ -1491,6 +1511,22 @@ public SendAdminChat(playerid, text[])
 	    	SendClientMessage(i, COLOR_ADMINCHAT, str);
 	}
 }
+public SendTeata(playerid, text[])
+{
+	new str[STRING_LENGHT];
+	format( str, sizeof(str), "(%i)%s teatab: %s", playerid, pInfo[playerid][pCharName], text);
+	for( new i = 0; i <= MAX_PLAYERS; i++ )
+	{
+	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] && pInfo[i][pAdminLevel] > 0 )
+	    	SendClientMessage(i, COLOR_TEATA, str);
+	}
+}
+public SendAdminMessage(playerid, text[])
+{
+    new str[STRING_LENGHT];
+	format( str, sizeof(str), "Administraator %s: %s", pInfo[playerid][pCharName], text);
+	SendClientMessageToAll(COLOR_ADMIN_MESSAGE, str);
+}
 
 public Velocity(playerid, Float: X, Float: Y, Float: Z)
 {
@@ -1638,7 +1674,21 @@ public ClearDelay(playerid, skillId)
 	SkillDelay[playerid][skillId] = 0;
 	return 1;
 }
-
+public CheckFalseDeadPlayers(playerid)
+{
+	new Float:health;
+	for( new i = 0; i <= MAX_PLAYERS; i++ )
+	{
+	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] )
+	    {
+	    	health = GetPlayerHealth(i, health);
+	    	if( health < 1 )
+	   		{
+				SpawnPlayer(i);
+	    	}
+	    }
+	}
+}
 /*
 *    EOF
 */
