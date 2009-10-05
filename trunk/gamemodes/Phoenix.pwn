@@ -59,7 +59,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"97"
+#define SCRIPT_REVISION 	"98"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -671,8 +671,11 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 	}
 	if( RELEASED(KEY_FIRE) || RELEASED(KEY_FIRE | KEY_HANDBRAKE) )
 	{
-	    KillTimer(pInfo[playerid][pSkillTimer]);
-		pInfo[playerid][pSkillTimer] = 0;
+	    if( pInfo[playerid][pSkillTimer] != 0 )
+	    {
+	    	KillTimer(pInfo[playerid][pSkillTimer]);
+			pInfo[playerid][pSkillTimer] = 0;
+		}
 	}
 }
 /*
@@ -1588,8 +1591,11 @@ public XpAdd(playerid, skillId, amount)
 	{
 	    if ( IsPlayerInAnyVehicle(playerid) || GetPlayerWeapon(playerid) != 22 )
 		{
-			KillTimer(pInfo[playerid][pSkillTimer]);
-			pInfo[playerid][pSkillTimer] = 0;
+		    if( pInfo[playerid][pSkillTimer] != 0 )
+		    {
+				KillTimer(pInfo[playerid][pSkillTimer]);
+				pInfo[playerid][pSkillTimer] = 0;
+			}
 			return 1;
 		}
 		SkillDelay[playerid][SKILL_PISTOL] = 1;
