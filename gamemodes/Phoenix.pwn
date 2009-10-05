@@ -388,11 +388,13 @@ public OnPlayerRequestClass(playerid)
 {
 	if(IsPlayerNPC(playerid)) return 1;
 	SetPlayerVirtualWorld(playerid, playerid);
-	SetPlayerPos(playerid, 			1668.3400, 1392.7003, 15.4365);
+	SetPlayerPos(playerid, 1763.4633,-1110.3879,74.4867);
 	SetPlayerFacingAngle(playerid, 90);
 	
-	SetPlayerCameraPos(playerid, 	1730.4994, 1431.5691, 23.7563);
-	SetPlayerCameraLookAt(playerid, 1679.3628, 1401.7775, 29.8623);
+	SetPlayerCameraPos(playerid, 	2028.6260,-856.2253,157.4038);
+	SetPlayerCameraLookAt(playerid, 1813.7842,-1015.3187,188.0742);
+	if( !pInfo[playerid][pLoggedIn] )	showLogin(playerid);
+	
 	return 1;
 }
 
@@ -1153,7 +1155,6 @@ public GetUserInfo(playerid)
 			strmid(pInfo[playerid][uSalt], Field, 0, strlen(Field), STRING_LENGHT);
 			mysql_free_result();
 		}	
-		showLogin(playerid);
 		return 1;
 	}
 	SendClientMessage(playerid, COLOR_RED, LANG_NOUSER);
