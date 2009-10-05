@@ -59,7 +59,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"94"
+#define SCRIPT_REVISION 	"97"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -346,7 +346,7 @@ public GetLevel(skillId, xP, &xpNeeded)
 	}
 	for(new i = 0; i < 99; i++)
 	{
-		xpNeeded = (floatround(Skills[skillId][sLevel] * Skills[skillId][sRatio]) * i);
+		xpNeeded = floatround((Skills[skillId][sLevel] * i) * Skills[skillId][sRatio]);
 		if(xP < xpNeeded) return i;
 	}	
 	xpNeeded = 999;
