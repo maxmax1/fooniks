@@ -10,7 +10,7 @@
 *    under the License.
 *    
 *    The Original Code is Phoenix.
-*    The Initial Developers of the Original Code are Jyrno42 and 13th.
+*    The Initial Developers of the Original Code are Jyrno42 and 13th. 
 */
 
 #define LANG_WELCOME_TO				"Tere Tulemast %s-%sr%s-%s, Palun oota..."
@@ -23,7 +23,23 @@
 #define LANG_DIALOG_LOGIN_CAPTION		"Palun logige sisse!"
 #define LANG_DIALOG_LOGIN_INFO			"Tere, %s.\n Sisesta parool:"
 #define LANG_DIALOG_LOGIN_LOGINBUTTON		"Logi Sisse!"
-#define LANG_DIALOG_LOGIN_EXITBUTTON		"Välju"
+#define LANG_DIALOG_EXITBUTTON		"Välju"
+#define LANG_DIALOG_SEND		    "Saada"
+#define LANG_DIALOG_END		    "Lõpeta"
+#define LANG_DIALOG_REASON		    "Sisesta põhjus:"
+#define LANG_DIALOG_BAN		    "Banni"
+#define LANG_DIALOG_KICK		    "Kicki"
 #define LANG_LOGGED_IN                "Edukalt sisse logitud."
 #define LANG_WRONG_PASSWORD               "Vale parool!"
 #define LANG_MUST_LOGIN               "Mängimiseks pead sisse logima!"
+#define LANG_BB               "Nägemist!"
+#define LANG_EMPTY_ES         "Tühja erasõnumit ei saa saata!"
+#define LANG_NOT_ONLINE         "Mängijat ei ole (enam) online!"
+#define LANG_SEND_ES_TO        "Saada erasõnum mängijale: %s"
+#define LANG_ES               "Erasõnum"
+#define LANG_VEH_NOKEYS               "Sul pole selle auto võtmeid."
+#define LANG_VEH_CRASH               "lendab masinast välja"
+#define LANG_GLOBAL_BANMSG               "Administraator %s bannis kasutaja %s. Põhjus: %s"
+#define LANG_GLOBAL_KICKMSG               "Administraator %s kickis kasutaja %s. Põhjus: %s"
+#define LANG_NOT_ADMIN               "Sa pole admin!"
+#define LANG_ACTION_SHOUT               "karjub"
