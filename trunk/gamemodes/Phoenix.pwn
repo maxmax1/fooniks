@@ -29,6 +29,7 @@
 *    INCLUDES
 */
 
+ // author: -, External Credit #4
 #define dcmd(%1,%2,%3) if (!strcmp((%3)[1], #%1, true, (%2)) && ((((%3)[(%2) + 1] == '\0') && (dcmd_%1(playerid, ""))) || (((%3)[(%2) + 1] == ' ') && (dcmd_%1(playerid, (%3)[(%2) + 2]))))) return 1
 
 #include <a_samp>
@@ -39,6 +40,7 @@
 #include <phoenix_Lang>
 #include <phoenix_RealCarnames>
 
+// author: Alex "Y_Less" Cole, External Credit #6
 #define SendFormattedText(%1,%2,%3,%4) do{new sendfstring[128];format(sendfstring,128,(%3),%4);SendClientMessage((%1), (%2) ,sendfstring);}while(FALSE)
 #define SendFormattedTextToAll(%1,%2,%3) do{new sendfstring[128];format(sendfstring,128,(%2),%3);SendClientMessageToAll((%1),sendfstring);}while(FALSE)
 
@@ -48,7 +50,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"91"
+#define SCRIPT_REVISION 	"92"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -101,6 +103,12 @@
 #define NPC_IGOR 1
 
 /*
+*    SKILL DEFINES
+*/
+#define MAX_SKILLS		1
+#define SKILL_PISTOL	0
+
+/*
 *    GLOBAL VARIABLES
 */
 
@@ -138,8 +146,8 @@ enum pInf
 	pInterior,
 	
 	SelectedPlayer,
-	
-	npcId
+	npcId,
+	pSkill[MAX_SKILLS+1],
 };
 new pInfo[MAX_PLAYERS][pInf];
 
@@ -180,6 +188,19 @@ enum vInf
 };
 new Vehicles[700][vInf];
 
+enum sInf
+{
+	sName[32],
+	sLevel,
+	Float: sRatio
+};
+new Skills[MAX_SKILLS][sInf] = 
+{
+	{"PISTOL", 1000, 1.5}
+};
+
+new SkillDelay[MAX_PLAYERS][MAX_SKILLS];
+
 /*
 *    FORWARDS
 */
@@ -212,9 +233,6 @@ forward FetchCharacterInformation(playerid);
 forward FetchCharacterInformationFinish(playerid);
 forward UpdatePlayer(playerid);
 forward UpdateAllPlayers();
-forward UpdatePlayerInt(sqlid, data[], value);
-forward UpdatePlayerFlo(sqlid, data[], Float:value);
-forward UpdatePlayerStr(sqlid, data[], value[]);
 
 forward MysqlUpdateBuild(query[], table[]);
 forward MysqlUpdateInt(query[], field[], value);
@@ -223,6 +241,13 @@ forward MysqlUpdateStr(query[], field[], value[]);
 forward MysqlUpdateFinish(query[], field[], value);
 forward Velocity(playerid, Float: X, Float: Y, Float: Z);
 forward NPCHandle(playerid);
+forward LoadSkills(playerid);
+forward SaveSkills(playerid);
+forward XpAdd(playerid, skillId, amount);
+forward SetSkills(playerid);
+forward OnLevelUp(playerid, skillId, newLevel, showMsg);
+forward GetLevel(skillId, xP, &xpNeeded);
+forward ClearDelay(playerid, skillId)
 
 /*
 *    MAIN()
@@ -300,6 +325,22 @@ PasswordHash(password[], salt[])
 	format(string, STRING_LENGHT, "%s%s", strtolower(MD5_Hash(password)), salt);
 	format(string, STRING_LENGHT, "%s", strtolower(MD5_Hash(string)));
 	return string;
+}
+
+public GetLevel(skillId, xP, &xpNeeded)
+{
+	if(xP < Skills[skillId][sLevel])
+	{
+		xpNeeded = Skills[skillId][sLevel];
+		return 1;
+	}
+	for(new i = 0; i < 99; i++)
+	{
+		xpNeeded = (floatround(Skills[skillId][sLevel] * Skills[skillId][sRatio]) * i);
+		if(xP < xpNeeded) return i;
+	}	
+	xpNeeded = 999;
+	return 99;
 }
 
 /*
@@ -383,6 +424,7 @@ public OnPlayerConnect(playerid)
 public OnPlayerDisconnect(playerid)
 {
 	UpdatePlayer(playerid);
+	SaveSkills(playerid);
 }
 
 public OnPlayerRequestClass(playerid)
@@ -555,7 +597,7 @@ public OnPlayerRequestSpawn(playerid)
 public OnPlayerPickUpPickup(playerid, pickupid)
 {
 	if( pickupid == EaglePickup )
-		GivePlayerWeapon(playerid, 24, 100);
+		GivePlayerWeapon(playerid, 22, 100);
 	if( pickupid == SawnoffPickup )
 		GivePlayerWeapon(playerid, 26, 100);
 	if( pickupid == MP5Pickup )
@@ -593,6 +635,7 @@ public OnPlayerText(playerid, text[])
 	SCMTAInPlayerRadius(playerid, CHAT_RADIUS, COLOR_CHAT_IC, str);
 	return 0;
 }
+
 public OnPlayerClickPlayer(playerid, clickedplayerid, source)
 {
     pInfo[playerid][SelectedPlayer] = clickedplayerid;
@@ -604,6 +647,17 @@ public OnPlayerClickPlayer(playerid, clickedplayerid, source)
 
 	ShowPlayerDialog( playerid, DIALOG_PLAYER, DIALOG_STYLE_LIST, "Mängija Valikud", str, "Ok", LANG_DIALOG_EXITBUTTON);
 	return 1;
+}
+
+public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
+{
+	SendFormattedText(playerid, COLOR_GREEN, "NEW: %d, OLD, %d" , newkeys, oldkeys);
+	if(SkillDelay[playerid][SKILL_PISTOL] == 0 && newkeys == KEY_FIRE && !IsPlayerInAnyVehicle(playerid) && GetPlayerWeapon(playerid) == 22)
+	{
+		XpAdd(playerid, SKILL_PISTOL, 25);
+		SkillDelay[playerid][SKILL_PISTOL] = 1;
+		SetTimerEx("ClearDelay", 300, 0, "ii", playerid, SKILL_PISTOL);
+	}
 }
 /*
 *    COMMANDS
@@ -620,6 +674,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(kick, 4, cmdtext);
 	dcmd(ban, 3, cmdtext);
 	dcmd(a, 1, cmdtext);
+	dcmd(oskus, 5, cmdtext);
 	
 	// ajutine
 	dcmd(kaklus, 6, cmdtext);
@@ -730,6 +785,23 @@ dcmd_a(playerid, params[])
 	new str[STRING_LENGHT];
 	if( sscanf(params,"s",str) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /a [SÕNUM]");
 	SendAdminChat(playerid, str);
+	return 1;
+}
+
+dcmd_oskus(playerid, params[])
+{
+	#pragma unused params
+	
+	SendClientMessage(playerid, COLOR_YELLOW, "Sinu oskused:");
+	new string[128];
+	
+	for(new i = 0; i < MAX_SKILLS; i++)
+	{
+		new xpNeeded;
+		new level = GetLevel(i, pInfo[playerid][pSkill][i], xpNeeded);
+		format(string, 128, "Oskus: %s, Level: %d, XP: %d / %d", Skills[i][sName], level, pInfo[playerid][pSkill][i], xpNeeded);
+		SendClientMessage(playerid, COLOR_YELLOW, string);
+	}
 	return 1;
 }
 
@@ -1259,9 +1331,7 @@ public FetchCharacterInformationFinish(playerid)
 			pInfo[playerid][pAdminLevel] = strval(Field);
 			
 			mysql_free_result();
-			SendClientMessage(playerid, COLOR_GREEN, LANG_LOGGED_IN);
-			pInfo[playerid][pLoggedIn] = 1;
-			SpawnPlayer(playerid);
+			LoadSkills(playerid);
 		}
 	}
 	Fetch_UInfo_Thread = -1;
@@ -1306,6 +1376,7 @@ public UpdateAllPlayers()
 	{
 	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] )
 	    UpdatePlayer(i);
+		SaveSkills(i);
 	}
 }
 
@@ -1422,12 +1493,119 @@ public NPCHandle(playerid)
 	//Kick(playerid);
 	return 0;
 }
+
 public AddCarToSQL(model, Float:posX, Float:posY, Float:posZ, Float:angle)
 {
 	new query[1028];
 	format(query, sizeof(query), "INSERT INTO `estrpco_portal`.`ph_vehicles` (`vehicleId` ,`vModel` ,`vType` ,`vPosXd` ,`vPosYd` ,`vPosZd` ,`vAngZd` ,`vPosX` ,`vPosY` ,`vPosZ` ,`vAngZ` ,`vColor1` ,`vColor2` ,`vOwner` ,`vValue` ,`vDeaths` ,`vHealth`)VALUES (NULL , '%i', '0', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '-1', '-1', '0', '0', '0', '1000');", model, posX, posY, posZ, angle, posX, posY, posZ, angle);
 	mysql_query(query, FETCH_UINFO_THREAD);
 }
+
+public LoadSkills(playerid)
+{	
+	new query[128];
+	format(query, 128, "SELECT * FROM %sskills WHERE cid = '%d'", MYSQL_PREFIX, pInfo[playerid][pSqlId]);
+	mysql_query(query);
+	
+	if(mysql_store_result() == 1)
+	{
+		if(mysql_num_rows() > 0)
+		{
+			new Field[64], str[12];			
+			for(new i = 0; i < MAX_SKILLS; i++)
+			{
+				format(str, 12, "skill_%d", i);
+				mysql_fetch_field_row(Field, str);
+				pInfo[playerid][pSkill][i]	= strval(Field);
+			}			
+			mysql_free_result();	
+
+			SetSkills(playerid);
+		
+			SendClientMessage(playerid, COLOR_GREEN, LANG_LOGGED_IN);
+			pInfo[playerid][pLoggedIn] = 1;
+			SpawnPlayer(playerid);		
+			return 1;			
+		}
+		else
+		{
+			mysql_free_result();
+			format(query, 128, "INSERT INTO %sskills(id, cid) VALUES(NULL, '%d');", MYSQL_PREFIX, pInfo[playerid][pSqlId]);
+			mysql_query(query);
+			SetTimerEx("LoadSkills", 500, 0, "i", playerid);
+			return 1;
+		}
+	}
+	
+	SendClientMessage(playerid, COLOR_RED, LANG_STATSERROR);
+	Kick(playerid);
+	return 1;
+}
+
+public SaveSkills(playerid)
+{	
+	new sqlid = pInfo[playerid][pSqlId];
+	new query[MAX_QUERY], table[32];
+	format(table, 32, "%sskills", MYSQL_PREFIX);
+	
+	MysqlUpdateBuild(query, table);
+	
+	new str[12];			
+	for(new i = 0; i < MAX_SKILLS; i++)
+	{
+		format(str, 12, "skill_%d", i);
+		MysqlUpdateInt(query, str, pInfo[playerid][pSkill][i]);
+	}
+	
+	MysqlUpdateFinish(query, "cid", sqlid);	
+	return 1;
+}
+
+public XpAdd(playerid, skillId, amount)
+{
+	new xpNeeded;
+	new oldLevel = GetLevel(skillId, pInfo[playerid][pSkill][skillId], xpNeeded);
+	pInfo[playerid][pSkill][skillId] += amount;
+	
+	if(pInfo[playerid][pSkill][skillId] >= xpNeeded)
+	{	
+		OnLevelUp(playerid, skillId, (oldLevel+1), 1);
+	}
+	
+	//UpdateSkillDraw(playerid, skillId, amount);
+	return 1;
+}
+
+public SetSkills(playerid)
+{
+	for(new i = 0; i < MAX_SKILLS; i++)
+	{
+		new xpNeeded;
+		new level = GetLevel(i, pInfo[playerid][pSkill][i], xpNeeded);
+		OnLevelUp(playerid, i, level, 0);
+	}
+}
+
+public OnLevelUp(playerid, skillId, newLevel, showMsg)
+{
+	if(showMsg == 1)
+	{
+		//	LevelAP
+		new string[128];
+		format(string, 128, "Sinu %s oskus on nüüd %d. Oled kogunud %d kogemuspunkti.", Skills[skillId][sName], newLevel, pInfo[playerid][pSkill][skillId]);
+		SendClientMessage(playerid, COLOR_GREEN, string);
+	}
+	
+	if(skillId == SKILL_PISTOL) SetPlayerSkillLevel(playerid, WEAPONSKILL_PISTOL, floatround(newLevel*10));
+	return 1;
+}
+
+public ClearDelay(playerid, skillId)
+{
+	SkillDelay[playerid][skillId] = 0;
+	return 1;
+}
+
 /*
 *    EOF
 */
