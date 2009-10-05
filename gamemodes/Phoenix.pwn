@@ -19,6 +19,9 @@
 *        External Credit #1 - Simon, IsValidSkin
 *        External Credit #2 - Alex "Y_Less" Cole, MD5 Core
 *        External Credit #3 - Alex "Y_Less" Cole, Y_SERVER
+*        External Credit #4 - Alex "Y_Less" Cole, sscanf
+*        External Credit #5 - DCMD
+*        External Credit #6 - Alex "Y_Less" Cole, SendFormattedText/SendFormattedTextToAll
 *
 */
 
@@ -36,13 +39,16 @@
 #include <phoenix_Lang>
 #include <phoenix_RealCarnames>
 
+#define SendFormattedText(%1,%2,%3,%4) do{new sendfstring[128];format(sendfstring,128,(%3),%4);SendClientMessage((%1), (%2) ,sendfstring);}while(FALSE)
+#define SendFormattedTextToAll(%1,%2,%3) do{new sendfstring[128];format(sendfstring,128,(%2),%3);SendClientMessageToAll((%1),sendfstring);}while(FALSE)
+
 /*
 *    DEFINES
 */
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"85"
+#define SCRIPT_REVISION 	"86"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -606,12 +612,16 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(me, 2, cmdtext);
 	dcmd(s, 1, cmdtext);
 	dcmd(es, 2, cmdtext);
-	dcmd(mj, 2, cmdtext);
 	dcmd(mjuurde, 7, cmdtext);
 	dcmd(msiia, 5, cmdtext);
 	dcmd(kick, 4, cmdtext);
 	dcmd(ban, 3, cmdtext);
 	dcmd(a, 1, cmdtext);
+	
+	// ajutine
+	dcmd(kaklus, 6, cmdtext);
+	dcmd(mj, 2, cmdtext);
+
 	return 1;
 }
 
@@ -676,16 +686,6 @@ dcmd_es(playerid, params[])
 	else SendEs(playerid);
 }
 
-dcmd_mj(playerid, params[])
-{
-	#pragma unused params
-	new Float: vx, Float: vy, Float: vz;
-	GetPlayerVelocity(playerid, vx, vy, vz);
-	vz += 10.0;
-	SetPlayerVelocity(playerid, vx, vy, vz);
-	SendEmote(playerid, "hüppab jube kõrgele.");
-	return 1;
-}
 dcmd_mjuurde(playerid, params[])
 {
 	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, "Sa pole admin!");
@@ -728,6 +728,44 @@ dcmd_a(playerid, params[])
 	SendAdminChat(playerid, str);
 	return 1;
 }
+
+// AJUTISED
+dcmd_kaklus(playerid, params[])
+{
+	new style;
+	if(sscanf(params, "i", style))
+	{
+		SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /kaklus [stiiliNR]");
+		SendClientMessage(playerid, COLOR_YELLOW, "stiiliNR: 0(tava), 1(poks), 2(kungfu), 3(põlv, pea), 4(haare, löök), 5(küünarnukid)");
+		return 1;
+	}
+	if(style < 0 || style > 5) return SendClientMessage(playerid, COLOR_RED, "Vale stiiliNR.");
+	
+	new sampStyleID = 4;
+	if(style == 1) 		sampStyleID = 5;
+	else if(style == 2) sampStyleID = 6;
+	else if(style == 3) sampStyleID = 7;
+	else if(style == 4) sampStyleID = 15;
+	else if(style == 5) sampStyleID = 26;
+	
+	SendFormattedText(playerid, COLOR_YELLOW, "Debug: Väärtus muudetud: i = %d, sampId = %d", style, sampStyleID);
+	
+	SendClientMessage(playerid, COLOR_RED, "Muutsid oma kaklusstiili.");
+	SetPlayerFightingStyle(playerid, sampStyleID);
+	return 1;	
+}
+
+dcmd_mj(playerid, params[])
+{
+	#pragma unused params
+	new Float: vx, Float: vy, Float: vz;
+	GetPlayerVelocity(playerid, vx, vy, vz);
+	vz += 10.0;
+	SetPlayerVelocity(playerid, vx, vy, vz);
+	SendEmote(playerid, "hüppab jube kõrgele.");
+	return 1;
+}
+
 /*
 *    PUBLICS
 */
