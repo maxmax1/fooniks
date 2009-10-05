@@ -43,3 +43,4 @@
 #define LANG_GLOBAL_KICKMSG               "Administraator %s kickis kasutaja %s. Põhjus: %s"
 #define LANG_NOT_ADMIN               "Sa pole admin!"
 #define LANG_ACTION_SHOUT               "karjub"
+#define LANG_STATSERROR "Statistika Laadimisel oli Viga."
