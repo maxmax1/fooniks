@@ -48,7 +48,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"86"
+#define SCRIPT_REVISION 	"89"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -183,6 +183,7 @@ new Vehicles[700][vInf];
 /*
 *    FORWARDS
 */
+forward AddCarToSQL(model, Float:posX, Float:posY, Float:posZ, Float:angle);
 forward SendAdminChat(playerid, text[]);
 forward ShowBanDialog(playerid);
 forward ShowKickDialog(playerid);
@@ -623,6 +624,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	// ajutine
 	dcmd(kaklus, 6, cmdtext);
 	dcmd(mj, 2, cmdtext);
+	dcmd(addveh, 6, cmdtext);
 
 	return 1;
 }
@@ -750,8 +752,6 @@ dcmd_kaklus(playerid, params[])
 	else if(style == 4) sampStyleID = 15;
 	else if(style == 5) sampStyleID = 26;
 	
-	SendFormattedText(playerid, COLOR_YELLOW, "Debug: Väärtus muudetud: i = %d, sampId = %d", style, sampStyleID);
-	
 	SendClientMessage(playerid, COLOR_RED, "Muutsid oma kaklusstiili.");
 	SetPlayerFightingStyle(playerid, sampStyleID);
 	return 1;	
@@ -765,6 +765,26 @@ dcmd_mj(playerid, params[])
 	vz += 10.0;
 	SetPlayerVelocity(playerid, vx, vy, vz);
 	SendEmote(playerid, "hüppab jube kõrgele.");
+	return 1;
+}
+dcmd_addveh(playerid, params[])
+{
+    #pragma unused params
+	if( pInfo[playerid][pAdminLevel] > 1 )
+	{
+	    if( IsPlayerInAnyVehicle(playerid) )
+	    {
+	        new vid = GetPlayerVehicleID(playerid);
+	        new model = GetVehicleModel(vid);
+	        new Float:posX, Float:posY, Float:posZ, Float:angle;
+	        GetVehicleZAngle(vid, angle);
+	        GetVehiclePos(vid, posX, posY, posZ);
+	        AddCarToSQL(model, posX, posY, posZ, angle);
+
+			SendClientMessage(playerid, COLOR_YELLOW, "LISATUD!");
+	    }
+	    else return 1;
+	}
 	return 1;
 }
 
@@ -1399,7 +1419,12 @@ public NPCHandle(playerid)
 	//Kick(playerid);
 	return 0;
 }
-
+public AddCarToSQL(model, Float:posX, Float:posY, Float:posZ, Float:angle)
+{
+	new query[1028];
+	format(query, sizeof(query), "INSERT INTO `estrpco_portal`.`ph_vehicles` (`vehicleId` ,`vModel` ,`vType` ,`vPosXd` ,`vPosYd` ,`vPosZd` ,`vAngZd` ,`vPosX` ,`vPosY` ,`vPosZ` ,`vAngZ` ,`vColor1` ,`vColor2` ,`vOwner` ,`vValue` ,`vDeaths` ,`vHealth`)VALUES (NULL , '%i', '0', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '-1', '-1', '0', '0', '0', '100');", model, posX, posY, posZ, angle, posX, posY, posZ, angle);
+	mysql_query(query, FETCH_UINFO_THREAD);
+}
 /*
 *    EOF
 */
