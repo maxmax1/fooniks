@@ -291,7 +291,7 @@ stock showLogin(playerid)
 {
 	new string[64];
 	format(string, 64, LANG_DIALOG_LOGIN_INFO, pInfo[playerid][uUserName]);
-	ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, string, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_LOGIN_EXITBUTTON);
+	ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_INPUT, LANG_DIALOG_LOGIN_CAPTION, string, LANG_DIALOG_LOGIN_LOGINBUTTON, LANG_DIALOG_EXITBUTTON);
 }
 
 PasswordHash(password[], salt[])
@@ -461,7 +461,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			SendClientMessage(playerid, COLOR_RED, LANG_MUST_LOGIN);
 			
-			SendClientMessage(playerid, COLOR_GREEN, "Nägemist!");
+			SendClientMessage(playerid, COLOR_GREEN, LANG_BB);
 			Kick(playerid);
 			return 1;
 		}
@@ -502,7 +502,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	{
 	    if( strlen(inputtext) == 0 )
 		{
-		    SendClientMessage(playerid, COLOR_RED, "Tühja erasõnumit ei saa saata!");
+		    SendClientMessage(playerid, COLOR_RED, LANG_EMPTY_ES);
 		    SendEs(playerid);
 		}
 		else
@@ -512,7 +512,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				ForwardEs(playerid, inputtext);
 		    }
 			else
-			SendClientMessage(playerid, COLOR_RED, "Mängijat ei ole (enam) online!");
+			SendClientMessage(playerid, COLOR_RED, LANG_NOT_ONLINE);
 		}
 	}
 	else if( dialogid == DIALOG_KICKPLAYER )
@@ -602,7 +602,7 @@ public OnPlayerClickPlayer(playerid, clickedplayerid, source)
 	if( pInfo[playerid][pAdminLevel] > 0 )
         format( str, sizeof(str), "%s\nTele Siia\nTele Sinna\nKicki\nBanni", str);
 
-	ShowPlayerDialog( playerid, DIALOG_PLAYER, DIALOG_STYLE_LIST, "Mängija Valikud", str, "Ok", "Välju");
+	ShowPlayerDialog( playerid, DIALOG_PLAYER, DIALOG_STYLE_LIST, "Mängija Valikud", str, "Ok", LANG_DIALOG_EXITBUTTON);
 	return 1;
 }
 /*
@@ -676,7 +676,7 @@ dcmd_s(playerid, params[])
 	if(strlen(text) == 0) return SendClientMessage(playerid, COLOR_RED, "KASUTUS: /s tekst");
 
 	new delay = ( strlen(text) * 150 ) + 2000;
-	format(str, sizeof(str), "%s karjub: %s", pInfo[playerid][pCharName], text);
+	format(str, sizeof(str), "%s %s: %s", pInfo[playerid][pCharName], LANG_ACTION_SHOUT, text);
 	SetPlayerChatBubble(playerid, str, COLOR_CHAT_SHOUT, CHAT_RADIUS_SHOUT, delay);
 	SCMTAInPlayerRadius(playerid, CHAT_RADIUS_SHOUT, COLOR_CHAT_SHOUT, str);
 	return 1;
@@ -692,7 +692,7 @@ dcmd_es(playerid, params[])
 
 dcmd_mjuurde(playerid, params[])
 {
-	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, "Sa pole admin!");
+	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
 	new selectedplayer;
 	if ( sscanf(params, "u", selectedplayer) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /mjuurde [ID/NIMI]");
     WarpPlayerToPlayer(playerid, selectedplayer);
@@ -700,7 +700,7 @@ dcmd_mjuurde(playerid, params[])
 }
 dcmd_msiia(playerid, params[])
 {
-    if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, "Sa pole admin!");
+    if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
     new selectedplayer;
     if ( sscanf(params, "u", selectedplayer) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /msiia [ID/NIMI]");
     WarpPlayerToPlayer(selectedplayer, playerid);
@@ -708,7 +708,7 @@ dcmd_msiia(playerid, params[])
 }
 dcmd_kick(playerid, params[])
 {
-    if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, "Sa pole admin!");
+    if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
 	new selectedplayer, reason[STRING_LENGHT];
     sscanf(params, "us", selectedplayer, reason);
     if( strlen(reason) == 0 ){ pInfo[playerid][SelectedPlayer] = selectedplayer; ShowKickDialog(playerid); return 1;}
@@ -717,7 +717,7 @@ dcmd_kick(playerid, params[])
 }
 dcmd_ban(playerid, params[])
 {
-    if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, "Sa pole admin!");
+    if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
     new selectedplayer, reason[STRING_LENGHT];
     sscanf(params, "us", selectedplayer, reason);
 	if( strlen(reason) == 0 ){ pInfo[playerid][SelectedPlayer] = selectedplayer; ShowBanDialog(playerid); return 1;}
@@ -726,7 +726,7 @@ dcmd_ban(playerid, params[])
 }
 dcmd_a(playerid, params[])
 {
-	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, "Sa pole admin!");
+	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
 	new str[STRING_LENGHT];
 	if( sscanf(params,"s",str) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /a [SÕNUM]");
 	SendAdminChat(playerid, str);
@@ -795,8 +795,8 @@ dcmd_addveh(playerid, params[])
 public SendEs(playerid)
 {
 	new str[STRING_LENGHT];
-	format(str, sizeof(str),"Saada erasõnum mängijale: %s", pInfo[pInfo[playerid][SelectedPlayer]][pCharName]);
-	ShowPlayerDialog(playerid, DIALOG_SENDES, DIALOG_STYLE_INPUT,"Erasõnum", str, "Saada", "Välju");
+	format(str, sizeof(str), LANG_SEND_ES_TO, pInfo[pInfo[playerid][SelectedPlayer]][pCharName]);
+	ShowPlayerDialog(playerid, DIALOG_SENDES, DIALOG_STYLE_INPUT, LANG_ES, str, LANG_DIALOG_SEND, LANG_DIALOG_EXITBUTTON);
 }
 public ForwardEs(playerid, message[])
 {
@@ -886,7 +886,7 @@ public LoadAllVehiclesFinish()
 {
 	mysql_store_result();
 	
-	new Field[64], Data[1028], vId;
+	new Field[64], Data[128], vId;
 	for(vId = 0; vId < mysql_num_rows(); vId++)
 	{
 		mysql_fetch_row(Data);
@@ -926,6 +926,9 @@ public LoadAllVehiclesFinish()
 		
 		mysql_fetch_field_row(Field, "vColor1");
 		Vehicles[vId][vColor1] = strval(Field);
+		
+		mysql_fetch_field_row(Field, "vColor2");
+		Vehicles[vId][vColor2] = strval(Field);
 		
 		mysql_fetch_field_row(Field, "vOwner");
 		Vehicles[vId][vOwner] = strval(Field);
@@ -1049,7 +1052,7 @@ public OnDriverEnterVehicle(playerid)
 	if(Remove)
 	{
 		RemovePlayerFromVehicle(playerid);
-		SendClientMessage(playerid, COLOR_RED, "Sul pole selle auto võtmeid.");
+		SendClientMessage(playerid, COLOR_RED, LANG_VEH_NOKEYS);
 	}
 	else
 	{
@@ -1107,7 +1110,7 @@ public OnSpeedoUpdate(playerid)
 		
 		if((oSpeed - Vehicles[vId][vSpeed]) > 50 && (oHealth - Vehicles[vId][vHealth]) > 50)
 		{
-			SendEmote(playerid, "lendab masinast välja");
+			SendEmote(playerid, LANG_VEH_CRASH);
 			SetPlayerPos(playerid, Vehicles[vId][vPosX], Vehicles[vId][vPosY], Vehicles[vId][vPosZ]+2);
 			SetTimerEx("Velocity", 75, 0, "ifff", playerid, oX, oY, oZ);
 			ApplyAnimation(playerid, "CRACK", "crckdeth2", 4.0, 1, 1, 1, 1, 1);
@@ -1362,7 +1365,7 @@ public WarpPlayerToPlayer(WarpWho, WarpTo)
 public BanPlayer(playerid, banner, reason[])
 {
 	new str[STRING_LENGHT];
-	format(str, sizeof(str), "Administraator %s bannis kasutaja %s. Põhjus: %s", pInfo[banner][pCharName], pInfo[playerid][pCharName], reason);
+	format(str, sizeof(str), LANG_GLOBAL_BANMSG, pInfo[banner][pCharName], pInfo[playerid][pCharName], reason);
     SendClientMessageToAll(COLOR_ADMINMSG, str);
 	// Siia võiks mingi hea ban süsteemi teha :D
 }
@@ -1370,7 +1373,7 @@ public BanPlayer(playerid, banner, reason[])
 public KickPlayer(playerid, kicker, reason[])
 {
 	new str[STRING_LENGHT];
-	format(str, sizeof(str), "Administraator %s kickis kasutaja %s. Põhjus: %s", pInfo[kicker][pCharName], pInfo[playerid][pCharName], reason);
+	format(str, sizeof(str), LANG_GLOBAL_KICKMSG, pInfo[kicker][pCharName], pInfo[playerid][pCharName], reason);
 	SendClientMessageToAll(COLOR_ADMINMSG, str);
 	Kick(playerid);
 }
@@ -1379,14 +1382,14 @@ public ShowBanDialog(playerid)
 {
 	new str[STRING_LENGHT];
 	format( str, sizeof(str), "Banni %s", pInfo[pInfo[playerid][SelectedPlayer]][pCharName]);
-	ShowPlayerDialog(playerid, DIALOG_BANPLAYER, DIALOG_STYLE_INPUT, str, "Sisesta põhjus:", "Banni", "Lõpeta");
+	ShowPlayerDialog(playerid, DIALOG_BANPLAYER, DIALOG_STYLE_INPUT, str, LANG_DIALOG_REASON, LANG_DIALOG_BAN, LANG_DIALOG_END);
 }
 
 public ShowKickDialog(playerid)
 {
 	new str[STRING_LENGHT];
 	format( str, sizeof(str), "Kicki %s", pInfo[pInfo[playerid][SelectedPlayer]][pCharName]);
-	ShowPlayerDialog(playerid, DIALOG_KICKPLAYER, DIALOG_STYLE_INPUT, str, "Sisesta põhjus:", "Kicki", "Lõpeta");
+	ShowPlayerDialog(playerid, DIALOG_KICKPLAYER, DIALOG_STYLE_INPUT, str, LANG_DIALOG_REASON, LANG_DIALOG_KICK, LANG_DIALOG_END);
 }
 
 public SendAdminChat(playerid, text[])
