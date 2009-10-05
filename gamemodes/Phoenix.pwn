@@ -48,7 +48,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"90"
+#define SCRIPT_REVISION 	"91"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -1422,7 +1422,7 @@ public NPCHandle(playerid)
 public AddCarToSQL(model, Float:posX, Float:posY, Float:posZ, Float:angle)
 {
 	new query[1028];
-	format(query, sizeof(query), "INSERT INTO `estrpco_portal`.`ph_vehicles` (`vehicleId` ,`vModel` ,`vType` ,`vPosXd` ,`vPosYd` ,`vPosZd` ,`vAngZd` ,`vPosX` ,`vPosY` ,`vPosZ` ,`vAngZ` ,`vColor1` ,`vColor2` ,`vOwner` ,`vValue` ,`vDeaths` ,`vHealth`)VALUES (NULL , '%i', '0', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '-1', '-1', '0', '0', '0', '100');", model, posX, posY, posZ, angle, posX, posY, posZ, angle);
+	format(query, sizeof(query), "INSERT INTO `estrpco_portal`.`ph_vehicles` (`vehicleId` ,`vModel` ,`vType` ,`vPosXd` ,`vPosYd` ,`vPosZd` ,`vAngZd` ,`vPosX` ,`vPosY` ,`vPosZ` ,`vAngZ` ,`vColor1` ,`vColor2` ,`vOwner` ,`vValue` ,`vDeaths` ,`vHealth`)VALUES (NULL , '%i', '0', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '-1', '-1', '0', '0', '0', '1000');", model, posX, posY, posZ, angle, posX, posY, posZ, angle);
 	mysql_query(query, FETCH_UINFO_THREAD);
 }
 /*
