@@ -32,6 +32,15 @@
  // author: -, External Credit #4
 #define dcmd(%1,%2,%3) if (!strcmp((%3)[1], #%1, true, (%2)) && ((((%3)[(%2) + 1] == '\0') && (dcmd_%1(playerid, ""))) || (((%3)[(%2) + 1] == ' ') && (dcmd_%1(playerid, (%3)[(%2) + 2]))))) return 1
 
+#define HOLDING(%0) \
+	((newkeys & (%0)) == (%0))
+#define PRESSED(%0) \
+	(((newkeys & (%0)) == (%0)) && ((oldkeys & (%0)) != (%0)))
+#define RELEASED(%0) \
+	(((newkeys & (%0)) != (%0)) && ((oldkeys & (%0)) == (%0)))
+
+
+
 #include <a_samp>
 #include <a_mysql>
 #include <md5_core>  // author: Alex "Y_Less" Cole, External Credit #2
@@ -50,7 +59,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"92"
+#define SCRIPT_REVISION 	"93"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -119,7 +128,7 @@ new WelcomeStr[64];
          */
 	new Fetch_UInfo_Thread = -1;
 
-new EaglePickup, SawnoffPickup, MP5Pickup, AKPickup;
+new PistolPickup, SawnoffPickup, MP5Pickup, AKPickup;
 
 enum pInf
 {
@@ -148,6 +157,7 @@ enum pInf
 	SelectedPlayer,
 	npcId,
 	pSkill[MAX_SKILLS+1],
+	pSkillTimer
 };
 new pInfo[MAX_PLAYERS][pInf];
 
@@ -247,7 +257,7 @@ forward XpAdd(playerid, skillId, amount);
 forward SetSkills(playerid);
 forward OnLevelUp(playerid, skillId, newLevel, showMsg);
 forward GetLevel(skillId, xP, &xpNeeded);
-forward ClearDelay(playerid, skillId)
+forward ClearDelay(playerid, skillId);
 
 /*
 *    MAIN()
@@ -389,7 +399,7 @@ public OnGameModeInit()
 	
 	SetTimer("UpdateAllPlayers", 1000*60*15, true);
 	
-	EaglePickup = CreatePickup(348 , 2, 2394.2112,-1206.5466,27.8595, 0); // eagle
+	PistolPickup = CreatePickup(346 , 2, 2394.2112,-1206.5466,27.8595, 0); // Pistol
 	SawnoffPickup = CreatePickup(350 , 2, 2505.4795,-1117.3652,56.2031, 0); // sawnoff
 	MP5Pickup = CreatePickup(353 , 2, 2526.4465,-1237.0942,43.6563, 0); // mp5
 	AKPickup = CreatePickup(355 , 2, 2345.6289,-1364.8751,28.0859, 0); // AK
@@ -596,7 +606,7 @@ public OnPlayerRequestSpawn(playerid)
 
 public OnPlayerPickUpPickup(playerid, pickupid)
 {
-	if( pickupid == EaglePickup )
+	if( pickupid == PistolPickup )
 		GivePlayerWeapon(playerid, 22, 100);
 	if( pickupid == SawnoffPickup )
 		GivePlayerWeapon(playerid, 26, 100);
@@ -651,12 +661,18 @@ public OnPlayerClickPlayer(playerid, clickedplayerid, source)
 
 public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 {
-	SendFormattedText(playerid, COLOR_GREEN, "NEW: %d, OLD, %d" , newkeys, oldkeys);
-	if(SkillDelay[playerid][SKILL_PISTOL] == 0 && newkeys == KEY_FIRE && !IsPlayerInAnyVehicle(playerid) && GetPlayerWeapon(playerid) == 22)
+    if( PRESSED(KEY_FIRE) || PRESSED(KEY_FIRE | KEY_HANDBRAKE) )
+    {
+		if(SkillDelay[playerid][SKILL_PISTOL] == 0 && !IsPlayerInAnyVehicle(playerid) && GetPlayerWeapon(playerid) == 22)
+		{
+			XpAdd(playerid, SKILL_PISTOL, 25);
+			if( pInfo[playerid][pSkillTimer] != 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_PISTOL, 25);
+		}
+	}
+	if( RELEASED(KEY_FIRE) || RELEASED(KEY_FIRE | KEY_HANDBRAKE) )
 	{
-		XpAdd(playerid, SKILL_PISTOL, 25);
-		SkillDelay[playerid][SKILL_PISTOL] = 1;
-		SetTimerEx("ClearDelay", 300, 0, "ii", playerid, SKILL_PISTOL);
+	    KillTimer(pInfo[playerid][pSkillTimer]);
+		pInfo[playerid][pSkillTimer] = 0;
 	}
 }
 /*
@@ -1183,6 +1199,7 @@ public OnSpeedoUpdate(playerid)
 		if((oSpeed - Vehicles[vId][vSpeed]) > 50 && (oHealth - Vehicles[vId][vHealth]) > 50)
 		{
 			SendEmote(playerid, LANG_VEH_CRASH);
+			GetVehiclePos(vId, Vehicles[vId][vPosZ], Vehicles[vId][vPosY], Vehicles[vId][vPosZ]);
 			SetPlayerPos(playerid, Vehicles[vId][vPosX], Vehicles[vId][vPosY], Vehicles[vId][vPosZ]+2);
 			SetTimerEx("Velocity", 75, 0, "ifff", playerid, oX, oY, oZ);
 			ApplyAnimation(playerid, "CRACK", "crckdeth2", 4.0, 1, 1, 1, 1, 1);
@@ -1566,6 +1583,18 @@ public XpAdd(playerid, skillId, amount)
 	new xpNeeded;
 	new oldLevel = GetLevel(skillId, pInfo[playerid][pSkill][skillId], xpNeeded);
 	pInfo[playerid][pSkill][skillId] += amount;
+	
+	if( skillId == SKILL_PISTOL )
+	{
+	    if ( IsPlayerInAnyVehicle(playerid) || GetPlayerWeapon(playerid) != 22 )
+		{
+			KillTimer(pInfo[playerid][pSkillTimer]);
+			pInfo[playerid][pSkillTimer] = 0;
+			return 1;
+		}
+		SkillDelay[playerid][SKILL_PISTOL] = 1;
+		SetTimerEx("ClearDelay", 285, 0, "ii", playerid, SKILL_PISTOL);
+	}
 	
 	if(pInfo[playerid][pSkill][skillId] >= xpNeeded)
 	{	
