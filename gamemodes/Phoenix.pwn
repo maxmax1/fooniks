@@ -59,7 +59,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"93"
+#define SCRIPT_REVISION 	"94"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -666,7 +666,7 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 		if(SkillDelay[playerid][SKILL_PISTOL] == 0 && !IsPlayerInAnyVehicle(playerid) && GetPlayerWeapon(playerid) == 22)
 		{
 			XpAdd(playerid, SKILL_PISTOL, 25);
-			if( pInfo[playerid][pSkillTimer] != 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_PISTOL, 25);
+			if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_PISTOL, 25);
 		}
 	}
 	if( RELEASED(KEY_FIRE) || RELEASED(KEY_FIRE | KEY_HANDBRAKE) )
