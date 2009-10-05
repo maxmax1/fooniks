@@ -1160,9 +1160,11 @@ public OnDriverExitVehicle(playerid)
 {
 	OnSpeedoUpdate(playerid);
 	new vId = GetVehicleSqlId(GetPlayerVehicleID(playerid));
-	if(vId == -1) vId = 200+playerid;
+	if(vId == -1) return 0;
+	
 	Vehicles[vId][vSpeed] = 0;
 	InfoBarTimer[playerid] = -1;
+	return 1;
 }
 
 public ShowSpeedo(playerid)
@@ -1179,12 +1181,7 @@ public OnSpeedoUpdate(playerid)
 	if(IsPlayerConnected(playerid) && IsPlayerInAnyVehicle(playerid))
 	{
 		new vId = GetVehicleSqlId(GetPlayerVehicleID(playerid));
-		if(vId == -1)
-		{
-			vId = 200+playerid;
-			Vehicles[vId][vSampId] = GetPlayerVehicleID(playerid);
-			VehPos(vId);
-		}
+		if(vId == -1) return 0;
 
 		new oSpeed = Vehicles[vId][vSpeed], Float: oHealth = Vehicles[vId][vHealth];
 		new Float: oX = Vehicles[vId][vSpeedX], Float: oY = Vehicles[vId][vSpeedY], Float: oZ = Vehicles[vId][vSpeedZ];
@@ -1201,8 +1198,8 @@ public OnSpeedoUpdate(playerid)
 		
 		if((oSpeed - Vehicles[vId][vSpeed]) > 50 && (oHealth - Vehicles[vId][vHealth]) > 50)
 		{
+			VehPos(vId);
 			SendEmote(playerid, LANG_VEH_CRASH);
-			GetVehiclePos(vId, Vehicles[vId][vPosZ], Vehicles[vId][vPosY], Vehicles[vId][vPosZ]);
 			SetPlayerPos(playerid, Vehicles[vId][vPosX], Vehicles[vId][vPosY], Vehicles[vId][vPosZ]+2);
 			SetTimerEx("Velocity", 75, 0, "ifff", playerid, oX, oY, oZ);
 			ApplyAnimation(playerid, "CRACK", "crckdeth2", 4.0, 1, 1, 1, 1, 1);
@@ -1214,6 +1211,7 @@ public OnSpeedoUpdate(playerid)
 		TextDrawHideForPlayer(playerid, InfoBar[playerid]);
 		KillTimer(InfoBarTimer[playerid]);
 	}
+	return 1;
 }
 
 public CheckCharacter(playerid)
