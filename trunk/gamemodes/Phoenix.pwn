@@ -59,7 +59,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"100"
+#define SCRIPT_REVISION 	"101"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -115,8 +115,9 @@
 /*
 *    SKILL DEFINES
 */
-#define MAX_SKILLS		1
+#define MAX_SKILLS		2
 #define SKILL_PISTOL	0
+#define SKILL_PISTOLS	1
 
 /*
 *    GLOBAL VARIABLES
@@ -207,7 +208,8 @@ enum sInf
 };
 new Skills[MAX_SKILLS][sInf] = 
 {
-	{"PISTOL", 1000, 1.5}
+	{"PISTOL", 1000, 1.5},
+	{"PISTOL_VAIKNE", 1250, 1.5}
 };
 
 new SkillDelay[MAX_PLAYERS][MAX_SKILLS];
@@ -670,6 +672,11 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 		{
 			XpAdd(playerid, SKILL_PISTOL, 25);
 			if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_PISTOL, 25);
+		}
+		if(SkillDelay[playerid][SKILL_PISTOLS] == 0 && !IsPlayerInAnyVehicle(playerid) && GetPlayerWeapon(playerid) == 23)
+		{
+			XpAdd(playerid, SKILL_PISTOLS, 25);
+			if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_PISTOLS, 25);
 		}
 	}
 	if( RELEASED(KEY_FIRE) || RELEASED(KEY_FIRE | KEY_HANDBRAKE) )
