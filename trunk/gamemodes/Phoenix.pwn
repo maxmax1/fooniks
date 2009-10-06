@@ -350,9 +350,11 @@ public GetLevel(skillId, xP, &xpNeeded)
 		xpNeeded = Skills[skillId][sLevel];
 		return 1;
 	}
+	new temp = Skills[skillId][sLevel];
 	for(new i = 0; i < 99; i++)
 	{
-		xpNeeded = floatround((Skills[skillId][sLevel] * i) * Skills[skillId][sRatio]);
+		temp = floatround(temp*Skills[skillId][sRatio]);
+		xpNeeded = floatround(temp * i);
 		if(xP < xpNeeded) return i;
 	}	
 	xpNeeded = 999;
