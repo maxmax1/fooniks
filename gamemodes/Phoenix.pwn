@@ -59,7 +59,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"107"
+#define SCRIPT_REVISION 	"108"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -1280,10 +1280,10 @@ public LoadAllVehiclesFinish()
 		if(Vehicles[vId][vHealth] < 400.0) Vehicles[vId][vHealth] = 450.0;
 		
 		Vehicles[vId][vSampId] = AddStaticVehicleEx(Vehicles[vId][vModel], 
-													Vehicles[vId][vPosX],
-													Vehicles[vId][vPosY],
-													Vehicles[vId][vPosZ],
-													Vehicles[vId][vAngZ],
+													Vehicles[vId][vPosXd],
+													Vehicles[vId][vPosYd],
+													Vehicles[vId][vPosZd],
+													Vehicles[vId][vAngZd],
 													/*Vehicles[vId][vColor1]*/-1,
 													/*Vehicles[vId][vColor2]*/-1,
 													VEHICLE_DELAY);
