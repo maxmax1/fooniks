@@ -702,6 +702,7 @@ public OnPlayerConnect(playerid)
 
 public OnPlayerDisconnect(playerid)
 {
+	if(IsPlayerNPC(playerid)) return 1;
 	UpdatePlayer(playerid);
 	SaveSkills(playerid);
 }
