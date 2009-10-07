@@ -11,6 +11,7 @@
 new cWaypoint = 0;
 new cTravelTo = 0;
 new cAction = ACTION_IDLE;
+new gStoppedForTraffic;
 
 new waypoints[WAYPOINTS][32] =
 {
@@ -101,3 +102,60 @@ public OnClientMessage(color, text[])
 		else SendChat("Ma ole hetkel hõivatud!");
 	}
 }
+
+stock GetXYInfrontOfMe(Float:distance, &Float:x, &Float:y)
+{
+    new Float:z, Float:angle;
+    GetMyPos(x,y,z);
+    GetMyFacingAngle(angle);
+    x += (distance * floatsin(-angle, degrees));
+    y += (distance * floatcos(-angle, degrees));
+}
+
+LookForAReasonToPause()
+{
+  	new Float:X,Float:Y,Float:Z;
+	new x=0;
+
+	GetMyPos(X,Y,Z);
+	GetXYInfrontOfMe(11.0, X, Y);
+
+	while(x!=MAX_PLAYERS)
+	{
+	    if(IsPlayerConnected(x) && IsPlayerStreamedIn(x))
+		{
+			if( GetPlayerState(x) == PLAYER_STATE_DRIVER || GetPlayerState(x) == PLAYER_STATE_ONFOOT )
+			{
+				if(IsPlayerInRangeOfPoint(x,11.0,X,Y,Z))
+				{
+					return 1;
+				}
+			}
+		}
+		x++;
+	}
+	return 0;
+}
+
+public OnNPCModeInit()
+{
+	SetTimer("ScanTimer",200,1);
+}
+
+forward ScanTimer();
+public ScanTimer()
+{
+    new ReasonToPause = LookForAReasonToPause();
+
+	if(ReasonToPause && !gStoppedForTraffic)
+	{
+		PauseRecordingPlayback();
+		gStoppedForTraffic = 1;
+	}
+	else if(!ReasonToPause && gStoppedForTraffic)
+	{
+	    ResumeRecordingPlayback();
+	    gStoppedForTraffic = 0;
+	}
+}
+
