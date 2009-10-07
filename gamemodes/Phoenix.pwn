@@ -59,7 +59,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"103"
+#define SCRIPT_REVISION 	"105"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -1566,14 +1566,14 @@ public KickPlayer(playerid, kicker, reason[])
 public ShowBanDialog(playerid)
 {
 	new str[STRING_LENGHT];
-	format( str, sizeof(str), "Banni %s", pInfo[pInfo[playerid][SelectedPlayer]][pCharName]);
+	format( str, sizeof(str), LANG_DIALOG_BAN_S, pInfo[pInfo[playerid][SelectedPlayer]][pCharName]);
 	ShowPlayerDialog(playerid, DIALOG_BANPLAYER, DIALOG_STYLE_INPUT, str, LANG_DIALOG_REASON, LANG_DIALOG_BAN, LANG_DIALOG_END);
 }
 
 public ShowKickDialog(playerid)
 {
 	new str[STRING_LENGHT];
-	format( str, sizeof(str), "Kicki %s", pInfo[pInfo[playerid][SelectedPlayer]][pCharName]);
+	format( str, sizeof(str), LANG_DIALOG_KICK_S, pInfo[pInfo[playerid][SelectedPlayer]][pCharName]);
 	ShowPlayerDialog(playerid, DIALOG_KICKPLAYER, DIALOG_STYLE_INPUT, str, LANG_DIALOG_REASON, LANG_DIALOG_KICK, LANG_DIALOG_END);
 }
 
@@ -1590,7 +1590,7 @@ public SendAdminChat(playerid, text[])
 public SendTeata(playerid, text[])
 {
 	new str[STRING_LENGHT];
-	format( str, sizeof(str), "(%i)%s teatab: %s", playerid, pInfo[playerid][pCharName], text);
+	format( str, sizeof(str), LANG_REPORT, playerid, pInfo[playerid][pCharName], text);
 	for( new i = 0; i <= MAX_PLAYERS; i++ )
 	{
 	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] && pInfo[i][pAdminLevel] > 0 )
@@ -1600,7 +1600,7 @@ public SendTeata(playerid, text[])
 public SendAdminMessage(playerid, text[])
 {
     new str[STRING_LENGHT];
-	format( str, sizeof(str), "Administraator %s: %s", pInfo[playerid][pCharName], text);
+	format( str, sizeof(str), LANG_ADMINMSG, pInfo[playerid][pCharName], text);
 	SendClientMessageToAll(COLOR_ADMIN_MESSAGE, str);
 }
 
@@ -1737,7 +1737,7 @@ public OnLevelUp(playerid, skillId, newLevel, showMsg)
 	{
 		//	LevelAP
 		new string[128];
-		format(string, 128, "Sinu %s oskus on nüüd %d. Oled kogunud %d kogemuspunkti.", Skills[skillId][sName], newLevel, pInfo[playerid][pSkill][skillId]);
+		format(string, 128, LANG_LEVELUP, Skills[skillId][sName], newLevel, pInfo[playerid][pSkill][skillId]);
 		SendClientMessage(playerid, COLOR_GREEN, string);
 	}
 	
