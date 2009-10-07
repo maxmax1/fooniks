@@ -30,7 +30,7 @@
 */
 
  // author: -, External Credit #4
-#define dcmd(%1,%2,%3) if (!strcmp((%3)[1], #%1, true, (%2)) && ((((%3)[(%2) + 1] == '\0') && (dcmd_%1(playerid, ""))) || (((%3)[(%2) + 1] == ' ') && (dcmd_%1(playerid, (%3)[(%2) + 2]))))) return 1
+#define dcmd(%1,%2,%3) if (!strcmp(DcmdFix( (%3)[1], (%2) ), #%1, true, (%2)) && ((((%3)[(%2) + 1] == '\0') && (dcmd_%1(playerid, ""))) || (((%3)[(%2) + 1] == ' ') && (dcmd_%1(playerid, (%3)[(%2) + 2]))))) return 1
 
 #define HOLDING(%0) \
 	((newkeys & (%0)) == (%0))
@@ -53,13 +53,15 @@
 #define SendFormattedText(%1,%2,%3,%4) do{new sendfstring[128];format(sendfstring,128,(%3),%4);SendClientMessage((%1), (%2) ,sendfstring);}while(FALSE)
 #define SendFormattedTextToAll(%1,%2,%3) do{new sendfstring[128];format(sendfstring,128,(%2),%3);SendClientMessageToAll((%1),sendfstring);}while(FALSE)
 
+#define animCmd(%0,%1,%2,%3,%4,%5,%6) if(!strcmp(DcmdFix( (%6)[1], strlen((%6)[1]) ),#%0,true)) return  ApplyAnimation(playerid,%1,%2,1.0,%3,%4,%4,0,%5)
+
 /*
 *    DEFINES
 */
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"110"
+#define SCRIPT_REVISION 	"112"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -284,14 +286,18 @@ new animLib[MAX_LIBS][32] =
 
 new anims[MAX_LIBS][MAX_ANIMS][32] = 
 {
+	// Avab akent
 	{"thrw_barl_thrw", "null", "null", "null", "null", "null", "null", "null", "null", "null", "null", "null", "null"},
-	{"Stepsit_in", "Stepsit_loop", "Stepsit_out", "null", "null", "null", "null", "null", "null", "null", "null", "null", "null"},
-	{"Barcustom_get", "Barcustom_loop", "Barcustom_order", "BARman_idle", "Barserve_bottle", "Barserve_give",
-	 "Barserve_glass", "Barserve_in", "Barserve_loop", "Barserve_order", "dnk_stndF_loop", "dnk_stndM_loop", "null"},
+	
+	{"Stepsit_loop", "null", "null", "null", "null", "null", "null", "null", "null", "null", "null", "null", "null"},
+	//	Vıta letilt jook, tellib jooki, toetub leti ‰‰rele, 
+	{"Barcustom_get", "Barcustom_order", "BARman_idle", "Barserve_bottle", "Barserve_give",
+	 "Barserve_glass", "Barserve_in", "Barserve_loop", "Barserve_order", "dnk_stndF_loop", "dnk_stndM_loop", "null", "null"},
 	{"Bat_1", "Bat_2", "Bat_3", "Bat_4", "Bat_block", "Bat_Hit_1", "Bat_Hit_2", "Bat_Hit_3", "Bat_Hit_4", "Bat_IDLE", "Bat_M", "BAT_PART", "null"},
 	{"BD_Fire1", "BD_Fire2", "BD_Fire3", "BD_GF_Wave", "BD_Panic_01", "BD_Panic_02", "BD_Panic_03", "BD_Panic_04", "BD_Panic_Loop", 
 	 "Grlfrd_Kiss_03", "M_smklean_loop", "Playa_Kiss_03", "wash_up"}
 };
+
 
 /*
 *    FORWARDS
@@ -420,6 +426,34 @@ PasswordHash(password[], salt[])
 	format(string, STRING_LENGHT, "%s%s", strtolower(MD5_Hash(password)), salt);
 	format(string, STRING_LENGHT, "%s", strtolower(MD5_Hash(string)));
 	return string;
+}
+
+DcmdFix(text[], size)
+{
+	new fixed[128];
+	strmid(fixed, text, 0, 128, 128);
+	
+	new endreplacing;
+	
+	for( new i; i < size; i++ )
+	{
+		if(endreplacing == 0)
+		{
+			switch( fixed[i] )
+			{
+				case '¸','‹': fixed[i] = 'y';
+				case 'ı','’': fixed[i] = '6';
+				case 'ˆ','÷': fixed[i] = '8';
+				case '‰','ƒ': fixed[i] = '2';
+			}
+			if(fixed[i+1] == ' ' || fixed[i+1] == '\0') endreplacing = 1;
+		}
+		if(endreplacing == 1)
+		{
+			return fixed;	
+		}
+	}
+	return fixed;
 }
 
 public GetLevel(skillId, xP, &xpNeeded)
@@ -990,8 +1024,12 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(mj, 2, cmdtext);
 	dcmd(addveh, 6, cmdtext);
 	dcmd(animlib, 7, cmdtext);
+	
+	animCmd("istu", "Attractors", "Stepsit_loop", 1, 0, 0, cmdtext);
+	animCmd("pysti", "Attractors", "Stepsit_out", 0, 0, 0, cmdtext);
+	animCmd("aken", "AIRPORT", "thrw_barl_thrw", 1, 0, 2000, cmdtext);
 
-
+	SendFormattedText(playerid, COLOR_RED, "K‰sku %s ei ole.", cmdtext);
 	return 1;
 }
 
