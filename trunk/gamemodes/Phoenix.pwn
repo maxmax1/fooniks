@@ -58,8 +58,8 @@
 */
 
 #define SCRIPT_NAME			"Phoenix"
-#define SCRIPT_VERSION  	"0.1"
-#define SCRIPT_REVISION 	"102"
+#define SCRIPT_VERSION  	"0.1.1"
+#define SCRIPT_REVISION 	"103"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -115,9 +115,19 @@
 /*
 *    SKILL DEFINES
 */
-#define MAX_SKILLS		2
-#define SKILL_PISTOL	0
-#define SKILL_PISTOLS	1
+#define MAX_SKILLS		11
+
+#define SKILL_PISTOL				0
+#define SKILL_PISTOLS				1
+#define SKILL_DEAGLE				2
+#define SKILL_SHOTGUN				3
+#define SKILL_SAWNOFF_SHOTGUN		4
+#define SKILL_SPAS12_SHOTGUN		5
+#define SKILL_MICRO_UZI				6
+#define SKILL_MP5					7
+#define SKILL_AK47					8
+#define SKILL_M4					9
+#define SKILL_SNIPERRIFLE			10
 
 /*
 *    GLOBAL VARIABLES
@@ -209,7 +219,16 @@ enum sInf
 new Skills[MAX_SKILLS][sInf] = 
 {
 	{"PISTOL", 1000, 1.5},
-	{"PISTOL_VAIKNE", 1250, 1.5}
+	{"PISTOL_VAIKNE", 1250, 1.5},
+	{"DEAGLE", 1500, 1.5},
+	{"SHOTGUN", 2000, 1.5},
+	{"SAWNOFF_SHOTGUN", 2100, 1.5},
+	{"SPAS12_SHOTGUN", 1800, 1.5},
+	{"MICRO_UZI", 3000, 1.5},
+	{"MP5", 1800, 1.5},
+	{"AK47", 3500, 1.5},
+	{"M4", 2000, 1.5},
+	{"SNIPERRIFLE", 5000, 1.5}
 };
 
 new SkillDelay[MAX_PLAYERS][MAX_SKILLS];
@@ -670,15 +689,63 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 {
     if( PRESSED(KEY_FIRE) || PRESSED(KEY_FIRE | KEY_HANDBRAKE) )
     {
-		if(SkillDelay[playerid][SKILL_PISTOL] == 0 && !IsPlayerInAnyVehicle(playerid) && GetPlayerWeapon(playerid) == 22)
+		if(!IsPlayerInAnyVehicle(playerid))
 		{
-			XpAdd(playerid, SKILL_PISTOL, 25);
-			if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_PISTOL, 25);
-		}
-		if(SkillDelay[playerid][SKILL_PISTOLS] == 0 && !IsPlayerInAnyVehicle(playerid) && GetPlayerWeapon(playerid) == 23)
-		{
-			XpAdd(playerid, SKILL_PISTOLS, 25);
-			if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_PISTOLS, 25);
+			if(SkillDelay[playerid][SKILL_PISTOL] == 0 && GetPlayerWeapon(playerid) == 22)
+			{
+				XpAdd(playerid, SKILL_PISTOL, 25);
+				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_PISTOL, 25);
+			}
+			if(SkillDelay[playerid][SKILL_PISTOLS] == 0 && GetPlayerWeapon(playerid) == 23)
+			{
+				XpAdd(playerid, SKILL_PISTOLS, 25);
+				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_PISTOLS, 25);
+			}
+			if(SkillDelay[playerid][SKILL_DEAGLE] == 0 && GetPlayerWeapon(playerid) == 24)
+			{
+				XpAdd(playerid, SKILL_DEAGLE, 25);
+				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_DEAGLE, 25);
+			}
+			if(SkillDelay[playerid][SKILL_SHOTGUN] == 0 && GetPlayerWeapon(playerid) == 25)
+			{
+				XpAdd(playerid, SKILL_SHOTGUN, 25);
+				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_SHOTGUN, 25);
+			}
+			if(SkillDelay[playerid][SKILL_SAWNOFF_SHOTGUN] == 0 && GetPlayerWeapon(playerid) == 26)
+			{
+				XpAdd(playerid, SKILL_SAWNOFF_SHOTGUN, 25);
+				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_SAWNOFF_SHOTGUN, 25);
+			}
+			if(SkillDelay[playerid][SKILL_SPAS12_SHOTGUN] == 0 && GetPlayerWeapon(playerid) == 27)
+			{
+				XpAdd(playerid, SKILL_SPAS12_SHOTGUN, 25);
+				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_SPAS12_SHOTGUN, 25);
+			}
+			if(SkillDelay[playerid][SKILL_MICRO_UZI] == 0 && GetPlayerWeapon(playerid) == 28)
+			{
+				XpAdd(playerid, SKILL_MICRO_UZI, 25);
+				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_MICRO_UZI, 25);
+			}
+			if(SkillDelay[playerid][SKILL_MP5] == 0 && GetPlayerWeapon(playerid) == 29)
+			{
+				XpAdd(playerid, SKILL_MP5, 25);
+				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_MP5, 25);
+			}
+			if(SkillDelay[playerid][SKILL_AK47] == 0 && GetPlayerWeapon(playerid) == 30)
+			{
+				XpAdd(playerid, SKILL_AK47, 25);
+				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_AK47, 25);
+			}
+			if(SkillDelay[playerid][SKILL_M4] == 0 && GetPlayerWeapon(playerid) == 31)
+			{
+				XpAdd(playerid, SKILL_M4, 25);
+				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_M4, 25);
+			}
+			if(SkillDelay[playerid][SKILL_SNIPERRIFLE] == 0 && GetPlayerWeapon(playerid) == 34)
+			{
+				XpAdd(playerid, SKILL_SNIPERRIFLE, 25);
+				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_SNIPERRIFLE, 25);
+			}			
 		}
 	}
 	if( RELEASED(KEY_FIRE) || RELEASED(KEY_FIRE | KEY_HANDBRAKE) )
@@ -1674,7 +1741,7 @@ public OnLevelUp(playerid, skillId, newLevel, showMsg)
 		SendClientMessage(playerid, COLOR_GREEN, string);
 	}
 	
-	if(skillId == SKILL_PISTOL) SetPlayerSkillLevel(playerid, WEAPONSKILL_PISTOL, floatround(newLevel*10));
+	if(skillId < 11) SetPlayerSkillLevel(playerid, skillId, floatround(newLevel*10));
 	return 1;
 }
 
@@ -1683,6 +1750,7 @@ public ClearDelay(playerid, skillId)
 	SkillDelay[playerid][skillId] = 0;
 	return 1;
 }
+
 public CheckFalseDeadPlayers(playerid)
 {
 	new Float:health;
