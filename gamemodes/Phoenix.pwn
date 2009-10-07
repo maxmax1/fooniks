@@ -59,7 +59,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"109"
+#define SCRIPT_REVISION 	"110"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -80,6 +80,9 @@
 
 #define STRING_LENGHT 256
 #define MAX_QUERY 255
+
+#define MAX_LIBS 5
+#define MAX_ANIMS 13
 
 #define VEHICLE_GROUP			0	// Gängid, Grupeeringud
 #define VEHICLE_JOB				1	// Tööd
@@ -232,6 +235,63 @@ new Skills[MAX_SKILLS][sInf] =
 };
 
 new SkillDelay[MAX_PLAYERS][MAX_SKILLS];
+
+new animLib[MAX_LIBS][32] = 
+{
+	{"AIRPORT"},
+	{"Attractors"},
+	{"BAR"},
+	{"BASEBALL"},
+	{"BD_FIRE"}/*,
+	{"BEACH"},
+	{"benchpress"},
+	{"BF_injection"},
+	{"BIKED"},
+	{"BIKEH"},
+	{"BIKELEAP"},
+	{"BIKES"},
+	{"BIKEV"},
+	{"BIKE_DBZ"},
+	{"BMX"},
+	{"BOMBER"},
+	{"BOX"},
+	{"BSKTBALL"},
+	{"BUDDY"},
+	{"BUS"},
+	{"CAMERA"},
+	{"CAR"},
+	{"CARRY"},
+	{"CAR_CHAT"},
+	{"CASINO"},
+	{"CHAINSAW"},
+	{"CHOPPA"},
+	{"CLOTHES"},
+	{"COACH"},
+	{"COLT45"},
+	{"COP_AMBIENT"},
+	{"COP_DVBYZ"},
+	{"CRACK"},
+	{"CRIB"},
+	{"DAM_JUMP"},
+	{"DANCING"},
+	{"DEALER"},
+	{"DILDO"},
+	{"DODGE"},
+	{"DOZER"},
+	{"DRIVEBYS"},
+	{"FAT"}*/
+};
+
+new anims[MAX_LIBS][MAX_ANIMS][32] = 
+{
+	{"thrw_barl_thrw", "null", "null", "null", "null", "null", "null", "null", "null", "null", "null", "null", "null"},
+	{"Stepsit_in", "Stepsit_loop", "Stepsit_out", "null", "null", "null", "null", "null", "null", "null", "null", "null", "null"},
+	{"Barcustom_get", "Barcustom_loop", "Barcustom_order", "BARman_idle", "Barserve_bottle", "Barserve_give",
+	 "Barserve_glass", "Barserve_in", "Barserve_loop", "Barserve_order", "dnk_stndF_loop", "dnk_stndM_loop", "null"},
+	{"Bat_1", "Bat_2", "Bat_3", "Bat_4", "Bat_block", "Bat_Hit_1", "Bat_Hit_2", "Bat_Hit_3", "Bat_Hit_4", "Bat_IDLE", "Bat_M", "BAT_PART", "null"},
+	{"BD_Fire1", "BD_Fire2", "BD_Fire3", "BD_GF_Wave", "BD_Panic_01", "BD_Panic_02", "BD_Panic_03", "BD_Panic_04", "BD_Panic_Loop", 
+	 "Grlfrd_Kiss_03", "M_smklean_loop", "Playa_Kiss_03", "wash_up"}
+};
 
 /*
 *    FORWARDS
@@ -929,6 +989,8 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(kaklus, 6, cmdtext);
 	dcmd(mj, 2, cmdtext);
 	dcmd(addveh, 6, cmdtext);
+	dcmd(animlib, 7, cmdtext);
+
 
 	return 1;
 }
@@ -1066,6 +1128,26 @@ dcmd_am(playerid, params[])
 	new str[STRING_LENGHT];
 	if( sscanf(params,"s",str) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /am [SÕNUM]");
 	SendAdminChat(playerid, str);
+	return 1;
+}
+
+dcmd_animlib(playerid, params[])
+{
+	new lib, anim;
+	if(sscanf(params, "ii", lib, anim)) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /animlib libId, animId");
+	if(lib > MAX_LIBS || lib < 0 || anim > MAX_ANIMS || anim < 0)
+	{
+		SendFormattedText(playerid, COLOR_YELLOW,"Viga: libId(0, %d), animId(0, %d)", MAX_LIBS, MAX_ANIMS);
+		return 1;
+	}
+	if(strcmp(anims[lib][anim], "null", true) == 0) 
+	{
+		SendClientMessage(playerid, COLOR_YELLOW,"Sellel libil ei ole nii palju animatsioone");
+		return 1;
+	}
+	
+	ApplyAnimation(playerid, animLib[lib], anims[lib][anim], 1.0, 0, 0, 0, 0, 0);
+	SendFormattedText(playerid, COLOR_YELLOW, "Määratud: libId(%d), animId(%d)", lib, anim);	
 	return 1;
 }
 
