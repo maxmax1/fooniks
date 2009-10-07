@@ -59,7 +59,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"106"
+#define SCRIPT_REVISION 	"107"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -73,7 +73,7 @@
 	#define VEHICLE_SAVE_THREAD     2
 	#define FETCH_UINFO_THREAD      3
 
-#define VEHICLE_DELAY 60000
+#define VEHICLE_DELAY 1000*60*5
 #define SQL_FINISH_TIME 1000
 #define CHAT_RADIUS 25
 #define CHAT_RADIUS_SHOUT 40
@@ -663,6 +663,7 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
 
 public OnVehicleDeath(vehicleid)
 {
+	/*
 	new vSqlId = GetVehicleSqlId(vehicleid);
 	if(vSqlId != -1)
 	{
@@ -670,6 +671,7 @@ public OnVehicleDeath(vehicleid)
 		VehPosd(vSqlId);
 		SetTimerEx("SetVehicleSpawn", 500, 0, "d", vSqlId);
 	}
+	*/
 	return 1;
 }
 
@@ -1278,12 +1280,12 @@ public LoadAllVehiclesFinish()
 		if(Vehicles[vId][vHealth] < 400.0) Vehicles[vId][vHealth] = 450.0;
 		
 		Vehicles[vId][vSampId] = AddStaticVehicleEx(Vehicles[vId][vModel], 
-													Vehicles[vId][vPosXd],
-													Vehicles[vId][vPosYd],
-													Vehicles[vId][vPosZd],
-													Vehicles[vId][vAngZd],
-													Vehicles[vId][vColor1],
-													Vehicles[vId][vColor2],
+													Vehicles[vId][vPosX],
+													Vehicles[vId][vPosY],
+													Vehicles[vId][vPosZ],
+													Vehicles[vId][vAngZ],
+													/*Vehicles[vId][vColor1]*/-1,
+													/*Vehicles[vId][vColor2]*/-1,
 													VEHICLE_DELAY);
 		SetTimerEx("SetVehicleSpawn", 500, 0, "d", vId);
 	}
