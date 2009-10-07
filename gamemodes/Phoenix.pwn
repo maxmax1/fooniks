@@ -59,7 +59,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"108"
+#define SCRIPT_REVISION 	"109"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -1287,7 +1287,7 @@ public LoadAllVehiclesFinish()
 													/*Vehicles[vId][vColor1]*/-1,
 													/*Vehicles[vId][vColor2]*/-1,
 													VEHICLE_DELAY);
-		SetTimerEx("SetVehicleSpawn", 500, 0, "d", vId);
+		//SetTimerEx("SetVehicleSpawn", 500, 0, "d", vId);
 	}
 	LOADED_VEHICLES = vId+1;
 	printf("\t\t %d Vehicles Loaded.", LOADED_VEHICLES);
