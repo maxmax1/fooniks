@@ -20,10 +20,12 @@
 #define LANG_UNLOADED				"\t\t* %s-%sr%s-%s UnLoaded."
 #define LANG_NOCHARACTER			"Sellise nimega karakterit ei ole!"
 #define LANG_NOUSER				"Sellise nimega kasutajat ei ole!"
+
 #define LANG_DIALOG_LOGIN_CAPTION		"Palun logige sisse!"
 #define LANG_DIALOG_LOGIN_INFO			"Tere, %s.\n Sisesta parool:"
 #define LANG_DIALOG_LOGIN_LOGINBUTTON		"Logi Sisse!"
 #define LANG_DIALOG_EXITBUTTON		"Välju"
+#define LANG_DIALOG_OK		    "Ok"
 #define LANG_DIALOG_SEND		    "Saada"
 #define LANG_DIALOG_END		    "Lõpeta"
 #define LANG_DIALOG_REASON		    "Sisesta põhjus:"
@@ -31,6 +33,12 @@
 #define LANG_DIALOG_BAN_S		    "Banni %s"
 #define LANG_DIALOG_KICK		    "Kicki"
 #define LANG_DIALOG_KICK_S		    "Kicki %s"
+#define LANG_DIALOG_ADMINCPHEAD "Administratsioon"
+#define LANG_DIALOG_TELEHEAD "Telepordid"
+#define LANG_DIALOG_ADMINCP "Avalik Sõnum\nMäära Kellaaeg\nMäära Ilm\nTelepordid"
+
+#define LANG_BAD_INPUT "Vigane sisestus."
+
 #define LANG_LOGGED_IN                "Edukalt sisse logitud."
 #define LANG_WRONG_PASSWORD               "Vale parool!"
 #define LANG_MUST_LOGIN               "Mängimiseks pead sisse logima!"
@@ -49,3 +57,4 @@
 #define LANG_LEVELUP "Sinu %s oskus on nüüd %d. Oled kogunud %d kogemuspunkti."
 #define LANG_ADMINMSG "Administraator %s: %s"
 #define LANG_REPORT "(%i)%s teatab: %s"
+#define LANG_TELEPORTED_TO "Teleported to %s."
