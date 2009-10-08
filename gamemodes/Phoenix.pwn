@@ -60,7 +60,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"115"
+#define SCRIPT_REVISION 	"116"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -71,8 +71,7 @@
          *  THREADS IDs
          */
 	#define VEHICLE_LOAD_THREAD     1
-	#define VEHICLE_SAVE_THREAD     2
-	#define FETCH_UINFO_THREAD      3
+	#define FETCH_UINFO_THREAD      2
 
 #define VEHICLE_DELAY 1000*60*5
 #define SQL_FINISH_TIME 1000
@@ -80,7 +79,7 @@
 #define CHAT_RADIUS_SHOUT 40
 
 #define STRING_LENGHT 256
-#define MAX_QUERY 255
+#define MAX_QUERY 300
 #define MAX_TELEPORTS 9
 
 #define MAX_LIBS 5
@@ -187,7 +186,6 @@ new pInfo[MAX_PLAYERS][pInf];
 new Text:  InfoBar[MAX_PLAYERS];
 new 	   InfoBarTimer[MAX_PLAYERS];
 
-new VEHICLE_SAVE_NEXT = 0;
 new LOADED_VEHICLES = 0;
 enum vInf
 {
@@ -287,7 +285,7 @@ forward SCMTAInPlayerRadius(playerid, radius, color, message[]);
 forward LoadAllVehiclesStart();
 forward LoadAllVehiclesFinish();
 forward SaveAllVehicles(closingdown);
-forward SaveVehicle(vId, saveall);
+forward SaveVehicle(vId);
 forward SetVehicleSpawn(vId);
 forward OnDriverEnterVehicle(playerid);
 forward OnDriverExitVehicle(playerid);
@@ -1381,15 +1379,6 @@ public OnQueryFinish(query[], resultid)
 	{
 		LoadAllVehiclesFinish();
 	}
-	else if( resultid == VEHICLE_SAVE_THREAD )
-	{
-		if(VEHICLE_SAVE_NEXT < LOADED_VEHICLES)
-		{
-			SaveVehicle(VEHICLE_SAVE_NEXT, true);
-			VEHICLE_SAVE_NEXT++;
-		}
-		else VEHICLE_SAVE_NEXT = 0;
-	}
 	else if( resultid == FETCH_UINFO_THREAD )
 	{
 		FetchCharacterInformationFinish(Fetch_UInfo_Thread);
@@ -1482,43 +1471,34 @@ public LoadAllVehiclesFinish()
 
 public SaveAllVehicles(closingdown)
 {
-	print("Started Saving all vehicles.");
-	if(closingdown)
+	for(new i; i < LOADED_VEHICLES; i++)
 	{
-		print("Saving all before server shutdown.");
-		for(new i; i < LOADED_VEHICLES; i++)
-		{
-			SaveVehicle(i, false); // Kui server on kinni minemas peame kindlad olema, et ennem asjad salvestatud on.
-		}
-		print("All vehicles saved.");
-	}
-	else
-	{
-		SaveVehicle(VEHICLE_SAVE_NEXT, true);
-		VEHICLE_SAVE_NEXT++;
+		SaveVehicle(i);
 	}
 }
 
-public SaveVehicle(vId, saveall)
+public SaveVehicle(vId)
 {
 	VehPos(vId);
-	new query[512];
 	
-	format(query, 512, "UPDATE %svehicles SET vPosX = '%.5f', vPosY = '%.5f', vPosZ = '%.5f', vAngZ = '%.5f', vColor1 = '%d', vColor2 = '%d', vOwner = '%d', vValue = '%d', vDeaths = '%d', vHealth = '%f' WHERE vehicleId = '%d'",
-		MYSQL_PREFIX,
-		Vehicles[vId][vPosX],
-		Vehicles[vId][vPosY],
-		Vehicles[vId][vPosZ],
-		Vehicles[vId][vAngZ],
-		Vehicles[vId][vColor1],
-		Vehicles[vId][vColor2],
-		Vehicles[vId][vOwner],
-		Vehicles[vId][vValue],
-		Vehicles[vId][vDeaths],
-		Vehicles[vId][vHealth],
-		Vehicles[vId][vSqlID]);
-	if(!saveall) mysql_query(query);
-	else mysql_query(query, VEHICLE_SAVE_THREAD);
+	new query[MAX_QUERY], table[32];
+	format(table, 32, "%svehicles", MYSQL_PREFIX);
+	
+	MysqlUpdateBuild(query, table);
+	MysqlUpdateInt(query, "vColor1", Vehicles[vId][vColor1]);
+	MysqlUpdateInt(query, "vColor2", Vehicles[vId][vColor2]);
+	MysqlUpdateInt(query, "vOwner", Vehicles[vId][vOwner]);
+	MysqlUpdateInt(query, "vValue", Vehicles[vId][vValue]);
+	MysqlUpdateInt(query, "vDeaths", Vehicles[vId][vDeaths]);
+	MysqlUpdateFlo(query, "vHealth", Vehicles[vId][vHealth]);
+	
+	MysqlUpdateFlo(query, "vPosX", Vehicles[vId][vPosX]);
+	MysqlUpdateFlo(query, "vPosY", Vehicles[vId][vPosY]);
+	MysqlUpdateFlo(query, "vPosZ", Vehicles[vId][vPosZ]);
+	MysqlUpdateFlo(query, "vAngZ", Vehicles[vId][vAngZ]);
+	
+	MysqlUpdateFinish(query, "vehicleId", Vehicles[vId][vSqlID]);
+	return 1;
 }
 
 public SetVehicleSpawn(vId)
