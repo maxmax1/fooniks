@@ -60,7 +60,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"113"
+#define SCRIPT_REVISION 	"115"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -889,13 +889,13 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	{
 		if( response != 0 )
 		{
-			if(pInfo[playerid][aAction] == 1)
+			if(pInfo[playerid][aAction] == 2)
 			{
 				new hour = strval(inputtext);
 				if(hour > 0 && hour < 24) SetWorldTime(hour);
 				else SendClientMessage(playerid, COLOR_RED, LANG_BAD_INPUT);
 			}
-			else if(pInfo[playerid][aAction] == 2)
+			else if(pInfo[playerid][aAction] == 3)
 			{
 				new weather = strval(inputtext);
 				if(weather > 0 && weather < 50) SetWeather(weather);
