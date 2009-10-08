@@ -29,6 +29,7 @@
 *    INCLUDES
 */
 
+#define animCmd(%0,%1,%2,%3,%4,%5,%6) if(!strcmp(DcmdFix( (%6)[1], strlen((%6)[1]) ),#%0,true)) return  ApplyAnimation(playerid,%1,%2,1.0,%3,%4,%4,0,%5)
  // author: -, External Credit #4
 #define dcmd(%1,%2,%3) if (!strcmp(DcmdFix( (%3)[1], (%2) ), #%1, true, (%2)) && ((((%3)[(%2) + 1] == '\0') && (dcmd_%1(playerid, ""))) || (((%3)[(%2) + 1] == ' ') && (dcmd_%1(playerid, (%3)[(%2) + 2]))))) return 1
 
@@ -53,15 +54,13 @@
 #define SendFormattedText(%1,%2,%3,%4) do{new sendfstring[128];format(sendfstring,128,(%3),%4);SendClientMessage((%1), (%2) ,sendfstring);}while(FALSE)
 #define SendFormattedTextToAll(%1,%2,%3) do{new sendfstring[128];format(sendfstring,128,(%2),%3);SendClientMessageToAll((%1),sendfstring);}while(FALSE)
 
-#define animCmd(%0,%1,%2,%3,%4,%5,%6) if(!strcmp(DcmdFix( (%6)[1], strlen((%6)[1]) ),#%0,true)) return  ApplyAnimation(playerid,%1,%2,1.0,%3,%4,%4,0,%5)
-
 /*
 *    DEFINES
 */
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"112"
+#define SCRIPT_REVISION 	"113"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -82,6 +81,7 @@
 
 #define STRING_LENGHT 256
 #define MAX_QUERY 255
+#define MAX_TELEPORTS 9
 
 #define MAX_LIBS 5
 #define MAX_ANIMS 13
@@ -114,6 +114,9 @@
 #define DIALOG_SENDES 2011
 #define DIALOG_BANPLAYER 2012
 #define DIALOG_KICKPLAYER 2013
+#define DIALOG_ADMINCP 2014
+#define DIALOG_AACTION 2015
+#define DIALOG_TELEPORTS 2016
 
 #define NPC_IGOR 1
 
@@ -137,6 +140,8 @@
 /*
 *    GLOBAL VARIABLES
 */
+
+new gHour, gMinute, gSecond;
 
 new WelcomeStr[64];
 
@@ -162,6 +167,7 @@ enum pInf
 	pLeader,
 	pModel,
 	pAdminLevel,
+	aAction,
 	
 	Float:pPosX,
 	Float:pPosY,
@@ -235,67 +241,29 @@ new Skills[MAX_SKILLS][sInf] =
 	{"M4", 2000, 1.5},
 	{"SNIPERRIFLE", 5000, 1.5}
 };
-
 new SkillDelay[MAX_PLAYERS][MAX_SKILLS];
 
-new animLib[MAX_LIBS][32] = 
+enum posInfo
 {
-	{"AIRPORT"},
-	{"Attractors"},
-	{"BAR"},
-	{"BASEBALL"},
-	{"BD_FIRE"}/*,
-	{"BEACH"},
-	{"benchpress"},
-	{"BF_injection"},
-	{"BIKED"},
-	{"BIKEH"},
-	{"BIKELEAP"},
-	{"BIKES"},
-	{"BIKEV"},
-	{"BIKE_DBZ"},
-	{"BMX"},
-	{"BOMBER"},
-	{"BOX"},
-	{"BSKTBALL"},
-	{"BUDDY"},
-	{"BUS"},
-	{"CAMERA"},
-	{"CAR"},
-	{"CARRY"},
-	{"CAR_CHAT"},
-	{"CASINO"},
-	{"CHAINSAW"},
-	{"CHOPPA"},
-	{"CLOTHES"},
-	{"COACH"},
-	{"COLT45"},
-	{"COP_AMBIENT"},
-	{"COP_DVBYZ"},
-	{"CRACK"},
-	{"CRIB"},
-	{"DAM_JUMP"},
-	{"DANCING"},
-	{"DEALER"},
-	{"DILDO"},
-	{"DODGE"},
-	{"DOZER"},
-	{"DRIVEBYS"},
-	{"FAT"}*/
-};
-
-new anims[MAX_LIBS][MAX_ANIMS][32] = 
+	tName[32],
+	Float: tX,
+	Float: tY,
+	Float: tZ,
+	Float: tvX,
+	Float: tvY,
+	Float: tvZ
+};	
+new telePositions[MAX_TELEPORTS][posInfo] = 
 {
-	// Avab akent
-	{"thrw_barl_thrw", "null", "null", "null", "null", "null", "null", "null", "null", "null", "null", "null", "null"},
-	
-	{"Stepsit_loop", "null", "null", "null", "null", "null", "null", "null", "null", "null", "null", "null", "null"},
-	//	Vıta letilt jook, tellib jooki, toetub leti ‰‰rele, 
-	{"Barcustom_get", "Barcustom_order", "BARman_idle", "Barserve_bottle", "Barserve_give",
-	 "Barserve_glass", "Barserve_in", "Barserve_loop", "Barserve_order", "dnk_stndF_loop", "dnk_stndM_loop", "null", "null"},
-	{"Bat_1", "Bat_2", "Bat_3", "Bat_4", "Bat_block", "Bat_Hit_1", "Bat_Hit_2", "Bat_Hit_3", "Bat_Hit_4", "Bat_IDLE", "Bat_M", "BAT_PART", "null"},
-	{"BD_Fire1", "BD_Fire2", "BD_Fire3", "BD_GF_Wave", "BD_Panic_01", "BD_Panic_02", "BD_Panic_03", "BD_Panic_04", "BD_Panic_Loop", 
-	 "Grlfrd_Kiss_03", "M_smklean_loop", "Playa_Kiss_03", "wash_up"}
+	{"LSPD", 1552.2706, -1675.6493, 16.1953, 1524.2191, -1632.0856, 13.1682},
+	{"Kardirada", 1645.6719, -1149.8458, 24.0712, 1660.2335, -1155.1641, 23.4643},
+	{"Linnavalitsus", 1481.6273, -1748.2708, 15.4453, 1484.5649, -1737.8258, 13.1684},
+	{"Unity", 1756.1044, -1862.4084, 13.5763, 1765.5027, -1859.9630, 13.1998},
+	{"Lennukas", 2010.0344, -2201.4253, 13.5469, 2008.3926, -2202.1609, 13.2537},
+	{"Sadam", 2753.3142, -2452.6616, 13.6432, 2755.5708, -2452.7727, 13.2536},
+	{"Staadion", 2680.4749, -1672.8507, 9.4194, 2682.1299, -1672.1379, 9.1324},
+	{"PigPen", 2427.9739, -1242.3777, 24.2333, 2426.4302, -1243.2527, 23.8387},
+	{"pay'N'spray", 2074.6631, -1825.7513, 13.5469, 2076.2275, -1824.9553, 13.1682}
 };
 
 
@@ -349,6 +317,7 @@ forward SetSkills(playerid);
 forward OnLevelUp(playerid, skillId, newLevel, showMsg);
 forward GetLevel(skillId, xP, &xpNeeded);
 forward ClearDelay(playerid, skillId);
+forward TimeSync();
 
 /*
 *    MAIN()
@@ -474,6 +443,47 @@ public GetLevel(skillId, xP, &xpNeeded)
 	return 99;
 }
 
+stock showAdminDialog(playerid)
+{
+	if(pInfo[playerid][pAdminLevel] < 1) return 1;
+	ShowPlayerDialog(playerid, DIALOG_ADMINCP, DIALOG_STYLE_LIST, LANG_DIALOG_ADMINCPHEAD, LANG_DIALOG_ADMINCP, LANG_DIALOG_OK, LANG_DIALOG_EXITBUTTON);	
+	return 1;
+}
+
+stock showAdminActionDialog(playerid, action)
+{
+	if(pInfo[playerid][pAdminLevel] < 1) return 1;
+	pInfo[playerid][aAction] = action+1;
+	
+	new string[32];
+	if(action == 1) format(string, 32, "M‰‰ra Kellaaeg");
+	else if(action == 2) format(string, 32, "M‰‰ra Ilm");
+	else format(string, 32, "Avalik Sınum:");
+	
+	ShowPlayerDialog(playerid, DIALOG_AACTION, DIALOG_STYLE_INPUT, LANG_DIALOG_ADMINCPHEAD, string, LANG_DIALOG_OK, LANG_DIALOG_EXITBUTTON);
+	return 1;
+}
+
+stock showTeleDialog(playerid)
+{
+	if(pInfo[playerid][pAdminLevel] < 1) return 1;
+	
+	new string[128];	
+	for(new i; i < MAX_TELEPORTS; i++)
+	{
+		format(string, 128, "%s\n%s", string, telePositions[i][tName]);
+	}
+	ShowPlayerDialog(playerid, DIALOG_TELEPORTS, DIALOG_STYLE_LIST, LANG_DIALOG_TELEHEAD, string, LANG_DIALOG_OK, LANG_DIALOG_EXITBUTTON);	
+	return 1;
+}
+
+stock setTime()
+{
+	
+	gettime(gHour, gMinute, gSecond);
+	SetWorldTime(gHour);
+}
+
 /*
 *    NATIVES
 */
@@ -518,8 +528,10 @@ public OnGameModeInit()
 	SetNameTagDrawDistance(7.5);
 	LimitGlobalChatRadius(CHAT_RADIUS);
 	
+	setTime();	
 	SetTimer("UpdateAllPlayers", 1000*60*15, true);
 	SetTimer("CheckFalseDeadPlayers", 3000, true);
+	SetTimer("TimeSync", 60000, true);
 	
 	PistolPickup = CreatePickup(346 , 2, 2394.2112,-1206.5466,27.8595, 0); // Pistol
 	SawnoffPickup = CreatePickup(350 , 2, 2505.4795,-1117.3652,56.2031, 0); // sawnoff
@@ -705,6 +717,7 @@ public OnPlayerDisconnect(playerid)
 	if(IsPlayerNPC(playerid)) return 1;
 	UpdatePlayer(playerid);
 	SaveSkills(playerid);
+	return 1;
 }
 
 public OnPlayerRequestClass(playerid)
@@ -822,6 +835,8 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	}
 	else if( dialogid == DIALOG_SENDES )
 	{
+		if( response == 0 ) return 1;
+		
 	    if( strlen(inputtext) == 0 )
 		{
 		    SendClientMessage(playerid, COLOR_RED, LANG_EMPTY_ES);
@@ -859,6 +874,58 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	        BanPlayer(pInfo[playerid][SelectedPlayer], playerid, inputtext);
 	    }
 	}
+	else if( dialogid == DIALOG_ADMINCP )
+	{
+		if( response == 0 ) return 1;
+		
+		if(listitem < 3) // 
+		{
+			showAdminActionDialog(playerid, listitem);
+			return 1;
+		}
+		else showTeleDialog(playerid);
+	}
+	else if( dialogid == DIALOG_AACTION )
+	{
+		if( response != 0 )
+		{
+			if(pInfo[playerid][aAction] == 1)
+			{
+				new hour = strval(inputtext);
+				if(hour > 0 && hour < 24) SetWorldTime(hour);
+				else SendClientMessage(playerid, COLOR_RED, LANG_BAD_INPUT);
+			}
+			else if(pInfo[playerid][aAction] == 2)
+			{
+				new weather = strval(inputtext);
+				if(weather > 0 && weather < 50) SetWeather(weather);
+				else SendClientMessage(playerid, COLOR_RED, LANG_BAD_INPUT);
+			}
+			else
+			{
+				dcmd_am(playerid, inputtext);
+			}
+		}
+		pInfo[playerid][aAction] = 0;
+	}
+	else if( dialogid == DIALOG_TELEPORTS )
+	{
+		if( response == 0 ) return 1;
+		
+		new vehId = GetPlayerVehicleID(playerid);
+		
+		if(vehId == 0)
+		{
+			SetPlayerPos(playerid, telePositions[listitem][tX], telePositions[listitem][tY], telePositions[listitem][tZ]);
+		}
+		else
+		{
+			SetVehiclePos(playerid, telePositions[listitem][tvX], telePositions[listitem][tvY], telePositions[listitem][tvZ]);
+		}
+		
+		SendFormattedText(playerid, COLOR_GREEN, LANG_TELEPORTED_TO, telePositions[listitem][tName]);
+	}
+	
 	return 1;
 }
 public OnPlayerRequestSpawn(playerid)
@@ -1019,12 +1086,12 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(oskus, 5, cmdtext);
 	dcmd(teata, 5, cmdtext);
 	dcmd(am, 2, cmdtext);
+	dcmd(admin, 5, cmdtext);
 	
 	// ajutine
 	dcmd(kaklus, 6, cmdtext);
 	dcmd(mj, 2, cmdtext);
 	dcmd(addveh, 6, cmdtext);
-	dcmd(animlib, 7, cmdtext);
 	
 	animCmd("istu", "Attractors", "Stepsit_loop", 1, 0, 0, cmdtext);
 	animCmd("pysti", "Attractors", "Stepsit_out", 0, 0, 0, cmdtext);
@@ -1093,6 +1160,7 @@ dcmd_es(playerid, params[])
 	pInfo[playerid][SelectedPlayer] = selplayer;
 	if( strlen(text) > 0 ) ForwardEs(playerid, text);
 	else SendEs(playerid);
+	return 1;
 }
 
 dcmd_mjuurde(playerid, params[])
@@ -1103,6 +1171,7 @@ dcmd_mjuurde(playerid, params[])
     WarpPlayerToPlayer(playerid, selectedplayer);
     return 1;
 }
+
 dcmd_msiia(playerid, params[])
 {
     if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
@@ -1111,6 +1180,7 @@ dcmd_msiia(playerid, params[])
     WarpPlayerToPlayer(selectedplayer, playerid);
     return 1;
 }
+
 dcmd_kick(playerid, params[])
 {
     if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
@@ -1120,6 +1190,7 @@ dcmd_kick(playerid, params[])
     else KickPlayer(selectedplayer, playerid, reason);
     return 1;
 }
+
 dcmd_ban(playerid, params[])
 {
     if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
@@ -1129,6 +1200,7 @@ dcmd_ban(playerid, params[])
     else BanPlayer(selectedplayer, playerid, reason);
     return 1;
 }
+
 dcmd_a(playerid, params[])
 {
 	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
@@ -1154,6 +1226,7 @@ dcmd_oskus(playerid, params[])
 	}
 	return 1;
 }
+
 dcmd_teata(playerid, params[])
 {
 	new str[STRING_LENGHT];
@@ -1161,6 +1234,7 @@ dcmd_teata(playerid, params[])
 	SendTeata(playerid, str);
 	return 1;
 }
+
 dcmd_am(playerid, params[])
 {
 	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
@@ -1170,23 +1244,12 @@ dcmd_am(playerid, params[])
 	return 1;
 }
 
-dcmd_animlib(playerid, params[])
+dcmd_admin(playerid, params[])
 {
-	new lib, anim;
-	if(sscanf(params, "ii", lib, anim)) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /animlib libId, animId");
-	if(lib > MAX_LIBS || lib < 0 || anim > MAX_ANIMS || anim < 0)
-	{
-		SendFormattedText(playerid, COLOR_YELLOW,"Viga: libId(0, %d), animId(0, %d)", MAX_LIBS, MAX_ANIMS);
-		return 1;
-	}
-	if(strcmp(anims[lib][anim], "null", true) == 0) 
-	{
-		SendClientMessage(playerid, COLOR_YELLOW,"Sellel libil ei ole nii palju animatsioone");
-		return 1;
-	}
+	#pragma unused params
+	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
 	
-	ApplyAnimation(playerid, animLib[lib], anims[lib][anim], 1.0, 0, 0, 0, 0, 0);
-	SendFormattedText(playerid, COLOR_YELLOW, "M‰‰ratud: libId(%d), animId(%d)", lib, anim);	
+	showAdminDialog(playerid);
 	return 1;
 }
 
@@ -1255,13 +1318,14 @@ public SendEs(playerid)
 	format(str, sizeof(str), LANG_SEND_ES_TO, pInfo[pInfo[playerid][SelectedPlayer]][pCharName]);
 	ShowPlayerDialog(playerid, DIALOG_SENDES, DIALOG_STYLE_INPUT, LANG_ES, str, LANG_DIALOG_SEND, LANG_DIALOG_EXITBUTTON);
 }
+
 public ForwardEs(playerid, message[])
 {
 	new str[STRING_LENGHT];
 	
-	format(str, sizeof(str),"-> %s: %s", pInfo[pInfo[playerid][SelectedPlayer]][pCharName], message);
+	format(str, sizeof(str),"-> %s(%d): %s", pInfo[pInfo[playerid][SelectedPlayer]][pCharName], pInfo[playerid][SelectedPlayer], message);
 	SendClientMessage(playerid, COLOR_CHAT_ES, str);
-	format(str, sizeof(str),"<- %s: %s", pInfo[playerid][pCharName], message);
+	format(str, sizeof(str),"<- %s(%d): %s", pInfo[playerid][pCharName], playerid, message);
 	SendClientMessage(pInfo[playerid][SelectedPlayer], COLOR_CHAT_ES, str);
 }
 
@@ -1281,6 +1345,7 @@ public SendEmote(playerid, emote[])
 	    }
 	}
 }
+
 public SCMTAInPlayerRadius(playerid, radius, color, message[])
 {
 	new Float:PlayerLocX, Float:PlayerLocY, Float:PlayerLocZ;
@@ -2036,6 +2101,12 @@ public CheckFalseDeadPlayers(playerid)
 	    }
 	}
 }
+
+public TimeSync()
+{
+	setTime();
+}
+
 /*
 *    EOF
 */
