@@ -268,6 +268,7 @@ new telePositions[MAX_TELEPORTS][posInfo] =
 /*
 *    FORWARDS
 */
+forward CrashCar(vehicleid, Float:damage, Float:oX, Float:oY, Float:oZ);
 forward UpdateAllPlayerPos();
 forward SendTeata(playerid, text[]);
 forward SendAdminMessage(playerid, text[]);
@@ -1609,13 +1610,11 @@ public OnSpeedoUpdate(playerid)
 		format(string,sizeof(string),"~y~~h~Bensiin: %s  ~y~~h~Kiirus: ~w~%i km/h  ~y~~h~Korras: ~w~%d", fuel, Vehicles[vId][vSpeed], hProtsenti);
 		TextDrawSetString(InfoBar[playerid], string);
 		
-		if((oSpeed - Vehicles[vId][vSpeed]) > 50 && (oHealth - Vehicles[vId][vHealth]) > 50)
+		if((oSpeed - Vehicles[vId][vSpeed]) > 30 && (oHealth - Vehicles[vId][vHealth]) > 50)
 		{
-			VehPos(vId);
-			SendEmote(playerid, LANG_VEH_CRASH);
-			SetPlayerPos(playerid, Vehicles[vId][vPosX], Vehicles[vId][vPosY], Vehicles[vId][vPosZ]+2);
-			SetTimerEx("Velocity", 75, 0, "ifff", playerid, oX, oY, oZ);
-			ApplyAnimation(playerid, "CRACK", "crckdeth2", 4.0, 1, 1, 1, 1, 1);
+         	VehPos(vId);
+         	new Float:damage = oHealth - Vehicles[vId][vHealth];
+			CrashCar(vId, damage, oX, oY, oZ);
 			Vehicles[vId][vSpeed] = 0;
 		}
 	}
@@ -1625,6 +1624,26 @@ public OnSpeedoUpdate(playerid)
 		KillTimer(InfoBarTimer[playerid]);
 	}
 	return 1;
+}
+
+public CrashCar(vehicleid, Float:damage, Float:oX, Float:oY, Float:oZ)
+{
+	new pVeh;
+	for( new playerid = 0; playerid <= MAX_PLAYERS; playerid++ )
+	{
+	    if( IsPlayerConnected(playerid) && pInfo[playerid][pLoggedIn] && IsPlayerInAnyVehicle(playerid) )
+	    {
+			pVeh = GetPlayerVehicleID(playerid);
+			if( pVeh == vehicleid )
+			{
+				SendEmote(playerid, LANG_VEH_CRASH);
+				SetPlayerPos(playerid, Vehicles[vehicleid][vPosX], Vehicles[vehicleid][vPosY], Vehicles[vehicleid][vPosZ]+2);
+				SetTimerEx("Velocity", 75, 0, "ifff", playerid, oX, oY, oZ);
+				ApplyAnimation(playerid, "CRACK", "crckdeth2", 4.0, 1, 1, 1, 1, 1);
+				SetPlayerHealth(playerid, damage/10);
+			}
+		}
+	}
 }
 
 public CheckCharacter(playerid)
