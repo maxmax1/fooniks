@@ -60,7 +60,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"118"
+#define SCRIPT_REVISION 	"119"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -216,6 +216,7 @@ enum vInf
 	
 	vDeaths,
 	Float: vHealth,
+	SpeedLimit
 };
 new Vehicles[700][vInf];
 
@@ -1088,6 +1089,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(teata, 5, cmdtext);
 	dcmd(am, 2, cmdtext);
 	dcmd(admin, 5, cmdtext);
+	dcmd(kiirusepiirang, 14, cmdtext);
 	
 	// ajutine
 	dcmd(kaklus, 6, cmdtext);
@@ -1251,6 +1253,22 @@ dcmd_admin(playerid, params[])
 	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
 	
 	showAdminDialog(playerid);
+	return 1;
+}
+dcmd_kiirusepiirang(playerid, params[])
+{
+	new piirang;
+	if( sscanf(params, "i", piirang) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /kiirusepiirang [Piirang KM/H]");
+	if( piirang < 15 ) return SendClientMessage(playerid, COLOR_YELLOW, "Piirang ei saa olla väiksem kui 15km/h!");
+	
+	if( IsPlayerInAnyVehicle(playerid) && GetPlayerState(playerid) == PLAYER_STATE_DRIVER )
+	{
+	    new vehicleid = GetPlayerVehicleID(playerid);
+		Vehicles[vehicleid][SpeedLimit] = piirang;
+		SendClientMessage(playerid, COLOR_YELLOW, "Piirang määratud!");
+
+	}
+	else return SendClientMessage(playerid, COLOR_YELLOW, "Sa ei juhi ühtegi autot!");
 	return 1;
 }
 
@@ -1616,6 +1634,13 @@ public OnSpeedoUpdate(playerid)
          	new Float:damage = oHealth - Vehicles[vId][vHealth];
 			CrashCar(vId, damage, oX, oY, oZ);
 			Vehicles[vId][vSpeed] = 0;
+		}
+		else if( Vehicles[vId][vSpeed] > Vehicles[vId][SpeedLimit] )
+		{
+			new difference = Vehicles[vId][vSpeed] - Vehicles[vId][SpeedLimit];
+			if ( difference > 5 ) difference = 5;
+			new Float:SlowDownX = difference/3, Float:SlowDownY = difference/3, Float:SlowDownZ = difference/3;
+			SetVehicleVelocity(vId, Vehicles[vId][vSpeedX] - SlowDownX, Vehicles[vId][vSpeedY] - SlowDownY, Vehicles[vId][vSpeedZ] - SlowDownZ);
 		}
 	}
 	else
