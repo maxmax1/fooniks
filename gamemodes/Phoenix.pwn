@@ -1238,7 +1238,7 @@ dcmd_am(playerid, params[])
 	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
 	new str[STRING_LENGHT];
 	if( sscanf(params,"s",str) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /am [SÕNUM]");
-	SendAdminChat(playerid, str);
+	SendAdminMessage(playerid, str);
 	return 1;
 }
 
