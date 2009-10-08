@@ -60,7 +60,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"116"
+#define SCRIPT_REVISION 	"118"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -268,6 +268,7 @@ new telePositions[MAX_TELEPORTS][posInfo] =
 /*
 *    FORWARDS
 */
+forward UpdateAllPlayerPos();
 forward SendTeata(playerid, text[]);
 forward SendAdminMessage(playerid, text[]);
 forward CheckFalseDeadPlayers(playerid);
@@ -530,6 +531,7 @@ public OnGameModeInit()
 	SetTimer("UpdateAllPlayers", 1000*60*15, true);
 	SetTimer("CheckFalseDeadPlayers", 3000, true);
 	SetTimer("TimeSync", 60000, true);
+	SetTimer("UpdateAllPlayerPos", 1000*15, true);
 	
 	PistolPickup = CreatePickup(346 , 2, 2394.2112,-1206.5466,27.8595, 0); // Pistol
 	SawnoffPickup = CreatePickup(350 , 2, 2505.4795,-1117.3652,56.2031, 0); // sawnoff
@@ -1796,6 +1798,31 @@ public UpdatePlayer(playerid)
 	
 	MysqlUpdateFinish(query, "id", sqlid);
 
+	print("Player Updated!");
+	return 1;
+}
+public UpdateAllPlayerPos()
+{
+	for( new playerid = 0; playerid <= MAX_PLAYERS; playerid++ )
+	{
+		if(!IsPlayerConnected(playerid)) return 1;
+		if(!pInfo[playerid][pLoggedIn]) return 1;
+
+		GetPlayerPos(playerid, pInfo[playerid][pPosX], pInfo[playerid][pPosY], pInfo[playerid][pPosZ]);
+
+		new sqlid = pInfo[playerid][pSqlId];
+
+		new query[MAX_QUERY], table[32];
+		format(table, 32, "%scharacters", MYSQL_PREFIX);
+
+		MysqlUpdateBuild(query, table);
+
+		MysqlUpdateFlo(query, "posX", pInfo[playerid][pPosX]);
+		MysqlUpdateFlo(query, "posY", pInfo[playerid][pPosY]);
+		MysqlUpdateFlo(query, "posZ", pInfo[playerid][pPosZ]);
+		MysqlUpdateFinish(query, "id", sqlid);
+	}
+	print("All Player Positsions Saved!");
 	return 1;
 }
 
@@ -1804,8 +1831,10 @@ public UpdateAllPlayers()
 	for( new i = 0; i <= MAX_PLAYERS; i++ )
 	{
 	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] )
-	    UpdatePlayer(i);
-		SaveSkills(i);
+	    {
+	    	UpdatePlayer(i);
+			SaveSkills(i);
+		}
 	}
 }
 
