@@ -60,7 +60,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"119"
+#define SCRIPT_REVISION 	"121"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -1259,11 +1259,12 @@ dcmd_kiirusepiirang(playerid, params[])
 {
 	new piirang;
 	if( sscanf(params, "i", piirang) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /kiirusepiirang [Piirang KM/H]");
-	if( piirang < 15 ) return SendClientMessage(playerid, COLOR_YELLOW, "Piirang ei saa olla väiksem kui 15km/h!");
+	if( piirang < 15 && piirang != 0 ) return SendClientMessage(playerid, COLOR_YELLOW, "Piirang ei saa olla väiksem kui 15km/h!, piiraja välja lülitamiseks sisesta 0");
 	
 	if( IsPlayerInAnyVehicle(playerid) && GetPlayerState(playerid) == PLAYER_STATE_DRIVER )
 	{
-	    new vehicleid = GetPlayerVehicleID(playerid);
+	    new vehicleid = GetVehicleSqlId(GetPlayerVehicleID(playerid));
+	    
 		Vehicles[vehicleid][SpeedLimit] = piirang;
 		SendClientMessage(playerid, COLOR_YELLOW, "Piirang määratud!");
 
@@ -1617,14 +1618,15 @@ public OnSpeedoUpdate(playerid)
 
 		new oSpeed = Vehicles[vId][vSpeed], Float: oHealth = Vehicles[vId][vHealth];
 		new Float: oX = Vehicles[vId][vSpeedX], Float: oY = Vehicles[vId][vSpeedY], Float: oZ = Vehicles[vId][vSpeedZ];
-	
+
 		GetVehicleHealth(Vehicles[vId][vSampId], Vehicles[vId][vHealth]);
 		new hProtsenti = floatround((Vehicles[vId][vHealth] - 300) / 10);
 		new string[128], fuel[3] = "-";
-		
+
 		GetVehicleVelocity(Vehicles[vId][vSampId], Vehicles[vId][vSpeedX], Vehicles[vId][vSpeedY], Vehicles[vId][vSpeedZ]);
 		new Float: distance = floatabs(Vehicles[vId][vSpeedX]) + floatabs(Vehicles[vId][vSpeedY]) + floatabs(Vehicles[vId][vSpeedZ]);
 		Vehicles[vId][vSpeed] = floatround(distance * 175);
+		
 		format(string,sizeof(string),"~y~~h~Bensiin: %s  ~y~~h~Kiirus: ~w~%i km/h  ~y~~h~Korras: ~w~%d", fuel, Vehicles[vId][vSpeed], hProtsenti);
 		TextDrawSetString(InfoBar[playerid], string);
 		
@@ -1632,15 +1634,31 @@ public OnSpeedoUpdate(playerid)
 		{
          	VehPos(vId);
          	new Float:damage = oHealth - Vehicles[vId][vHealth];
-			CrashCar(vId, damage, oX, oY, oZ);
+			CrashCar(Vehicles[vId][vSampId], damage, oX, oY, oZ);
 			Vehicles[vId][vSpeed] = 0;
 		}
-		else if( Vehicles[vId][vSpeed] > Vehicles[vId][SpeedLimit] )
+		else if( Vehicles[vId][vSpeed] > Vehicles[vId][SpeedLimit] && Vehicles[vId][SpeedLimit] != 0 )
 		{
-			new difference = Vehicles[vId][vSpeed] - Vehicles[vId][SpeedLimit];
-			if ( difference > 5 ) difference = 5;
-			new Float:SlowDownX = difference/3, Float:SlowDownY = difference/3, Float:SlowDownZ = difference/3;
-			SetVehicleVelocity(vId, Vehicles[vId][vSpeedX] - SlowDownX, Vehicles[vId][vSpeedY] - SlowDownY, Vehicles[vId][vSpeedZ] - SlowDownZ);
+		    new difference = Vehicles[vId][vSpeed] - Vehicles[vId][SpeedLimit];
+			new Float:SpeedX, Float:SpeedY, Float:PercentX, Float:PercentY, multiplier, Float:newX, Float: newY, NegativeX, NegativeY;
+			SpeedX = Vehicles[vId][vSpeedX];
+			SpeedY = Vehicles[vId][vSpeedY];
+
+			if(SpeedX < 0) NegativeX = 1;
+			if(SpeedY < 0) NegativeY = 1;
+			if(NegativeX) SpeedX = SpeedX*-1;
+			if(NegativeY) SpeedY = SpeedY*-1;
+			PercentX = SpeedX/100;
+			PercentY = SpeedY/100;
+			multiplier = difference*4;
+			if( multiplier > 20 ) multiplier = 20;
+			newX = SpeedX - PercentX*multiplier;
+			newY = SpeedY - PercentY*multiplier;
+			if(NegativeX) newX = newX*-1;
+			if(NegativeY) newY = newY*-1;
+			
+			SetVehicleVelocity(Vehicles[vId][vSampId], newX, newY, Vehicles[vId][vSpeedZ]);
+
 		}
 	}
 	else
