@@ -60,7 +60,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"121"
+#define SCRIPT_REVISION 	"122"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -1626,8 +1626,9 @@ public OnSpeedoUpdate(playerid)
 		GetVehicleVelocity(Vehicles[vId][vSampId], Vehicles[vId][vSpeedX], Vehicles[vId][vSpeedY], Vehicles[vId][vSpeedZ]);
 		new Float: distance = floatabs(Vehicles[vId][vSpeedX]) + floatabs(Vehicles[vId][vSpeedY]) + floatabs(Vehicles[vId][vSpeedZ]);
 		Vehicles[vId][vSpeed] = floatround(distance * 175);
-		
-		format(string,sizeof(string),"~y~~h~Bensiin: %s  ~y~~h~Kiirus: ~w~%i km/h  ~y~~h~Korras: ~w~%d", fuel, Vehicles[vId][vSpeed], hProtsenti);
+		new showspeed = Vehicles[vId][vSpeed];
+		if( Vehicles[vId][SpeedLimit] != 0 && Vehicles[vId][SpeedLimit] < showspeed ) showspeed = Vehicles[vId][SpeedLimit];
+		format(string,sizeof(string),"~y~~h~Bensiin: %s  ~y~~h~Kiirus: ~w~%i km/h  ~y~~h~Korras: ~w~%d", fuel, showspeed, hProtsenti);
 		TextDrawSetString(InfoBar[playerid], string);
 		
 		if((oSpeed - Vehicles[vId][vSpeed]) > 30 && (oHealth - Vehicles[vId][vHealth]) > 50)
