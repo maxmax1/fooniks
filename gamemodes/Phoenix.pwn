@@ -60,7 +60,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"122"
+#define SCRIPT_REVISION 	"123"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -269,7 +269,7 @@ new telePositions[MAX_TELEPORTS][posInfo] =
 /*
 *    FORWARDS
 */
-forward CrashCar(vehicleid, Float:damage, Float:oX, Float:oY, Float:oZ);
+forward CrashCar(SQLVid, vehicleid, Float:damage, Float:oX, Float:oY, Float:oZ);
 forward UpdateAllPlayerPos();
 forward SendTeata(playerid, text[]);
 forward SendAdminMessage(playerid, text[]);
@@ -1633,9 +1633,8 @@ public OnSpeedoUpdate(playerid)
 		
 		if((oSpeed - Vehicles[vId][vSpeed]) > 30 && (oHealth - Vehicles[vId][vHealth]) > 50)
 		{
-         	VehPos(vId);
          	new Float:damage = oHealth - Vehicles[vId][vHealth];
-			CrashCar(Vehicles[vId][vSampId], damage, oX, oY, oZ);
+			CrashCar(vId, Vehicles[vId][vSampId], damage, oX, oY, oZ);
 			Vehicles[vId][vSpeed] = 0;
 		}
 		else if( Vehicles[vId][vSpeed] > Vehicles[vId][SpeedLimit] && Vehicles[vId][SpeedLimit] != 0 )
@@ -1670,7 +1669,7 @@ public OnSpeedoUpdate(playerid)
 	return 1;
 }
 
-public CrashCar(vehicleid, Float:damage, Float:oX, Float:oY, Float:oZ)
+public CrashCar(SQLVid, vehicleid, Float:damage, Float:oX, Float:oY, Float:oZ)
 {
 	new pVeh;
 	for( new playerid = 0; playerid <= MAX_PLAYERS; playerid++ )
@@ -1680,11 +1679,15 @@ public CrashCar(vehicleid, Float:damage, Float:oX, Float:oY, Float:oZ)
 			pVeh = GetPlayerVehicleID(playerid);
 			if( pVeh == vehicleid )
 			{
+			    VehPos(SQLVid);
 				SendEmote(playerid, LANG_VEH_CRASH);
-				SetPlayerPos(playerid, Vehicles[vehicleid][vPosX], Vehicles[vehicleid][vPosY], Vehicles[vehicleid][vPosZ]+2);
+				SetPlayerPos(playerid, Vehicles[SQLVid][vPosX], Vehicles[SQLVid][vPosY], Vehicles[SQLVid][vPosZ]+2);
 				SetTimerEx("Velocity", 75, 0, "ifff", playerid, oX, oY, oZ);
 				ApplyAnimation(playerid, "CRACK", "crckdeth2", 4.0, 1, 1, 1, 1, 1);
-				SetPlayerHealth(playerid, damage/10);
+				new Float:health;
+				GetPlayerHealth(playerid, health);
+				health = health - damage/10;
+				SetPlayerHealth(playerid, health);
 			}
 		}
 	}
