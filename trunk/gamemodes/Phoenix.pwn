@@ -29,7 +29,6 @@
 *    INCLUDES
 */
 
-#define animCmd(%0,%1,%2,%3,%4,%5,%6) if(!strcmp(DcmdFix( (%6)[1], strlen((%6)[1]) ),#%0,true)) return  ApplyAnimation(playerid,%1,%2,1.0,%3,%4,%4,0,%5)
  // author: -, External Credit #4
 #define dcmd(%1,%2,%3) if (!strcmp(DcmdFix( (%3)[1], (%2) ), #%1, true, (%2)) && ((((%3)[(%2) + 1] == '\0') && (dcmd_%1(playerid, ""))) || (((%3)[(%2) + 1] == ' ') && (dcmd_%1(playerid, (%3)[(%2) + 2]))))) return 1
 
@@ -49,6 +48,7 @@
 #include <phoenix_Core>
 #include <phoenix_Lang>
 #include <phoenix_RealCarnames>
+#include <phoenix_Anims>
 
 // author: Alex "Y_Less" Cole, External Credit #6
 #define SendFormattedText(%1,%2,%3,%4) do{new sendfstring[128];format(sendfstring,128,(%3),%4);SendClientMessage((%1), (%2) ,sendfstring);}while(FALSE)
@@ -60,7 +60,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"123"
+#define SCRIPT_REVISION 	"124"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -1096,9 +1096,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(mj, 2, cmdtext);
 	dcmd(addveh, 6, cmdtext);
 	
-	animCmd("istu", "Attractors", "Stepsit_loop", 1, 0, 0, cmdtext);
-	animCmd("pysti", "Attractors", "Stepsit_out", 0, 0, 0, cmdtext);
-	animCmd("aken", "AIRPORT", "thrw_barl_thrw", 1, 0, 2000, cmdtext);
+	if(animCmdHandler(playerid, cmdtext) != -1) return 1;
 
 	SendFormattedText(playerid, COLOR_RED, "Käsku %s ei ole.", cmdtext);
 	return 1;
@@ -1619,8 +1617,9 @@ public OnSpeedoUpdate(playerid)
 		new oSpeed = Vehicles[vId][vSpeed], Float: oHealth = Vehicles[vId][vHealth];
 		new Float: oX = Vehicles[vId][vSpeedX], Float: oY = Vehicles[vId][vSpeedY], Float: oZ = Vehicles[vId][vSpeedZ];
 
-		GetVehicleHealth(Vehicles[vId][vSampId], Vehicles[vId][vHealth]);
-		new hProtsenti = floatround((Vehicles[vId][vHealth] - 300) / 10);
+		GetVehicleHealth(Vehicles[vId][vSampId], Vehicles[vId][vHealth]);		
+		new hProtsenti = floatround((Vehicles[vId][vHealth] - 295) / 705);
+		if(hProtsenti < 0) hProtsenti = 0;
 		new string[128], fuel[3] = "-";
 
 		GetVehicleVelocity(Vehicles[vId][vSampId], Vehicles[vId][vSpeedX], Vehicles[vId][vSpeedY], Vehicles[vId][vSpeedZ]);
@@ -1628,7 +1627,7 @@ public OnSpeedoUpdate(playerid)
 		Vehicles[vId][vSpeed] = floatround(distance * 175);
 		new showspeed = Vehicles[vId][vSpeed];
 		if( Vehicles[vId][SpeedLimit] != 0 && Vehicles[vId][SpeedLimit] < showspeed ) showspeed = Vehicles[vId][SpeedLimit];
-		format(string,sizeof(string),"~y~~h~Bensiin: %s  ~y~~h~Kiirus: ~w~%i km/h  ~y~~h~Korras: ~w~%d", fuel, showspeed, hProtsenti);
+		format(string,sizeof(string),"~y~~h~Bensiin: %s  ~y~~h~Kiirus: ~w~%i km/h  ~y~~h~Korras: ~w~%d %%", fuel, showspeed, hProtsenti);
 		TextDrawSetString(InfoBar[playerid], string);
 		
 		if((oSpeed - Vehicles[vId][vSpeed]) > 30 && (oHealth - Vehicles[vId][vHealth]) > 50)
