@@ -49,6 +49,7 @@
 #define LANG_ES               "Erasõnum"
 #define LANG_VEH_NOKEYS               "Sul pole selle auto võtmeid."
 #define LANG_VEH_CRASH               "lendab masinast välja"
+#define LANG_CRASH_SEATBELT            "lendab peaga pehmesse turvapatja"
 #define LANG_GLOBAL_BANMSG               "Administraator %s bannis kasutaja %s. Põhjus: %s"
 #define LANG_GLOBAL_KICKMSG               "Administraator %s kickis kasutaja %s. Põhjus: %s"
 #define LANG_NOT_ADMIN               "Sa pole admin!"
