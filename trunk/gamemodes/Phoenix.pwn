@@ -60,7 +60,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"127"
+#define SCRIPT_REVISION 	"128"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -1660,7 +1660,7 @@ public OnSpeedoUpdate(playerid)
 		new Float: oX = Vehicles[vId][vSpeedX], Float: oY = Vehicles[vId][vSpeedY], Float: oZ = Vehicles[vId][vSpeedZ];
 
 		GetVehicleHealth(Vehicles[vId][vSampId], Vehicles[vId][vHealth]);		
-		new hProtsenti = floatround((Vehicles[vId][vHealth] - 295) / 705);
+		new hProtsenti = floatround(((Vehicles[vId][vHealth] - 295) / 705) * 100);
 		if(hProtsenti < 0) hProtsenti = 0;
 		new string[128], fuel[3] = "-";
 
