@@ -60,7 +60,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"125"
+#define SCRIPT_REVISION 	"127"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -179,7 +179,8 @@ enum pInf
 	SelectedPlayer,
 	npcId,
 	pSkill[MAX_SKILLS+1],
-	pSkillTimer
+	pSkillTimer,
+	pSeatbelt
 };
 new pInfo[MAX_PLAYERS][pInf];
 
@@ -769,6 +770,12 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
 {
 	if(newstate == PLAYER_STATE_DRIVER) 										OnDriverEnterVehicle(playerid);
 	else if(oldstate == PLAYER_STATE_DRIVER && newstate == PLAYER_STATE_ONFOOT) OnDriverExitVehicle(playerid);
+	
+	if(oldstate == PLAYER_STATE_PASSENGER && newstate == PLAYER_STATE_ONFOOT && pInfo[playerid][pSeatbelt] > 0)
+	{
+		SendEmote(playerid, "võtab turvavöö ära ning tuleb masinast välja.");
+		pInfo[playerid][pSeatbelt] = 0;
+	}
 }
 
 public OnVehicleDeath(vehicleid)
@@ -1094,7 +1101,10 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(teata, 5, cmdtext);
 	dcmd(am, 2, cmdtext);
 	dcmd(admin, 5, cmdtext);
+	
+	//	Masinas
 	dcmd(kiirusepiirang, 14, cmdtext);
+	dcmd(turvav88, 8, cmdtext);
 	
 	// ajutine
 	dcmd(kaklus, 6, cmdtext);
@@ -1258,6 +1268,7 @@ dcmd_admin(playerid, params[])
 	showAdminDialog(playerid);
 	return 1;
 }
+
 dcmd_kiirusepiirang(playerid, params[])
 {
 	new piirang;
@@ -1273,6 +1284,26 @@ dcmd_kiirusepiirang(playerid, params[])
 
 	}
 	else return SendClientMessage(playerid, COLOR_YELLOW, "Sa ei juhi ühtegi autot!");
+	return 1;
+}
+
+dcmd_turvav88(playerid, params[])
+{
+	#pragma unused params
+	if(IsPlayerInAnyVehicle(playerid))
+	{
+	    if(pInfo[playerid][pSeatbelt] == 1)
+		{
+			SendEmote(playerid, "eemaldab turvavöö.");
+			pInfo[playerid][pSeatbelt] = 0;
+		}
+		else
+		{
+			SendEmote(playerid, "paneb turvavöö peale.");
+			pInfo[playerid][pSeatbelt] = 1;
+		}
+	}
+	else return SendClientMessage(playerid, COLOR_YELLOW, "Sa ei ole ühesgi autos!");
 	return 1;
 }
 
@@ -1600,6 +1631,12 @@ public OnDriverExitVehicle(playerid)
 	
 	Vehicles[vId][vSpeed] = 0;
 	InfoBarTimer[playerid] = -1;
+	
+	if(pInfo[playerid][pSeatbelt] > 0)
+	{
+		SendEmote(playerid, "võtab turvavöö ära ning tuleb masinast välja.");
+		pInfo[playerid][pSeatbelt] = 0;
+	}	
 	return 1;
 }
 
@@ -1680,19 +1717,30 @@ public CrashCar(SQLVid, vehicleid, Float:damage, Float:oX, Float:oY, Float:oZ)
 	{
 	    if( IsPlayerConnected(playerid) && pInfo[playerid][pLoggedIn] && IsPlayerInAnyVehicle(playerid) )
 	    {
-			pVeh = GetPlayerVehicleID(playerid);
-			if( pVeh == vehicleid )
+			if(pInfo[playerid][pSeatbelt] == 0)
 			{
-			    VehPos(SQLVid);
-				SendEmote(playerid, LANG_VEH_CRASH);
-				SetPlayerPos(playerid, Vehicles[SQLVid][vPosX], Vehicles[SQLVid][vPosY], Vehicles[SQLVid][vPosZ]+2);
-				SetTimerEx("Velocity", 75, 0, "ifff", playerid, oX, oY, oZ);
-				ApplyAnimation(playerid, "CRACK", "crckdeth2", 4.0, 1, 1, 1, 1, 1);
+				pVeh = GetPlayerVehicleID(playerid);
+				if( pVeh == vehicleid )
+				{
+					VehPos(SQLVid);
+					SendEmote(playerid, LANG_VEH_CRASH);
+					SetPlayerPos(playerid, Vehicles[SQLVid][vPosX], Vehicles[SQLVid][vPosY], Vehicles[SQLVid][vPosZ]+2);
+					SetTimerEx("Velocity", 75, 0, "ifff", playerid, oX, oY, oZ);
+					ApplyAnimation(playerid, "CRACK", "crckdeth2", 4.0, 1, 1, 1, 1, 1);
+					new Float:health;
+					GetPlayerHealth(playerid, health);
+					health = health - damage/10;
+					SetPlayerHealth(playerid, health);
+				}
+			}
+			else
+			{
+				SendEmote(playerid, LANG_CRASH_SEATBELT);
 				new Float:health;
 				GetPlayerHealth(playerid, health);
-				health = health - damage/10;
+				health = health - damage/25;
 				SetPlayerHealth(playerid, health);
-			}
+			}			
 		}
 	}
 }
