@@ -60,7 +60,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"124"
+#define SCRIPT_REVISION 	"125"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -978,6 +978,11 @@ public OnPlayerText(playerid, text[])
 	if(IsPlayerNPC(playerid))
 	{
 		format(str, sizeof(str),"Igor_Yakov:  %s", text);
+	}
+
+	if(IsPlayerInAnyVehicle(playerid))
+	{
+		ApplyAnimation(playerid,"CAR_CHAT","car_talkm_loop",4.1,0,1,1,1,1);
 	}
 
 	SetPlayerChatBubble(playerid, str, COLOR_CHAT_IC, CHAT_RADIUS, delay);
