@@ -60,7 +60,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"129"
+#define SCRIPT_REVISION 	"130"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -82,8 +82,9 @@
 #define MAX_QUERY 300
 #define MAX_TELEPORTS 9
 
-#define MAX_LIBS 5
-#define MAX_ANIMS 13
+#define MAX_REST_POSITIONS 2
+#define REST_SIT 0
+#define REST_LAY 1
 
 #define VEHICLE_GROUP			0	// Gängid, Grupeeringud
 #define VEHICLE_JOB				1	// Tööd
@@ -180,7 +181,8 @@ enum pInf
 	npcId,
 	pSkill[MAX_SKILLS+1],
 	pSkillTimer,
-	pSeatbelt
+	pSeatbelt,
+	pResting
 };
 new pInfo[MAX_PLAYERS][pInf];
 
@@ -266,6 +268,21 @@ new telePositions[MAX_TELEPORTS][posInfo] =
 	{"pay'N'spray", 2074.6631, -1825.7513, 13.5469, 2076.2275, -1824.9553, 13.1682}
 };
 
+enum restInf
+{
+	restType,
+	Float: restX,
+	Float: restY,
+	Float: restZ,
+	Float: restAng
+};
+
+new RestPositions[MAX_REST_POSITIONS][restInf] = 
+{
+	{REST_SIT, 0.0, 0.0, 0.0, 0.0},
+	{REST_LAY, 2.0, 2.0, 2.0, 2.0}
+};
+
 
 /*
 *    FORWARDS
@@ -320,6 +337,9 @@ forward OnLevelUp(playerid, skillId, newLevel, showMsg);
 forward GetLevel(skillId, xP, &xpNeeded);
 forward ClearDelay(playerid, skillId);
 forward TimeSync();
+forward Rest(playerid);
+forward IsPlayerNearRestingPlace(playerid);
+forward RestingEnd(playerid);
 
 /*
 *    MAIN()
@@ -484,6 +504,13 @@ stock setTime()
 	
 	gettime(gHour, gMinute, gSecond);
 	SetWorldTime(gHour);
+}
+
+stock Float: Distance(Float:x1, Float:y1, Float:z1, Float:x2, Float:y2, Float:z2)
+{
+	new Float: temp = floatsqroot( (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2));
+	if(temp < 0) temp = temp * (-1);
+	return temp;
 }
 
 /*
@@ -1101,6 +1128,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(teata, 5, cmdtext);
 	dcmd(am, 2, cmdtext);
 	dcmd(admin, 5, cmdtext);
+	dcmd(puhka, 5, cmdtext);
 	
 	//	Masinas
 	dcmd(kiirusepiirang, 14, cmdtext);
@@ -1304,6 +1332,13 @@ dcmd_turvav88(playerid, params[])
 		}
 	}
 	else return SendClientMessage(playerid, COLOR_YELLOW, "Sa ei ole ühesgi autos!");
+	return 1;
+}
+
+dcmd_puhka(playerid, params[])
+{
+	#pragma unused params
+	Rest(playerid);
 	return 1;
 }
 
@@ -2234,6 +2269,78 @@ public CheckFalseDeadPlayers(playerid)
 public TimeSync()
 {
 	setTime();
+}
+
+public Rest(playerid)
+{
+	new RestPlace = IsPlayerNearRestingPlace(playerid);
+	
+	if(RestPlace != -1)
+	{
+		if(!pInfo[playerid][pResting])
+		{
+			SetPlayerPos(playerid, RestPositions[RestPlace][restX], RestPositions[RestPlace][restY],  RestPositions[RestPlace][restZ]);
+			SetPlayerFacingAngle(playerid, RestPositions[RestPlace][restAng]);
+			
+			pInfo[playerid][pResting] = 1;
+			
+			if(RestPositions[RestPlace][restType] == 0)
+			{
+				ApplyAnimation(playerid, "BEACH", "bather", 4.0, 1, 0, 0, 0, 0);
+				SendEmote(playerid, "läheb voodisse pikali");
+			}
+			else
+			{
+				ApplyAnimation(playerid,"BEACH", "ParkSit_M_loop", 4.0, 1, 0, 0, 0, 0);
+				SendEmote(playerid, "istub");
+			}	
+
+			SendClientMessage(playerid, COLOR_YELLOW, "Kirjuta /puhka, et püsti tõusta.");
+		}
+		else
+		{
+			RestingEnd(playerid);
+		}
+	}
+	else
+	{
+		ApplyAnimation(playerid,"BEACH", "ParkSit_M_loop", 4.0, 1, 0, 0, 5000, 0);
+		SendEmote(playerid, "istub");		
+		pInfo[playerid][pResting] = 1;
+		SetTimerEx("RestingEnd", 5000, 0, "i", playerid);
+	}
+	return 1;	
+}
+
+public IsPlayerNearRestingPlace(playerid)
+{
+	new Float: pX, Float: pY, Float: pZ;	
+	GetPlayerPos(playerid, pX, pY, pZ);
+	
+	new Float: kaugus = 5.0;
+	new Float: kaugus2;
+	
+	new ret = -1;
+	
+	for(new i; i < MAX_REST_POSITIONS; i++)
+	{
+		kaugus2 = Distance(pX, pY, pZ, RestPositions[i][restX], RestPositions[i][restY],  RestPositions[i][restZ]);
+		
+		if(kaugus2 < kaugus)
+		{
+			kaugus = kaugus2;
+			ret = i;
+		}
+	}	
+	
+	return ret;
+}
+
+public RestingEnd(playerid)
+{
+	pInfo[playerid][pResting] = 0;
+	SendEmote(playerid, "tõuseb püsti");
+	ClearAnimations(playerid);
 }
 
 /*
