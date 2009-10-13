@@ -60,7 +60,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"128"
+#define SCRIPT_REVISION 	"129"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -1768,11 +1768,13 @@ public CheckCharacter(playerid)
 			
 			GetUserInfo(playerid);
 			return 1;
-		}	
+		}
+		else
+		{
+	 		SendClientMessage(playerid, COLOR_RED, LANG_NOCHARACTER);
+			Kick(playerid);
+		}
 	}
-	
-	SendClientMessage(playerid, COLOR_RED, LANG_NOCHARACTER);
-	Kick(playerid);
 	return 1;
 }
 
