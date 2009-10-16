@@ -60,7 +60,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"130"
+#define SCRIPT_REVISION 	"131"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -219,7 +219,8 @@ enum vInf
 	
 	vDeaths,
 	Float: vHealth,
-	SpeedLimit
+	SpeedLimit,
+	Float:Turbo
 };
 new Vehicles[700][vInf];
 
@@ -1133,6 +1134,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	//	Masinas
 	dcmd(kiirusepiirang, 14, cmdtext);
 	dcmd(turvav88, 8, cmdtext);
+	dcmd(kalaturbo, 9, cmdtext);
 	
 	// ajutine
 	dcmd(kaklus, 6, cmdtext);
@@ -1302,13 +1304,29 @@ dcmd_kiirusepiirang(playerid, params[])
 	new piirang;
 	if( sscanf(params, "i", piirang) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /kiirusepiirang [Piirang KM/H]");
 	if( piirang < 15 && piirang != 0 ) return SendClientMessage(playerid, COLOR_YELLOW, "Piirang ei saa olla väiksem kui 15km/h!, piiraja välja lülitamiseks sisesta 0");
-	
-	if( IsPlayerInAnyVehicle(playerid) && GetPlayerState(playerid) == PLAYER_STATE_DRIVER )
+
+	if( GetPlayerState(playerid) == PLAYER_STATE_DRIVER )
 	{
 	    new vehicleid = GetVehicleSqlId(GetPlayerVehicleID(playerid));
-	    
+
 		Vehicles[vehicleid][SpeedLimit] = piirang;
 		SendClientMessage(playerid, COLOR_YELLOW, "Piirang määratud!");
+
+	}
+	else return SendClientMessage(playerid, COLOR_YELLOW, "Sa ei juhi ühtegi autot!");
+	return 1;
+}
+dcmd_kalaturbo(playerid, params[])
+{
+	new Float:turbo;
+	if( sscanf(params, "f", turbo) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /kalaturbo [turbo]");
+	
+	if( GetPlayerState(playerid) == PLAYER_STATE_DRIVER )
+	{
+	    new vehicleid = GetVehicleSqlId(GetPlayerVehicleID(playerid));
+
+		Vehicles[vehicleid][Turbo] = turbo;
+		SendClientMessage(playerid, COLOR_YELLOW, "turbo määratud!");
 
 	}
 	else return SendClientMessage(playerid, COLOR_YELLOW, "Sa ei juhi ühtegi autot!");
@@ -1732,9 +1750,34 @@ public OnSpeedoUpdate(playerid)
 			newY = SpeedY - PercentY*multiplier;
 			if(NegativeX) newX = newX*-1;
 			if(NegativeY) newY = newY*-1;
-			
+
 			SetVehicleVelocity(Vehicles[vId][vSampId], newX, newY, Vehicles[vId][vSpeedZ]);
 
+		}
+		else if( Vehicles[vId][Turbo] != 0 )
+		{
+		    new keys, updown, leftright;
+		    GetPlayerKeys(playerid, keys, updown, leftright);
+		    if( updown == KEY_UP )
+		    {
+		        new Float:SpeedX, Float:SpeedY, Float:PercentX, Float:PercentY, Float:newX, Float: newY, NegativeX, NegativeY;
+				SpeedX = Vehicles[vId][vSpeedX];
+				SpeedY = Vehicles[vId][vSpeedY];
+
+				if(SpeedX < 0) NegativeX = 1;
+				if(SpeedY < 0) NegativeY = 1;
+				if(NegativeX) SpeedX = SpeedX*-1;
+				if(NegativeY) SpeedY = SpeedY*-1;
+				PercentX = SpeedX/100;
+				PercentY = SpeedY/100;
+				
+				newX = SpeedX + PercentX*Vehicles[vId][Turbo];
+				newY = SpeedY + PercentY*Vehicles[vId][Turbo];
+				if(NegativeX) newX = newX*-1;
+				if(NegativeY) newY = newY*-1;
+
+				SetVehicleVelocity(Vehicles[vId][vSampId], newX, newY, Vehicles[vId][vSpeedZ]);
+			}
 		}
 	}
 	else
