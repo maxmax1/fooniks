@@ -61,7 +61,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"134"
+#define SCRIPT_REVISION 	"135"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -96,7 +96,7 @@
 #define COLOR_YELLOW		0xFFFF00AA
 #define COLOR_RED 0xAA3333AA
 #define COLOR_GREEN 0x33AA33AA
-#define COLOR_BLACK_80 0x000000cc
+#define COLOR_BLACK 0x000000FF
 #define COLOR_WHITE 0xffffffff
 
 #define PLAYER_COLOR 0xFFFF0000
@@ -724,8 +724,8 @@ public OnGameModeInit()
 	CreateObject(968, 1634.109741, -1140.096680, 23.661848, 0.0000, 0.0000, 0.8586);
 	//////////KARDIRADA LÕPP
 	
-	foodBar = CreateProgressbar(501.0, 105.0, COLOR_BLACK_80, COLOR_GREEN, COLOR_WHITE);
-	restBar = CreateProgressbar(501.0, 135.0, COLOR_BLACK_80, COLOR_YELLOW, COLOR_WHITE);
+	foodBar = CreateProgressbar(548.2, 54.5, 53.8, 0.1, 2.0, COLOR_BLACK, COLOR_YELLOW, COLOR_WHITE);
+	restBar = CreateProgressbar(548.2, 61.5, 53.8, 0.1, 2.0, COLOR_BLACK, COLOR_GREEN, COLOR_WHITE);
 	
 	return 1;
 }
