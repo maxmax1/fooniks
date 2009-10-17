@@ -49,6 +49,7 @@
 #include <phoenix_Lang>
 #include <phoenix_RealCarnames>
 #include <phoenix_Anims>
+#include <phoenix_ProgressBar>
 
 // author: Alex "Y_Less" Cole, External Credit #6
 #define SendFormattedText(%1,%2,%3,%4) do{new sendfstring[128];format(sendfstring,128,(%3),%4);SendClientMessage((%1), (%2) ,sendfstring);}while(FALSE)
@@ -60,7 +61,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"132"
+#define SCRIPT_REVISION 	"133"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -95,6 +96,8 @@
 #define COLOR_YELLOW		0xFFFF00AA
 #define COLOR_RED 0xAA3333AA
 #define COLOR_GREEN 0x33AA33AA
+#define COLOR_BLACK_80 0x000000cc
+#define COLOR_WHITE 0xffffffff
 
 #define PLAYER_COLOR 0xFFFF0000
 
@@ -142,6 +145,9 @@
 */
 
 new gHour, gMinute, gSecond;
+
+new foodBar;
+new restBar;
 
 new WelcomeStr[64];
 
@@ -718,6 +724,9 @@ public OnGameModeInit()
 	CreateObject(968, 1634.109741, -1140.096680, 23.661848, 0.0000, 0.0000, 0.8586);
 	//////////KARDIRADA LÕPP
 	
+	foodBar = CreateProgressbar(501.0, 105.0, COLOR_BLACK_80, COLOR_GREEN, COLOR_WHITE);
+	restBar = CreateProgressbar(525.0, 105.0, COLOR_BLACK_80, COLOR_YELLOW, COLOR_WHITE);
+	
 	return 1;
 }
 
@@ -791,6 +800,9 @@ public OnPlayerSpawn(playerid)
 	SetPlayerColor(playerid, PLAYER_COLOR);
 	
 	SetCameraBehindPlayer(playerid);
+	
+	ProccesBarShowForPlayer(foodBar, playerid);
+	ProccesBarShowForPlayer(restBar, playerid);
 	return 1;
 }
 
@@ -1130,6 +1142,8 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(am, 2, cmdtext);
 	dcmd(admin, 5, cmdtext);
 	dcmd(puhka, 5, cmdtext);
+	dcmd(tapa, 4, cmdtext);
+	dcmd(bartest, 7, cmdtext);
 	
 	//	Masinas
 	dcmd(kiirusepiirang, 14, cmdtext);
@@ -1316,6 +1330,7 @@ dcmd_kiirusepiirang(playerid, params[])
 	else return SendClientMessage(playerid, COLOR_YELLOW, "Sa ei juhi ühtegi autot!");
 	return 1;
 }
+
 dcmd_kalaturbo(playerid, params[])
 {
 	new Float:turbo;
@@ -1357,6 +1372,26 @@ dcmd_puhka(playerid, params[])
 {
 	#pragma unused params
 	Rest(playerid);
+	return 1;
+}
+
+dcmd_tapa(playerid, params[])
+{
+	#pragma unused params
+	SetPlayerHealth(playerid, 0.0);
+	return 1;
+}
+
+dcmd_bartest(playerid, params[])
+{
+	new id, Float: val;
+	if( sscanf(params, "if", id, val) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /bartest [id] [väärtus]");
+	
+	if(id < 0 || id > MAX_BARS) return SendClientMessage(playerid, COLOR_YELLOW, "Vigane ID(0-1)");
+	if(val < 0.0 || val > 100.0) return SendClientMessage(playerid, COLOR_YELLOW, "Vigane väärtus(0-100)");
+	
+	setProgressBar(id, playerid, val);
+	
 	return 1;
 }
 
