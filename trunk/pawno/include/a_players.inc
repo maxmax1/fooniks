@@ -105,6 +105,7 @@ native GetPlayerVelocity( playerid, &Float:X, &Float:Y, &Float:Z );
 native PlayCrimeReportForPlayer(playerid, suspectid, crime);
 native SetPlayerShopName(playerid, shopname[]);
 native SetPlayerSkillLevel(playerid, skill, level);
+native GetPlayerSurfingVehicleID(playerid);
 
 #define MAX_CHATBUBBLE_LENGTH 144
 native SetPlayerChatBubble(playerid, text[], color, Float:drawdistance, expiretime);
