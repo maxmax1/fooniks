@@ -61,7 +61,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"135"
+#define SCRIPT_REVISION 	"136"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -294,6 +294,8 @@ new RestPositions[MAX_REST_POSITIONS][restInf] =
 /*
 *    FORWARDS
 */
+forward SyncPlayerTime(playerid);
+forward SyncAllPlayerTime();
 forward CrashCar(SQLVid, vehicleid, Float:damage, Float:oX, Float:oY, Float:oZ);
 forward UpdateAllPlayerPos();
 forward SendTeata(playerid, text[]);
@@ -343,7 +345,6 @@ forward SetSkills(playerid);
 forward OnLevelUp(playerid, skillId, newLevel, showMsg);
 forward GetLevel(skillId, xP, &xpNeeded);
 forward ClearDelay(playerid, skillId);
-forward TimeSync();
 forward Rest(playerid);
 forward IsPlayerNearRestingPlace(playerid);
 forward RestingEnd(playerid);
@@ -506,13 +507,6 @@ stock showTeleDialog(playerid)
 	return 1;
 }
 
-stock setTime()
-{
-	
-	gettime(gHour, gMinute, gSecond);
-	SetWorldTime(gHour);
-}
-
 stock Float: Distance(Float:x1, Float:y1, Float:z1, Float:x2, Float:y2, Float:z2)
 {
 	new Float: temp = floatsqroot( (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2));
@@ -563,12 +557,6 @@ public OnGameModeInit()
 	ShowNameTags( 1 );
 	SetNameTagDrawDistance(7.5);
 	LimitGlobalChatRadius(CHAT_RADIUS);
-	
-	setTime();	
-	SetTimer("UpdateAllPlayers", 1000*60*15, true);
-	SetTimer("CheckFalseDeadPlayers", 3000, true);
-	SetTimer("TimeSync", 60000, true);
-	SetTimer("UpdateAllPlayerPos", 1000*15, true);
 	
 	PistolPickup = CreatePickup(346 , 2, 2394.2112,-1206.5466,27.8595, 0); // Pistol
 	SawnoffPickup = CreatePickup(350 , 2, 2505.4795,-1117.3652,56.2031, 0); // sawnoff
@@ -724,8 +712,18 @@ public OnGameModeInit()
 	CreateObject(968, 1634.109741, -1140.096680, 23.661848, 0.0000, 0.0000, 0.8586);
 	//////////KARDIRADA LÕPP
 	
-	foodBar = CreateProgressbar(548.2, 54.5, 53.8, 0.1, 2.0, COLOR_BLACK, COLOR_YELLOW, COLOR_WHITE);
-	restBar = CreateProgressbar(548.2, 61.5, 53.8, 0.1, 2.0, COLOR_BLACK, COLOR_GREEN, COLOR_WHITE);
+	foodBar = CreateProgressbar(548.2, 54.5, 53.8, 0.1, 2.0, COLOR_BLACK, COLOR_GREEN, COLOR_WHITE);
+	restBar = CreateProgressbar(548.2, 61.5, 53.8, 0.1, 2.0, COLOR_BLACK, COLOR_YELLOW, COLOR_WHITE);
+	
+	for( new i = 0; i <= 699; i++ )
+	{
+	    Vehicles[i][SpeedLimit] = 300;
+	}
+	
+	SetTimer("UpdateAllPlayers", 1000*60*15, true);
+	SetTimer("CheckFalseDeadPlayers", 3000, true);
+	SetTimer("SyncAllPlayerTime", 950, true);
+	SetTimer("UpdateAllPlayerPos", 1000*15, true);
 	
 	return 1;
 }
@@ -749,6 +747,8 @@ public OnPlayerConnect(playerid)
 	CheckCharacter(playerid);
 
 	pInfo[playerid][pLoggedIn] = 0;
+	
+	SyncPlayerTime(playerid);
 	return 1;
 }
 
@@ -803,6 +803,7 @@ public OnPlayerSpawn(playerid)
 	
 	ProccesBarShowForPlayer(foodBar, playerid);
 	ProccesBarShowForPlayer(restBar, playerid);
+	TogglePlayerClock(playerid, 1);
 	return 1;
 }
 
@@ -834,7 +835,7 @@ public OnVehicleDeath(vehicleid)
 
 public OnRconCommand(cmd[])
 {
-	if( strcmp(cmd, "gmx", true) == 0 ) OnGameModeExit();
+	if( strcmp(cmd, "gmx", true) == 0 ){ SendClientMessageToAll(COLOR_GREEN, "GMX"); OnGameModeExit(); }
 }
 
 public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
@@ -1148,7 +1149,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	//	Masinas
 	dcmd(kiirusepiirang, 14, cmdtext);
 	dcmd(turvav88, 8, cmdtext);
-	dcmd(kalaturbo, 9, cmdtext);
+	dcmd(turbo, 5, cmdtext);
 	
 	// ajutine
 	dcmd(kaklus, 6, cmdtext);
@@ -1318,7 +1319,7 @@ dcmd_kiirusepiirang(playerid, params[])
 	new piirang;
 	if( sscanf(params, "i", piirang) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /kiirusepiirang [Piirang KM/H]");
 	if( piirang < 15 && piirang != 0 ) return SendClientMessage(playerid, COLOR_YELLOW, "Piirang ei saa olla väiksem kui 15km/h!, piiraja välja lülitamiseks sisesta 0");
-
+	if( piirang > 300 ) piirang = 300;
 	if( GetPlayerState(playerid) == PLAYER_STATE_DRIVER )
 	{
 	    new vehicleid = GetVehicleSqlId(GetPlayerVehicleID(playerid));
@@ -1331,11 +1332,11 @@ dcmd_kiirusepiirang(playerid, params[])
 	return 1;
 }
 
-dcmd_kalaturbo(playerid, params[])
+dcmd_turbo(playerid, params[])
 {
 	new Float:turbo;
-	if( sscanf(params, "f", turbo) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /kalaturbo [turbo]");
-	
+	if( sscanf(params, "f", turbo) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /turbo [turbo suurus]");
+	if( turbo > 10 || turbo < 0 ) return SendClientMessage(playerid, COLOR_YELLOW, "Turbo suurus võib olla 0-10");
 	if( GetPlayerState(playerid) == PLAYER_STATE_DRIVER )
 	{
 	    new vehicleid = GetVehicleSqlId(GetPlayerVehicleID(playerid));
@@ -1766,7 +1767,32 @@ public OnSpeedoUpdate(playerid)
 			CrashCar(vId, Vehicles[vId][vSampId], damage, oX, oY, oZ);
 			Vehicles[vId][vSpeed] = 0;
 		}
-		else if( Vehicles[vId][vSpeed] > Vehicles[vId][SpeedLimit] && Vehicles[vId][SpeedLimit] != 0 )
+		if( Vehicles[vId][Turbo] != 0 )
+		{
+		    new keys, updown, leftright;
+		    GetPlayerKeys(playerid, keys, updown, leftright);
+		    if( keys == 8 && leftright == 0 && showspeed > 10)
+		    {
+		        new Float:SpeedX, Float:SpeedY, Float:PercentX, Float:PercentY, Float:newX, Float: newY, NegativeX, NegativeY;
+				SpeedX = Vehicles[vId][vSpeedX];
+				SpeedY = Vehicles[vId][vSpeedY];
+
+				if(SpeedX < 0) NegativeX = 1;
+				if(SpeedY < 0) NegativeY = 1;
+				if(NegativeX) SpeedX = SpeedX*-1;
+				if(NegativeY) SpeedY = SpeedY*-1;
+				PercentX = SpeedX/100;
+				PercentY = SpeedY/100;
+
+				newX = SpeedX + PercentX*Vehicles[vId][Turbo];
+				newY = SpeedY + PercentY*Vehicles[vId][Turbo];
+				if(NegativeX) newX = newX*-1;
+				if(NegativeY) newY = newY*-1;
+
+				SetVehicleVelocity(Vehicles[vId][vSampId], newX, newY, Vehicles[vId][vSpeedZ]);
+			}
+		}
+		if( Vehicles[vId][vSpeed] > Vehicles[vId][SpeedLimit] && Vehicles[vId][SpeedLimit] != 0 )
 		{
 		    new difference = Vehicles[vId][vSpeed] - Vehicles[vId][SpeedLimit];
 			new Float:SpeedX, Float:SpeedY, Float:PercentX, Float:PercentY, multiplier, Float:newX, Float: newY, NegativeX, NegativeY;
@@ -1789,31 +1815,7 @@ public OnSpeedoUpdate(playerid)
 			SetVehicleVelocity(Vehicles[vId][vSampId], newX, newY, Vehicles[vId][vSpeedZ]);
 
 		}
-		else if( Vehicles[vId][Turbo] != 0 )
-		{
-		    new keys, updown, leftright;
-		    GetPlayerKeys(playerid, keys, updown, leftright);
-		    if( updown == KEY_UP )
-		    {
-		        new Float:SpeedX, Float:SpeedY, Float:PercentX, Float:PercentY, Float:newX, Float: newY, NegativeX, NegativeY;
-				SpeedX = Vehicles[vId][vSpeedX];
-				SpeedY = Vehicles[vId][vSpeedY];
-
-				if(SpeedX < 0) NegativeX = 1;
-				if(SpeedY < 0) NegativeY = 1;
-				if(NegativeX) SpeedX = SpeedX*-1;
-				if(NegativeY) SpeedY = SpeedY*-1;
-				PercentX = SpeedX/100;
-				PercentY = SpeedY/100;
-				
-				newX = SpeedX + PercentX*Vehicles[vId][Turbo];
-				newY = SpeedY + PercentY*Vehicles[vId][Turbo];
-				if(NegativeX) newX = newX*-1;
-				if(NegativeY) newY = newY*-1;
-
-				SetVehicleVelocity(Vehicles[vId][vSampId], newX, newY, Vehicles[vId][vSpeedZ]);
-			}
-		}
+		
 	}
 	else
 	{
@@ -2344,10 +2346,6 @@ public CheckFalseDeadPlayers(playerid)
 	}
 }
 
-public TimeSync()
-{
-	setTime();
-}
 
 public Rest(playerid)
 {
@@ -2420,7 +2418,18 @@ public RestingEnd(playerid)
 	SendEmote(playerid, "tõuseb püsti");
 	ClearAnimations(playerid);
 }
-
+public SyncPlayerTime(playerid)
+{
+	SetPlayerTime(playerid, gHour, gMinute);
+}
+public SyncAllPlayerTime()
+{
+	gettime(gHour, gMinute, gSecond);
+	for( new playerid = 0; playerid <= MAX_PLAYERS; playerid++ )
+	{
+	    if( IsPlayerConnected(playerid) ) SyncPlayerTime(playerid);
+	}
+}
 /*
 *    EOF
 */
