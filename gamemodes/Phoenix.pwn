@@ -61,7 +61,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"136"
+#define SCRIPT_REVISION 	"137"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -74,6 +74,7 @@
 	#define VEHICLE_LOAD_THREAD     1
 	#define FETCH_UINFO_THREAD      2
 
+#define TIME_OFFSET -3
 #define VEHICLE_DELAY 1000*60*5
 #define SQL_FINISH_TIME 1000
 #define CHAT_RADIUS 25
@@ -83,7 +84,7 @@
 #define MAX_QUERY 300
 #define MAX_TELEPORTS 9
 
-#define MAX_REST_POSITIONS 2
+#define MAX_REST_POSITIONS 14
 #define REST_SIT 0
 #define REST_LAY 1
 
@@ -188,7 +189,8 @@ enum pInf
 	pSkill[MAX_SKILLS+1],
 	pSkillTimer,
 	pSeatbelt,
-	pResting
+	pResting,
+	pRestingAt
 };
 new pInfo[MAX_PLAYERS][pInf];
 
@@ -281,19 +283,34 @@ enum restInf
 	Float: restX,
 	Float: restY,
 	Float: restZ,
-	Float: restAng
+	Float: restAng,
+	Taken
 };
 
 new RestPositions[MAX_REST_POSITIONS][restInf] = 
 {
-	{REST_SIT, 0.0, 0.0, 0.0, 0.0},
-	{REST_LAY, 2.0, 2.0, 2.0, 2.0}
+	{REST_SIT, 0.0, 0.0, 0.0, 0.0, 0},
+	{REST_LAY, 2.0, 2.0, 2.0, 2.0, 0},
+	{REST_SIT,1202.5208,2.6604,1001.5255,194.8951, 0},
+	{REST_SIT,1201.4686,1.3668,1001.5255,271.1574, 0},
+	{REST_SIT,1201.4637,0.6496,1001.5255,266.7708, 0},
+	{REST_SIT,1201.5294,-0.6220,1001.5255,265.5174, 0},
+	{REST_SIT,1201.5164,-2.1263,1001.5255,257.9973, 0},
+	{REST_SIT,1201.4718,-3.4100,1001.5255,266.1441, 0},
+	{REST_SIT,1201.5441,-4.1636,1001.5255,270.8441, 0},
+	{REST_SIT,1201.5792,-5.1626,1001.5255,265.8307, 0},
+	{REST_SIT,1201.7568,-6.0220,1001.5255,286.7518, 0},
+	{REST_SIT,1202.1875,-7.2701,1001.5255,344.3098, 0},
+	{REST_LAY,1201.3108,-7.2603,1001.5255,320.8096, 0},
+	{REST_LAY,1201.6097,2.2717,1001.5255,222.9037, 0}
+	
 };
 
 
 /*
 *    FORWARDS
 */
+forward ClearResting(playerid);
 forward SyncPlayerTime(playerid);
 forward SyncAllPlayerTime();
 forward CrashCar(SQLVid, vehicleid, Float:damage, Float:oX, Float:oY, Float:oZ);
@@ -757,6 +774,7 @@ public OnPlayerDisconnect(playerid)
 	if(IsPlayerNPC(playerid)) return 1;
 	UpdatePlayer(playerid);
 	SaveSkills(playerid);
+	if( pInfo[playerid][pResting] ) ClearResting(playerid);
 	return 1;
 }
 
@@ -1014,6 +1032,8 @@ public OnPlayerDeath(playerid, killerid, reason)
 	pInfo[playerid][pHealth] = 100;
 	pInfo[playerid][pVW] = 0;
 	pInfo[playerid][pInterior] = 0;
+	
+	if ( pInfo[playerid][pResting] ) ClearResting(playerid);
 	
 	return 1;
 }
@@ -1783,9 +1803,14 @@ public OnSpeedoUpdate(playerid)
 				if(NegativeY) SpeedY = SpeedY*-1;
 				PercentX = SpeedX/100;
 				PercentY = SpeedY/100;
+				
+				new Float:turbo = Vehicles[vId][Turbo];
+				
+				if ( showspeed > 200 ) turbo = turbo / 4;
+				else if ( showspeed > 100 ) turbo = turbo / 2;
 
-				newX = SpeedX + PercentX*Vehicles[vId][Turbo];
-				newY = SpeedY + PercentY*Vehicles[vId][Turbo];
+				newX = SpeedX + PercentX*turbo;
+				newY = SpeedY + PercentY*turbo;
 				if(NegativeX) newX = newX*-1;
 				if(NegativeY) newY = newY*-1;
 
@@ -2349,34 +2374,34 @@ public CheckFalseDeadPlayers(playerid)
 
 public Rest(playerid)
 {
-	new RestPlace = IsPlayerNearRestingPlace(playerid);
 	
+	if( pInfo[playerid][pResting] )
+	{
+		RestingEnd(playerid);
+		return 1;
+	}
+	new RestPlace = IsPlayerNearRestingPlace(playerid);
 	if(RestPlace != -1)
 	{
-		if(!pInfo[playerid][pResting])
-		{
-			SetPlayerPos(playerid, RestPositions[RestPlace][restX], RestPositions[RestPlace][restY],  RestPositions[RestPlace][restZ]);
-			SetPlayerFacingAngle(playerid, RestPositions[RestPlace][restAng]);
-			
-			pInfo[playerid][pResting] = 1;
-			
-			if(RestPositions[RestPlace][restType] == 0)
-			{
-				ApplyAnimation(playerid, "BEACH", "bather", 4.0, 1, 0, 0, 0, 0);
-				SendEmote(playerid, "läheb voodisse pikali");
-			}
-			else
-			{
-				ApplyAnimation(playerid,"BEACH", "ParkSit_M_loop", 4.0, 1, 0, 0, 0, 0);
-				SendEmote(playerid, "istub");
-			}	
+		SetPlayerPos(playerid, RestPositions[RestPlace][restX], RestPositions[RestPlace][restY],  RestPositions[RestPlace][restZ]);
+		SetPlayerFacingAngle(playerid, RestPositions[RestPlace][restAng]);
 
-			SendClientMessage(playerid, COLOR_YELLOW, "Kirjuta /puhka, et püsti tõusta.");
+		pInfo[playerid][pResting] = 1;
+		RestPositions[RestPlace][Taken] = 1;
+		pInfo[playerid][pRestingAt] = RestPlace;
+
+		if(RestPositions[RestPlace][restType] == REST_LAY)
+		{
+			ApplyAnimation(playerid, "BEACH", "bather", 4.0, 1, 0, 0, 0, 0);
+			SendEmote(playerid, "läheb pikali");
 		}
 		else
 		{
-			RestingEnd(playerid);
+			ApplyAnimation(playerid,"BEACH", "ParkSit_M_loop", 4.0, 1, 0, 0, 0, 0);
+			SendEmote(playerid, "istub");
 		}
+
+		SendClientMessage(playerid, COLOR_YELLOW, "Kirjuta /puhka, et püsti tõusta.");
 	}
 	else
 	{
@@ -2400,12 +2425,15 @@ public IsPlayerNearRestingPlace(playerid)
 	
 	for(new i; i < MAX_REST_POSITIONS; i++)
 	{
-		kaugus2 = Distance(pX, pY, pZ, RestPositions[i][restX], RestPositions[i][restY],  RestPositions[i][restZ]);
-		
-		if(kaugus2 < kaugus)
+		if( !RestPositions[i][Taken] )
 		{
-			kaugus = kaugus2;
-			ret = i;
+			kaugus2 = Distance(pX, pY, pZ, RestPositions[i][restX], RestPositions[i][restY],  RestPositions[i][restZ]);
+
+			if(kaugus2 < kaugus)
+			{
+				kaugus = kaugus2;
+				ret = i;
+			}
 		}
 	}	
 	
@@ -2414,9 +2442,17 @@ public IsPlayerNearRestingPlace(playerid)
 
 public RestingEnd(playerid)
 {
-	pInfo[playerid][pResting] = 0;
+	ClearResting(playerid);
 	SendEmote(playerid, "tõuseb püsti");
 	ClearAnimations(playerid);
+}
+public ClearResting(playerid)
+{
+    new RestPlace = pInfo[playerid][pRestingAt];
+    pInfo[playerid][pResting] = 0;
+    RestPositions[RestPlace][Taken] = 0;
+    pInfo[playerid][pRestingAt] = -1;
+    
 }
 public SyncPlayerTime(playerid)
 {
@@ -2425,6 +2461,7 @@ public SyncPlayerTime(playerid)
 public SyncAllPlayerTime()
 {
 	gettime(gHour, gMinute, gSecond);
+	gHour = gHour + TIME_OFFSET;
 	for( new playerid = 0; playerid <= MAX_PLAYERS; playerid++ )
 	{
 	    if( IsPlayerConnected(playerid) ) SyncPlayerTime(playerid);
