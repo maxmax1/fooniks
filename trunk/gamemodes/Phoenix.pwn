@@ -61,7 +61,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"137"
+#define SCRIPT_REVISION 	"138"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -1781,7 +1781,7 @@ public OnSpeedoUpdate(playerid)
 		format(string,sizeof(string),"~y~~h~Bensiin: %s  ~y~~h~Kiirus: ~w~%i km/h  ~y~~h~Korras: ~w~%d %%", fuel, showspeed, hProtsenti);
 		TextDrawSetString(InfoBar[playerid], string);
 		
-		if((oSpeed - Vehicles[vId][vSpeed]) > 30 && (oHealth - Vehicles[vId][vHealth]) > 50)
+		if((oSpeed - Vehicles[vId][vSpeed]) > 70 && (oHealth - Vehicles[vId][vHealth]) > 100)
 		{
          	new Float:damage = oHealth - Vehicles[vId][vHealth];
 			CrashCar(vId, Vehicles[vId][vSampId], damage, oX, oY, oZ);
