@@ -23,6 +23,7 @@
 *        External Credit #5 - DCMD
 *        External Credit #6 - Alex "Y_Less" Cole, SendFormattedText/SendFormattedTextToAll
 *        External Credit #7 - UnKnown - GetXYInFrontOfPlayer
+*        External Credit #8 - Westie, strlib
 *
 */
 
@@ -46,6 +47,7 @@
 #include <a_mysql>
 #include <md5_core>  // author: Alex "Y_Less" Cole, External Credit #2
 #include <Y_server>  // author: Alex "Y_Less" Cole, External Credit #3
+#include <strlib>  	 // author: Westie, External Credit #8
 #include <phoenix_Core>
 #include <phoenix_Lang>
 #include <phoenix_RealCarnames>
@@ -61,8 +63,8 @@
 */
 
 #define SCRIPT_NAME			"Phoenix"
-#define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"139"
+#define SCRIPT_VERSION  	"0.1.2"
+#define SCRIPT_REVISION 	"140"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -994,9 +996,11 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		}
 		else
 		{
+			new str[_strlib_med_string];
+			str = str_replace("%s", "s", inputtext);
 		    if( IsPlayerConnected(pInfo[playerid][SelectedPlayer]) && pInfo[pInfo[playerid][SelectedPlayer]][pLoggedIn] )
 		    {
-				ForwardEs(playerid, inputtext);
+				ForwardEs(playerid, str);
 		    }
 			else
 			SendClientMessage(playerid, COLOR_RED, LANG_NOT_ONLINE);
@@ -1053,7 +1057,9 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			}
 			else
 			{
-				dcmd_am(playerid, inputtext);
+				new str[_strlib_med_string];
+				str = str_replace("%s", "s", inputtext);
+				dcmd_am(playerid, str);
 			}
 		}
 		pInfo[playerid][aAction] = 0;
