@@ -20,10 +20,11 @@ enum prgInf
 {
 	Text: backGround,
 	Text: innerDraw[MAX_PLAYERS],
+	Float: innerPrecent[MAX_PLAYERS],
 	Float: prgX,
 	Float: prgY,
 	Float: prgW,
-	Float: prgB
+	Float: prgB,
 };
 new progressInf[MAX_BARS][prgInf];
 
@@ -60,6 +61,7 @@ public CreateProgressbar(Float: x, Float: y, Float: width, Float: height, Float:
 		TextDrawColor(progressInf[progressBars][innerDraw][i], 0xffffffff);
 		TextDrawSetProportional(progressInf[progressBars][innerDraw][i], 1);
 		TextDrawSetShadow(progressInf[progressBars][innerDraw][i], 1);	
+		progressInf[progressBars][innerPrecent][i] = 100.0;	
 	}
 	progressBars++;
 	return progressBars-1;
@@ -69,11 +71,16 @@ stock setProgressBar(draw, playerid, Float: precent)
 {
 	if(draw > (MAX_BARS-1)) return 1;
 	
+	if(precent < 0.0) precent = 0.0;
+	if(precent > 100.0) precent = 100.0;
+	
 	new Float: rPrec = progressInf[draw][prgX] + progressInf[draw][prgW] / 100 * precent;
 	
 	TextDrawHideForPlayer(playerid, progressInf[draw][innerDraw][playerid]);
 	TextDrawTextSize(progressInf[draw][innerDraw][playerid], (rPrec), 10.000000);	
 	TextDrawShowForPlayer(playerid, progressInf[draw][innerDraw][playerid]);	
+	
+	progressInf[progressBars][innerPrecent][playerid] = precent;
 	return 0;
 }
 

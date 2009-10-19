@@ -22,6 +22,7 @@
 *        External Credit #4 - Alex "Y_Less" Cole, sscanf
 *        External Credit #5 - DCMD
 *        External Credit #6 - Alex "Y_Less" Cole, SendFormattedText/SendFormattedTextToAll
+*        External Credit #7 - UnKnown - GetXYInFrontOfPlayer
 *
 */
 
@@ -61,7 +62,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.1"
-#define SCRIPT_REVISION 	"138"
+#define SCRIPT_REVISION 	"139"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -127,7 +128,7 @@
 /*
 *    SKILL DEFINES
 */
-#define MAX_SKILLS		11
+#define MAX_SKILLS		12
 
 #define SKILL_PISTOL				0
 #define SKILL_PISTOLS				1
@@ -140,6 +141,7 @@
 #define SKILL_AK47					8
 #define SKILL_M4					9
 #define SKILL_SNIPERRIFLE			10
+#define SKILL_ATHLETE				11
 
 /*
 *    GLOBAL VARIABLES
@@ -189,8 +191,12 @@ enum pInf
 	pSkill[MAX_SKILLS+1],
 	pSkillTimer,
 	pSeatbelt,
+	
+	Float: pRest,
 	pResting,
-	pRestingAt
+	pRestingAt,
+	
+	pControllable
 };
 new pInfo[MAX_PLAYERS][pInf];
 
@@ -250,7 +256,8 @@ new Skills[MAX_SKILLS][sInf] =
 	{"MP5", 1800, 1.5},
 	{"AK47", 3500, 1.5},
 	{"M4", 2000, 1.5},
-	{"SNIPERRIFLE", 5000, 1.5}
+	{"SNIPERRIFLE", 5000, 1.5},
+	{"ATHLETE", 7500, 1.8}
 };
 new SkillDelay[MAX_PLAYERS][MAX_SKILLS];
 
@@ -365,6 +372,9 @@ forward ClearDelay(playerid, skillId);
 forward Rest(playerid);
 forward IsPlayerNearRestingPlace(playerid);
 forward RestingEnd(playerid);
+forward TogglePlayerControllableEx(playerid, toggle, timer);
+forward RestChange();
+forward RestUpdate();
 
 /*
 *    MAIN()
@@ -420,6 +430,19 @@ stock IsValidSkin(skinid) // author: Simon, External Credit #1
     for (new i = 0; i < MAX_BAD_SKINS; i++) { if (skinid == badSkins[i]) return false; }
     #undef MAX_BAD_SKINS
     return 1;
+}
+
+GetXYInFrontOfPlayer(playerid, &Float:x, &Float:y, Float:distance) // author: UnKnown, External Credit #7
+{
+	new Float:a;
+	GetPlayerPos(playerid, x, y, a);
+	GetPlayerFacingAngle(playerid, a);
+	if (GetPlayerVehicleID(playerid))
+	{
+	    GetVehicleZAngle(GetPlayerVehicleID(playerid), a);
+	}
+	x += (distance * floatsin(-a, degrees));
+	y += (distance * floatcos(-a, degrees));
 }
 
 stock IsGroupMember(playerid)
@@ -529,6 +552,48 @@ stock Float: Distance(Float:x1, Float:y1, Float:z1, Float:x2, Float:y2, Float:z2
 	new Float: temp = floatsqroot( (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2));
 	if(temp < 0) temp = temp * (-1);
 	return temp;
+}
+
+MegaJump(playerid)
+{
+	new Float: rad = 0.0125;
+	new Float: higher = 0.125;
+	new Float: JumpEnergy = 15.0;
+	
+	if(pInfo[playerid][pRest] > 50.0 && pInfo[playerid][pRest] < 75.0)
+	{
+		rad = 0.00625;
+		higher = 0.0625;
+	}
+	else if(pInfo[playerid][pRest] > 25.0 && pInfo[playerid][pRest] < 50.0)
+	{
+		rad = 0.003125;
+		higher = 0.03125;
+	}
+	else if(pInfo[playerid][pRest] < 25.0)
+	{
+		return 1;
+	}
+
+	if(SkillDelay[playerid][SKILL_ATHLETE] == 0 && pInfo[playerid][pControllable] == 1)
+	{
+		new Float: px, Float: py, Float: pz, Float: nx, Float: ny, Float: mx, Float: my;
+		GetPlayerPos(playerid, px, py, pz);
+		GetXYInFrontOfPlayer(playerid, nx, ny, rad);
+		
+		mx = nx - px;
+		my = ny - py;
+			
+		new Float: vx, Float: vy, Float: vz;
+		GetPlayerVelocity(playerid, vx, vy, vz);
+		SetPlayerVelocity(playerid, vx+mx, vy+my, vz+higher);	
+		SkillDelay[playerid][SKILL_ATHLETE] = 1;
+		SetTimerEx("ClearDelay", 1000, 0, "ii", playerid, SKILL_ATHLETE);
+		
+		pInfo[playerid][pRest] -= JumpEnergy;
+		setProgressBar(restBar, playerid, pInfo[playerid][pRest]);
+	}
+	return 1;
 }
 
 /*
@@ -741,6 +806,8 @@ public OnGameModeInit()
 	SetTimer("CheckFalseDeadPlayers", 3000, true);
 	SetTimer("SyncAllPlayerTime", 950, true);
 	SetTimer("UpdateAllPlayerPos", 1000*15, true);
+	SetTimer("RestChange", 10000, true);	
+	SetTimer("RestUpdate", 5000, true);
 	
 	return 1;
 }
@@ -764,6 +831,7 @@ public OnPlayerConnect(playerid)
 	CheckCharacter(playerid);
 
 	pInfo[playerid][pLoggedIn] = 0;
+	pInfo[playerid][pRest] = 100.0;
 	
 	SyncPlayerTime(playerid);
 	return 1;
@@ -808,6 +876,17 @@ public OnPlayerSpawn(playerid)
 			Kick(playerid);
 		}
 	}
+	
+	// Make Spawning safe.
+	if(pInfo[playerid][pHealth] < 1.0) pInfo[playerid][pHealth] = 50.0;
+	if(pInfo[playerid][pPosX] == 0 && pInfo[playerid][pPosY] == 0 && pInfo[playerid][pPosZ] == 0)
+	{
+		pInfo[playerid][pPosX] = 2420.3459;
+		pInfo[playerid][pPosY] = -1229.8799;
+		pInfo[playerid][pPosZ] = 24.7299;
+		pInfo[playerid][pAngle] = 180;
+	}
+
 
     SetPlayerPos(playerid, pInfo[playerid][pPosX],pInfo[playerid][pPosY],pInfo[playerid][pPosZ]+1);
 	SetPlayerVirtualWorld(playerid, pInfo[playerid][pVW]);
@@ -822,6 +901,9 @@ public OnPlayerSpawn(playerid)
 	ProccesBarShowForPlayer(foodBar, playerid);
 	ProccesBarShowForPlayer(restBar, playerid);
 	TogglePlayerClock(playerid, 1);
+	
+	pInfo[playerid][pControllable] = 1;
+	
 	return 1;
 }
 
@@ -1142,6 +1224,7 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 			pInfo[playerid][pSkillTimer] = 0;
 		}
 	}
+	if(PRESSED(KEY_JUMP)) MegaJump(playerid);
 }
 /*
 *    COMMANDS
@@ -1164,7 +1247,6 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(admin, 5, cmdtext);
 	dcmd(puhka, 5, cmdtext);
 	dcmd(tapa, 4, cmdtext);
-	dcmd(bartest, 7, cmdtext);
 	
 	//	Masinas
 	dcmd(kiirusepiirang, 14, cmdtext);
@@ -1173,7 +1255,6 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	
 	// ajutine
 	dcmd(kaklus, 6, cmdtext);
-	dcmd(mj, 2, cmdtext);
 	dcmd(addveh, 6, cmdtext);
 	
 	if(animCmdHandler(playerid, cmdtext) != -1) return 1;
@@ -1385,13 +1466,14 @@ dcmd_turvav88(playerid, params[])
 			pInfo[playerid][pSeatbelt] = 1;
 		}
 	}
-	else return SendClientMessage(playerid, COLOR_YELLOW, "Sa ei ole ühesgi autos!");
+	else return SendClientMessage(playerid, COLOR_YELLOW, "Sa ei ole üheski autos!");
 	return 1;
 }
 
 dcmd_puhka(playerid, params[])
 {
 	#pragma unused params
+	if(IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_YELLOW, "Sa istud juba!");
 	Rest(playerid);
 	return 1;
 }
@@ -1400,19 +1482,6 @@ dcmd_tapa(playerid, params[])
 {
 	#pragma unused params
 	SetPlayerHealth(playerid, 0.0);
-	return 1;
-}
-
-dcmd_bartest(playerid, params[])
-{
-	new id, Float: val;
-	if( sscanf(params, "if", id, val) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /bartest [id] [väärtus]");
-	
-	if(id < 0 || id > MAX_BARS) return SendClientMessage(playerid, COLOR_YELLOW, "Vigane ID(0-1)");
-	if(val < 0.0 || val > 100.0) return SendClientMessage(playerid, COLOR_YELLOW, "Vigane väärtus(0-100)");
-	
-	setProgressBar(id, playerid, val);
-	
 	return 1;
 }
 
@@ -1440,16 +1509,6 @@ dcmd_kaklus(playerid, params[])
 	return 1;	
 }
 
-dcmd_mj(playerid, params[])
-{
-	#pragma unused params
-	new Float: vx, Float: vy, Float: vz;
-	GetPlayerVelocity(playerid, vx, vy, vz);
-	vz += 10.0;
-	SetPlayerVelocity(playerid, vx, vy, vz);
-	SendEmote(playerid, "hüppab jube kõrgele.");
-	return 1;
-}
 dcmd_addveh(playerid, params[])
 {
     #pragma unused params
@@ -1880,6 +1939,7 @@ public CrashCar(SQLVid, vehicleid, Float:damage, Float:oX, Float:oY, Float:oZ)
 				GetPlayerHealth(playerid, health);
 				health = health - damage/25;
 				SetPlayerHealth(playerid, health);
+				TogglePlayerControllableEx(playerid, 0, 5000);
 			}			
 		}
 	}
@@ -2406,9 +2466,9 @@ public Rest(playerid)
 	else
 	{
 		ApplyAnimation(playerid,"BEACH", "ParkSit_M_loop", 4.0, 1, 0, 0, 5000, 0);
-		SendEmote(playerid, "istub");		
+		SendEmote(playerid, "istub maha");		
 		pInfo[playerid][pResting] = 1;
-		SetTimerEx("RestingEnd", 5000, 0, "i", playerid);
+		pInfo[playerid][pRestingAt] = -1;
 	}
 	return 1;	
 }
@@ -2446,18 +2506,21 @@ public RestingEnd(playerid)
 	SendEmote(playerid, "tõuseb püsti");
 	ClearAnimations(playerid);
 }
+
 public ClearResting(playerid)
 {
     new RestPlace = pInfo[playerid][pRestingAt];
+	if(RestPlace != -1 && RestPlace < MAX_REST_POSITIONS) RestPositions[RestPlace][Taken] = 0;
     pInfo[playerid][pResting] = 0;
-    RestPositions[RestPlace][Taken] = 0;
     pInfo[playerid][pRestingAt] = -1;
     
 }
+
 public SyncPlayerTime(playerid)
 {
 	SetPlayerTime(playerid, gHour, gMinute);
 }
+
 public SyncAllPlayerTime()
 {
 	gettime(gHour, gMinute, gSecond);
@@ -2467,6 +2530,68 @@ public SyncAllPlayerTime()
 	    if( IsPlayerConnected(playerid) ) SyncPlayerTime(playerid);
 	}
 }
+
+public TogglePlayerControllableEx(playerid, toggle, timer)
+{
+	pInfo[playerid][pControllable] = toggle;
+	TogglePlayerControllable(playerid, toggle);
+	
+	if(timer != -1)
+	{
+		new newval = 0;
+		if(toggle == 0) newval = 1;
+		SetTimerEx("TogglePlayerControllableEx", timer, 0, "iii", playerid, newval, -1);
+	}
+}
+
+public RestChange()
+{
+	for( new playerid = 0; playerid <= MAX_PLAYERS; playerid++ )
+	{
+	    if( IsPlayerConnected(playerid) && !IsPlayerNPC(playerid) )
+		{
+			if( pInfo[playerid][pResting] )
+			{
+				new Float: Rem = 1.0, xpNeeded;
+				
+				if(pInfo[playerid][pRestingAt] != -1)
+				{
+					Rem = 2.5;
+					if(RestPositions[pInfo[playerid][pRestingAt]][restType] == REST_LAY) Rem = 5.0;
+				}
+				
+				new level = GetLevel(SKILL_ATHLETE, pInfo[playerid][pSkill][SKILL_ATHLETE], xpNeeded);
+				if(level > 10) Rem = 1.0 + (level / 25);
+				
+				pInfo[playerid][pRest] += Rem;
+				XpAdd(playerid, SKILL_ATHLETE, 25);
+			}
+			else
+			{
+				new Float: Rem = 5.0, xpNeeded;
+				new level = GetLevel(SKILL_ATHLETE, pInfo[playerid][pSkill][SKILL_ATHLETE], xpNeeded);
+				if(level > 10) Rem = 5.0 - (level / 25);
+				
+				if(!IsPlayerInAnyVehicle(playerid)) pInfo[playerid][pRest] -= Rem;
+				else  pInfo[playerid][pRest] += 1.0;
+			}
+			if(pInfo[playerid][pRest] < 0.0) pInfo[playerid][pRest] = 0.0;
+			if(pInfo[playerid][pRest] > 100.0) pInfo[playerid][pRest] = 100.0;
+		}
+	}
+}
+
+public RestUpdate()
+{
+	for( new playerid = 0; playerid <= MAX_PLAYERS; playerid++ )
+	{
+	    if( IsPlayerConnected(playerid) && !IsPlayerNPC(playerid) )
+		{
+			if(progressInf[restBar][innerPrecent][playerid] != pInfo[playerid][pRest]) setProgressBar(restBar, playerid, pInfo[playerid][pRest]);
+		}
+	}
+}
+
 /*
 *    EOF
 */
