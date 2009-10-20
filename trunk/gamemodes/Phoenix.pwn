@@ -33,6 +33,9 @@
 
  // author: -, External Credit #4
 #define dcmd(%1,%2,%3) if (!strcmp(DcmdFix( (%3)[1], (%2) ), #%1, true, (%2)) && ((((%3)[(%2) + 1] == '\0') && (dcmd_%1(playerid, ""))) || (((%3)[(%2) + 1] == ' ') && (dcmd_%1(playerid, (%3)[(%2) + 2]))))) return 1
+// author: Alex "Y_Less" Cole, External Credit #6
+#define SendFormattedText(%1,%2,%3,%4) do{new sendfstring[128];format(sendfstring,128,(%3),%4);SendClientMessage((%1), (%2) ,sendfstring);}while(FALSE)
+#define SendFormattedTextToAll(%1,%2,%3) do{new sendfstring[128];format(sendfstring,128,(%2),%3);SendClientMessageToAll((%1),sendfstring);}while(FALSE)
 
 #define HOLDING(%0) \
 	((newkeys & (%0)) == (%0))
@@ -53,10 +56,7 @@
 #include <phoenix_RealCarnames>
 #include <phoenix_Anims>
 #include <phoenix_ProgressBar>
-
-// author: Alex "Y_Less" Cole, External Credit #6
-#define SendFormattedText(%1,%2,%3,%4) do{new sendfstring[128];format(sendfstring,128,(%3),%4);SendClientMessage((%1), (%2) ,sendfstring);}while(FALSE)
-#define SendFormattedTextToAll(%1,%2,%3) do{new sendfstring[128];format(sendfstring,128,(%2),%3);SendClientMessageToAll((%1),sendfstring);}while(FALSE)
+#include <phoenix_Interiors>
 
 /*
 *    DEFINES
@@ -64,7 +64,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.2"
-#define SCRIPT_REVISION 	"140"
+#define SCRIPT_REVISION 	"141"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -1262,6 +1262,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	// ajutine
 	dcmd(kaklus, 6, cmdtext);
 	dcmd(addveh, 6, cmdtext);
+	dcmd(int, 3, cmdtext);
 	
 	if(animCmdHandler(playerid, cmdtext) != -1) return 1;
 
@@ -1533,6 +1534,20 @@ dcmd_addveh(playerid, params[])
 	    }
 	    else return 1;
 	}
+	return 1;
+}
+
+// AJUTISED
+dcmd_int(playerid, params[])
+{
+	new id;
+	if(sscanf(params, "i", id))
+	{
+		SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /int [id]");
+		return 1;
+	}
+	
+	setToInt(playerid, id);
 	return 1;
 }
 
