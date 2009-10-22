@@ -57,6 +57,7 @@
 #include <phoenix_Anims>
 #include <phoenix_ProgressBar>
 #include <phoenix_Interiors>
+#include <phoenix_Pockets>
 
 /*
 *    DEFINES
@@ -64,7 +65,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.2"
-#define SCRIPT_REVISION 	"142"
+#define SCRIPT_REVISION 	"143"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -115,6 +116,7 @@
 #define COLOR_ADMINCHAT 0xffa800AA
 #define COLOR_TEATA 0xff0000AA
 #define COLOR_ADMIN_MESSAGE 0x0082fcAA
+
 /* DialogIDs */
 #define DIALOG_LOGIN 2009
 #define DIALOG_PLAYER 2010
@@ -124,6 +126,7 @@
 #define DIALOG_ADMINCP 2014
 #define DIALOG_AACTION 2015
 #define DIALOG_TELEPORTS 2016
+//#define DIALOG_POCKETS 2017 // Reserved
 
 #define NPC_IGOR 1
 
@@ -314,7 +317,6 @@ new RestPositions[MAX_REST_POSITIONS][restInf] =
 	{REST_LAY,1201.6097,2.2717,1001.5255,222.9037, 0}
 	
 };
-
 
 /*
 *    FORWARDS
@@ -1081,6 +1083,11 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		
 		SendFormattedText(playerid, COLOR_GREEN, LANG_TELEPORTED_TO, telePositions[listitem][tName]);
 	}
+	else if( dialogid == DIALOG_POCKETS )
+	{
+		if( response == 0 ) return 1;
+		UseItem(playerid, listitem);
+	}
 	
 	return 1;
 }
@@ -1253,6 +1260,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(admin, 5, cmdtext);
 	dcmd(puhka, 5, cmdtext);
 	dcmd(tapa, 4, cmdtext);
+	dcmd(taskud, 5, cmdtext);
 	
 	//	Masinas
 	dcmd(kiirusepiirang, 14, cmdtext);
@@ -1489,6 +1497,13 @@ dcmd_tapa(playerid, params[])
 {
 	#pragma unused params
 	SetPlayerHealth(playerid, 0.0);
+	return 1;
+}
+
+dcmd_taskud(playerid, params[])
+{
+	#pragma unused params
+	showPockets(playerid);
 	return 1;
 }
 
