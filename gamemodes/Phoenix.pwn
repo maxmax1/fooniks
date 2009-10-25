@@ -65,7 +65,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.2"
-#define SCRIPT_REVISION 	"143"
+#define SCRIPT_REVISION 	"144"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -321,6 +321,9 @@ new RestPositions[MAX_REST_POSITIONS][restInf] =
 /*
 *    FORWARDS
 */
+
+forward MysqlConnect();
+forward MysqlCheck();
 forward ClearResting(playerid);
 forward SyncPlayerTime(playerid);
 forward SyncAllPlayerTime();
@@ -608,14 +611,7 @@ MegaJump(playerid)
 public OnGameModeInit()
 {
 	// First things first, lets attempt to connect to database.
-	new Connection = mysql_connect(MYSQL_HOST, MYSQL_USER, MYSQL_DB, MYSQL_PASSWORD);
-	if(!Connection)
-	{
-		printf(LANG_FAILED_TO_CONNECT, SCRIPT_NAME);
-		SendRconCommand("exit");
-		return 1;
-	}
-	printf(LANG_CONNECTED, SCRIPT_NAME);
+	if(MysqlConnect() > 0) return 1;
 	mysql_debug(1);
 
 	new string[24]; // 24 should be enough.
@@ -806,6 +802,7 @@ public OnGameModeInit()
 	    Vehicles[i][SpeedLimit] = 300;
 	}
 	
+	SetTimer("MysqlCheck", 1000*60*5, true);
 	SetTimer("UpdateAllPlayers", 1000*60*15, true);
 	SetTimer("CheckFalseDeadPlayers", 3000, true);
 	SetTimer("SyncAllPlayerTime", 950, true);
@@ -1569,6 +1566,28 @@ dcmd_int(playerid, params[])
 /*
 *    PUBLICS
 */
+
+public MysqlConnect()
+{
+	new Connection = mysql_connect(MYSQL_HOST, MYSQL_USER, MYSQL_DB, MYSQL_PASSWORD);
+	if(!Connection)
+	{
+		printf(LANG_FAILED_TO_CONNECT, SCRIPT_NAME);
+		SendRconCommand("exit");
+		return 1;
+	}
+	printf(LANG_CONNECTED, SCRIPT_NAME);
+	return 0;
+}
+
+public MysqlCheck()
+{
+	if(mysql_ping() == -1)
+	{
+		printf("MYSQL LOST, reconnecting.");
+		MysqlConnect();
+	}
+}
 
 public SendEs(playerid)
 {
