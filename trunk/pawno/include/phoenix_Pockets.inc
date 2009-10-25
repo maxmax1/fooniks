@@ -23,12 +23,12 @@ enum itemInf
 	itemMin,
 	itemMax,
 	itemCallBack[16],
-	
+	itemOtherId
 };
 new Items[MAX_ITEMS][itemInf] = 
 {
-	{"tühjus", 0, 0, "UseEmpty"},
-	{"püstol", 0, 1, "setAPistol"}
+	{"tühjus", 0, 0, "UseEmpty",  0},
+	{"püstol", 0, 1, "setAPistol", 21}
 };
 
 enum pockInf
@@ -46,10 +46,21 @@ stock showPockets(playerid)
 	ShowPlayerDialog(playerid, DIALOG_POCKETS, DIALOG_STYLE_LIST, LANG_DIALOG_POCKETSHEAD, string, LANG_DIALOG_OK, LANG_DIALOG_EXITBUTTON);
 }
 
+stock FindFreeSlot(playerid, type, max)
+{
+	for(new i; i < MAX_POCKETS; i++)
+	{
+		if(type != 0 && Pockets[playerid][i][pAmount] > max) continue;
+		if(Pockets[playerid][i][pType] == type) return i;
+	}
+	return -1;
+}
+
 // Forwards
 
 forward BuildPockets(playerid, string[], len);
 forward UseItem(playerid, pocketid);
+forward public giveItem(playerid, itemId, amount);
 
 // Publics
 
@@ -82,9 +93,43 @@ public UseItem(playerid, pocketid)
 	return 0;
 }
 
+// returns given amount.
+public giveItem(playerid, itemId, amount)
+{
+	if(itemId < 0 || itemId > MAX_ITEMS) return 0;		
+
+	new type = (Items[itemId][itemMax] > 1)?itemId:0; // If itemMax is bigger than 1 find a slot that has free space.	
+	new maks = (Items[itemId][itemMax] > 1)?Items[itemId][itemMax]:0; // If itemMax is bigger than 1 find a slot that has free space.	
+	new freeSlot = FindFreeSlot(playerid, type, maks);
+	if(freeSlot == -1) return 0;
+	
+	if(maks == 0)
+	{
+		Pockets[playerid][freeSlot][pType] = itemId;
+		Pockets[playerid][freeSlot][pAmount] = amount;
+		return amount;
+	}
+	else
+	{
+		new canGive = maks - Pockets[playerid][freeSlot][pAmount];
+		new realGive = (amount > canGive)?canGive:amount;
+		
+		if(canGive > 0)
+		{
+			Pockets[playerid][freeSlot][pAmount] += realGive;
+			return (amount-realGive);
+		}
+		return 0;
+	}
+}
+
+
 // HANDLERS
 
 // forwards
+
+forward giveItemOtherStuff(playerid, itemid, amount);
+
 forward UseEmpty(playerid, amount);
 forward setAPistol(playerid, amount);
 
@@ -94,6 +139,20 @@ public UseEmpty(playerid, amount)
 	SendEmote(playerid, "katsub oma tühja taskut.");
 	return 1;
 }
+
+public giveItemOtherStuff(playerid, itemid, amount)
+{
+	if(itemid == 0)
+	{
+		return 1;
+	}
+	else if(itemid < 10)
+	{
+		GivePlayerWeapon(playerid, Items[itemid][itemOtherId], amount);
+	}
+	return 0;
+}
+
 public setAPistol(playerid, amount)
 {
 	SetPlayerArmedWeapon(playerid, 22);
