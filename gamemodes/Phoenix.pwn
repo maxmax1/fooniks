@@ -65,7 +65,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.2"
-#define SCRIPT_REVISION 	"145"
+#define SCRIPT_REVISION 	"146"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -1104,13 +1104,13 @@ public OnPlayerRequestSpawn(playerid)
 public OnPlayerPickUpPickup(playerid, pickupid)
 {
 	if( pickupid == PistolPickup )
-		GivePlayerWeapon(playerid, 22, 100);
+		giveItem(playerid, 2, 100);
 	if( pickupid == SawnoffPickup )
-		GivePlayerWeapon(playerid, 26, 100);
-	if( pickupid == MP5Pickup )
-		GivePlayerWeapon(playerid, 29, 100);
-	if( pickupid == AKPickup )
-		GivePlayerWeapon(playerid, 30, 100);
+		giveItem(playerid, 5, 100);
+	if( pickupid == MP5Pickup )		
+		giveItem(playerid, 8, 100);
+	if( pickupid == AKPickup )		
+		giveItem(playerid, 9, 100);
 
 	return 1;
 }
@@ -1257,7 +1257,8 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(admin, 5, cmdtext);
 	dcmd(puhka, 5, cmdtext);
 	dcmd(tapa, 4, cmdtext);
-	dcmd(taskud, 5, cmdtext);
+	dcmd(taskud, 6, cmdtext);
+	dcmd(td, 2, cmdtext);
 	
 	//	Masinas
 	dcmd(kiirusepiirang, 14, cmdtext);
@@ -1501,6 +1502,12 @@ dcmd_taskud(playerid, params[])
 {
 	#pragma unused params
 	showPockets(playerid);
+	return 1;
+}
+dcmd_td(playerid, params[])
+{
+	#pragma unused params
+	giveItem(playerid, 1, 100);
 	return 1;
 }
 

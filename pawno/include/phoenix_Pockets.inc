@@ -13,7 +13,7 @@
 *    The Initial Developers of the Original Code are Jyrno42 and 13th.
 */
 
-#define MAX_ITEMS 2
+#define MAX_ITEMS 13
 #define MAX_POCKETS 10
 #define DIALOG_POCKETS 2017
 
@@ -23,12 +23,24 @@ enum itemInf
 	itemMin,
 	itemMax,
 	itemCallBack[16],
-	itemOtherId
+	itemOtherId,
+	itemParent
 };
 new Items[MAX_ITEMS][itemInf] = 
 {
-	{"tühjus", 0, 0, "UseEmpty",  0},
-	{"püstol", 0, 1, "setAPistol", 21}
+	{"tühjus", 0, 0, "UseEmpty",  0, -1},	
+	{"püstol", 0, 500, "setWep", 22, -1},
+	{"püstolV", 0, 500, "setWep", 23, 1},
+	{"DEAGLE", 0, 500, "setWep", 24, 1},
+	{"Shotgun", 0, 500, "setWep", 25, -1},
+	{"ShotgunS", 0, 500, "setWep", 26, 4},
+	{"ShotgunSP", 0, 500, "setWep", 27, 4},
+	{"MICROUZI", 0, 500, "setWep", 28, -1},
+	{"MP5", 0, 500, "setWep", 29, 8},
+	{"AK47", 0, 500, "setWep", 30, -1},
+	{"M4", 0, 500, "setWep", 31, 10},	
+	{"CRifle", 0, 500, "setWep", 33, -1},	
+	{"SRifle", 0, 500, "setWep", 34, 11}
 };
 
 enum pockInf
@@ -46,21 +58,34 @@ stock showPockets(playerid)
 	ShowPlayerDialog(playerid, DIALOG_POCKETS, DIALOG_STYLE_LIST, LANG_DIALOG_POCKETSHEAD, string, LANG_DIALOG_OK, LANG_DIALOG_EXITBUTTON);
 }
 
-stock FindFreeSlot(playerid, type, max)
+stock FindFreeSlot(playerid, type, max, parent)
 {
 	for(new i; i < MAX_POCKETS; i++)
 	{
 		if(type != 0 && Pockets[playerid][i][pAmount] > max) continue;
-		if(Pockets[playerid][i][pType] == type) return i;
+		
+		if(parent != -1 && Pockets[playerid][i][pType] == parent) return i;
+		else if(parent == -1 && Items[Pockets[playerid][i][pType]][itemParent] == type) return i;
+		else if(Pockets[playerid][i][pType] == 0) return i;
+		else if(Pockets[playerid][i][pType] == type) return i;		
 	}
 	return -1;
+}
+
+stock pocketItemIsParent(parent, children)
+{
+	Items[children][itemParent]
+		{
+			if(i == children)
+		}
+	}
 }
 
 // Forwards
 
 forward BuildPockets(playerid, string[], len);
 forward UseItem(playerid, pocketid);
-forward public giveItem(playerid, itemId, amount);
+forward giveItem(playerid, itemId, amount);
 
 // Publics
 
@@ -88,7 +113,7 @@ public UseItem(playerid, pocketid)
 	if(Type < 0 || Type > MAX_ITEMS) return 3;
 	
 	new Amount = Pockets[playerid][pocketid][pAmount];
-	CallLocalFunction(Items[Type][itemCallBack], "ii", playerid, Amount);
+	CallLocalFunction(Items[Type][itemCallBack], "iii", playerid, Amount, Items[Type][itemOtherId]);
 	
 	return 0;
 }
@@ -100,23 +125,27 @@ public giveItem(playerid, itemId, amount)
 
 	new type = (Items[itemId][itemMax] > 1)?itemId:0; // If itemMax is bigger than 1 find a slot that has free space.	
 	new maks = (Items[itemId][itemMax] > 1)?Items[itemId][itemMax]:0; // If itemMax is bigger than 1 find a slot that has free space.	
-	new freeSlot = FindFreeSlot(playerid, type, maks);
-	if(freeSlot == -1) return 0;
+	new par = (Items[itemId][itemParent] != -1)?Items[itemId][itemParent]:-1; // If itemMax is bigger than 1 find a slot that has free space.	
+	new freeSlot = FindFreeSlot(playerid, type, maks, par);
 	
+	if(freeSlot == -1) return 0;
 	if(maks == 0)
 	{
 		Pockets[playerid][freeSlot][pType] = itemId;
 		Pockets[playerid][freeSlot][pAmount] = amount;
+		giveItemOtherStuff(playerid, itemId, amount);		
 		return amount;
 	}
 	else
 	{
-		new canGive = maks - Pockets[playerid][freeSlot][pAmount];
-		new realGive = (amount > canGive)?canGive:amount;
+		Pockets[playerid][freeSlot][pType] = itemId;
 		
+		new canGive = maks - Pockets[playerid][freeSlot][pAmount];
+		new realGive = (amount > canGive)?canGive:amount;		
 		if(canGive > 0)
 		{
 			Pockets[playerid][freeSlot][pAmount] += realGive;
+			giveItemOtherStuff(playerid, itemId, realGive);
 			return (amount-realGive);
 		}
 		return 0;
@@ -129,32 +158,35 @@ public giveItem(playerid, itemId, amount)
 // forwards
 
 forward giveItemOtherStuff(playerid, itemid, amount);
-
-forward UseEmpty(playerid, amount);
-forward setAPistol(playerid, amount);
-
-// publics
-public UseEmpty(playerid, amount)
-{
-	SendEmote(playerid, "katsub oma tühja taskut.");
-	return 1;
-}
-
 public giveItemOtherStuff(playerid, itemid, amount)
 {
 	if(itemid == 0)
 	{
 		return 1;
 	}
-	else if(itemid < 10)
+	else if(itemid < 12)
 	{
+		new oldWep = GetPlayerWeapon(playerid);
 		GivePlayerWeapon(playerid, Items[itemid][itemOtherId], amount);
+		SetPlayerArmedWeapon(playerid, oldWep);
 	}
 	return 0;
 }
 
-public setAPistol(playerid, amount)
+
+forward UseEmpty(playerid, amount, weP);
+forward setWep(playerid, amount, weP);
+
+// publics
+public UseEmpty(playerid, amount, weP)
 {
-	SetPlayerArmedWeapon(playerid, 22);
+	SendEmote(playerid, "katsub oma tühja taskut.");
+	return 1;
+}
+
+public setWep(playerid, amount, weP)
+{
+	SetPlayerArmedWeapon(playerid, weP);
+	SendEmote(playerid, "võtab kätte relva.");
 	return 1;
 }
