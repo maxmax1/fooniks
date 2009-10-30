@@ -58,6 +58,7 @@
 #include <phoenix_ProgressBar>
 #include <phoenix_Interiors>
 #include <phoenix_Pockets>
+#include <AntiShiit>
 
 /*
 *    DEFINES
@@ -65,7 +66,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.2"
-#define SCRIPT_REVISION 	"146"
+#define SCRIPT_REVISION 	"148"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -182,6 +183,8 @@ enum pInf
 	pModel,
 	pAdminLevel,
 	aAction,
+	
+	pMoney,
 	
 	Float:pPosX,
 	Float:pPosY,
@@ -338,7 +341,7 @@ forward ShowBanDialog(playerid);
 forward ShowKickDialog(playerid);
 forward WarpPlayerToPlayer(WarpWho, WarpTo);
 forward BanPlayer(playerid, banner, reason[]);
-forward KickPlayer(playerid, kicker, reason[]);
+forward KickPlayerP(playerid, kicker, reason[]);
 forward SendEs(playerid);
 forward ForwardEs(playerid, message[]);
 forward SendEmote(playerid, emote[]);
@@ -382,6 +385,9 @@ forward RestingEnd(playerid);
 forward TogglePlayerControllableEx(playerid, toggle, timer);
 forward RestChange();
 forward RestUpdate();
+
+forward GivePlayerMoneyNew(playerid, money);
+forward MoneyUpdate(playerid);
 
 /*
 *    MAIN()
@@ -594,13 +600,25 @@ MegaJump(playerid)
 		new Float: vx, Float: vy, Float: vz;
 		GetPlayerVelocity(playerid, vx, vy, vz);
 		SetPlayerVelocity(playerid, vx+mx, vy+my, vz+higher);	
+		
 		SkillDelay[playerid][SKILL_ATHLETE] = 1;
-		SetTimerEx("ClearDelay", 1000, 0, "ii", playerid, SKILL_ATHLETE);
+		SetTimerEx("ClearDelay", 10000, 0, "ii", playerid, SKILL_ATHLETE);
+		XpAdd(playerid, SKILL_ATHLETE, 25);
 		
 		pInfo[playerid][pRest] -= JumpEnergy;
 		setProgressBar(restBar, playerid, pInfo[playerid][pRest]);
 	}
 	return 1;
+}
+
+stock serverMoneyFix(playerid)
+{
+	new sampMoney = GetPlayerMoney(playerid);
+	if(sampMoney < pInfo[playerid][pMoney])
+	{
+		pInfo[playerid][pMoney] = sampMoney;
+		MoneyUpdate(playerid);
+	}
 }
 
 /*
@@ -810,6 +828,8 @@ public OnGameModeInit()
 	SetTimer("RestChange", 10000, true);	
 	SetTimer("RestUpdate", 5000, true);
 	
+	Add3DStream("http://streamer.sotovik.ee:8500/skyplus_hi.ogg", 1742.8539,-1861.9402, 14.0, 25.0);	
+	
 	return 1;
 }
 
@@ -1013,7 +1033,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	    }
 	    else
 	    {
-	        KickPlayer(pInfo[playerid][SelectedPlayer], playerid, inputtext);
+	        KickPlayerP(pInfo[playerid][SelectedPlayer], playerid, inputtext);
 	    }
 	}
 	else if( dialogid == DIALOG_BANPLAYER )
@@ -1234,8 +1254,29 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 			pInfo[playerid][pSkillTimer] = 0;
 		}
 	}
-	if(PRESSED(KEY_JUMP)) MegaJump(playerid);
+	if(PRESSED(KEY_JUMP) && !IsPlayerInAnyVehicle(playerid)) MegaJump(playerid);
 }
+
+public OnEnterExitModShop(playerid, enterexit, interiorid)
+{
+	if(enterexit == 0) serverMoneyFix(playerid);
+}
+
+public OnVehicleMod(playerid, vehicleid, componentid)
+{
+	serverMoneyFix(playerid);
+}
+
+public OnVehicleRespray(playerid, vehicleid, color1, color2)
+{
+	serverMoneyFix(playerid);
+}
+
+public OnVehiclePaintjob(playerid, vehicleid, paintjobid)
+{
+	serverMoneyFix(playerid);
+}
+
 /*
 *    COMMANDS
 */
@@ -1362,7 +1403,7 @@ dcmd_kick(playerid, params[])
 	new selectedplayer, reason[STRING_LENGHT];
     sscanf(params, "us", selectedplayer, reason);
     if( strlen(reason) == 0 ){ pInfo[playerid][SelectedPlayer] = selectedplayer; ShowKickDialog(playerid); return 1;}
-    else KickPlayer(selectedplayer, playerid, reason);
+    else KickPlayerP(selectedplayer, playerid, reason);
     return 1;
 }
 
@@ -2166,7 +2207,7 @@ public UpdatePlayer(playerid)
 	
 	MysqlUpdateBuild(query, table);
 	
-	MysqlUpdateInt(query, "money", GetPlayerMoney(playerid));
+	MysqlUpdateInt(query, "money", pInfo[playerid][pMoney]);
 	MysqlUpdateInt(query, "model", pInfo[playerid][pModel]);
 	MysqlUpdateFlo(query, "posX", pInfo[playerid][pPosX]);
 	MysqlUpdateFlo(query, "posY", pInfo[playerid][pPosY]);
@@ -2281,7 +2322,7 @@ public BanPlayer(playerid, banner, reason[])
 	// Siia võiks mingi hea ban süsteemi teha :D
 }
 
-public KickPlayer(playerid, kicker, reason[])
+public KickPlayerP(playerid, kicker, reason[])
 {
 	new str[STRING_LENGHT];
 	format(str, sizeof(str), LANG_GLOBAL_KICKMSG, pInfo[kicker][pCharName], pInfo[playerid][pCharName], reason);
@@ -2514,11 +2555,13 @@ public Rest(playerid)
 
 		if(RestPositions[RestPlace][restType] == REST_LAY)
 		{
+			ApplyAnimation(playerid, "BEACH", "", 4.0, 1, 0, 0, 0, 0);	/// preload
 			ApplyAnimation(playerid, "BEACH", "bather", 4.0, 1, 0, 0, 0, 0);
 			SendEmote(playerid, "läheb pikali");
 		}
 		else
 		{
+			ApplyAnimation(playerid, "BEACH", "", 4.0, 1, 0, 0, 0, 0);	/// preload
 			ApplyAnimation(playerid,"BEACH", "ParkSit_M_loop", 4.0, 1, 0, 0, 0, 0);
 			SendEmote(playerid, "istub");
 		}
@@ -2527,6 +2570,7 @@ public Rest(playerid)
 	}
 	else
 	{
+		ApplyAnimation(playerid, "BEACH", "", 4.0, 1, 0, 0, 0, 0);	/// preload
 		ApplyAnimation(playerid,"BEACH", "ParkSit_M_loop", 4.0, 1, 0, 0, 5000, 0);
 		SendEmote(playerid, "istub maha");		
 		pInfo[playerid][pResting] = 1;
@@ -2652,6 +2696,18 @@ public RestUpdate()
 			if(progressInf[restBar][innerPrecent][playerid] != pInfo[playerid][pRest]) setProgressBar(restBar, playerid, pInfo[playerid][pRest]);
 		}
 	}
+}
+
+public GivePlayerMoneyNew(playerid, money)
+{
+	pInfo[playerid][pMoney] += money;
+	MoneyUpdate(playerid);
+}
+
+public MoneyUpdate(playerid)
+{
+	ResetPlayerMoney(playerid);
+	GivePlayerMoney(playerid, pInfo[playerid][pMoney]);
 }
 
 /*
