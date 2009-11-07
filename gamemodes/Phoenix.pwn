@@ -2555,13 +2555,13 @@ public Rest(playerid)
 
 		if(RestPositions[RestPlace][restType] == REST_LAY)
 		{
-			ApplyAnimation(playerid, "BEACH", "", 4.0, 1, 0, 0, 0, 0);	/// preload
+			ApplyAnimation(playerid, "BEACH", "null", 4.0, 1, 0, 0, 0, 0);	/// preload
 			ApplyAnimation(playerid, "BEACH", "bather", 4.0, 1, 0, 0, 0, 0);
 			SendEmote(playerid, "läheb pikali");
 		}
 		else
 		{
-			ApplyAnimation(playerid, "BEACH", "", 4.0, 1, 0, 0, 0, 0);	/// preload
+			ApplyAnimation(playerid, "BEACH", "null", 4.0, 1, 0, 0, 0, 0);	/// preload
 			ApplyAnimation(playerid,"BEACH", "ParkSit_M_loop", 4.0, 1, 0, 0, 0, 0);
 			SendEmote(playerid, "istub");
 		}
@@ -2570,7 +2570,7 @@ public Rest(playerid)
 	}
 	else
 	{
-		ApplyAnimation(playerid, "BEACH", "", 4.0, 1, 0, 0, 0, 0);	/// preload
+		ApplyAnimation(playerid, "BEACH", "null", 4.0, 1, 0, 0, 0, 0);	/// preload
 		ApplyAnimation(playerid,"BEACH", "ParkSit_M_loop", 4.0, 1, 0, 0, 5000, 0);
 		SendEmote(playerid, "istub maha");		
 		pInfo[playerid][pResting] = 1;
