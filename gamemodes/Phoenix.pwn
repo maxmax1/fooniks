@@ -1310,6 +1310,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	dcmd(kaklus, 6, cmdtext);
 	dcmd(addveh, 6, cmdtext);
 	dcmd(int, 3, cmdtext);
+	dcmd(pasad, 5, cmdtext);
 	
 	if(animCmdHandler(playerid, cmdtext) != -1) return 1;
 
@@ -1608,6 +1609,19 @@ dcmd_int(playerid, params[])
 	}
 	
 	setToInt(playerid, id);
+	return 1;
+}
+
+dcmd_pasad(playerid, params[])
+{
+	new id, id2;
+	if(sscanf(params, "ii", id, id2))
+	{
+		SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /pasad [id] [id2]");
+		return 1;
+	}
+	
+	CallRemoteFunction("poolPostition", "iii", playerid, id, id2);
 	return 1;
 }
 
