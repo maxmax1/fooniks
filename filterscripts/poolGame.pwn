@@ -1,4 +1,5 @@
 #include <a_samp>
+#include <playerList>
 
 #define MAX_GAMES 3
 #define MAX_BALLS 16
@@ -61,7 +62,11 @@ new FALSE = false;
 
 enum bPathInf
 {
+	ballParentTick,
+	ballParent,
+	
 	ballPUsed,
+	ballToHole,
 	Float: ballPX,
 	Float: ballPY,
 	Float: ballPZ,
@@ -73,9 +78,15 @@ enum bgInf
 {
 	Float: tablePos[3],
 	timer,
+	gameOn,
+	tempUsed,
+	ballsMoving,
+	
 	poolPlayer1,
 	poolPlayer2,
-	gameOn,
+	poolScore1,
+	poolScore2,
+	poolCurrentPlayer,
 	
 	pathPos[MAX_BALLS],
 	playPath[MAX_BALLS],
@@ -86,16 +97,6 @@ enum bgInf
 	Float: ballY[MAX_BALLS],
 	Float: ballZ[MAX_BALLS],
 	
-	Float: ballStartX[MAX_BALLS],
-	Float: ballStartY[MAX_BALLS],
-	Float: ballStartSpeed[MAX_BALLS],
-	
-	Float: ballEndX[MAX_BALLS],
-	Float: ballEndY[MAX_BALLS],
-	
-	Float: ballSpeed[MAX_BALLS],
-	ballMoving[MAX_BALLS],
-	
 	Text: shotDraw
 };
 new Games[MAX_GAMES][bgInf];
@@ -105,6 +106,7 @@ new onShot[MAX_PLAYERS];
 new myGame[MAX_PLAYERS];
 new speed[MAX_PLAYERS];
 new cam[MAX_PLAYERS];
+new confirmBox[MAX_PLAYERS];
 
 stock nearPoolTable(playerid)
 {
@@ -156,7 +158,12 @@ forward GameCam(playerid, game);
 forward ResetCam(playerid);
 forward ResetBalls(game);
 forward endGame(game);
-forward IsInHole(game, ball);
+forward GameCheck(game);
+forward IsInHole(game, Float: x, Float: y);
+forward BuildPath(game, ball, Float: angle, Float: spd, parent, parentTick);
+forward StartPath(game, ball);
+forward PlayPath(game, ball, playId);
+forward ClearPath(game, ball);
 
 /*
 *    PUBLICS
@@ -243,10 +250,12 @@ public StartGame(game, pl1, pl2)
 	cam[pl1] = 0;
 	cam[pl2] = 0;
 	
-	//Games[game][timer] = SetTimerEx("GameTimer", 20, 1, "i", game);
+	Games[game][poolCurrentPlayer] = 1;	
+	
+	SetTimerEx("GameCheck", 30000, 0, "i", game);
 	Games[game][gameOn] = true;
 }
-
+/*
 public GameTimer(game)
 {
 	for(new i = 0; i < MAX_BALLS; i++)
@@ -256,36 +265,6 @@ public GameTimer(game)
 		if(Games[game][ballMoving][i])
 		{
 			GetObjectPos(Games[game][balls][i], Games[game][ballX][i], Games[game][ballY][i], Games[game][ballZ][i]);
-			
-			new hole = IsInHole(game, i);
-			if(hole > 0)
-			{
-				DestroyObject(Games[game][balls][i]);
-				Games[game][ballMoving][i] = 0;
-				Games[game][ballGone][i] = 1;
-				
-				if(i == BALL_CUE)
-				{
-					SendClientMessage(Games[game][poolPlayer1], COLOR_RED, "* Lõid valge palli auku. Vastase kord");
-					Games[game][ballGone][BALL_CUE] = 0;
-					
-					Games[game][ballX][BALL_CUE] = Games[game][tablePos][0];
-					Games[game][ballY][BALL_CUE] = (Games[game][tablePos][1]+0.47);
-					Games[game][ballZ][BALL_CUE] = Games[game][tablePos][2];
-					Games[game][ballSpeed][BALL_CUE] = 0;
-					Games[game][ballEndX][BALL_CUE] = 0;
-					Games[game][ballEndY][BALL_CUE] = 0;				
-					Games[game][ballStartX][BALL_CUE] = 0;
-					Games[game][ballStartY][BALL_CUE] = 0;
-					
-					Games[game][balls][BALL_CUE] = CreateObject(OB_WHITE, Games[game][ballX][BALL_CUE], Games[game][ballY][BALL_CUE], Games[game][ballZ][BALL_CUE], 0, 0, 0);
-				}
-				else
-				{
-					SendClientMessage(Games[game][poolPlayer1], COLOR_RED, "* Lõid palli auku. ++");
-				}
-				continue;
-			}
 			
 			// Ball Bounce
 			for(new ball; ball < MAX_BALLS; ball++)
@@ -445,6 +424,7 @@ public GameTimer(game)
 		}
 	}
 }
+*/
 
 /*
 *    SA-MP Natives
@@ -474,11 +454,28 @@ public OnObjectMoved(objectid)
 				GetObjectPos(Games[game][balls][i], Games[game][ballX][i], Games[game][ballY][i], Games[game][ballZ][i]);
 				if(Games[game][playPath][i])
 				{
+					if(BallPaths[(game*MAX_BALLS)+i][Games[game][pathPos][i]][ballToHole] > 0)
+					{
+						if(i == BALL_CUE)
+						{
+							SendClientMessage(Games[game][poolPlayer1], COLOR_RED, "Lõid valge palli auku.");
+							
+							DestroyObject(Games[game][balls][BALL_CUE]);
+							Games[game][ballX][BALL_CUE] = Games[game][tablePos][0];
+							Games[game][ballY][BALL_CUE] = (Games[game][tablePos][1]+0.47);
+							Games[game][ballZ][BALL_CUE] = Games[game][tablePos][2];							
+							Games[game][balls][BALL_CUE] = CreateObject(OB_WHITE, Games[game][ballX][i], Games[game][ballY][i], Games[game][ballZ][i], 0.0, 0.0, 0.0);
+							Games[game][poolCurrentPlayer] = (Games[game][poolCurrentPlayer] < 2)?2:1;
+							Games[game][ballsMoving] = false;
+						}
+					}
+					
 					Games[game][pathPos][i]++;
 					if(!PlayPath(game, i, Games[game][pathPos][i]))
 					{
 						Games[game][playPath][i] = false;
 						ClearPath(game, i);
+						Games[game][ballsMoving] = false;
 					}
 				}
 			}
@@ -496,7 +493,7 @@ public OnFilterScriptExit()
 			DestroyObject(Games[i1][balls][i]);
 		}
 		KillTimer(Games[i1][timer]);
-		TextDrawHideForAll(Games[freeId][shotDraw]);
+		TextDrawHideForAll(Games[i1][shotDraw]);
 	}
 }
 
@@ -506,6 +503,7 @@ public OnPlayerConnect(playerid)
 	myGame[playerid] = -1;
 	speed[playerid] = 2;
 	cam[playerid] = 0;
+	confirmBox[playerid] = false;
 }
 
 public OnPlayerDisconnect(playerid)
@@ -521,6 +519,7 @@ public OnPlayerDisconnect(playerid)
 	myGame[playerid] = -1;
 	speed[playerid] = 2;
 	cam[playerid] = 0;
+	confirmBox[playerid] = false;
 }
 
 public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
@@ -530,7 +529,7 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 		new i = nearPoolTable(playerid);
 		if(i != -1)
 		{
-			if(Games[i][gameOn])
+			if(Games[i][gameOn] || Games[i][tempUsed])
 			{
 				SendClientMessage(playerid, COLOR_YELLOW, "Mäng juba käib selles lauas.");
 			}
@@ -538,7 +537,7 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 			{
 				myGame[playerid] = i;
 				SendClientMessage(playerid, COLOR_YELLOW, "Vali omale vastane...");	
-				StartGame(i, playerid, playerid);
+				ShowPlayerList(playerid, 15.0, true);
 			}
 		}
 	}
@@ -556,12 +555,23 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 			{
 				if(myGame[playerid] == i)
 				{
-					onShot[playerid] = 1;
-					poolPostition(playerid, 3, 3);
-					TextDrawShowForPlayer(playerid, Games[i][shotDraw]);
-					
-					SetSpeed(playerid, 2, i);
-					GameCam(playerid, myGame[playerid]);
+					if(Games[i][poolCurrentPlayer] == 1 && Games[i][poolPlayer1] != playerid || Games[i][poolCurrentPlayer] == 2 && Games[i][poolPlayer2] != playerid)
+					{
+						SendClientMessage(playerid, COLOR_YELLOW, "Hetkel pole sinu kord lüüa..");
+					}
+					else if(Games[i][ballsMoving])
+					{
+						SendClientMessage(playerid, COLOR_YELLOW, "Oota kuni pallid seisma jäävad.");
+					}
+					else
+					{					
+						onShot[playerid] = 1;
+						poolPostition(playerid, 3, 3);
+						TextDrawShowForPlayer(playerid, Games[i][shotDraw]);
+						
+						SetSpeed(playerid, 2, i);
+						GameCam(playerid, myGame[playerid]);
+					}
 				}
 				else if(Games[i][gameOn])
 				{
@@ -634,8 +644,11 @@ public CueBall(game, playerid)
 {
 	new Float: a;
 	GetPlayerFacingAngle(playerid, a);	
-	BuildPath(game, BALL_CUE,  a+2.8, speed[playerid]);
+	BuildPath(game, BALL_CUE,  a+2.8, speed[playerid], -1, 0);
 	StartPath(game, BALL_CUE);
+	
+	Games[game][poolCurrentPlayer] = (Games[game][poolCurrentPlayer] < 2)?2:1;
+	Games[game][ballsMoving] = true;
 }
 
 public SetSpeed(playerid, spd, game)
@@ -644,8 +657,20 @@ public SetSpeed(playerid, spd, game)
 	else if(spd < 1) spd = 1;
 	
 	speed[playerid] = spd;
-	new str[8];
-	format(str, 8, "%d", spd);
+	new str[10+(MAX_SPEED*4)] = "Kiirus: ";
+	
+	for(new i = 1; i <= MAX_SPEED; i++)
+	{
+		if(spd >= float(i))
+		{
+			format(str, sizeof(str), "%s%s", str, "~g~|");
+		}
+		else
+		{
+			format(str, sizeof(str), "%s%s", str, "~r~|");
+		}
+	}
+	
 	TextDrawSetString(Games[game][shotDraw], str);
 }
 
@@ -676,9 +701,9 @@ public ResetCam(playerid)
 
 public ResetBalls(game)
 {
-	new Float: posX = Games[freeId][tablePos][0];
-	new Float: posY = Games[freeId][tablePos][1];
-	new Float: posZ = Games[freeId][tablePos][2];
+	new Float: posX = Games[game][tablePos][0];
+	new Float: posY = Games[game][tablePos][1];
+	new Float: posZ = Games[game][tablePos][2];
 
 	Games[game][balls][BALL_CUE] = CreateObject(OB_WHITE, posX, (posY+0.47), posZ, 0, 0, 0);
 	Games[game][ballX][BALL_CUE] = posX;
@@ -768,14 +793,61 @@ public ResetBalls(game)
 
 public endGame(game)
 {
-	KillTimer(Games[game][timer]);
-	Games[game][timer] = -1;
-	TextDrawHideForAll(Games[game][shotDraw]);	
-	ResetBalls(freeId);
+	SendClientMessage(Games[game][poolPlayer1], COLOR_GREEN, "* Piljardimäng lõppes.");
+	onShot[Games[game][poolPlayer1]] = 0;
+	myGame[Games[game][poolPlayer1]] = -1;
+	speed[Games[game][poolPlayer1]] = 2;
+	cam[Games[game][poolPlayer1]] = 0;	
+	
+	if(Games[game][poolPlayer1] != Games[game][poolPlayer2])
+	{
+		SendClientMessage(Games[game][poolPlayer2], COLOR_GREEN, "* Piljardimäng lõppes.");
+		onShot[Games[game][poolPlayer2]] = 0;
+		myGame[Games[game][poolPlayer2]] = -1;
+		speed[Games[game][poolPlayer2]] = 2;
+		cam[Games[game][poolPlayer2]] = 0;	
+	}
+	
+	TextDrawHideForAll(Games[game][shotDraw]);
+
+	for(new i; i < MAX_BALLS; i++)
+	{
+		if(Games[game][balls][i] == 0) continue;
+		DestroyObject(Games[game][balls][i]);
+	}
+
+	ResetBalls(game);
 	Games[game][gameOn] = false;	
 }
 
-public IsInHole(game, ball)
+public GameCheck(game)
+{
+	if(!IsPlayerConnected(Games[game][poolPlayer1]))
+	{
+		endGame(game);
+		return 0;
+	}
+	if(!IsPlayerConnected(Games[game][poolPlayer2]))
+	{
+		endGame(game);
+		return 0;
+	}
+	if(!IsPlayerInRangeOfPoint(Games[game][poolPlayer1], 50.0, Games[game][tablePos][0], Games[game][tablePos][1], Games[game][tablePos][2]))
+	{
+		endGame(game);
+		return 0;
+	}
+	if(!IsPlayerInRangeOfPoint(Games[game][poolPlayer2], 50.0, Games[game][tablePos][0], Games[game][tablePos][1], Games[game][tablePos][2]))
+	{
+		endGame(game);
+		return 0;
+	}
+	
+	SetTimerEx("GameCheck", 30000, 0, "i", game);
+	return 1;
+}
+
+public IsInHole(game, Float: x, Float: y)
 {
 /*
 1***********2
@@ -788,63 +860,86 @@ public IsInHole(game, ball)
 *                   *
 5***********6	
 */
-	if(DistanceCheck2D(Games[game][ballX][ball], Games[game][ballY][ball], Games[game][tablePos][0]-0.49, Games[game][tablePos][1]+0.96) < 0.0025)
+	if(DistanceCheck2D(x, y, Games[game][tablePos][0]-0.51, Games[game][tablePos][1]+0.96) < 0.0025)
 	{
 		return 1;
 	}
-	else if(DistanceCheck2D(Games[game][ballX][ball], Games[game][ballY][ball], Games[game][tablePos][0]+0.49, Games[game][tablePos][1]+0.96) < 0.0025)
+	else if(DistanceCheck2D(x, y, Games[game][tablePos][0]+0.51, Games[game][tablePos][1]+0.96) < 0.0025)
 	{
 		return 2;
 	}
-	else if(DistanceCheck2D(Games[game][ballX][ball], Games[game][ballY][ball], Games[game][tablePos][0]-0.49, Games[game][tablePos][1]) < 0.0025)
+	else if(DistanceCheck2D(x, y, Games[game][tablePos][0]-0.53, Games[game][tablePos][1]) < 0.0025)
 	{
 		return 3;
 	}
-	else if(DistanceCheck2D(Games[game][ballX][ball], Games[game][ballY][ball], Games[game][tablePos][0]+0.49, Games[game][tablePos][1]) < 0.0025)
+	else if(DistanceCheck2D(x, y, Games[game][tablePos][0]+0.53, Games[game][tablePos][1]) < 0.0025)
 	{
 		return 4;
 	}
-	else if(DistanceCheck2D(Games[game][ballX][ball], Games[game][ballY][ball], Games[game][tablePos][0]-0.49, Games[game][tablePos][1]-0.96) < 0.0025)
+	else if(DistanceCheck2D(x, y, Games[game][tablePos][0]-0.51, Games[game][tablePos][1]-0.96) < 0.0025)
 	{
 		return 5;
 	}
-	else if(DistanceCheck2D(Games[game][ballX][ball], Games[game][ballY][ball], Games[game][tablePos][0]+0.49, Games[game][tablePos][1]-0.96) < 0.0025)
+	else if(DistanceCheck2D(x, y, Games[game][tablePos][0]+0.51, Games[game][tablePos][1]-0.96) < 0.0025)
 	{
 		return 6;
 	}
 	return 0;
 }
 
-forward BuildPath(game, ball, Float: angle, Float: spd);
-public BuildPath(game, ball,  Float: angle, Float: spd)
+public BuildPath(game, ball,  Float: angle, Float: spd, parent, parentTick)
 {
-	/*
-	Float: ballX,
-	Float: ballY,
-	Float: ballZ,
-	Float: ballSpeed,
-}*/
-	SendClientMessage(0, COLOR_GREEN, "path build");
+	ClearPath(game, ball);
 	new Float: newX = Games[game][ballX][ball];
 	new Float: newY = Games[game][ballY][ball];
 	
-	SendFormattedText(0, COLOR_GREEN, "ang = %f", angle);
+	BallPaths[(game*MAX_BALLS)+ball][0][ballParent] = parent;
+	BallPaths[(game*MAX_BALLS)+ball][0][ballParentTick] = parentTick;
 
 	new i = 0;
-	while(spd > 0.001 && i < MAX_PATHS)
+	while(spd > 0.002 && i < MAX_PATHS)
 	{
 		// Seintega põrkumise kontroll ning uue nurga määramine.
-		// PS: Kui on väike vastus siis millegipärast nussib nurga ära:)
 		
-		// (90+90.0) läheb putsi:)
-		// (90-90.0)  läheb putsi:)
+		angle += ((newX+((spd*0.1) * floatsin(-angle, degrees))) > (Games[game][tablePos][0]+0.49))?((angle >= 90)?(90-angle):((2*90)-angle)):(0.0);
+		angle += ((newX+((spd*0.1) * floatsin(-angle, degrees))) < (Games[game][tablePos][0]-0.49))?-((angle >= 90)?(angle+90):((2*90)-angle)):(0.0);
 		
-		angle += ((newX+((spd*0.1) * floatsin(-angle, degrees))) > (Games[game][tablePos][0]+0.49))?(angle+90):(0.0);
-		angle += ((newX+((spd*0.1) * floatsin(-angle, degrees))) < (Games[game][tablePos][0]-0.49))?(angle-90.0):(0.0);
+		angle += ((newY+((spd*0.1) * floatcos(-angle, degrees))) > (Games[game][tablePos][1]+0.96))?((angle >= 180)?(180-angle):((2*180)-angle)):(0.0);
+		angle += ((newY+((spd*0.1) * floatcos(-angle, degrees))) < (Games[game][tablePos][1]-0.96))?-((angle >= 180)?(angle+180):((2*180)-angle)):(0.0);
+			
+		// Pallidevahelised põrked. ballParentTick.
 		
-		angle += ((newY+((spd*0.1) * floatcos(-angle, degrees))) > (Games[game][tablePos][1]+0.96))?(angle+90):(0.0);
-		angle += ((newY+((spd*0.1) * floatcos(-angle, degrees))) < (Games[game][tablePos][1]-0.96))?(angle-90.0):(0.0);
-		
+		for(new bl; bl < MAX_BALLS; bl++)
+		{
+			if(bl == ball) continue;
+			if((DistanceCheck2D(newX, newY, Games[game][ballX][bl], Games[game][ballY][bl])) > 0.025) continue;
+			
+			new Float: ballsAngle;
+			
+			if(newY == Games[game][ballY][bl] && newX < Games[game][ballX][bl])
+			{
+				ballsAngle = 0.0;
+			}
+			else if(newY == Games[game][ballY][bl] && newX > Games[game][ballX][bl])
+			{
+				ballsAngle = 180.0;
+			}
+			else if(newX == Games[game][ballX][bl] && newY < Games[game][ballY][bl])
+			{
+				ballsAngle = 90.0;
+			}
+			else if(newX == Games[game][ballX][bl] && newY > Games[game][ballY][bl])
+			{
+				ballsAngle = 270.0;
+			}
+			else
+			{
+				ballsAngle = atan((Games[game][ballX][bl] - newX) / (Games[game][ballY][bl] - newY));
+			}			
+			BuildPath(game, bl,  ballsAngle, spd, ball, i);
+			angle += (ballsAngle > angle)?(ballsAngle - angle):(angle+ballsAngle);
+		}
+			
 		// Järgmine liikumiskoht
 		newX += ((spd*0.1) * floatsin(-angle, degrees));
 		newY += ((spd*0.1) * floatcos(-angle, degrees));
@@ -852,15 +947,20 @@ public BuildPath(game, ball,  Float: angle, Float: spd)
 		BallPaths[(game*MAX_BALLS)+ball][i][ballPX] = newX;
 		BallPaths[(game*MAX_BALLS)+ball][i][ballPY] = newY;
 		BallPaths[(game*MAX_BALLS)+ball][i][ballSpeed] = spd;
-		BallPaths[(game*MAX_BALLS)+ball][i][ballPUsed] = 1;		
+		BallPaths[(game*MAX_BALLS)+ball][i][ballPUsed] = 1;	
+
+		new hole = IsInHole(game, newX, newY);
+		if(hole > 0)
+		{
+			BallPaths[(game*MAX_BALLS)+ball][i][ballToHole] = hole;
+			break;
+		}
 				
 		spd -= (spd*0.1);
 		i++;
 	}
-	SendFormattedText(0, COLOR_GREEN, "path built, i = %d, spd = %f", i, spd);
 }
 
-forward StartPath(game, ball);
 public StartPath(game, ball)
 {
 	if(!BallPaths[(game*MAX_BALLS)+ball][0][ballPUsed]) return false;
@@ -870,7 +970,6 @@ public StartPath(game, ball)
 	return true;
 }
 
-forward PlayPath(game, ball, playId);
 public PlayPath(game, ball, playId)
 {
 	if(!BallPaths[(game*MAX_BALLS)+ball][playId][ballPUsed]) return false;
@@ -878,11 +977,21 @@ public PlayPath(game, ball, playId)
 										 BallPaths[(game*MAX_BALLS)+ball][playId][ballPY],
 										 Games[game][tablePos][2],
 										 BallPaths[(game*MAX_BALLS)+ball][playId][ballSpeed]);
-	
+	if(playId != 0)
+	{
+		for(new ball2; ball2 < MAX_BALLS; ball2++)
+		{
+			if(ball == ball2) continue;
+			
+			if(BallPaths[(game*MAX_BALLS)+ball2][0][ballParentTick] == playId && BallPaths[(game*MAX_BALLS)+ball2][0][ballParent] == ball)
+			{
+				PlayPath(game, ball2, 0);
+			}	
+		}
+	}
 	return true;
 }
 
-forward ClearPath(game, ball);
 public ClearPath(game, ball)
 {
 	for(new i = 0; i < MAX_PATHS; i++)
@@ -893,5 +1002,67 @@ public ClearPath(game, ball)
 		BallPaths[(game*MAX_BALLS)+ball][i][ballPX] = 0;
 		BallPaths[(game*MAX_BALLS)+ball][i][ballPY] = 0;
 		BallPaths[(game*MAX_BALLS)+ball][i][ballSpeed] = 0;		
+		BallPaths[(game*MAX_BALLS)+ball][i][ballParentTick] = 0;		
+	}
+}
+
+public OnPlayerSelectPlayer(playerid, otherId, btn)
+{
+	if(btn == 0)
+	{
+		myGame[playerid] = 0;
+	}
+	else if(playerid == otherId)
+	{
+		StartGame(myGame[playerid], playerid, otherId);
+	}
+	else
+	{
+		if(myGame[otherId] != 0)
+		{
+			SendClientMessage(playerid, COLOR_RED, "Vastane juba mängib...");
+		}
+		else
+		{
+			// Siia asja kontroll...
+			Games[myGame[playerid]][poolPlayer1] = playerid;
+			Games[myGame[playerid]][poolPlayer2] = otherId;
+			Games[myGame[playerid]][tempUsed] = 1;
+			
+			new str[64];
+			GetPlayerName(playerid, str, MAX_PLAYER_NAME);
+			format(str, 64, "%s soovib sinuga piljardit mängida.\n Nõustud?", str);
+			
+			ShowPlayerConfirmbox(playerid, str);			
+			confirmBox[otherId] = true;
+			myGame[otherId] = myGame[playerid];
+		}
+	}
+}
+
+public OnPlayerConfirm(playerid, accepted)
+{
+	if(confirmBox[playerid])
+	{
+		confirmBox[playerid] = false;
+		if(accepted == 0)
+		{
+			// No
+			if(Games[myGame[playerid]][poolPlayer1] != playerid)
+			{
+				myGame[Games[myGame[playerid]][poolPlayer1]] = 0;
+			}
+			else
+			{
+				myGame[Games[myGame[playerid]][poolPlayer2]] = 0;
+			}		
+			Games[myGame[playerid]][poolPlayer1] = -1;
+			Games[myGame[playerid]][poolPlayer2] = -1;
+			Games[myGame[playerid]][tempUsed] = 0;
+		}
+		else
+		{
+			StartGame(myGame[playerid], Games[myGame[playerid]][poolPlayer1], Games[myGame[playerid]][poolPlayer2]);
+		}
 	}
 }
