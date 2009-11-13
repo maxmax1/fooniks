@@ -66,7 +66,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.2"
-#define SCRIPT_REVISION 	"148"
+#define SCRIPT_REVISION 	"150"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -87,7 +87,7 @@
 
 #define STRING_LENGHT 256
 #define MAX_QUERY 300
-#define MAX_TELEPORTS 9
+#define MAX_TELEPORTS 10
 
 #define MAX_REST_POSITIONS 14
 #define REST_SIT 0
@@ -289,7 +289,8 @@ new telePositions[MAX_TELEPORTS][posInfo] =
 	{"Sadam", 2753.3142, -2452.6616, 13.6432, 2755.5708, -2452.7727, 13.2536},
 	{"Staadion", 2680.4749, -1672.8507, 9.4194, 2682.1299, -1672.1379, 9.1324},
 	{"PigPen", 2427.9739, -1242.3777, 24.2333, 2426.4302, -1243.2527, 23.8387},
-	{"pay'N'spray", 2074.6631, -1825.7513, 13.5469, 2076.2275, -1824.9553, 13.1682}
+	{"pay'N'spray", 2074.6631, -1825.7513, 13.5469, 2076.2275, -1824.9553, 13.1682},
+	{"TenGreen", 2351.5228, -1673.0512, 13.5469, 2351.5228, -1673.0512, 13.1682}
 };
 
 enum restInf
