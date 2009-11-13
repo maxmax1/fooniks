@@ -2,6 +2,7 @@
 
 #define MAX_GAMES 3
 #define MAX_BALLS 16
+#define MAX_PATHS 128
 
 #define BALL_CUE	0
 #define BALL_8		1
@@ -44,6 +45,8 @@
 #define WALL_MODIFIER 0.7
 #define MAX_SPEED 5
 
+#define PATH_STEP 0.02
+
 #define DistanceCheck2D(%0,%1,%2,%3) \
 ((((%0) - (%2)) * ((%0) - (%2))) + (((%1) - (%3)) * ((%1) - (%3)))) // Y_Less's macro.
 
@@ -56,6 +59,16 @@ new FALSE = false;
 #define COLOR_RED			0xFF3333AA
 #define COLOR_GREEN			0x33FF33AA
 
+enum bPathInf
+{
+	ballPUsed,
+	Float: ballPX,
+	Float: ballPY,
+	Float: ballPZ,
+	Float: ballSpeed,
+}
+new BallPaths[MAX_GAMES*MAX_BALLS][MAX_PATHS][bPathInf];
+
 enum bgInf
 {
 	Float: tablePos[3],
@@ -63,6 +76,9 @@ enum bgInf
 	poolPlayer1,
 	poolPlayer2,
 	gameOn,
+	
+	pathPos[MAX_BALLS],
+	playPath[MAX_BALLS],
 	
 	balls[MAX_BALLS],
 	ballGone[MAX_BALLS],
@@ -88,6 +104,7 @@ new freeId = 0;
 new onShot[MAX_PLAYERS];
 new myGame[MAX_PLAYERS];
 new speed[MAX_PLAYERS];
+new cam[MAX_PLAYERS];
 
 stock nearPoolTable(playerid)
 {
@@ -135,7 +152,7 @@ forward StartGame(game, pl1, pl2);
 forward GameTimer(game);
 forward CueBall(game, playerid);
 forward SetSpeed(playerid, spd, game);
-forward OverHeadCam(playerid, game);
+forward GameCam(playerid, game);
 forward ResetCam(playerid);
 forward ResetBalls(game);
 forward endGame(game);
@@ -223,8 +240,10 @@ public StartGame(game, pl1, pl2)
 	}
 	Games[game][poolPlayer1] = pl1;
 	Games[game][poolPlayer2] = pl2;
+	cam[pl1] = 0;
+	cam[pl2] = 0;
 	
-	Games[game][timer] = SetTimerEx("GameTimer", 20, 1, "i", game);
+	//Games[game][timer] = SetTimerEx("GameTimer", 20, 1, "i", game);
 	Games[game][gameOn] = true;
 }
 
@@ -268,6 +287,76 @@ public GameTimer(game)
 				continue;
 			}
 			
+			// Ball Bounce
+			for(new ball; ball < MAX_BALLS; ball++)
+			{
+				if(ball == i) continue;
+				if((DistanceCheck2D(Games[game][ballX][ball], Games[game][ballY][ball], Games[game][ballX][i], Games[game][ballY][i])) > BALL_DIAMETER) continue;
+				
+				if(!Games[game][ballMoving][ball])
+				{
+					new Float: vecNW2x = Games[game][ballX][ball] - Games[game][ballX][i];
+					new Float: vecNW2y = Games[game][ballY][ball] - Games[game][ballY][i];
+					new Float: vecNW2Len = floatsqroot(floatpower(vecNW2x, 2) + floatpower(vecNW2y, 2));
+					
+					new Float: vecWx = Games[game][ballEndX][i] - Games[game][ballX][i];
+					new Float: vecWy = Games[game][ballEndY][i] - Games[game][ballY][i];
+					new Float: vecWLen = floatsqroot(floatpower(vecWx, 2) + floatpower(vecWy, 2));
+					
+					new Float: vecWang;
+					
+					if(Games[game][ballY][i] == Games[game][ballEndY][i] && Games[game][ballX][i] < Games[game][ballEndX][i])
+					{
+						vecWang = 0.0;
+					}
+					else if(Games[game][ballY][i] == Games[game][ballEndY][i] && Games[game][ballX][i] > Games[game][ballEndX][i])
+					{
+						vecWang = 180.0;
+					}
+					else if(Games[game][ballX][i] == Games[game][ballEndX][i] && Games[game][ballY][i] < Games[game][ballEndY][i])
+					{
+						vecWang = 90.0;
+					}
+					else if(Games[game][ballX][i] == Games[game][ballEndX][i] && Games[game][ballY][i] > Games[game][ballEndY][i])
+					{
+						vecWang = 270.0;
+					}
+					else
+					{
+						vecWang = atan((Games[game][ballEndX][i] - Games[game][ballX][i]) / (Games[game][ballEndY][i] - Games[game][ballY][i]));
+					}
+					
+					
+					new Float: gamma = acos((vecWx * vecNW2x) + (vecWy * vecNW2y) / (vecWLen * vecNW2Len));
+					new Float: alpha = vecWang + (gamma - 90);
+					new Float: beta = vecWang - (gamma - 90);
+					
+					new Float: vecNWx2 = Games[game][ballX][i] - (vecWLen * floatsin(-(alpha), degrees));
+					new Float: vecNWy2 = Games[game][ballY][i] - (vecWLen * floatcos(-(alpha), degrees));
+					
+					MoveObject(Games[game][balls][i],  vecNWx2, vecNWy2, Games[game][ballZ][i], (Games[game][ballSpeed][i]*WALL_MODIFIER));
+					
+					Games[game][ballSpeed][i] = (Games[game][ballSpeed][i]*WALL_MODIFIER);
+					Games[game][ballMoving][i] = 1;
+					Games[game][ballStartX][i] = Games[game][ballX][i];
+					Games[game][ballStartY][i] = Games[game][ballY][i];
+					Games[game][ballEndX][i] = vecNWx2;
+					Games[game][ballEndY][i] = vecNWy2;	
+					
+					new Float: vecNW2x2 = Games[game][ballX][i] - (vecWLen * floatsin(-(beta), degrees));
+					new Float: vecNW2y2 = Games[game][ballY][i] - (vecWLen * floatcos(-(beta), degrees));					
+					
+					MoveObject(Games[game][balls][ball],  vecNW2x2, vecNW2y2, Games[game][ballZ][ball], (Games[game][ballSpeed][i]*WALL_MODIFIER));
+					
+					Games[game][ballSpeed][ball] = (Games[game][ballSpeed][i]*WALL_MODIFIER);
+					Games[game][ballMoving][ball] = 1;
+					Games[game][ballStartX][ball] = Games[game][ballX][ball];
+					Games[game][ballStartY][ball] = Games[game][ballY][ball];
+					Games[game][ballEndX][ball] = vecNW2x2;
+					Games[game][ballEndY][ball] = vecNW2y2;						
+				}
+			}
+			
 			// Wall Bounce
 			if(Games[game][ballX][i] > (Games[game][tablePos][0]+0.47) || Games[game][ballX][i] < (Games[game][tablePos][0]-0.47))
 			{
@@ -287,13 +376,11 @@ public GameTimer(game)
 					
 				new Float: gamma = acos((vecTx * vecUx) + (vecTy * vecUy) / (vecTLen * vecULen));
 				
-				new Float: k = floattan(180.0 - (gamma-90.0));
+				new Float: k = floattan(180.0 - (gamma-90.0), degrees);
 				
 				new Float: hX = Games[game][ballX][i] - (sX - Games[game][ballX][i]);
 				new Float: hY = k * (hX - (backToCord)) + (Games[game][ballY][i]);
-				
-				SendFormattedText(0, COLOR_GREEN, "%f", gamma);
-				
+					
 				MoveObject(Games[game][balls][i],  hX, hY, Games[game][ballZ][i], (Games[game][ballSpeed][i]*WALL_MODIFIER));
 				
 				Games[game][ballSpeed][i] = (Games[game][ballSpeed][i]*WALL_MODIFIER);
@@ -322,7 +409,7 @@ public GameTimer(game)
 					
 				new Float: gamma = acos((vecTx * vecUx) + (vecTy * vecUy) / (vecTLen * vecULen));
 				
-				new Float: k = floattan(180.0 - (gamma-90.0));
+				new Float: k = floattan(180.0 - (gamma-90.0), degrees);
 				
 				new Float: hY = Games[game][ballY][i] - (sY - Games[game][ballY][i]);
 				new Float: hX = k * (hY - (backToCord)) + (Games[game][ballX][i]);
@@ -372,19 +459,28 @@ public OnFilterScriptInit()
 		myGame[i] = -1;
 		onShot[i] = 0;
 		speed[i] = 2;
+		cam[i] = 0;
 	}
 }
 
 public OnObjectMoved(objectid)
 {
-	for(new i1 = 0; i1 < freeId; i1++)
+	for(new game = 0; game < freeId; game++)
 	{
 		for(new i = 0; i < MAX_BALLS; i++)
 		{	
-			if(objectid == Games[i1][balls][i])
+			if(objectid == Games[game][balls][i])
 			{
-				Games[i1][ballMoving][i] = 0;
-				GetObjectPos(Games[i1][balls][i], Games[i1][ballX][i], Games[i1][ballY][i], Games[i1][ballZ][i]);
+				GetObjectPos(Games[game][balls][i], Games[game][ballX][i], Games[game][ballY][i], Games[game][ballZ][i]);
+				if(Games[game][playPath][i])
+				{
+					Games[game][pathPos][i]++;
+					if(!PlayPath(game, i, Games[game][pathPos][i]))
+					{
+						Games[game][playPath][i] = false;
+						ClearPath(game, i);
+					}
+				}
 			}
 		}
 	}
@@ -409,6 +505,7 @@ public OnPlayerConnect(playerid)
 	onShot[playerid] = 0;
 	myGame[playerid] = -1;
 	speed[playerid] = 2;
+	cam[playerid] = 0;
 }
 
 public OnPlayerDisconnect(playerid)
@@ -423,6 +520,7 @@ public OnPlayerDisconnect(playerid)
 	}
 	myGame[playerid] = -1;
 	speed[playerid] = 2;
+	cam[playerid] = 0;
 }
 
 public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
@@ -463,14 +561,7 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 					TextDrawShowForPlayer(playerid, Games[i][shotDraw]);
 					
 					SetSpeed(playerid, 2, i);
-					
-					new Float: tx, Float: ty, Float: sz;
-					new Float:a;				
-					GetPlayerPos(playerid, tx, ty, sz);
-					GetPlayerFacingAngle(playerid, a);				
-					
-					SetPlayerCameraPos(playerid, tx, ty, sz+1.0);
-					SetPlayerCameraLookAt(playerid, tx+(1.0 * floatsin(-a, degrees)), ty+(1.0 * floatcos(-a, degrees)), sz);
+					GameCam(playerid, myGame[playerid]);
 				}
 				else if(Games[i][gameOn])
 				{
@@ -528,22 +619,23 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 			SetSpeed(playerid, (speed[playerid]-1), myGame[playerid]);
 		}
 	}
+	else if(newkeys == KEY_LOOK_BEHIND)
+	{
+		if(onShot[playerid] == 1)
+		{
+			cam[playerid]++;
+			if(cam[playerid] > 1) cam[playerid] = 0;
+			GameCam(playerid, myGame[playerid]);
+		}
+	}
 }
 
 public CueBall(game, playerid)
 {
-	new Float: x, Float: y;
-	GetXYInFrontOfPlayer(playerid, x, y, float(speed[playerid]));
-	GetObjectPos(Games[game][balls][BALL_CUE], Games[game][ballStartX][BALL_CUE], Games[game][ballStartY][BALL_CUE], Games[game][ballZ][BALL_CUE]);
-	MoveObject(Games[game][balls][BALL_CUE], x, y, Games[game][ballZ][BALL_CUE], float(speed[playerid]));
-	
-	Games[game][ballEndX][BALL_CUE] = x;
-	Games[game][ballEndY][BALL_CUE] = y;
-	
-	Games[game][ballSpeed][BALL_CUE] = speed[playerid];
-	Games[game][ballStartSpeed][BALL_CUE] = speed[playerid];
-	Games[game][ballMoving][BALL_CUE] = 1;
-	OverHeadCam(playerid, game);
+	new Float: a;
+	GetPlayerFacingAngle(playerid, a);	
+	BuildPath(game, BALL_CUE,  a+2.8, speed[playerid]);
+	StartPath(game, BALL_CUE);
 }
 
 public SetSpeed(playerid, spd, game)
@@ -557,10 +649,23 @@ public SetSpeed(playerid, spd, game)
 	TextDrawSetString(Games[game][shotDraw], str);
 }
 
-public OverHeadCam(playerid, game)
+public GameCam(playerid, game)
 {
-	SetPlayerCameraPos(playerid, Games[game][tablePos][0], Games[game][tablePos][1], Games[game][tablePos][2]+3.0);
-	SetPlayerCameraLookAt(playerid, Games[game][tablePos][0], Games[game][tablePos][1], Games[game][tablePos][2]);
+	if(cam[playerid] == 0)
+	{
+		new Float: tx, Float: ty, Float: sz;
+		new Float:a;				
+		GetPlayerPos(playerid, tx, ty, sz);
+		GetPlayerFacingAngle(playerid, a);
+		a += 2.8;
+		SetPlayerCameraPos(playerid, tx+(0.5 * floatsin(-a, degrees)), ty+(0.5 * floatcos(-a, degrees)), sz+0.5);
+		SetPlayerCameraLookAt(playerid, tx+(1.0 * floatsin(-a, degrees)), ty+(1.0 * floatcos(-a, degrees)), sz);
+	}
+	else
+	{
+		SetPlayerCameraPos(playerid, Games[game][tablePos][0], Games[game][tablePos][1], Games[game][tablePos][2]+3.0);
+		SetPlayerCameraLookAt(playerid, Games[game][tablePos][0], Games[game][tablePos][1], Games[game][tablePos][2]);
+	}
 }
 
 public ResetCam(playerid) 
@@ -708,4 +813,85 @@ public IsInHole(game, ball)
 		return 6;
 	}
 	return 0;
+}
+
+forward BuildPath(game, ball, Float: angle, Float: spd);
+public BuildPath(game, ball,  Float: angle, Float: spd)
+{
+	/*
+	Float: ballX,
+	Float: ballY,
+	Float: ballZ,
+	Float: ballSpeed,
+}*/
+	SendClientMessage(0, COLOR_GREEN, "path build");
+	new Float: newX = Games[game][ballX][ball];
+	new Float: newY = Games[game][ballY][ball];
+	
+	SendFormattedText(0, COLOR_GREEN, "ang = %f", angle);
+
+	new i = 0;
+	while(spd > 0.001 && i < MAX_PATHS)
+	{
+		// Seintega põrkumise kontroll ning uue nurga määramine.
+		// PS: Kui on väike vastus siis millegipärast nussib nurga ära:)
+		
+		// (90+90.0) läheb putsi:)
+		// (90-90.0)  läheb putsi:)
+		
+		angle += ((newX+((spd*0.1) * floatsin(-angle, degrees))) > (Games[game][tablePos][0]+0.49))?(angle+90):(0.0);
+		angle += ((newX+((spd*0.1) * floatsin(-angle, degrees))) < (Games[game][tablePos][0]-0.49))?(angle-90.0):(0.0);
+		
+		angle += ((newY+((spd*0.1) * floatcos(-angle, degrees))) > (Games[game][tablePos][1]+0.96))?(angle+90):(0.0);
+		angle += ((newY+((spd*0.1) * floatcos(-angle, degrees))) < (Games[game][tablePos][1]-0.96))?(angle-90.0):(0.0);
+		
+		// Järgmine liikumiskoht
+		newX += ((spd*0.1) * floatsin(-angle, degrees));
+		newY += ((spd*0.1) * floatcos(-angle, degrees));
+		
+		BallPaths[(game*MAX_BALLS)+ball][i][ballPX] = newX;
+		BallPaths[(game*MAX_BALLS)+ball][i][ballPY] = newY;
+		BallPaths[(game*MAX_BALLS)+ball][i][ballSpeed] = spd;
+		BallPaths[(game*MAX_BALLS)+ball][i][ballPUsed] = 1;		
+				
+		spd -= (spd*0.1);
+		i++;
+	}
+	SendFormattedText(0, COLOR_GREEN, "path built, i = %d, spd = %f", i, spd);
+}
+
+forward StartPath(game, ball);
+public StartPath(game, ball)
+{
+	if(!BallPaths[(game*MAX_BALLS)+ball][0][ballPUsed]) return false;
+	Games[game][pathPos][ball] = 0;
+	Games[game][playPath][ball] = true;
+	PlayPath(game, ball, 0);
+	return true;
+}
+
+forward PlayPath(game, ball, playId);
+public PlayPath(game, ball, playId)
+{
+	if(!BallPaths[(game*MAX_BALLS)+ball][playId][ballPUsed]) return false;
+	MoveObject(Games[game][balls][ball], BallPaths[(game*MAX_BALLS)+ball][playId][ballPX], 
+										 BallPaths[(game*MAX_BALLS)+ball][playId][ballPY],
+										 Games[game][tablePos][2],
+										 BallPaths[(game*MAX_BALLS)+ball][playId][ballSpeed]);
+	
+	return true;
+}
+
+forward ClearPath(game, ball);
+public ClearPath(game, ball)
+{
+	for(new i = 0; i < MAX_PATHS; i++)
+	{
+		if(!BallPaths[(game*MAX_BALLS)+ball][i][ballPUsed]) break;
+		
+		BallPaths[(game*MAX_BALLS)+ball][i][ballPUsed] = 0;
+		BallPaths[(game*MAX_BALLS)+ball][i][ballPX] = 0;
+		BallPaths[(game*MAX_BALLS)+ball][i][ballPY] = 0;
+		BallPaths[(game*MAX_BALLS)+ball][i][ballSpeed] = 0;		
+	}
 }
