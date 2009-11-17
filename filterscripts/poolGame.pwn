@@ -1,4 +1,13 @@
 #include <a_samp>
+
+#if defined MAX_PLAYERS
+
+	#undef MAX_PLAYERS
+	
+#endif
+	
+#define MAX_PLAYERS 200
+
 #include <playerList>
 
 #define MAX_GAMES 3
@@ -70,8 +79,8 @@ enum bPathInf
 	Float: ballPX,
 	Float: ballPY,
 	Float: ballPZ,
-	Float: ballSpeed,
-}
+	Float: ballSpeed
+};
 new BallPaths[MAX_GAMES*MAX_BALLS][MAX_PATHS][bPathInf];
 
 enum bgInf
@@ -889,6 +898,7 @@ public IsInHole(game, Float: x, Float: y)
 
 public BuildPath(game, ball,  Float: angle, Float: spd, parent, parentTick)
 {
+	SendFormattedText(0, COLOR_GREEN, "PALL: %d", ball);
 	ClearPath(game, ball);
 	new Float: newX = Games[game][ballX][ball];
 	new Float: newY = Games[game][ballY][ball];
@@ -912,7 +922,8 @@ public BuildPath(game, ball,  Float: angle, Float: spd, parent, parentTick)
 		for(new bl; bl < MAX_BALLS; bl++)
 		{
 			if(bl == ball) continue;
-			if((DistanceCheck2D(newX, newY, Games[game][ballX][bl], Games[game][ballY][bl])) > 0.025) continue;
+			if(parent == bl) continue;
+			if((DistanceCheck2D(newX, newY, Games[game][ballX][bl], Games[game][ballY][bl])) > 0.005) continue;
 			
 			new Float: ballsAngle;
 			
@@ -936,8 +947,9 @@ public BuildPath(game, ball,  Float: angle, Float: spd, parent, parentTick)
 			{
 				ballsAngle = atan((Games[game][ballX][bl] - newX) / (Games[game][ballY][bl] - newY));
 			}			
-			BuildPath(game, bl,  ballsAngle, spd, ball, i);
+			BuildPath(game, bl, ballsAngle, spd, ball, i);
 			angle += (ballsAngle > angle)?(ballsAngle - angle):(angle+ballsAngle);
+			break;
 		}
 			
 		// Järgmine liikumiskoht
