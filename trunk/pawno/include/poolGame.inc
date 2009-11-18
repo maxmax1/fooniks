@@ -190,7 +190,7 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 forward WeBetterNeverCallThisFunction();
 forward AddPoolGames();
 forward poolTextDraw(playerid, game, status, tdId);
-forward poolTextDrawUpdate(playerid, game, text[], tdId);
+forward poolTextDrawUpdate(game, text[], tdId);
 forward onPoolRequestGame(playerid);
 
 forward poolTimer(timerid, param1, param2, time);
@@ -227,7 +227,7 @@ public poolTextDraw(playerid, game, status, tdId)
 	}
 }
 
-public poolTextDrawUpdate(playerid, game, text[], tdId)
+public poolTextDrawUpdate(game, text[], tdId)
 {
 	TextDrawSetString(poolTextDraws[game][tdId], text);
 }
