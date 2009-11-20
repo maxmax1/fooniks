@@ -253,4 +253,5 @@ public WeBetterNeverCallThisFunction()
 	SetCameraBehindPlayer(0);
 	SetTimerEx("null", 500, 0, "i", 0);
 	SendClientMessage(0, 0x00000000, "");
+	IsPlayerConnected(0);
 }

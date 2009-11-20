@@ -13,6 +13,12 @@
 *    The Initial Developers of the Original Code are Jyrno42 and 13th.
 */
 
+/*
+*    This File: phoenix_Pockets.inc
+*    Purpose: Add an inventory system...
+*
+*/
+
 #define MAX_ITEMS 13
 #define MAX_POCKETS 10
 #define DIALOG_POCKETS 2017
@@ -58,7 +64,7 @@ stock showPockets(playerid)
 	ShowPlayerDialog(playerid, DIALOG_POCKETS, DIALOG_STYLE_LIST, LANG_DIALOG_POCKETSHEAD, string, LANG_DIALOG_OK, LANG_DIALOG_EXITBUTTON);
 }
 
-stock FindFreeSlot(playerid, type, max, parent)
+stock findFreeSlot(playerid, type, max, parent)
 {
 	for(new i; i < MAX_POCKETS; i++)
 	{
@@ -72,13 +78,13 @@ stock FindFreeSlot(playerid, type, max, parent)
 	return -1;
 }
 
-stock pocketItemIsParent(parent, children)
+stock getSlotByItem(playerid, item)
 {
-	Items[children][itemParent]
-		{
-			if(i == children)
-		}
+	for(new i; i < MAX_POCKETS; i++)
+	{
+		if(Pockets[playerid][i][pType] == item) return i;
 	}
+	return -1;
 }
 
 // Forwards
@@ -86,6 +92,8 @@ stock pocketItemIsParent(parent, children)
 forward BuildPockets(playerid, string[], len);
 forward UseItem(playerid, pocketid);
 forward giveItem(playerid, itemId, amount);
+forward RemAmount(playerid, itemId, amount);
+forward giveItemOtherStuff(playerid, itemid, amount);
 
 // Publics
 
@@ -126,7 +134,7 @@ public giveItem(playerid, itemId, amount)
 	new type = (Items[itemId][itemMax] > 1)?itemId:0; // If itemMax is bigger than 1 find a slot that has free space.	
 	new maks = (Items[itemId][itemMax] > 1)?Items[itemId][itemMax]:0; // If itemMax is bigger than 1 find a slot that has free space.	
 	new par = (Items[itemId][itemParent] != -1)?Items[itemId][itemParent]:-1; // If itemMax is bigger than 1 find a slot that has free space.	
-	new freeSlot = FindFreeSlot(playerid, type, maks, par);
+	new freeSlot = findFreeSlot(playerid, type, maks, par);
 	
 	if(freeSlot == -1) return 0;
 	if(maks == 0)
@@ -152,12 +160,25 @@ public giveItem(playerid, itemId, amount)
 	}
 }
 
+public RemAmount(playerid, itemId, amount)
+{
+	if(itemId < 0 || itemId > MAX_ITEMS) return 0;	
+	
+	new foundSlot = getSlotByItem(playerid, itemId);
+	if(foundSlot == -1) return 0;
+	
+	Pockets[playerid][foundSlot][pAmount] -= amount;
+	if(Pockets[playerid][foundSlot][pAmount] < 1)
+	{
+		Pockets[playerid][foundSlot][pType] = 0;
+	}
+	return 1;
+}
 
 // HANDLERS
 
 // forwards
 
-forward giveItemOtherStuff(playerid, itemid, amount);
 public giveItemOtherStuff(playerid, itemid, amount)
 {
 	if(itemid == 0)

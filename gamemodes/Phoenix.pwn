@@ -24,7 +24,7 @@
 *        External Credit #6 - Alex "Y_Less" Cole, SendFormattedText/SendFormattedTextToAll
 *        External Credit #7 - UnKnown - GetXYInFrontOfPlayer
 *        External Credit #8 - Westie, strlib
-*
+*        External Credit #9 - Alex "Y_Less" Cole, foreach
 */
 
 /*
@@ -51,6 +51,7 @@
 #include <md5_core>  // author: Alex "Y_Less" Cole, External Credit #2
 #include <Y_server>  // author: Alex "Y_Less" Cole, External Credit #3
 #include <strlib>  	 // author: Westie, External Credit #8
+#include <foreach>   // author: Alex "Y_Less" Cole, External Credit #9
 #include <phoenix_Core>
 #include <phoenix_Lang>
 #include <phoenix_RealCarnames>
@@ -58,6 +59,7 @@
 #include <phoenix_ProgressBar>
 #include <phoenix_Interiors>
 #include <phoenix_Pockets>
+#include <phoenix_HelpDraw>
 #include <AntiShiit>
 
 /*
@@ -66,7 +68,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  	"0.1.2"
-#define SCRIPT_REVISION 	"150"
+#define SCRIPT_REVISION 	"155"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -148,6 +150,9 @@
 #define SKILL_M4					9
 #define SKILL_SNIPERRIFLE			10
 #define SKILL_ATHLETE				11
+
+#define SkillWeapon(%0) \
+		((%0 == 0)?22:(%0 == 1)?23:(%0 == 2)?24:(%0 == 3)?25:(%0 == 4)?26:(%0 == 5)?27:(%0 == 6)?28:(%0 == 7)?29:(%0 == 8)?30:(%0 == 9)?31:(%0 == 10)?34:999)
 
 /*
 *    GLOBAL VARIABLES
@@ -831,6 +836,19 @@ public OnGameModeInit()
 	
 	Add3DStream("http://streamer.sotovik.ee:8500/skyplus_hi.ogg", 1742.8539,-1861.9402, 14.0, 25.0);	
 	
+	AddHelpDraw(510.12, -84.84, 998.867, "PILJARD", "Siin saad mängida piljardit, vajuta ENTER, et mängu alustada.");
+	AddHelpDraw(494.1889, -75.4208, 998.7578, "BAAR", "Jookide ostmiseks vajuta ENTER.");
+	AddHelpDraw(1939.5618, -1773.0765, 12.9710, "TANKLA", "Kütuse ostmiseks vajuta ENTER.");
+	AddHelpDraw(1840.4050, -1857.0118, 12.9691, "AUTOTÖÖKODA", "Sisenemiseks vajuta ENTER.");
+	AddHelpDraw(1025.4198, -1881.5576, 12.3513, "TURG", "Leia omale vaba putka ning kasuta /turg käsku, et kaupu müüa.");
+	AddHelpDraw(654.1728, -1863.9569, 5.4609, "KANG", "Trenni tegemiseks vajuta ENTER.");
+	AddHelpDraw(774.0507, 1.5343, 1001.1402, "KANG", "Trenni tegemiseks vajuta ENTER.");
+	AddHelpDraw(770.0912, 13.4033, 1000.6996, "POKSIKOTID", "Trenni tegemiseks vajuta ENTER.");
+	AddHelpDraw(396.9932,-2087.8381,7.8359, "KALAPÜÜK", "Püügi alustamiseks vajuta ENTER.");
+	AddHelpDraw(387.3677,-2087.9058,7.8359, "KALAPÜÜK", "Püügi alustamiseks vajuta ENTER.");
+	AddHelpDraw(367.4025,-2087.6528,7.8359, "KALAPÜÜK", "Püügi alustamiseks vajuta ENTER.");
+	AddHelpDraw(358.8732,-2087.8032,7.8359, "KALAPÜÜK", "Püügi alustamiseks vajuta ENTER.");
+	
 	return 1;
 }
 
@@ -845,6 +863,7 @@ public OnGameModeExit()
 
 public OnPlayerConnect(playerid)
 {
+	MysqlCheck();
 	if(IsPlayerNPC(playerid)) return NPCHandle(playerid);
 	
     GetPlayerName(playerid, pInfo[playerid][pCharName], 30);
@@ -2479,9 +2498,9 @@ public XpAdd(playerid, skillId, amount)
 	new oldLevel = GetLevel(skillId, pInfo[playerid][pSkill][skillId], xpNeeded);
 	pInfo[playerid][pSkill][skillId] += amount;
 	
-	if( skillId == SKILL_PISTOL )
+	if( skillId <= 10 )
 	{
-	    if ( IsPlayerInAnyVehicle(playerid) || GetPlayerWeapon(playerid) != 22 )
+	    if ( IsPlayerInAnyVehicle(playerid) || GetPlayerWeapon(playerid) != SkillWeapon(skillId) )
 		{
 		    if( pInfo[playerid][pSkillTimer] != 0 )
 		    {
@@ -2490,9 +2509,14 @@ public XpAdd(playerid, skillId, amount)
 			}
 			return 1;
 		}
-		SkillDelay[playerid][SKILL_PISTOL] = 1;
-		SetTimerEx("ClearDelay", 285, 0, "ii", playerid, SKILL_PISTOL);
-	}
+		SkillDelay[playerid][skillId] = 1;
+		SetTimerEx("ClearDelay", 285, 0, "ii", playerid, skillId);
+		if(skillId <= 10)
+		{
+			new wepId = skillId+1;
+			RemAmount(playerid, wepId, 1);
+		}
+	}	
 	
 	if(pInfo[playerid][pSkill][skillId] >= xpNeeded)
 	{	
