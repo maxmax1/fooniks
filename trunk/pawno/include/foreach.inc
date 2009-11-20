@@ -95,6 +95,8 @@ Commands:
         -
 Compile options:
         YSI_ITTER_NO_SORT - Removed.
+        FOREACH_NO_BOTS - Remove the bot iterators for smaller code.
+        FOREACH_NO_PLAYERS - Remove all code for player itteration.
 Operators:
         -
 Iterators:
@@ -113,7 +115,7 @@ Iterators:
         #error "Please include a_samp or a_npc before foreach"
 #endif
  
-#if defined SendChat
+#if defined SendChat || defined FOREACH_NO_PLAYERS
         #define BOTSYNC_IS_BOT     (true)
 #endif
  
@@ -123,7 +125,8 @@ Iterators:
  
 #if !defined BOTSYNC_IS_BOT
         static
-                bool:YSI_g_OPC = false;
+                bool:YSI_g_OPC = false,
+                bool:YSI_g_OPDC = false;
 #endif
  
 #if defined YSI_ITTER_NO_SORT
@@ -248,7 +251,7 @@ Create the internal itterators.
 #if !defined BOTSYNC_IS_BOT
         Itter_Create(Player, MAX_PLAYERS);
         
-        #if defined _FOREACH_BOT
+        #if defined _FOREACH_BOT && !defined FOREACH_NO_BOTS
                 Itter_Create(Bot, MAX_PLAYERS);
                 Itter_Create(Character, MAX_PLAYERS);
                 
@@ -313,15 +316,18 @@ Notes:
         public OnPlayerConnect(playerid)
         {
                 #if defined _FOREACH_BOT
-                        if (IsPlayerNPC(playerid))
-                        {
-                                Itter_Add(Bot, playerid);
-                        }
-                        else
+                        if (!IsPlayerNPC(playerid))
                         {
                                 Itter_Add(Player, playerid);
                         }
-                        Itter_Add(Character, playerid);
+                        #if !defined FOREACH_NO_BOTS
+                                else
+                                {
+                                        Itter_Add(Bot, playerid);
+                                }
+                                #pragma tabsize 4
+                                Itter_Add(Character, playerid);
+                        #endif
                 #else
                         Itter_Add(Player, playerid);
                 #endif
@@ -331,9 +337,14 @@ Notes:
                 }
                 return 1;
         }
- 
+        
+        #if defined _ALS_OnPlayerConnect
+                #undef OnPlayerConnect
+        #else
+                #define _ALS_OnPlayerConnect
+        #endif
         #define OnPlayerConnect Itter_OnPlayerConnect
- 
+        
         forward Itter_OnPlayerConnect(playerid);
 #endif
  
@@ -352,10 +363,11 @@ Notes:
 #if !defined BOTSYNC_IS_BOT
         public OnGameModeInit()
         {
+                printf("foreach called");
                 if (YSI_gPlayerC)
                 {
                         print("foreach error: Something went wrong again!  Please tell Y_less");
-                        #if defined _FOREACH_BOT
+                        #if defined _FOREACH_BOT && !defined FOREACH_NO_BOTS
                                 printf("%d", YSI_gBotS);
                                 printf("%d", YSI_gBotC);
                                 printf("%d", YSI_gCharacterS);
@@ -365,11 +377,17 @@ Notes:
                         printf("%d", YSI_gPlayerC);
                 }
                 YSI_g_OPC = (funcidx("Itter_OnPlayerConnect") != -1);
+                YSI_g_OPDC = (funcidx("Itter_OnPlayerDisconnect") != -1);
                 CallLocalFunction("Itter_OnGameModeInit", "");
         }
- 
+        
+        #if defined _ALS_OnGameModeInit
+                #undef OnGameModeInit
+        #else
+                #define _ALS_OnGameModeInit
+        #endif
         #define OnGameModeInit Itter_OnGameModeInit
- 
+        
         forward Itter_OnGameModeInit();
 #endif
  
@@ -388,24 +406,35 @@ Notes:
         public OnPlayerDisconnect(playerid, reason)
         {
                 #if defined _FOREACH_BOT
-                        if (IsPlayerNPC(playerid))
-                        {
-                                Itter_Remove(Bot, playerid);
-                        }
-                        else
+                        if (!IsPlayerNPC(playerid))
                         {
                                 Itter_Remove(Player, playerid);
                         }
-                        Itter_Remove(Character, playerid);
+                        #if !defined FOREACH_NO_BOTS
+                                else
+                                {
+                                        Itter_Remove(Bot, playerid);
+                                }
+                                #pragma tabsize 4
+                                Itter_Remove(Character, playerid);
+                        #endif
                 #else
                         Itter_Remove(Player, playerid);
                 #endif
-                CallLocalFunction("Itter_OnPlayerDisconnect", "ii", playerid, reason);
+                if (YSI_g_OPDC)
+                {
+                        CallLocalFunction("Itter_OnPlayerDisconnect", "ii", playerid, reason);
+                }
                 return 1;
         }
- 
+        
+        #if defined _ALS_OnPlayerDisconnect
+                #undef OnPlayerDisconnect
+        #else
+                #define _ALS_OnPlayerDisconnect
+        #endif
         #define OnPlayerDisconnect Itter_OnPlayerDisconnect
- 
+        
         forward Itter_OnPlayerDisconnect(playerid, reason);
 #endif
  

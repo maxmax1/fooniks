@@ -97,7 +97,7 @@ stock str_replace(sSearch[], sReplace[], const sSubject[], &iCount = 0)
 	Returns:
 		Replaced string.
 */
-stock str_ireplace(sSearch[], sReplace[], const sSubject[], &iCount = 0)
+stock str_ireplace(sSearch[], sReplace[], const sSubject[], &iCount = 0, maxTimes, index)
 {
 	new
 		iLengthTarget = strlen(sSearch),
@@ -112,8 +112,10 @@ stock str_ireplace(sSearch[], sReplace[], const sSubject[], &iCount = 0)
 	strcat(sReturn, sSubject, _strlib_med_string);
 	iCount = 0;
 
-	for(new iIndex; iIndex < iItterations; ++iIndex)
+	for(new iIndex = index; iIndex < iItterations; ++iIndex)
 	{
+		if(iCount >= maxTimes) break;
+	
 		strmid(sTemp, sReturn, iIndex, (iIndex + iLengthTarget), (iLengthTarget + 1));
 
 		if(!strcmp(sTemp, sSearch, true))
