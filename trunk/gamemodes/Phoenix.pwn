@@ -20,86 +20,17 @@
 *        External Credit #2 - Alex "Y_Less" Cole, MD5 Core
 *        External Credit #3 - Alex "Y_Less" Cole, Y_SERVER
 *        External Credit #4 - Alex "Y_Less" Cole, sscanf
-*        External Credit #5 - DCMD
+*        External Credit #5 - Zeex, zcmd
 *        External Credit #6 - Alex "Y_Less" Cole, SendFormattedText/SendFormattedTextToAll
 *        External Credit #7 - UnKnown - GetXYInFrontOfPlayer
 *        External Credit #8 - Westie, strlib
 *        External Credit #9 - Alex "Y_Less" Cole, foreach
 */
 
-/*
-*    INCLUDES
-*/
-
- // author: -, External Credit #4
-#define dcmd(%1,%2,%3) if (!strcmp(DcmdFix( (%3)[1], (%2) ), #%1, true, (%2)) && ((((%3)[(%2) + 1] == '\0') && (dcmd_%1(playerid, ""))) || (((%3)[(%2) + 1] == ' ') && (dcmd_%1(playerid, (%3)[(%2) + 2]))))) return 1
-// author: Alex "Y_Less" Cole, External Credit #6
-#define SendFormattedText(%1,%2,%3,%4) do{new sendfstring[128];format(sendfstring,128,(%3),%4);SendClientMessage((%1), (%2) ,sendfstring);}while(FALSE)
-#define SendFormattedTextToAll(%1,%2,%3) do{new sendfstring[128];format(sendfstring,128,(%2),%3);SendClientMessageToAll((%1),sendfstring);}while(FALSE)
-
-#define HOLDING(%0) \
-	((newkeys & (%0)) == (%0))
-#define PRESSED(%0) \
-	(((newkeys & (%0)) == (%0)) && ((oldkeys & (%0)) != (%0)))
-#define RELEASED(%0) \
-	(((newkeys & (%0)) != (%0)) && ((oldkeys & (%0)) == (%0)))
-
-
-
-#include <a_samp>
-#include <a_mysql>
-#include <md5_core>  // author: Alex "Y_Less" Cole, External Credit #2
-#include <Y_server>  // author: Alex "Y_Less" Cole, External Credit #3
-#include <strlib>  	 // author: Westie, External Credit #8
-#include <foreach>   // author: Alex "Y_Less" Cole, External Credit #9
-#include <phoenix_Core>
-#include <phoenix_Lang>
-#include <phoenix_RealCarnames>
-#include <phoenix_Anims>
-#include <phoenix_ProgressBar>
-#include <phoenix_Interiors>
-#include <phoenix_Pockets>
-#include <phoenix_HelpDraw>
-#include <AntiShiit>
 
 /*
-*    DEFINES
+*    COLORS
 */
-
-#define SCRIPT_NAME			"Phoenix"
-#define SCRIPT_VERSION  	"0.1.2"
-#define SCRIPT_REVISION 	"155"
-
-#define MYSQL_HOST			"localhost"
-#define MYSQL_USER			"estrpco_portal"
-#define MYSQL_DB			"estrpco_portal"
-#define MYSQL_PREFIX		"ph_"
-
-    /*
-         *  THREADS IDs
-         */
-	#define VEHICLE_LOAD_THREAD     1
-	#define FETCH_UINFO_THREAD      2
-
-#define TIME_OFFSET -3
-#define VEHICLE_DELAY 1000*60*5
-#define SQL_FINISH_TIME 1000
-#define CHAT_RADIUS 25
-#define CHAT_RADIUS_SHOUT 40
-
-#define STRING_LENGHT 256
-#define MAX_QUERY 300
-#define MAX_TELEPORTS 10
-
-#define MAX_REST_POSITIONS 14
-#define REST_SIT 0
-#define REST_LAY 1
-
-#define VEHICLE_GROUP			0	// Gängid, Grupeeringud
-#define VEHICLE_JOB				1	// Tööd
-#define VEHICLE_BUYABLE			2	// Ostetav masin
-#define VEHICLE_SPECIAL			3	// Rongid, transpordivahendid jms. PS: Neid ei saa mängijad kasutada. Botid juhivad!
-#define VEHICLE_ADMIN			4	// Administraatorite masinad
 
 #define COLOR_YELLOW		0xFFFF00AA
 #define COLOR_RED 0xAA3333AA
@@ -120,6 +51,79 @@
 #define COLOR_TEATA 0xff0000AA
 #define COLOR_ADMIN_MESSAGE 0x0082fcAA
 
+// author: Alex "Y_Less" Cole, External Credit #6
+#define SendFormattedText(%1,%2,%3,%4) do{new sendfstring[128];format(sendfstring,128,(%3),%4);SendClientMessage((%1), (%2) ,sendfstring);}while(FALSE)
+#define SendFormattedTextToAll(%1,%2,%3) do{new sendfstring[128];format(sendfstring,128,(%2),%3);SendClientMessageToAll((%1),sendfstring);}while(FALSE)
+
+/*
+*    INCLUDES
+*/
+#include <a_samp>
+#include <a_mysql>
+#include <md5_core>  // author: Alex "Y_Less" Cole, External Credit #2
+#include <Y_server>  // author: Alex "Y_Less" Cole, External Credit #3
+#include <strlib>  	 // author: Westie, External Credit #8
+#include <foreach>   // author: Alex "Y_Less" Cole, External Credit #9
+#include <zcmd> 	 // author: Zeex, External Credit #5
+#include <../../../phoenix_Core> // Enam pole svnis mysqli passe...
+#include <phoenix_Lang>
+#include <phoenix_RealCarnames>
+#include <phoenix_Money>
+#include <phoenix_Anims>
+#include <phoenix_ProgressBar>
+#include <phoenix_Interiors>
+#include <phoenix_Pockets>
+#include <phoenix_HelpDraw>
+#include <AntiShiit>
+
+#include <phoenix_JobSystem>
+#include <phoenix_StreetCleaner>
+
+public AddAllJobs()
+{
+	JOBS_RegisterJob(CLEAN_JOB_ID, "SCleaner");
+}
+
+
+/*
+*    DEFINES
+*/
+
+#define SCRIPT_NAME			"Phoenix"
+#define SCRIPT_VERSION  	"0.1.2"
+#define SCRIPT_REVISION 	"156"
+
+#define MYSQL_HOST			"localhost"
+#define MYSQL_USER			"estrpco_portal"
+#define MYSQL_DB			"estrpco_portal"
+#define MYSQL_PREFIX		"ph_"
+
+    /*
+         *  THREADS IDs
+         */
+	#define VEHICLE_LOAD_THREAD     1
+	#define FETCH_UINFO_THREAD      2
+
+#define TIME_OFFSET -3
+#define VEHICLE_DELAY 1000*60*5
+#define SQL_FINISH_TIME 1000
+#define CHAT_RADIUS 25
+#define CHAT_RADIUS_SHOUT 40
+
+#define STRING_LENGHT 256
+#define MAX_QUERY 512
+#define MAX_TELEPORTS 10
+
+#define MAX_REST_POSITIONS 14
+#define REST_SIT 0
+#define REST_LAY 1
+
+#define VEHICLE_GROUP			0	// Gängid, Grupeeringud
+#define VEHICLE_JOB				1	// Tööd
+#define VEHICLE_BUYABLE			2	// Ostetav masin
+#define VEHICLE_SPECIAL			3	// Rongid, transpordivahendid jms. PS: Neid ei saa mängijad kasutada. Botid juhivad!
+#define VEHICLE_ADMIN			4	// Administraatorite masinad
+
 /* DialogIDs */
 #define DIALOG_LOGIN 2009
 #define DIALOG_PLAYER 2010
@@ -130,6 +134,13 @@
 #define DIALOG_AACTION 2015
 #define DIALOG_TELEPORTS 2016
 //#define DIALOG_POCKETS 2017 // Reserved
+
+#define HOLDING(%0) \
+	((newkeys & (%0)) == (%0))
+#define PRESSED(%0) \
+	(((newkeys & (%0)) == (%0)) && ((oldkeys & (%0)) != (%0)))
+#define RELEASED(%0) \
+	(((newkeys & (%0)) != (%0)) && ((oldkeys & (%0)) == (%0)))
 
 #define NPC_IGOR 1
 
@@ -188,8 +199,6 @@ enum pInf
 	pModel,
 	pAdminLevel,
 	aAction,
-	
-	pMoney,
 	
 	Float:pPosX,
 	Float:pPosY,
@@ -391,9 +400,6 @@ forward RestingEnd(playerid);
 forward TogglePlayerControllableEx(playerid, toggle, timer);
 forward RestChange();
 forward RestUpdate();
-
-forward GivePlayerMoneyNew(playerid, money);
-forward MoneyUpdate(playerid);
 
 /*
 *    MAIN()
@@ -615,16 +621,6 @@ MegaJump(playerid)
 		setProgressBar(restBar, playerid, pInfo[playerid][pRest]);
 	}
 	return 1;
-}
-
-stock serverMoneyFix(playerid)
-{
-	new sampMoney = GetPlayerMoney(playerid);
-	if(sampMoney < pInfo[playerid][pMoney])
-	{
-		pInfo[playerid][pMoney] = sampMoney;
-		MoneyUpdate(playerid);
-	}
 }
 
 /*
@@ -1098,7 +1094,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			{
 				new str[_strlib_med_string];
 				str = str_replace("%s", "s", inputtext);
-				dcmd_am(playerid, str);
+				cmd_am(playerid, str);
 			}
 		}
 		pInfo[playerid][aAction] = 0;
@@ -1302,43 +1298,11 @@ public OnVehiclePaintjob(playerid, vehicleid, paintjobid)
 */
 public OnPlayerCommandText(playerid, cmdtext[])
 {
-	dcmd(o, 1, cmdtext);
-	dcmd(b, 1, cmdtext);
-	dcmd(me, 2, cmdtext);
-	dcmd(s, 1, cmdtext);
-	dcmd(es, 2, cmdtext);
-	dcmd(mjuurde, 7, cmdtext);
-	dcmd(msiia, 5, cmdtext);
-	dcmd(kick, 4, cmdtext);
-	dcmd(ban, 3, cmdtext);
-	dcmd(a, 1, cmdtext);
-	dcmd(oskus, 5, cmdtext);
-	dcmd(teata, 5, cmdtext);
-	dcmd(am, 2, cmdtext);
-	dcmd(admin, 5, cmdtext);
-	dcmd(puhka, 5, cmdtext);
-	dcmd(tapa, 4, cmdtext);
-	dcmd(taskud, 6, cmdtext);
-	dcmd(td, 2, cmdtext);
-	
-	//	Masinas
-	dcmd(kiirusepiirang, 14, cmdtext);
-	dcmd(turvav88, 8, cmdtext);
-	dcmd(turbo, 5, cmdtext);
-	
-	// ajutine
-	dcmd(kaklus, 6, cmdtext);
-	dcmd(addveh, 6, cmdtext);
-	dcmd(int, 3, cmdtext);
-	dcmd(pasad, 5, cmdtext);
-	
-	if(animCmdHandler(playerid, cmdtext) != -1) return 1;
-
-	SendFormattedText(playerid, COLOR_RED, "Käsku %s ei ole.", cmdtext);
-	return 1;
+//	SendFormattedText(playerid, COLOR_RED, "Käsku %s ei ole.", cmdtext);
+//	return 1;
 }
 
-dcmd_o(playerid, params[])
+COMMAND:o(playerid, params[])
 {
 	new text[STRING_LENGHT], str[STRING_LENGHT];
 	sscanf(params, "s", text);
@@ -1346,17 +1310,17 @@ dcmd_o(playerid, params[])
 	if(strlen(text) == 0) return SendClientMessage(playerid, COLOR_RED, "KASUTUS: /o tekst");
 	format(str, sizeof(str), "(( %s: %s ))", pInfo[playerid][pCharName], text);
 	
-	for( new i = 0; i <= MAX_PLAYERS; i++ )
+	foreach(Player, i)
 	{
-	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] && !IsPlayerNPC(i) )
+	    if( pInfo[i][pLoggedIn] )
 	    {
-				SendClientMessage(i, COLOR_CHAT_OOC_GLOBAL, str);
+			SendClientMessage(i, COLOR_CHAT_OOC_GLOBAL, str);
 	    }
 	}
 	
 	return 1;
 }
-dcmd_b(playerid, params[])
+COMMAND:b(playerid, params[])
 {
 	new text[STRING_LENGHT], str[STRING_LENGHT];
 	sscanf(params, "s", text);
@@ -1367,7 +1331,7 @@ dcmd_b(playerid, params[])
 	SCMTAInPlayerRadius(playerid, CHAT_RADIUS, COLOR_CHAT_OOC_LOCAL, str);
 	return 1;
 }
-dcmd_me(playerid, params[])
+COMMAND:me(playerid, params[])
 {
 	new text[STRING_LENGHT];
 	sscanf(params, "s", text);
@@ -1377,7 +1341,7 @@ dcmd_me(playerid, params[])
 	SendEmote(playerid, text);
 	return 1;
 }
-dcmd_s(playerid, params[])
+COMMAND:s(playerid, params[])
 {
 	new text[STRING_LENGHT], str[STRING_LENGHT];
 	sscanf(params, "s", text);
@@ -1390,7 +1354,7 @@ dcmd_s(playerid, params[])
 	SCMTAInPlayerRadius(playerid, CHAT_RADIUS_SHOUT, COLOR_CHAT_SHOUT, str);
 	return 1;
 }
-dcmd_es(playerid, params[])
+COMMAND:es(playerid, params[])
 {
 	new selplayer, text[STRING_LENGHT];
 	sscanf(params, "us", selplayer, text);
@@ -1400,7 +1364,7 @@ dcmd_es(playerid, params[])
 	return 1;
 }
 
-dcmd_mjuurde(playerid, params[])
+COMMAND:mjuurde(playerid, params[])
 {
 	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
 	new selectedplayer;
@@ -1409,7 +1373,7 @@ dcmd_mjuurde(playerid, params[])
     return 1;
 }
 
-dcmd_msiia(playerid, params[])
+COMMAND:msiia(playerid, params[])
 {
     if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
     new selectedplayer;
@@ -1418,7 +1382,7 @@ dcmd_msiia(playerid, params[])
     return 1;
 }
 
-dcmd_kick(playerid, params[])
+COMMAND:kick(playerid, params[])
 {
     if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
 	new selectedplayer, reason[STRING_LENGHT];
@@ -1428,7 +1392,7 @@ dcmd_kick(playerid, params[])
     return 1;
 }
 
-dcmd_ban(playerid, params[])
+COMMAND:ban(playerid, params[])
 {
     if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
     new selectedplayer, reason[STRING_LENGHT];
@@ -1438,7 +1402,7 @@ dcmd_ban(playerid, params[])
     return 1;
 }
 
-dcmd_a(playerid, params[])
+COMMAND:a(playerid, params[])
 {
 	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
 	new str[STRING_LENGHT];
@@ -1447,7 +1411,7 @@ dcmd_a(playerid, params[])
 	return 1;
 }
 
-dcmd_oskus(playerid, params[])
+COMMAND:oskus(playerid, params[])
 {
 	#pragma unused params
 	
@@ -1464,7 +1428,7 @@ dcmd_oskus(playerid, params[])
 	return 1;
 }
 
-dcmd_teata(playerid, params[])
+COMMAND:teata(playerid, params[])
 {
 	new str[STRING_LENGHT];
 	if( sscanf(params,"s",str) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /teata [SÕNUM]");
@@ -1472,7 +1436,7 @@ dcmd_teata(playerid, params[])
 	return 1;
 }
 
-dcmd_am(playerid, params[])
+COMMAND:am(playerid, params[])
 {
 	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
 	new str[STRING_LENGHT];
@@ -1481,7 +1445,7 @@ dcmd_am(playerid, params[])
 	return 1;
 }
 
-dcmd_admin(playerid, params[])
+COMMAND:admin(playerid, params[])
 {
 	#pragma unused params
 	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
@@ -1490,7 +1454,7 @@ dcmd_admin(playerid, params[])
 	return 1;
 }
 
-dcmd_kiirusepiirang(playerid, params[])
+COMMAND:kiirusepiirang(playerid, params[])
 {
 	new piirang;
 	if( sscanf(params, "i", piirang) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /kiirusepiirang [Piirang KM/H]");
@@ -1508,7 +1472,7 @@ dcmd_kiirusepiirang(playerid, params[])
 	return 1;
 }
 
-dcmd_turbo(playerid, params[])
+COMMAND:turbo(playerid, params[])
 {
 	new Float:turbo;
 	if( sscanf(params, "f", turbo) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /turbo [turbo suurus]");
@@ -1525,7 +1489,7 @@ dcmd_turbo(playerid, params[])
 	return 1;
 }
 
-dcmd_turvav88(playerid, params[])
+COMMAND:turvav88(playerid, params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))
@@ -1545,7 +1509,7 @@ dcmd_turvav88(playerid, params[])
 	return 1;
 }
 
-dcmd_puhka(playerid, params[])
+COMMAND:puhka(playerid, params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_YELLOW, "Sa istud juba!");
@@ -1553,20 +1517,20 @@ dcmd_puhka(playerid, params[])
 	return 1;
 }
 
-dcmd_tapa(playerid, params[])
+COMMAND:tapa(playerid, params[])
 {
 	#pragma unused params
 	SetPlayerHealth(playerid, 0.0);
 	return 1;
 }
 
-dcmd_taskud(playerid, params[])
+COMMAND:taskud(playerid, params[])
 {
 	#pragma unused params
 	showPockets(playerid);
 	return 1;
 }
-dcmd_td(playerid, params[])
+COMMAND:td(playerid, params[])
 {
 	#pragma unused params
 	giveItem(playerid, 1, 100);
@@ -1574,7 +1538,7 @@ dcmd_td(playerid, params[])
 }
 
 // AJUTISED
-dcmd_kaklus(playerid, params[])
+COMMAND:kaklus(playerid, params[])
 {
 	new style;
 	if(sscanf(params, "i", style))
@@ -1597,7 +1561,7 @@ dcmd_kaklus(playerid, params[])
 	return 1;	
 }
 
-dcmd_addveh(playerid, params[])
+COMMAND:addveh(playerid, params[])
 {
     #pragma unused params
 	if( pInfo[playerid][pAdminLevel] > 1 )
@@ -1619,7 +1583,7 @@ dcmd_addveh(playerid, params[])
 }
 
 // AJUTISED
-dcmd_int(playerid, params[])
+COMMAND:int(playerid, params[])
 {
 	new id;
 	if(sscanf(params, "i", id))
@@ -1632,7 +1596,7 @@ dcmd_int(playerid, params[])
 	return 1;
 }
 
-dcmd_pasad(playerid, params[])
+COMMAND:pasad(playerid, params[])
 {
 	new id, id2;
 	if(sscanf(params, "ii", id, id2))
@@ -1693,9 +1657,10 @@ public SendEmote(playerid, emote[])
 	new Float:PlayerLocX, Float:PlayerLocY, Float:PlayerLocZ, str[STRING_LENGHT];
 	GetPlayerPos(playerid, PlayerLocX, PlayerLocY, PlayerLocZ);
 	format(str, sizeof(str),"*%s %s*", pInfo[playerid][pCharName], emote);
-	for( new i = 0; i <= MAX_PLAYERS; i++ )
+	
+	foreach(Player, i)
 	{
-	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] )
+	    if( pInfo[i][pLoggedIn] )
 	    {
 	        if( IsPlayerInRangeOfPoint(i, CHAT_RADIUS, PlayerLocX, PlayerLocY, PlayerLocZ) )
 	        {
@@ -1709,9 +1674,10 @@ public SCMTAInPlayerRadius(playerid, radius, color, message[])
 {
 	new Float:PlayerLocX, Float:PlayerLocY, Float:PlayerLocZ;
 	GetPlayerPos(playerid, PlayerLocX, PlayerLocY, PlayerLocZ);
-	for( new i = 0; i <= MAX_PLAYERS; i++ )
+	
+	foreach(Character, i)
 	{
-	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] )
+	    if( pInfo[i][pLoggedIn] )
 	    {
 	        if( IsPlayerInRangeOfPoint(i, radius, PlayerLocX, PlayerLocY, PlayerLocZ) )
 	        {
@@ -2049,9 +2015,9 @@ public OnSpeedoUpdate(playerid)
 public CrashCar(SQLVid, vehicleid, Float:damage, Float:oX, Float:oY, Float:oZ)
 {
 	new pVeh;
-	for( new playerid = 0; playerid <= MAX_PLAYERS; playerid++ )
+	foreach (Player, playerid)
 	{
-	    if( IsPlayerConnected(playerid) && pInfo[playerid][pLoggedIn] && IsPlayerInAnyVehicle(playerid) )
+	    if( pInfo[playerid][pLoggedIn] && IsPlayerInAnyVehicle(playerid) )
 	    {
 			if(pInfo[playerid][pSeatbelt] == 0)
 			{
@@ -2200,7 +2166,7 @@ public FetchCharacterInformationFinish(playerid)
 			mysql_fetch_field_row(Field, "model");
 			pInfo[playerid][pModel] = strval(Field);
 			mysql_fetch_field_row(Field, "money");
-			GivePlayerMoney(playerid, strval(Field));
+			GivePlayerMoneyNew(playerid, strval(Field));
 			mysql_fetch_field_row(Field, "posX");
 			pInfo[playerid][pPosX] = floatstr(Field);
 			mysql_fetch_field_row(Field, "posY");
@@ -2217,6 +2183,8 @@ public FetchCharacterInformationFinish(playerid)
 			pInfo[playerid][pHealth] = floatstr(Field);
 			mysql_fetch_field_row(Field, "adminLevel");
 			pInfo[playerid][pAdminLevel] = strval(Field);
+			mysql_fetch_field_row(Field, "playerJob");
+			gMyJob[playerid] = strval(Field);
 			
 			mysql_free_result();
 			LoadSkills(playerid);
@@ -2241,7 +2209,7 @@ public UpdatePlayer(playerid)
 	
 	MysqlUpdateBuild(query, table);
 	
-	MysqlUpdateInt(query, "money", pInfo[playerid][pMoney]);
+	MysqlUpdateInt(query, "money", PlayerMoney[playerid]);
 	MysqlUpdateInt(query, "model", pInfo[playerid][pModel]);
 	MysqlUpdateFlo(query, "posX", pInfo[playerid][pPosX]);
 	MysqlUpdateFlo(query, "posY", pInfo[playerid][pPosY]);
@@ -2260,24 +2228,21 @@ public UpdatePlayer(playerid)
 }
 public UpdateAllPlayerPos()
 {
-	for( new playerid = 0; playerid <= MAX_PLAYERS; playerid++ )
+	foreach(Player, playerid)
 	{
-		if(!IsPlayerConnected(playerid)) return 1;
-		if(!pInfo[playerid][pLoggedIn]) return 1;
+		if(pInfo[playerid][pLoggedIn])
+		{
+			GetPlayerPos(playerid, pInfo[playerid][pPosX], pInfo[playerid][pPosY], pInfo[playerid][pPosZ]);
 
-		GetPlayerPos(playerid, pInfo[playerid][pPosX], pInfo[playerid][pPosY], pInfo[playerid][pPosZ]);
-
-		new sqlid = pInfo[playerid][pSqlId];
-
-		new query[MAX_QUERY], table[32];
-		format(table, 32, "%scharacters", MYSQL_PREFIX);
-
-		MysqlUpdateBuild(query, table);
-
-		MysqlUpdateFlo(query, "posX", pInfo[playerid][pPosX]);
-		MysqlUpdateFlo(query, "posY", pInfo[playerid][pPosY]);
-		MysqlUpdateFlo(query, "posZ", pInfo[playerid][pPosZ]);
-		MysqlUpdateFinish(query, "id", sqlid);
+			new sqlid = pInfo[playerid][pSqlId];
+			new query[MAX_QUERY], table[32];
+			format(table, 32, "%scharacters", MYSQL_PREFIX);
+			MysqlUpdateBuild(query, table);
+			MysqlUpdateFlo(query, "posX", pInfo[playerid][pPosX]);
+			MysqlUpdateFlo(query, "posY", pInfo[playerid][pPosY]);
+			MysqlUpdateFlo(query, "posZ", pInfo[playerid][pPosZ]);
+			MysqlUpdateFinish(query, "id", sqlid);
+		}
 	}
 	print("All Player Positsions Saved!");
 	return 1;
@@ -2285,9 +2250,9 @@ public UpdateAllPlayerPos()
 
 public UpdateAllPlayers()
 {
-	for( new i = 0; i <= MAX_PLAYERS; i++ )
+	foreach(Player, i)
 	{
-	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] )
+	    if( pInfo[i][pLoggedIn] )
 	    {
 	    	UpdatePlayer(i);
 			SaveSkills(i);
@@ -2382,9 +2347,9 @@ public SendAdminChat(playerid, text[])
 {
 	new str[STRING_LENGHT];
 	format( str, sizeof(str), "(%i)%s: %s", pInfo[playerid][pAdminLevel], pInfo[playerid][pCharName], text);
-	for( new i = 0; i <= MAX_PLAYERS; i++ )
+	foreach(Player, i)
 	{
-	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] && pInfo[i][pAdminLevel] > 0 )
+	    if( pInfo[i][pLoggedIn] && pInfo[i][pAdminLevel] > 0 )
 	    	SendClientMessage(i, COLOR_ADMINCHAT, str);
 	}
 }
@@ -2392,9 +2357,9 @@ public SendTeata(playerid, text[])
 {
 	new str[STRING_LENGHT];
 	format( str, sizeof(str), LANG_REPORT, playerid, pInfo[playerid][pCharName], text);
-	for( new i = 0; i <= MAX_PLAYERS; i++ )
+	foreach (Player, i)
 	{
-	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] && pInfo[i][pAdminLevel] > 0 )
+	    if( pInfo[i][pLoggedIn] && pInfo[i][pAdminLevel] > 0 )
 	    	SendClientMessage(i, COLOR_TEATA, str);
 	}
 }
@@ -2560,9 +2525,9 @@ public ClearDelay(playerid, skillId)
 public CheckFalseDeadPlayers(playerid)
 {
 	new Float:health;
-	for( new i = 0; i <= MAX_PLAYERS; i++ )
+	foreach (Player, i)
 	{
-	    if( IsPlayerConnected(i) && pInfo[i][pLoggedIn] )
+	    if( pInfo[i][pLoggedIn] )
 	    {
 	    	health = GetPlayerHealth(i, health);
 	    	if( health < 1 )
@@ -2670,9 +2635,9 @@ public SyncAllPlayerTime()
 {
 	gettime(gHour, gMinute, gSecond);
 	gHour = gHour + TIME_OFFSET;
-	for( new playerid = 0; playerid <= MAX_PLAYERS; playerid++ )
+	foreach(Player, playerid)
 	{
-	    if( IsPlayerConnected(playerid) ) SyncPlayerTime(playerid);
+		SyncPlayerTime(playerid);
 	}
 }
 
@@ -2691,9 +2656,9 @@ public TogglePlayerControllableEx(playerid, toggle, timer)
 
 public RestChange()
 {
-	for( new playerid = 0; playerid <= MAX_PLAYERS; playerid++ )
+	foreach (Player, playerid)
 	{
-	    if( IsPlayerConnected(playerid) && !IsPlayerNPC(playerid) )
+	    if( pInfo[playerid][pLoggedIn] && !IsPlayerNPC(playerid) )
 		{
 			if( pInfo[playerid][pResting] )
 			{
@@ -2728,25 +2693,13 @@ public RestChange()
 
 public RestUpdate()
 {
-	for( new playerid = 0; playerid <= MAX_PLAYERS; playerid++ )
+	foreach (Player, playerid)
 	{
-	    if( IsPlayerConnected(playerid) && !IsPlayerNPC(playerid) )
+	    if( pInfo[playerid][pLoggedIn] && !IsPlayerNPC(playerid) )
 		{
 			if(progressInf[restBar][innerPrecent][playerid] != pInfo[playerid][pRest]) setProgressBar(restBar, playerid, pInfo[playerid][pRest]);
 		}
 	}
-}
-
-public GivePlayerMoneyNew(playerid, money)
-{
-	pInfo[playerid][pMoney] += money;
-	MoneyUpdate(playerid);
-}
-
-public MoneyUpdate(playerid)
-{
-	ResetPlayerMoney(playerid);
-	GivePlayerMoney(playerid, pInfo[playerid][pMoney]);
 }
 
 /*

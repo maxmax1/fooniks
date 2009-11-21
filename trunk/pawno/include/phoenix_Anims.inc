@@ -13,13 +13,18 @@
 *    The Initial Developers of the Original Code are Jyrno42 and 13th. 
 */
 
+/*
+*    This File: phoenix_Anims.inc
+*    Purpose: Add animations to the gamemode.
+*/
+
 #define COLOR_ANIMS 0x33AA33AA
 #define animCmd(%0,%1,%2,%3,%4,%5,%6) if(!strcmp(DcmdFix( (%6)[1], strlen((%6)[1]) ),#%0,true)) return  ApplyAnimation(playerid,%1,%2,1.0,%3,%4,%4,0,%5)
 #define animStop(%0,%1) if(!strcmp(DcmdFix( (%1)[1], strlen((%1)[1]) ),#%0,true)) return stopAnims(playerid)
 
 #define animHelper(%0,%1,%2) if(!strcmp(DcmdFix( (%2)[1], strlen((%2)[1]) ),#%0,true)) return SendClientMessage(playerid, COLOR_ANIMS, %1)
 
-stock animCmdHandler(playerid, cmdtext[])
+public OnPlayerCommandText(playerid, cmdtext[])
 {
 	if(!strcmp("/animatsioonid", cmdtext,true))
 	{
@@ -1084,8 +1089,21 @@ stock animCmdHandler(playerid, cmdtext[])
 	animCmd("apaulmac 8", "PAULNMAC","wank_loop", 1, 0, 0, cmdtext);
 	animCmd("apaulmac 9", "PAULNMAC","wank_out", 1, 0, 2000, cmdtext);
 
-	return -1;
+    if (funcidx("phAnims_OnPlayerCommandText") != -1)
+    {
+        return CallLocalFunction("phAnims_OnPlayerCommandText", "is", playerid, cmdtext);
+    }
+    return 1;
 }
+
+forward phAnims_OnPlayerCommandText(playerid, cmdtext[]);
+
+#if defined _ALS_OnPlayerCommandText
+    #undef OnPlayerCommandText
+#else
+    #define _ALS_OnPlayerCommandText
+#endif
+#define OnPlayerCommandText phAnims_OnPlayerCommandText
 
 stock stopAnims(playerid)
 {

@@ -83,7 +83,5 @@ stock setToInt(playerid, intId)
 	
 	SetPlayerInterior(playerid, Interiors[intId][intSampInt]);
 	SetPlayerPos(playerid, Interiors[intId][intX], Interiors[intId][intY], Interiors[intId][intZ]);
-	
-	SendFormattedText(playerid, 0xFFFF00AA, "SetToInt(%d, %d); %f, %f, %f", playerid, intId, Interiors[intId][intX], Interiors[intId][intY], Interiors[intId][intZ]); 
 	return 1;
 }
