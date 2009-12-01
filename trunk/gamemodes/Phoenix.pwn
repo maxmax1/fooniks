@@ -74,6 +74,7 @@
 #include <phoenix_Interiors>
 #include <phoenix_Pockets>
 #include <phoenix_HelpDraw>
+#include <phoenix_NewsPaper>
 #include <AntiShiit>
 
 #include <phoenix_JobSystem>
@@ -90,17 +91,17 @@ public AddAllJobs()
 */
 
 #define SCRIPT_NAME			"Phoenix"
-#define SCRIPT_VERSION  	"0.1.2"
-#define SCRIPT_REVISION 	"156"
+#define SCRIPT_VERSION  		"0.1.2"
+#define SCRIPT_REVISION 		"157"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
-#define MYSQL_DB			"estrpco_portal"
-#define MYSQL_PREFIX		"ph_"
+#define MYSQL_DB				"estrpco_portal"
+#define MYSQL_PREFIX			"ph_"
 
-    /*
-         *  THREADS IDs
-         */
+	/*
+	*  THREADS IDs
+	*/
 	#define VEHICLE_LOAD_THREAD     1
 	#define FETCH_UINFO_THREAD      2
 
@@ -1606,6 +1607,12 @@ COMMAND:pasad(playerid, params[])
 	}
 	
 	CallRemoteFunction("poolPostition", "iii", playerid, id, id2);
+	return 1;
+}
+
+COMMAND:ajaleht(playerid, params[])
+{
+	ShowNewsPaper(playerid, FRONT_PAGE, "Pealkiri");
 	return 1;
 }
 
