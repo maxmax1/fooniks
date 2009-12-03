@@ -55,6 +55,13 @@
 #define SendFormattedText(%1,%2,%3,%4) do{new sendfstring[128];format(sendfstring,128,(%3),%4);SendClientMessage((%1), (%2) ,sendfstring);}while(FALSE)
 #define SendFormattedTextToAll(%1,%2,%3) do{new sendfstring[128];format(sendfstring,128,(%2),%3);SendClientMessageToAll((%1),sendfstring);}while(FALSE)
 
+#define MYSQL_HOST			"localhost"
+#define MYSQL_USER			"estrpco_portal"
+#define MYSQL_DB				"estrpco_portal"
+#define MYSQL_PREFIX			"ph_"
+#define PH_DEBUG // Turn debug on!
+new Connection;
+
 /*
 *    INCLUDES
 */
@@ -75,7 +82,7 @@
 #include <phoenix_Pockets>
 #include <phoenix_HelpDraw>
 #include <phoenix_NewsPaper>
-#include <AntiShiit>
+//#include <AntiShiit>
 
 #include <phoenix_JobSystem>
 #include <phoenix_StreetCleaner>
@@ -92,12 +99,8 @@ public AddAllJobs()
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"157"
+#define SCRIPT_REVISION 		"158"
 
-#define MYSQL_HOST			"localhost"
-#define MYSQL_USER			"estrpco_portal"
-#define MYSQL_DB				"estrpco_portal"
-#define MYSQL_PREFIX			"ph_"
 
 	/*
 	*  THREADS IDs
@@ -169,7 +172,6 @@ public AddAllJobs()
 /*
 *    GLOBAL VARIABLES
 */
-
 new gHour, gMinute, gSecond;
 
 new foodBar;
@@ -632,8 +634,11 @@ MegaJump(playerid)
 public OnGameModeInit()
 {
 	// First things first, lets attempt to connect to database.
-	if(MysqlConnect() > 0) return 1;
-	mysql_debug(1);
+	if(!Connection)
+	{
+		MysqlConnect();
+		if(!Connection) return 1;
+	}
 
 	new string[24]; // 24 should be enough.
 	format(string, 24, "%s %s r%s", SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION);
@@ -831,7 +836,7 @@ public OnGameModeInit()
 	SetTimer("RestChange", 10000, true);	
 	SetTimer("RestUpdate", 5000, true);
 	
-	Add3DStream("http://streamer.sotovik.ee:8500/skyplus_hi.ogg", 1742.8539,-1861.9402, 14.0, 25.0);	
+	//Add3DStream("http://streamer.sotovik.ee:8500/skyplus_hi.ogg", 1742.8539,-1861.9402, 14.0, 25.0);	
 	
 	AddHelpDraw(510.12, -84.84, 998.867, "PILJARD", "Siin saad mängida piljardit, vajuta ENTER, et mängu alustada.");
 	AddHelpDraw(494.1889, -75.4208, 998.7578, "BAAR", "Jookide ostmiseks vajuta ENTER.");
@@ -1610,9 +1615,13 @@ COMMAND:pasad(playerid, params[])
 	return 1;
 }
 
+new cPage = 0;
+
 COMMAND:ajaleht(playerid, params[])
 {
-	ShowNewsPaper(playerid, FRONT_PAGE, "Pealkiri");
+	ShowNewsPaper(playerid, 1, cPage);
+	cPage++;
+	cPage = (cPage > 4)?0:cPage;
 	return 1;
 }
 
@@ -1622,7 +1631,7 @@ COMMAND:ajaleht(playerid, params[])
 
 public MysqlConnect()
 {
-	new Connection = mysql_connect(MYSQL_HOST, MYSQL_USER, MYSQL_DB, MYSQL_PASSWORD);
+	Connection = mysql_connect(MYSQL_HOST, MYSQL_USER, MYSQL_DB, MYSQL_PASSWORD);
 	if(!Connection)
 	{
 		printf(LANG_FAILED_TO_CONNECT, SCRIPT_NAME);
@@ -1630,6 +1639,13 @@ public MysqlConnect()
 		return 1;
 	}
 	printf(LANG_CONNECTED, SCRIPT_NAME);
+	
+	#if  defined PH_DEBUG
+	
+		mysql_debug(1);
+		
+	#endif
+	
 	return 0;
 }
 
