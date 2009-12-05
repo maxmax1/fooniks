@@ -13,6 +13,11 @@
 *    The Initial Developers of the Original Code are Jyrno42 and 13th.
 */
 
+#if !defined _phoenix_included
+	#error "Phoenix ERROR #1, You need phoenix base for this gamemode to run!"
+	#endinput
+#endif
+
 #define MAX_INTERIORS 49
 
 enum intInf

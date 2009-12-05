@@ -19,6 +19,11 @@
 *
 */
 
+#if !defined _phoenix_included
+	#error "Phoenix ERROR #1, You need phoenix base for this gamemode to run!"
+	#endinput
+#endif
+
 #define MAX_ITEMS 13
 #define MAX_POCKETS 10
 #define DIALOG_POCKETS 2017
