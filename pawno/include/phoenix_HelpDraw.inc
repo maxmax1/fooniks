@@ -18,6 +18,11 @@
 *    Purpose: This is for easy streamed help textdraw creation.
 */
 
+#if !defined _phoenix_included
+	#error "Phoenix ERROR #1, You need phoenix base for this gamemode to run!"
+	#endinput
+#endif
+
 #define MAX_HELPDRAWS 32
 #define HELPBOX_BACK 0x000000AA
 
@@ -33,16 +38,25 @@ enum helpInf
 };
 new HelpDraws[MAX_HELPDRAWS][helpInf];
 new usedHelpDraws = 0;
-
 new isHelpActive[MAX_PLAYERS];
+
+enum smallInf
+{
+	bool: inUse,
+	Text: smDraw
+};
+new SmallHelpDraw[32][smallInf];
+new gPlayerSmDraw[MAX_PLAYERS] = {-1, ...};
 
 forward AddHelpDraw(Float: x, Float: y, Float: z, header[], text[]);
 forward HelpDrawTimer();
 forward HelpDrawShow(playerid, drawId);
 forward HelpDrawHide(playerid, drawId);
-
+forward SmallHelpDrawShow(playerid, helpText[], timer);
+forward SmallHelpDrawHide(playerid);
 forward HelpDraw_OnGameModeInit();
 forward HelpDraw_OnPlayerConnect(playerid);
+forward HelpDraw_OnPlayerDisconnect(playerid);
 
 public AddHelpDraw(Float: x, Float: y, Float: z, header[], text[])
 {
@@ -122,9 +136,53 @@ public HelpDrawHide(playerid, drawId)
 	isHelpActive[playerid] = -1;
 }
 
+public SmallHelpDrawShow(playerid, helpText[], timer)
+{
+	if(timer < 1000) timer = 1000;
+	
+	new foundId = -1;
+	for(new i = 0; i < 32; i++)
+	{
+		if(!SmallHelpDraw[i][inUse])
+		{
+			foundId = i;
+			break;
+		}
+	}
+	if(foundId == -1) return 0;
+	
+	TextDrawSetString(SmallHelpDraw[foundId][smDraw], helpText);
+	TextDrawShowForPlayer(playerid, SmallHelpDraw[foundId][smDraw]);
+	SmallHelpDraw[foundId][inUse] = true;
+	SetTimerEx("SmallHelpDrawHide", timer, 0, "i", playerid);
+	gPlayerSmDraw[playerid] = foundId;
+	return 1;
+}
+
+public SmallHelpDrawHide(playerid)
+{
+	if(gPlayerSmDraw[playerid] == -1) return 0;
+	TextDrawHideForPlayer(playerid, SmallHelpDraw[gPlayerSmDraw[playerid]][smDraw]);
+	SmallHelpDraw[gPlayerSmDraw[playerid]][inUse] = false;
+	gPlayerSmDraw[playerid] = -1;
+	return 1;
+}
+
 public OnGameModeInit()
 {
 	SetTimer("HelpDrawTimer", 3000, 1);
+	
+	for(new i = 0; i < 32; i++)
+	{
+		SmallHelpDraw[i][inUse] = false;
+		SmallHelpDraw[i][smDraw] = TextDrawCreate(400, 336, " ");
+		TextDrawUseBox(SmallHelpDraw[i][smDraw], 1);
+		TextDrawBoxColor(SmallHelpDraw[i][smDraw], HELPBOX_BACK);
+		TextDrawFont(SmallHelpDraw[i][smDraw], 2);
+		TextDrawLetterSize(SmallHelpDraw[i][smDraw], 0.299999,1.100000);
+		TextDrawSetProportional(SmallHelpDraw[i][smDraw], true);
+		TextDrawTextSize(SmallHelpDraw[i][smDraw], 550.0, 450.0);
+	}
 	
     if (funcidx("HelpDraw_OnGameModeInit") != -1)
     {
@@ -136,10 +194,23 @@ public OnGameModeInit()
 public OnPlayerConnect(playerid)
 {
 	isHelpActive[playerid] = -1;
+	SmallHelpDrawHide(playerid);
 	
     if (funcidx("HelpDraw_OnPlayerConnect") != -1)
     {
         return CallLocalFunction("HelpDraw_OnPlayerConnect", "i", playerid);
+    }
+    return 1;
+}
+
+public OnPlayerDisconnect(playerid)
+{
+	isHelpActive[playerid] = -1;
+	SmallHelpDrawHide(playerid);
+	
+    if (funcidx("HelpDraw_OnPlayerDisconnect") != -1)
+    {
+        return CallLocalFunction("HelpDraw_OnPlayerDisconnect", "i", playerid);
     }
     return 1;
 }
@@ -157,3 +228,10 @@ public OnPlayerConnect(playerid)
     #define _ALS_OnPlayerConnect
 #endif
 #define OnPlayerConnect HelpDraw_OnPlayerConnect
+
+#if defined _ALS_OnPlayerDisconnect
+    #undef OnPlayerDisconnect
+#else
+    #define _ALS_OnPlayerDisconnect
+#endif
+#define OnPlayerDisconnect HelpDraw_OnPlayerDisconnect

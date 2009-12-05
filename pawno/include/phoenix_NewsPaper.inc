@@ -18,6 +18,23 @@
 *    Purpose: Create a good-looking newspaper.
 */
 
+#if !defined _phoenix_included
+	#error "Phoenix ERROR #1, You need phoenix base for this gamemode to run!"
+	#endinput
+#endif
+
+/*
+	STAT Calculating querys: 
+		stat1 = 
+			SELECT SUM( money )  FROM `ph_characters`
+		stat2 = 
+			SELECT COUNT( * )  FROM `ph_characters`  WHERE UNIX_TIMESTAMP( ) - UNIX_TIMESTAMP( `regDate` ) < 86400
+		stat3 = 
+			SELECT id FROM `ph_characters`  ORDER BY UNIX_TIMESTAMP( regDate ) ASC LIMIT 1
+		stat4 = 
+		
+*/
+
 #define NEWSPAPERBACK 0x000000AA
 
 #define FRONT_PAGE 0
@@ -25,6 +42,8 @@
 #define MAX_NEWSPAPERS 3
 
 new paperActive[MAX_PLAYERS];
+new paperDrawActive[MAX_PLAYERS];
+new currentPage[MAX_PLAYERS];
 
 enum newsDrawInf
 {
@@ -55,30 +74,43 @@ enum newsInf
 	add2[256],
 	add3[256],
 	add4[256],
-	bool: paperUsed
+	bool: paperUsed,
+	sqlId
 };
 new NewsPapers[MAX_NEWSPAPERS][newsInf];
 
-forward ShowNewsPaper(playerid, paperid, page);
-forward HideNewsPaper(playerid);
+forward ShowNewsPaper(playerid, paperid);
+forward HideNewsPaper(playerid, page);
 forward CreatePaperDraw(paperid);
 forward LoadNewsPapers();
+
 forward NewsPaper_OnGameModeInit();
+forward NP_OnPlayerKeyStateChange(playerid, newkeys, oldkeys);
+forward NP_OnPlayerConnect(playerid);
+forward NP_OnPlayerDisconnect(playerid);
  
-public ShowNewsPaper(playerid, paperid, page)
+public ShowNewsPaper(playerid, paperid)
 {
 	if(paperid < 0 || paperid > MAX_NEWSPAPERS) return 1;
 	if(!NewsPapers[paperid][paperUsed]) return 2;
 	
-	if(paperActive[playerid] > -1)
+	if(paperDrawActive[playerid] > -1)
 	{
-		HideNewsPaper(playerid);
+		HideNewsPaper(playerid, false);
+	}
+	else
+	{
+		// Just opened!
+		SmallHelpDrawShow(playerid, "~b~Ajaleht.~n~~g~Liikumiseks kasuta: ~n~~<~ ~w~~k~~VEHICLE_TURRETLEFT~~n~~>~ ~w~~k~~VEHICLE_TURRETRIGHT~~n~~r~Sulgemiseks: ~n~~w~~k~~VEHICLE_ENTER_EXIT~", 10000);
 	}
 	
 	new i = findFreePaperDraw();
 	if(i != -1)
 	{
-		if(page == 0)
+		if(currentPage[playerid] < 0) currentPage[playerid] = 0;
+		if(currentPage[playerid] > 3) currentPage[playerid] = 3;
+		
+		if(currentPage[playerid] == 0)
 		{
 			TextDrawSetString(NewsDraw[i][Text1], NewsPapers[paperid][headLine]);
 			TextDrawSetString(NewsDraw[i][Text2], "1 / 4");
@@ -88,25 +120,25 @@ public ShowNewsPaper(playerid, paperid, page)
 			TextDrawSetString(NewsDraw[i][Text5], NewsPapers[paperid][article3]);
 			TextDrawSetString(NewsDraw[i][Text6], NewsPapers[paperid][article4]);
 		}
-		else if(page == 1)
+		else if(currentPage[playerid] == 1)
 		{
 			TextDrawSetString(NewsDraw[i][Text1], "F88niks Numbrites");
 			TextDrawSetString(NewsDraw[i][Text2], "2 / 4");
 			
-			new string[128];
-			format(string, 128, "~b~Majandus~n~~n~Sularaha: %d~n~Pangas: x~n~Kinnisvaraturul: x~n~Autoturul: x~n~Arimaailmas: x", NewsPapers[i][stat1]);
+			new string[150];
+			format(string, 150, "~b~Majandus~n~~n~~g~Sularaha: ~w~%d~n~~g~Pangas: ~w~x~n~~g~Kinnisvaraturul: ~w~x~n~~g~Autoturul: ~w~x~n~~g~Arimaailmas: ~w~x", NewsPapers[i][stat1]);
 			TextDrawSetString(NewsDraw[i][Text3], string);
 
-			format(string, 128, "~b~Sotsiaalelu~n~~n~Syndide Arv: %d~n~Vanim isik: Max_Thunder", NewsPapers[i][stat2]);
+			format(string, 128, "~b~Sotsiaalelu~n~~n~~g~Syndide Arv: ~w~%d~n~~g~Vanim isik: ~w~%s", NewsPapers[i][stat2], GetCharacterName(NewsPapers[i][stat3]));
 			TextDrawSetString(NewsDraw[i][Text4], string);
 
 			format(string, 128, "~b~Kuritegevus~n~~n~M6rvu: x~n~Varguseid: x~n~2Randamisi: x~n~Trahvide arv: x");
 			TextDrawSetString(NewsDraw[i][Text5], string);
 			
-			format(string, 50, "Infot vahendab Riigi Statistikaamet.");
+			format(string, 100, "Infot vahendab Riigi Statistikaamet.~n~Kontaktisik: Martin_Mets~n~53934751~n~Linnavalitsus: ~n~113");
 			TextDrawSetString(NewsDraw[i][Text6], string);
 		}
-		else if(page == 2)
+		else if(currentPage[playerid] == 2)
 		{
 			TextDrawSetString(NewsDraw[i][Text1], "T88kuulutused");
 			TextDrawSetString(NewsDraw[i][Text2], "3 / 4");
@@ -116,17 +148,16 @@ public ShowNewsPaper(playerid, paperid, page)
 			TextDrawSetString(NewsDraw[i][Text5], " ");
 			TextDrawSetString(NewsDraw[i][Text6], " ");
 		}
-		else if(page == 3)
+		else if(currentPage[playerid] == 3)
 		{
 			TextDrawSetString(NewsDraw[i][Text1], "Kuulutused");
 			TextDrawSetString(NewsDraw[i][Text2], "4 / 4");
 			
-			TextDrawSetString(NewsDraw[i][Text3], " ");
-			TextDrawSetString(NewsDraw[i][Text4], " ");
-			TextDrawSetString(NewsDraw[i][Text5], " ");
-			TextDrawSetString(NewsDraw[i][Text6], " ");
+			TextDrawSetString(NewsDraw[i][Text3], NewsPapers[paperid][add1]);
+			TextDrawSetString(NewsDraw[i][Text4], NewsPapers[paperid][add2]);
+			TextDrawSetString(NewsDraw[i][Text5], NewsPapers[paperid][add3]);
+			TextDrawSetString(NewsDraw[i][Text6], NewsPapers[paperid][add4]);
 		}
-		else return 3;
 		
 		TextDrawShowForPlayer(playerid, NewsDraw[i][Text0]); // Taust
 		TextDrawShowForPlayer(playerid, NewsDraw[i][Text1]); // Pealkiri
@@ -136,15 +167,17 @@ public ShowNewsPaper(playerid, paperid, page)
 		TextDrawShowForPlayer(playerid, NewsDraw[i][Text5]); // Block 3
 		TextDrawShowForPlayer(playerid, NewsDraw[i][Text6]); // Block 4
 		NewsDraw[i][used] = true;
-		paperActive[playerid] = i;
+		paperActive[playerid] = paperid;
+		paperDrawActive[playerid] = i;
+		TogglePlayerControllableEx(playerid, 0, -1);
 		return 0;
 	}
 	return 4;
 }
 
-public HideNewsPaper(playerid)
+public HideNewsPaper(playerid, page)
 {
-	new i = paperActive[playerid];
+	new i = paperDrawActive[playerid];
 	if(i == -1) return 1;	
 	TextDrawHideForPlayer(playerid, NewsDraw[i][Text0]); // Taust
 	TextDrawHideForPlayer(playerid, NewsDraw[i][Text1]); // Pealkiri
@@ -154,7 +187,9 @@ public HideNewsPaper(playerid)
 	TextDrawHideForPlayer(playerid, NewsDraw[i][Text5]); // Block 3
 	TextDrawHideForPlayer(playerid, NewsDraw[i][Text6]); // Block 4
 	NewsDraw[i][used] = false;
-	paperActive[playerid] = -1;
+	paperDrawActive[playerid] = -1;
+	if(page) currentPage[playerid] = 0;
+	TogglePlayerControllableEx(playerid, 1, -1);
 	return 0;	
 }
 
@@ -229,13 +264,13 @@ public LoadNewsPapers()
 	mysql_query(string);
 	mysql_store_result();
 	
-	new Field[260], Data[1024];
-	for(new nId2 = 0; nId2 < mysql_num_rows(); nId2++)
+	new Field[260], Data[1024], numRows = mysql_num_rows();
+	for(new nId = 0; nId < numRows; nId++)
 	{
-		mysql_fetch_row(Data);
+		if(!mysql_fetch_row_format(Data, " ")) continue;
 		
 		mysql_fetch_field_row(Field, "id");
-		new nId = strval(Field);
+		NewsPapers[nId][sqlId] = strval(Field);
 		
 		mysql_fetch_field_row(Field, "headLine");
 		format(NewsPapers[nId][headLine], 32, "%s", Field);
@@ -276,6 +311,10 @@ public LoadNewsPapers()
 		mysql_fetch_field_row(Field, "stat4");
 		NewsPapers[nId][stat4] = strval(Field);
 		
+		#if defined PH_DEBUG
+		printf("\n NewsStats: %d, %d, %d, %d, \n", NewsPapers[nId][stat1], NewsPapers[nId][stat2], NewsPapers[nId][stat3], NewsPapers[nId][stat4]);
+		#endif
+		
 		NewsPapers[nId][paperUsed] = true;
 	}
 	mysql_free_result();
@@ -294,14 +333,8 @@ public OnGameModeInit()
 	
 	foreach(Player, i)
 	{
-		paperActive[i] = -1;
+		paperDrawActive[i] = -1;
 	}
-	
-	if(!Connection)
-	{
-		MysqlConnect();
-		if(!Connection) return 1;
-	}	
 	
 	LoadNewsPapers();
 	
@@ -312,9 +345,82 @@ public OnGameModeInit()
     return 1;
 }
 
+public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
+{
+	if(paperActive[playerid] > -1)
+	{
+		if(PRESSED(KEY_ANALOG_LEFT)) currentPage[playerid]--;
+		else if(PRESSED(KEY_ANALOG_RIGHT)) currentPage[playerid]++;
+		else if(PRESSED(KEY_SECONDARY_ATTACK))
+		{
+			HideNewsPaper(playerid, true);
+			goto wrong_key;
+		}
+		else
+		{
+			goto wrong_key;
+		}
+		currentPage[playerid] = (currentPage[playerid] > 3)?0:currentPage[playerid];
+		currentPage[playerid] = (currentPage[playerid] < 0)?3:currentPage[playerid];
+		ShowNewsPaper(playerid, paperActive[playerid]);
+	}
+	wrong_key:
+    if (funcidx("NP_OnPlayerKeyStateChange") != -1)
+    {
+        return CallLocalFunction("NP_OnPlayerKeyStateChange", "iii", playerid, newkeys, oldkeys);
+    }
+    return 1;
+}
+
+
+public OnPlayerConnect(playerid)
+{
+	HideNewsPaper(playerid, true);
+	paperActive[playerid] = -1;
+	
+    if (funcidx("NP_OnPlayerConnect") != -1)
+    {
+        return CallLocalFunction("NP_OnPlayerConnect", "i", playerid);
+    }
+    return 1;
+}
+
+public OnPlayerDisconnect(playerid)
+{
+	HideNewsPaper(playerid, true);
+	paperActive[playerid] = -1;
+	
+    if (funcidx("NP_OnPlayerDisconnect") != -1)
+    {
+        return CallLocalFunction("NP_OnPlayerDisconnect", "i", playerid);
+    }
+    return 1;
+}
+
 #if defined _ALS_OnGameModeInit
     #undef OnGameModeInit
 #else
     #define _ALS_OnGameModeInit
 #endif
 #define OnGameModeInit NewsPaper_OnGameModeInit
+
+#if defined _ALS_OnPlayerKeyStateChange
+    #undef OnPlayerKeyStateChange
+#else
+    #define _ALS_OnPlayerKeyStateChange
+#endif
+#define OnPlayerKeyStateChange NP_OnPlayerKeyStateChange
+
+#if defined _ALS_OnPlayerConnect
+    #undef OnPlayerConnect
+#else
+    #define _ALS_OnPlayerConnect
+#endif
+#define OnPlayerConnect NP_OnPlayerConnect
+
+#if defined _ALS_OnPlayerDisconnect
+    #undef OnPlayerDisconnect
+#else
+    #define _ALS_OnPlayerDisconnect
+#endif
+#define OnPlayerDisconnect NP_OnPlayerDisconnect

@@ -27,40 +27,28 @@
 *        External Credit #9 - Alex "Y_Less" Cole, foreach
 */
 
-
 /*
-*    COLORS
+*    DEFINES 1
 */
 
-#define COLOR_YELLOW		0xFFFF00AA
-#define COLOR_RED 0xAA3333AA
-#define COLOR_GREEN 0x33AA33AA
-#define COLOR_BLACK 0x000000FF
-#define COLOR_WHITE 0xffffffff
-
-#define PLAYER_COLOR 0xFFFF0000
-
-#define COLOR_CHAT_IC 0xf2ffacAA
-#define COLOR_CHAT_OOC_GLOBAL 0x8cf8ffAA
-#define COLOR_CHAT_OOC_LOCAL 0xf2ffacAA
-#define COLOR_CHAT_ME 0xda92e5AA
-#define COLOR_CHAT_SHOUT 0xd7ff00AA
-#define COLOR_CHAT_ES 0xfffc00AA
-#define COLOR_ADMINMSG 0xff3c00AA
-#define COLOR_ADMINCHAT 0xffa800AA
-#define COLOR_TEATA 0xff0000AA
-#define COLOR_ADMIN_MESSAGE 0x0082fcAA
-
-// author: Alex "Y_Less" Cole, External Credit #6
-#define SendFormattedText(%1,%2,%3,%4) do{new sendfstring[128];format(sendfstring,128,(%3),%4);SendClientMessage((%1), (%2) ,sendfstring);}while(FALSE)
-#define SendFormattedTextToAll(%1,%2,%3) do{new sendfstring[128];format(sendfstring,128,(%2),%3);SendClientMessageToAll((%1),sendfstring);}while(FALSE)
+#define SCRIPT_NAME			"Phoenix"
+#define SCRIPT_VERSION  		"0.1.2"
+#define SCRIPT_REVISION 		"159"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
 #define MYSQL_DB				"estrpco_portal"
 #define MYSQL_PREFIX			"ph_"
+
+#define MAX_SKILLS		12
+
 #define PH_DEBUG // Turn debug on!
-new Connection;
+
+/*
+*    THREADS IDs
+*/
+#define VEHICLE_LOAD_THREAD     1
+#define FETCH_UINFO_THREAD      2
 
 /*
 *    INCLUDES
@@ -72,10 +60,19 @@ new Connection;
 #include <strlib>  	 // author: Westie, External Credit #8
 #include <foreach>   // author: Alex "Y_Less" Cole, External Credit #9
 #include <zcmd> 	 // author: Zeex, External Credit #5
-#include <../../../phoenix_Core> // Enam pole svnis mysqli passe...
-#include <phoenix_Lang>
+#include <stuff> 	 // some Stuff Needed EveryWhere
+
+#include <phoenix_Core>
 #include <phoenix_RealCarnames>
 #include <phoenix_Money>
+
+#include <phoenix_JobSystem>
+#include <phoenix_StreetCleaner>
+
+#include <phoenix_Users>
+#include <phoenix_Skills>
+#include <phoenix_Vehicles>
+
 #include <phoenix_Anims>
 #include <phoenix_ProgressBar>
 #include <phoenix_Interiors>
@@ -84,49 +81,25 @@ new Connection;
 #include <phoenix_NewsPaper>
 //#include <AntiShiit>
 
-#include <phoenix_JobSystem>
-#include <phoenix_StreetCleaner>
-
 public AddAllJobs()
 {
 	JOBS_RegisterJob(CLEAN_JOB_ID, "SCleaner");
 }
 
-
 /*
-*    DEFINES
+*    DEFINES 2
 */
 
-#define SCRIPT_NAME			"Phoenix"
-#define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"158"
-
-
-	/*
-	*  THREADS IDs
-	*/
-	#define VEHICLE_LOAD_THREAD     1
-	#define FETCH_UINFO_THREAD      2
-
 #define TIME_OFFSET -3
-#define VEHICLE_DELAY 1000*60*5
-#define SQL_FINISH_TIME 1000
 #define CHAT_RADIUS 25
 #define CHAT_RADIUS_SHOUT 40
 
 #define STRING_LENGHT 256
-#define MAX_QUERY 512
 #define MAX_TELEPORTS 10
 
 #define MAX_REST_POSITIONS 14
 #define REST_SIT 0
 #define REST_LAY 1
-
-#define VEHICLE_GROUP			0	// Gängid, Grupeeringud
-#define VEHICLE_JOB				1	// Tööd
-#define VEHICLE_BUYABLE			2	// Ostetav masin
-#define VEHICLE_SPECIAL			3	// Rongid, transpordivahendid jms. PS: Neid ei saa mängijad kasutada. Botid juhivad!
-#define VEHICLE_ADMIN			4	// Administraatorite masinad
 
 /* DialogIDs */
 #define DIALOG_LOGIN 2009
@@ -139,35 +112,7 @@ public AddAllJobs()
 #define DIALOG_TELEPORTS 2016
 //#define DIALOG_POCKETS 2017 // Reserved
 
-#define HOLDING(%0) \
-	((newkeys & (%0)) == (%0))
-#define PRESSED(%0) \
-	(((newkeys & (%0)) == (%0)) && ((oldkeys & (%0)) != (%0)))
-#define RELEASED(%0) \
-	(((newkeys & (%0)) != (%0)) && ((oldkeys & (%0)) == (%0)))
-
 #define NPC_IGOR 1
-
-/*
-*    SKILL DEFINES
-*/
-#define MAX_SKILLS		12
-
-#define SKILL_PISTOL				0
-#define SKILL_PISTOLS				1
-#define SKILL_DEAGLE				2
-#define SKILL_SHOTGUN				3
-#define SKILL_SAWNOFF_SHOTGUN		4
-#define SKILL_SPAS12_SHOTGUN		5
-#define SKILL_MICRO_UZI				6
-#define SKILL_MP5					7
-#define SKILL_AK47					8
-#define SKILL_M4					9
-#define SKILL_SNIPERRIFLE			10
-#define SKILL_ATHLETE				11
-
-#define SkillWeapon(%0) \
-		((%0 == 0)?22:(%0 == 1)?23:(%0 == 2)?24:(%0 == 3)?25:(%0 == 4)?26:(%0 == 5)?27:(%0 == 6)?28:(%0 == 7)?29:(%0 == 8)?30:(%0 == 9)?31:(%0 == 10)?34:999)
 
 /*
 *    GLOBAL VARIABLES
@@ -179,112 +124,7 @@ new restBar;
 
 new WelcomeStr[64];
 
-    /*
-         *  THREADS Vars
-         */
-	new Fetch_UInfo_Thread = -1;
-
 new PistolPickup, SawnoffPickup, MP5Pickup, AKPickup;
-
-enum pInf
-{
-	uSqlId,
-	uUserName[20],	
-	uPassWordHash[64],
-	uSalt[10],
-	pLoggedIn,
-	pCharName[30],
-	pSqlId,
-	pAdmin,
-	pJob,
-	pMember,
-	pLeader,
-	pModel,
-	pAdminLevel,
-	aAction,
-	
-	Float:pPosX,
-	Float:pPosY,
-	Float:pPosZ,
-	Float:pAngle,
-	Float:pHealth,
-	pVW,
-	pInterior,
-	
-	SelectedPlayer,
-	npcId,
-	pSkill[MAX_SKILLS+1],
-	pSkillTimer,
-	pSeatbelt,
-	
-	Float: pRest,
-	pResting,
-	pRestingAt,
-	
-	pControllable
-};
-new pInfo[MAX_PLAYERS][pInf];
-
-new Text:  InfoBar[MAX_PLAYERS];
-new 	   InfoBarTimer[MAX_PLAYERS];
-
-new LOADED_VEHICLES = 0;
-enum vInf
-{
-	vSqlID,
-	vSampId,
-	
-	vModel,
-	vType,
-	
-	Float: vPosXd,
-	Float: vPosYd,
-	Float: vPosZd,
-	Float: vAngZd,
-	Float: vPosX,
-	Float: vPosY,
-	Float: vPosZ,
-	vSpeed,
-	Float: vSpeedX,
-	Float: vSpeedY,
-	Float: vSpeedZ,
-	Float: vAngZ,
-	
-	vColor1,
-	vColor2,
-	
-	vOwner,
-	vValue,
-	
-	vDeaths,
-	Float: vHealth,
-	SpeedLimit,
-	Float:Turbo
-};
-new Vehicles[700][vInf];
-
-enum sInf
-{
-	sName[32],
-	sLevel,
-	Float: sRatio
-};
-new Skills[MAX_SKILLS][sInf] = 
-{
-	{"PISTOL", 1000, 1.5},
-	{"PISTOL_VAIKNE", 1250, 1.5},
-	{"DEAGLE", 1500, 1.5},
-	{"SHOTGUN", 2000, 1.5},
-	{"SAWNOFF_SHOTGUN", 2100, 1.5},
-	{"SPAS12_SHOTGUN", 1800, 1.5},
-	{"MICRO_UZI", 3000, 1.5},
-	{"MP5", 1800, 1.5},
-	{"AK47", 3500, 1.5},
-	{"M4", 2000, 1.5},
-	{"SNIPERRIFLE", 5000, 1.5},
-	{"ATHLETE", 7500, 1.8}
-};
-new SkillDelay[MAX_PLAYERS][MAX_SKILLS];
 
 enum posInfo
 {
@@ -317,25 +157,25 @@ enum restInf
 	Float: restY,
 	Float: restZ,
 	Float: restAng,
-	Taken
+	bool: Taken
 };
 
 new RestPositions[MAX_REST_POSITIONS][restInf] = 
 {
-	{REST_SIT, 0.0, 0.0, 0.0, 0.0, 0},
-	{REST_LAY, 2.0, 2.0, 2.0, 2.0, 0},
-	{REST_SIT,1202.5208,2.6604,1001.5255,194.8951, 0},
-	{REST_SIT,1201.4686,1.3668,1001.5255,271.1574, 0},
-	{REST_SIT,1201.4637,0.6496,1001.5255,266.7708, 0},
-	{REST_SIT,1201.5294,-0.6220,1001.5255,265.5174, 0},
-	{REST_SIT,1201.5164,-2.1263,1001.5255,257.9973, 0},
-	{REST_SIT,1201.4718,-3.4100,1001.5255,266.1441, 0},
-	{REST_SIT,1201.5441,-4.1636,1001.5255,270.8441, 0},
-	{REST_SIT,1201.5792,-5.1626,1001.5255,265.8307, 0},
-	{REST_SIT,1201.7568,-6.0220,1001.5255,286.7518, 0},
-	{REST_SIT,1202.1875,-7.2701,1001.5255,344.3098, 0},
-	{REST_LAY,1201.3108,-7.2603,1001.5255,320.8096, 0},
-	{REST_LAY,1201.6097,2.2717,1001.5255,222.9037, 0}
+	{REST_SIT, 0.0, 0.0, 0.0, 0.0, false},
+	{REST_LAY, 2.0, 2.0, 2.0, 2.0, false},
+	{REST_SIT,1202.5208,2.6604,1001.5255,194.8951, false},
+	{REST_SIT,1201.4686,1.3668,1001.5255,271.1574, false},
+	{REST_SIT,1201.4637,0.6496,1001.5255,266.7708, false},
+	{REST_SIT,1201.5294,-0.6220,1001.5255,265.5174, false},
+	{REST_SIT,1201.5164,-2.1263,1001.5255,257.9973, false},
+	{REST_SIT,1201.4718,-3.4100,1001.5255,266.1441, false},
+	{REST_SIT,1201.5441,-4.1636,1001.5255,270.8441, false},
+	{REST_SIT,1201.5792,-5.1626,1001.5255,265.8307, false},
+	{REST_SIT,1201.7568,-6.0220,1001.5255,286.7518, false},
+	{REST_SIT,1202.1875,-7.2701,1001.5255,344.3098, false},
+	{REST_LAY,1201.3108,-7.2603,1001.5255,320.8096, false},
+	{REST_LAY,1201.6097,2.2717,1001.5255,222.9037, false}
 	
 };
 
@@ -343,17 +183,13 @@ new RestPositions[MAX_REST_POSITIONS][restInf] =
 *    FORWARDS
 */
 
-forward MysqlConnect();
-forward MysqlCheck();
 forward ClearResting(playerid);
 forward SyncPlayerTime(playerid);
 forward SyncAllPlayerTime();
-forward CrashCar(SQLVid, vehicleid, Float:damage, Float:oX, Float:oY, Float:oZ);
 forward UpdateAllPlayerPos();
 forward SendTeata(playerid, text[]);
 forward SendAdminMessage(playerid, text[]);
 forward CheckFalseDeadPlayers(playerid);
-forward AddCarToSQL(model, Float:posX, Float:posY, Float:posZ, Float:angle);
 forward SendAdminChat(playerid, text[]);
 forward ShowBanDialog(playerid);
 forward ShowKickDialog(playerid);
@@ -364,39 +200,9 @@ forward SendEs(playerid);
 forward ForwardEs(playerid, message[]);
 forward SendEmote(playerid, emote[]);
 forward SCMTAInPlayerRadius(playerid, radius, color, message[]);
-forward LoadAllVehiclesStart();
-forward LoadAllVehiclesFinish();
-forward SaveAllVehicles(closingdown);
-forward SaveVehicle(vId);
-forward SetVehicleSpawn(vId);
-forward OnDriverEnterVehicle(playerid);
-forward OnDriverExitVehicle(playerid);
-forward ShowSpeedo(playerid);
-forward OnSpeedoUpdate(playerid);
-forward CheckCharacter(playerid);
-forward CheckCharacterFinish(playerid);
-forward GetUserInfo(playerid);
-forward GetUserInfoFinish(playerid);
-forward AuthenticateUser(playerid, givenPassword[]);
-forward FetchCharacterInformation(playerid);
-forward FetchCharacterInformationFinish(playerid);
-forward UpdatePlayer(playerid);
-forward UpdateAllPlayers();
 
-forward MysqlUpdateBuild(query[], table[]);
-forward MysqlUpdateInt(query[], field[], value);
-forward MysqlUpdateFlo(query[], field[], Float: value);
-forward MysqlUpdateStr(query[], field[], value[]);
-forward MysqlUpdateFinish(query[], field[], value);
 forward Velocity(playerid, Float: X, Float: Y, Float: Z);
 forward NPCHandle(playerid);
-forward LoadSkills(playerid);
-forward SaveSkills(playerid);
-forward XpAdd(playerid, skillId, amount);
-forward SetSkills(playerid);
-forward OnLevelUp(playerid, skillId, newLevel, showMsg);
-forward GetLevel(skillId, xP, &xpNeeded);
-forward ClearDelay(playerid, skillId);
 forward Rest(playerid);
 forward IsPlayerNearRestingPlace(playerid);
 forward RestingEnd(playerid);
@@ -417,15 +223,6 @@ main()
 *    STOCKS
 */
 
-stock GetVehicleSqlId(vehicleid)
-{
-	for(new i; i < LOADED_VEHICLES; i++)
-	{
-		if(Vehicles[i][vSampId] == vehicleid) return i;
-	}
-	return -1;
-}
-
 stock findBotAVehicle(botType)
 {
 	for(new i; i < LOADED_VEHICLES; i++)
@@ -433,20 +230,6 @@ stock findBotAVehicle(botType)
 		if(Vehicles[i][vType] == VEHICLE_SPECIAL && Vehicles[i][vOwner] == botType) return i;
 	}
 	return -1;
-}
-
-stock VehPos(vId)
-{
-	GetVehiclePos(Vehicles[vId][vSampId], Vehicles[vId][vPosX], Vehicles[vId][vPosY], Vehicles[vId][vPosZ]);
-	GetVehicleZAngle(Vehicles[vId][vSampId], Vehicles[vId][vAngZ]);
-}
-
-stock VehPosd(vId)
-{
-	Vehicles[vId][vPosX] = Vehicles[vId][vPosXd];
-	Vehicles[vId][vPosY] = Vehicles[vId][vPosZd];
-	Vehicles[vId][vPosZ] = Vehicles[vId][vPosYd];
-	Vehicles[vId][vAngZ] = Vehicles[vId][vAngZd];
 }
 
 stock IsValidSkin(skinid) // author: Simon, External Credit #1
@@ -521,24 +304,6 @@ DcmdFix(text[], size)
 		}
 	}
 	return fixed;
-}
-
-public GetLevel(skillId, xP, &xpNeeded)
-{
-	if(xP < Skills[skillId][sLevel])
-	{
-		xpNeeded = Skills[skillId][sLevel];
-		return 1;
-	}
-	new temp = Skills[skillId][sLevel];
-	for(new i = 0; i < 99; i++)
-	{
-		temp = floatround(temp*Skills[skillId][sRatio]);
-		xpNeeded = floatround(temp * i);
-		if(xP < xpNeeded) return i;
-	}	
-	xpNeeded = 999;
-	return 99;
 }
 
 stock showAdminDialog(playerid)
@@ -626,6 +391,23 @@ MegaJump(playerid)
 	return 1;
 }
 
+stock GetCharacterName(charSqlId)
+{
+	new query[128], retStr[32];
+	format(query, 128, "SELECT name FROM %scharacters WHERE id = '%d' LIMIT 0, 1", MYSQL_PREFIX, charSqlId);
+	mysql_query(query);
+	if(mysql_store_result())
+	{
+		if(mysql_fetch_row_format(query, " ")) 
+		{
+			format(retStr, 32, "%s", query);
+			return retStr;
+		}
+	}
+	format(retStr, 32, "Pole");
+	return retStr;
+}
+
 /*
 *    NATIVES
 */
@@ -633,13 +415,6 @@ MegaJump(playerid)
 
 public OnGameModeInit()
 {
-	// First things first, lets attempt to connect to database.
-	if(!Connection)
-	{
-		MysqlConnect();
-		if(!Connection) return 1;
-	}
-
 	new string[24]; // 24 should be enough.
 	format(string, 24, "%s %s r%s", SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION);
 	SetGameModeText(string);
@@ -856,7 +631,6 @@ public OnGameModeInit()
 
 public OnGameModeExit()
 {
-	SaveAllVehicles(true);
 	UpdateAllPlayers();
 
 	printf(LANG_UNLOADED, SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION, SCRIPTER_NAME);
@@ -868,12 +642,14 @@ public OnPlayerConnect(playerid)
 	MysqlCheck();
 	if(IsPlayerNPC(playerid)) return NPCHandle(playerid);
 	
+	ClearPlayerData(playerid);
+	
     GetPlayerName(playerid, pInfo[playerid][pCharName], 30);
 	SendClientMessage(playerid, COLOR_YELLOW, WelcomeStr);
 	InfoBarTimer[playerid] = -1;
 	CheckCharacter(playerid);
 
-	pInfo[playerid][pLoggedIn] = 0;
+	pInfo[playerid][pLoggedIn] = false;
 	pInfo[playerid][pRest] = 100.0;
 	
 	SyncPlayerTime(playerid);
@@ -886,6 +662,7 @@ public OnPlayerDisconnect(playerid)
 	UpdatePlayer(playerid);
 	SaveSkills(playerid);
 	if( pInfo[playerid][pResting] ) ClearResting(playerid);
+	ClearPlayerData(playerid);	
 	return 1;
 }
 
@@ -1299,14 +1076,26 @@ public OnVehiclePaintjob(playerid, vehicleid, paintjobid)
 	serverMoneyFix(playerid);
 }
 
+public OnPlayerCommandText(playerid, cmdtext[])
+{
+
+}
+
+public OnQueryFinish(query[], resultid)
+{
+	if( resultid == VEHICLE_LOAD_THREAD )
+	{
+		LoadAllVehiclesFinish();
+	}
+	else if( resultid == FETCH_UINFO_THREAD )
+	{
+		FetchCharacterInformationFinish(Fetch_UInfo_Thread);
+	}
+}
+
 /*
 *    COMMANDS
 */
-public OnPlayerCommandText(playerid, cmdtext[])
-{
-//	SendFormattedText(playerid, COLOR_RED, "Käsku %s ei ole.", cmdtext);
-//	return 1;
-}
 
 COMMAND:o(playerid, params[])
 {
@@ -1615,48 +1404,15 @@ COMMAND:pasad(playerid, params[])
 	return 1;
 }
 
-new cPage = 0;
-
 COMMAND:ajaleht(playerid, params[])
 {
-	ShowNewsPaper(playerid, 1, cPage);
-	cPage++;
-	cPage = (cPage > 4)?0:cPage;
+	ShowNewsPaper(playerid, 0);
 	return 1;
 }
 
 /*
 *    PUBLICS
 */
-
-public MysqlConnect()
-{
-	Connection = mysql_connect(MYSQL_HOST, MYSQL_USER, MYSQL_DB, MYSQL_PASSWORD);
-	if(!Connection)
-	{
-		printf(LANG_FAILED_TO_CONNECT, SCRIPT_NAME);
-		SendRconCommand("exit");
-		return 1;
-	}
-	printf(LANG_CONNECTED, SCRIPT_NAME);
-	
-	#if  defined PH_DEBUG
-	
-		mysql_debug(1);
-		
-	#endif
-	
-	return 0;
-}
-
-public MysqlCheck()
-{
-	if(mysql_ping() == -1)
-	{
-		printf("MYSQL LOST, reconnecting.");
-		MysqlConnect();
-	}
-}
 
 public SendEs(playerid)
 {
@@ -1721,612 +1477,6 @@ public SCMTAInPlayerRadius(playerid, radius, color, message[])
 			}
 		}
 	}
-}
-
-public OnQueryFinish(query[], resultid)
-{
-	if( resultid == VEHICLE_LOAD_THREAD )
-	{
-		LoadAllVehiclesFinish();
-	}
-	else if( resultid == FETCH_UINFO_THREAD )
-	{
-		FetchCharacterInformationFinish(Fetch_UInfo_Thread);
-	}
-}
-
-public LoadAllVehiclesStart()
-{
-	print("\t\t Started Loading Vehicles.");
-	new query[32];
-	format(query, 32, "SELECT * FROM %svehicles", MYSQL_PREFIX);
-	mysql_query(query, VEHICLE_LOAD_THREAD);
-}
-
-public LoadAllVehiclesFinish()
-{
-	mysql_store_result();
-	
-	new Field[64], Data[128], vId;
-	for(vId = 0; vId < mysql_num_rows(); vId++)
-	{
-		mysql_fetch_row(Data);
-		
-		mysql_fetch_field_row(Field, "vehicleId");
-		Vehicles[vId][vSqlID] = strval(Field);
-		
-		mysql_fetch_field_row(Field, "vModel");
-		Vehicles[vId][vModel] = strval(Field);
-		
-		mysql_fetch_field_row(Field, "vType");
-		Vehicles[vId][vType] = strval(Field);
-		
-		mysql_fetch_field_row(Field, "vPosXd");
-		Vehicles[vId][vPosXd] = floatstr(Field);
-		
-		mysql_fetch_field_row(Field, "vPosYd");
-		Vehicles[vId][vPosYd] = floatstr(Field);
-		
-		mysql_fetch_field_row(Field, "vPosZd");
-		Vehicles[vId][vPosZd] = floatstr(Field);
-		
-		mysql_fetch_field_row(Field, "vAngZd");
-		Vehicles[vId][vAngZd] = floatstr(Field);
-		
-		mysql_fetch_field_row(Field, "vPosX");
-		Vehicles[vId][vPosX] = floatstr(Field);
-		
-		mysql_fetch_field_row(Field, "vPosY");
-		Vehicles[vId][vPosY] = floatstr(Field);
-		
-		mysql_fetch_field_row(Field, "vPosZ");
-		Vehicles[vId][vPosZ] = floatstr(Field);
-		
-		mysql_fetch_field_row(Field, "vAngZ");
-		Vehicles[vId][vAngZ] = floatstr(Field);
-		
-		mysql_fetch_field_row(Field, "vColor1");
-		Vehicles[vId][vColor1] = strval(Field);
-		
-		mysql_fetch_field_row(Field, "vColor2");
-		Vehicles[vId][vColor2] = strval(Field);
-		
-		mysql_fetch_field_row(Field, "vOwner");
-		Vehicles[vId][vOwner] = strval(Field);
-		
-		mysql_fetch_field_row(Field, "vValue");
-		Vehicles[vId][vValue] = strval(Field);
-		
-		mysql_fetch_field_row(Field, "vDeaths");
-		Vehicles[vId][vDeaths] = strval(Field);
-		
-		mysql_fetch_field_row(Field, "vHealth");
-		Vehicles[vId][vHealth] = floatstr(Field);
-		if(Vehicles[vId][vHealth] < 400.0) Vehicles[vId][vHealth] = 450.0;
-		
-		Vehicles[vId][vSampId] = AddStaticVehicleEx(Vehicles[vId][vModel], 
-													Vehicles[vId][vPosXd],
-													Vehicles[vId][vPosYd],
-													Vehicles[vId][vPosZd],
-													Vehicles[vId][vAngZd],
-													/*Vehicles[vId][vColor1]*/-1,
-													/*Vehicles[vId][vColor2]*/-1,
-													VEHICLE_DELAY);
-		//SetTimerEx("SetVehicleSpawn", 500, 0, "d", vId);
-	}
-	LOADED_VEHICLES = vId+1;
-	printf("\t\t %d Vehicles Loaded.", LOADED_VEHICLES);
-	mysql_free_result();
-}
-
-public SaveAllVehicles(closingdown)
-{
-	for(new i; i < LOADED_VEHICLES; i++)
-	{
-		SaveVehicle(i);
-	}
-}
-
-public SaveVehicle(vId)
-{
-	VehPos(vId);
-	
-	new query[MAX_QUERY], table[32];
-	format(table, 32, "%svehicles", MYSQL_PREFIX);
-	
-	MysqlUpdateBuild(query, table);
-	MysqlUpdateInt(query, "vColor1", Vehicles[vId][vColor1]);
-	MysqlUpdateInt(query, "vColor2", Vehicles[vId][vColor2]);
-	MysqlUpdateInt(query, "vOwner", Vehicles[vId][vOwner]);
-	MysqlUpdateInt(query, "vValue", Vehicles[vId][vValue]);
-	MysqlUpdateInt(query, "vDeaths", Vehicles[vId][vDeaths]);
-	MysqlUpdateFlo(query, "vHealth", Vehicles[vId][vHealth]);
-	
-	MysqlUpdateFlo(query, "vPosX", Vehicles[vId][vPosX]);
-	MysqlUpdateFlo(query, "vPosY", Vehicles[vId][vPosY]);
-	MysqlUpdateFlo(query, "vPosZ", Vehicles[vId][vPosZ]);
-	MysqlUpdateFlo(query, "vAngZ", Vehicles[vId][vAngZ]);
-	
-	MysqlUpdateFinish(query, "vehicleId", Vehicles[vId][vSqlID]);
-	return 1;
-}
-
-public SetVehicleSpawn(vId)
-{
-	SetVehicleHealth(Vehicles[vId][vSampId], Vehicles[vId][vHealth]);
-	SetVehiclePos(Vehicles[vId][vSampId], Vehicles[vId][vPosX], Vehicles[vId][vPosY], Vehicles[vId][vPosZ]);
-	SetVehicleZAngle(Vehicles[vId][vSampId], Vehicles[vId][vAngZ]);
-}
-
-public OnDriverEnterVehicle(playerid)
-{
-	new vId = GetVehicleSqlId(GetPlayerVehicleID(playerid));
-	new Remove = false, Freeze = false;
-	new string[128];
-	
-	if(vId == -1) Remove = false;
-	else
-	{
-		if		(Vehicles[vId][vType] == VEHICLE_GROUP)
-		{
-			if(Vehicles[vId][vOwner] == 0) Remove = false;
-			else if(IsGroupMember(playerid) != Vehicles[vId][vOwner]) Remove = true;
-		}
-		else if	(Vehicles[vId][vType] == VEHICLE_JOB)
-		{
-			if(Vehicles[vId][vOwner] == 0) Remove = false;
-			else if(pInfo[playerid][pJob] != Vehicles[vId][vOwner]) Remove = true;
-		}
-		else if	(Vehicles[vId][vType] == VEHICLE_BUYABLE)
-		{
-			if(Vehicles[vId][vOwner] > 0) Remove = true;
-			else
-			{	
-				format(string, 128, "~y~ %s ~n~~g~ Hind: %d SAK", CarNames[Vehicles[vId][vModel] - 400], Vehicles[vId][vValue]);
-				GameTextForPlayer(playerid, string, 3000, 4);
-				
-				format(string, 128, "Kirjuta: /omasin, et seda masinat osta.");
-				SendClientMessage(playerid, COLOR_GREEN, string);	
-				Freeze = false;
-			}
-		}
-		else if	(Vehicles[vId][vType] == VEHICLE_SPECIAL)
-		{
-			if(!IsPlayerNPC(playerid)) Remove = true;
-		}
-		else
-		{
-			if(pInfo[playerid][pAdmin] < 1) Remove = true;
-			else if(pInfo[playerid][pAdmin] < Vehicles[vId][vOwner]) Remove = true;
-		}
-	}
-	
-	if(Remove)
-	{
-		RemovePlayerFromVehicle(playerid);
-		SendClientMessage(playerid, COLOR_RED, LANG_VEH_NOKEYS);
-	}
-	else
-	{
-		if(Freeze) TogglePlayerControllable(playerid, 0);
-	
-		ShowSpeedo(playerid);
-		format(string, 128, "%s", CarNames[Vehicles[vId][vModel] - 400]);
-		GameTextForPlayer(playerid, string, 6000, 1);
-	}
-	return 1;
-}
-
-public OnDriverExitVehicle(playerid)
-{
-	OnSpeedoUpdate(playerid);
-	new vId = GetVehicleSqlId(GetPlayerVehicleID(playerid));
-	if(vId == -1) return 0;
-	
-	Vehicles[vId][vSpeed] = 0;
-	InfoBarTimer[playerid] = -1;
-	
-	if(pInfo[playerid][pSeatbelt] > 0)
-	{
-		SendEmote(playerid, "võtab turvavöö ära ning tuleb masinast välja.");
-		pInfo[playerid][pSeatbelt] = 0;
-	}	
-	return 1;
-}
-
-public ShowSpeedo(playerid)
-{
-	if(InfoBarTimer[playerid] != -1) return 0;
-	
-	InfoBarTimer[playerid] = SetTimerEx("OnSpeedoUpdate", 200, 1, "i", playerid);
-	TextDrawShowForPlayer(playerid, InfoBar[playerid]);	
-	return 1;
-}
-
-public OnSpeedoUpdate(playerid)
-{
-	if(IsPlayerConnected(playerid) && IsPlayerInAnyVehicle(playerid))
-	{
-		new vId = GetVehicleSqlId(GetPlayerVehicleID(playerid));
-		if(vId == -1) return 0;
-
-		new oSpeed = Vehicles[vId][vSpeed], Float: oHealth = Vehicles[vId][vHealth];
-		new Float: oX = Vehicles[vId][vSpeedX], Float: oY = Vehicles[vId][vSpeedY], Float: oZ = Vehicles[vId][vSpeedZ];
-
-		GetVehicleHealth(Vehicles[vId][vSampId], Vehicles[vId][vHealth]);		
-		new hProtsenti = floatround(((Vehicles[vId][vHealth] - 295) / 705) * 100);
-		if(hProtsenti < 0) hProtsenti = 0;
-		new string[128], fuel[3] = "-";
-
-		GetVehicleVelocity(Vehicles[vId][vSampId], Vehicles[vId][vSpeedX], Vehicles[vId][vSpeedY], Vehicles[vId][vSpeedZ]);
-		new Float: distance = floatabs(Vehicles[vId][vSpeedX]) + floatabs(Vehicles[vId][vSpeedY]) + floatabs(Vehicles[vId][vSpeedZ]);
-		Vehicles[vId][vSpeed] = floatround(distance * 175);
-		new showspeed = Vehicles[vId][vSpeed];
-		if( Vehicles[vId][SpeedLimit] != 0 && Vehicles[vId][SpeedLimit] < showspeed ) showspeed = Vehicles[vId][SpeedLimit];
-		format(string,sizeof(string),"~y~~h~Bensiin: %s  ~y~~h~Kiirus: ~w~%i km/h  ~y~~h~Korras: ~w~%d %%", fuel, showspeed, hProtsenti);
-		TextDrawSetString(InfoBar[playerid], string);
-		
-		if((oSpeed - Vehicles[vId][vSpeed]) > 70 && (oHealth - Vehicles[vId][vHealth]) > 100)
-		{
-         	new Float:damage = oHealth - Vehicles[vId][vHealth];
-			CrashCar(vId, Vehicles[vId][vSampId], damage, oX, oY, oZ);
-			Vehicles[vId][vSpeed] = 0;
-		}
-		if( Vehicles[vId][Turbo] != 0 )
-		{
-		    new keys, updown, leftright;
-		    GetPlayerKeys(playerid, keys, updown, leftright);
-		    if( keys == 8 && leftright == 0 && showspeed > 10)
-		    {
-		        new Float:SpeedX, Float:SpeedY, Float:PercentX, Float:PercentY, Float:newX, Float: newY, NegativeX, NegativeY;
-				SpeedX = Vehicles[vId][vSpeedX];
-				SpeedY = Vehicles[vId][vSpeedY];
-
-				if(SpeedX < 0) NegativeX = 1;
-				if(SpeedY < 0) NegativeY = 1;
-				if(NegativeX) SpeedX = SpeedX*-1;
-				if(NegativeY) SpeedY = SpeedY*-1;
-				PercentX = SpeedX/100;
-				PercentY = SpeedY/100;
-				
-				new Float:turbo = Vehicles[vId][Turbo];
-				
-				if ( showspeed > 200 ) turbo = turbo / 4;
-				else if ( showspeed > 100 ) turbo = turbo / 2;
-
-				newX = SpeedX + PercentX*turbo;
-				newY = SpeedY + PercentY*turbo;
-				if(NegativeX) newX = newX*-1;
-				if(NegativeY) newY = newY*-1;
-
-				SetVehicleVelocity(Vehicles[vId][vSampId], newX, newY, Vehicles[vId][vSpeedZ]);
-			}
-		}
-		if( Vehicles[vId][vSpeed] > Vehicles[vId][SpeedLimit] && Vehicles[vId][SpeedLimit] != 0 )
-		{
-		    new difference = Vehicles[vId][vSpeed] - Vehicles[vId][SpeedLimit];
-			new Float:SpeedX, Float:SpeedY, Float:PercentX, Float:PercentY, multiplier, Float:newX, Float: newY, NegativeX, NegativeY;
-			SpeedX = Vehicles[vId][vSpeedX];
-			SpeedY = Vehicles[vId][vSpeedY];
-
-			if(SpeedX < 0) NegativeX = 1;
-			if(SpeedY < 0) NegativeY = 1;
-			if(NegativeX) SpeedX = SpeedX*-1;
-			if(NegativeY) SpeedY = SpeedY*-1;
-			PercentX = SpeedX/100;
-			PercentY = SpeedY/100;
-			multiplier = difference*4;
-			if( multiplier > 20 ) multiplier = 20;
-			newX = SpeedX - PercentX*multiplier;
-			newY = SpeedY - PercentY*multiplier;
-			if(NegativeX) newX = newX*-1;
-			if(NegativeY) newY = newY*-1;
-
-			SetVehicleVelocity(Vehicles[vId][vSampId], newX, newY, Vehicles[vId][vSpeedZ]);
-
-		}
-		
-	}
-	else
-	{
-		TextDrawHideForPlayer(playerid, InfoBar[playerid]);
-		KillTimer(InfoBarTimer[playerid]);
-	}
-	return 1;
-}
-
-public CrashCar(SQLVid, vehicleid, Float:damage, Float:oX, Float:oY, Float:oZ)
-{
-	new pVeh;
-	foreach (Player, playerid)
-	{
-	    if( pInfo[playerid][pLoggedIn] && IsPlayerInAnyVehicle(playerid) )
-	    {
-			if(pInfo[playerid][pSeatbelt] == 0)
-			{
-				pVeh = GetPlayerVehicleID(playerid);
-				if( pVeh == vehicleid )
-				{
-					VehPos(SQLVid);
-					SendEmote(playerid, LANG_VEH_CRASH);
-					SetPlayerPos(playerid, Vehicles[SQLVid][vPosX], Vehicles[SQLVid][vPosY], Vehicles[SQLVid][vPosZ]+2);
-					SetTimerEx("Velocity", 75, 0, "ifff", playerid, oX, oY, oZ);
-					ApplyAnimation(playerid, "CRACK", "crckdeth2", 4.0, 1, 1, 1, 1, 1);
-					new Float:health;
-					GetPlayerHealth(playerid, health);
-					health = health - damage/10;
-					SetPlayerHealth(playerid, health);
-				}
-			}
-			else
-			{
-				SendEmote(playerid, LANG_CRASH_SEATBELT);
-				new Float:health;
-				GetPlayerHealth(playerid, health);
-				health = health - damage/25;
-				SetPlayerHealth(playerid, health);
-				TogglePlayerControllableEx(playerid, 0, 5000);
-			}			
-		}
-	}
-}
-
-public CheckCharacter(playerid)
-{
-	new eName[32], query[86];
-	mysql_real_escape_string(pInfo[playerid][pCharName], eName);
-	format(query, 86, "SELECT id, userid FROM %scharacters WHERE name = '%s' LIMIT 0, 1", MYSQL_PREFIX, eName);	
-	mysql_query(query);
-		
-	if(mysql_store_result())
-	{
-		if(mysql_num_rows() > 0)
-		{
-			new Field[64], Data[128];
-			mysql_fetch_row(Data);
-			
-			mysql_fetch_field_row(Field, "id");
-			pInfo[playerid][pSqlId] = strval(Field);
-			
-			mysql_fetch_field_row(Field, "userid");
-			pInfo[playerid][uSqlId] = strval(Field);
-			mysql_free_result();
-			
-			GetUserInfo(playerid);
-			return 1;
-		}
-		else
-		{
-	 		SendClientMessage(playerid, COLOR_RED, LANG_NOCHARACTER);
-			Kick(playerid);
-		}
-	}
-	return 1;
-}
-
-public GetUserInfo(playerid)
-{
-	new query[86];
-	format(query, 86, "SELECT username, password, salt FROM user WHERE userid = '%d' LIMIT 1", pInfo[playerid][uSqlId]);
-	mysql_query(query);
-
-	if(mysql_store_result() == 1)
-	{		
-		if(mysql_num_rows() > 0)
-		{
-			new Field[64], Data[128];
-			mysql_fetch_row(Data);
-			
-			mysql_fetch_field_row(Field, "username");
-			strmid(pInfo[playerid][uUserName], Field, 0, strlen(Field), STRING_LENGHT);
-			
-			mysql_fetch_field_row(Field, "password");
-			strmid(pInfo[playerid][uPassWordHash], Field, 0, strlen(Field), STRING_LENGHT);
-			
-			mysql_fetch_field_row(Field, "salt");
-			strmid(pInfo[playerid][uSalt], Field, 0, strlen(Field), STRING_LENGHT);
-			mysql_free_result();
-		}	
-		return 1;
-	}
-	SendClientMessage(playerid, COLOR_RED, LANG_NOUSER);
-	Kick(playerid);
-	return 1;
-}
-
-public AuthenticateUser(playerid, givenPassword[])
-{
-	new string[STRING_LENGHT];
-	format(string, STRING_LENGHT, "%s", PasswordHash(givenPassword, pInfo[playerid][uSalt]));
-	new strC = strcmp(pInfo[playerid][uPassWordHash], string, true);
-	
-
-	if(strC != 0) // wrong Password
-	{
-		SendClientMessage(playerid, COLOR_RED, LANG_WRONG_PASSWORD);
-		showLogin(playerid);
-	}
-	else
-	{
-	    FetchCharacterInformation(playerid);
-	}
-	return 1;
-}
-
-public FetchCharacterInformation(playerid)
-{
-	if(Fetch_UInfo_Thread != -1) // thread is busy, lets attemp again in 1 second.
-	{
-		SetTimerEx("FetchCharacterInformation", 1000, 0, "i", playerid);
-		return 1;
-	}
-	Fetch_UInfo_Thread = playerid;
-
-	new query[86];
-	format(query, 86, "SELECT * FROM %scharacters WHERE id = '%d' LIMIT 0, 1", MYSQL_PREFIX, pInfo[playerid][pSqlId]);
-	mysql_query(query, FETCH_UINFO_THREAD);
-	SetTimerEx("FetchCharacterInformationFinish", SQL_FINISH_TIME, 0, "i", playerid);
-	return 1;
-
-}
-
-public FetchCharacterInformationFinish(playerid)
-{
-	if(Fetch_UInfo_Thread != playerid) return 1;
-	
-	if(mysql_store_result() == 1)
-	{
-		if(mysql_num_rows() < 1)
-		{
-			SendClientMessage(playerid, COLOR_RED, LANG_NOCHARACTER);
-			Kick(playerid);
-		}
-		else
-		{
-			new Field[64], Data[1024];
-			mysql_fetch_row(Data);
-			
-			mysql_fetch_field_row(Field, "model");
-			pInfo[playerid][pModel] = strval(Field);
-			mysql_fetch_field_row(Field, "money");
-			GivePlayerMoneyNew(playerid, strval(Field));
-			mysql_fetch_field_row(Field, "posX");
-			pInfo[playerid][pPosX] = floatstr(Field);
-			mysql_fetch_field_row(Field, "posY");
-			pInfo[playerid][pPosY] = floatstr(Field);
-			mysql_fetch_field_row(Field, "posZ");
-			pInfo[playerid][pPosZ] = floatstr(Field);
-			mysql_fetch_field_row(Field, "angle");
-			pInfo[playerid][pAngle] = floatstr(Field);
-			mysql_fetch_field_row(Field, "VirtualWorld");
-			pInfo[playerid][pVW] = strval(Field);
-			mysql_fetch_field_row(Field, "interior");
-			pInfo[playerid][pInterior] = strval(Field);
-			mysql_fetch_field_row(Field, "health");
-			pInfo[playerid][pHealth] = floatstr(Field);
-			mysql_fetch_field_row(Field, "adminLevel");
-			pInfo[playerid][pAdminLevel] = strval(Field);
-			mysql_fetch_field_row(Field, "playerJob");
-			gMyJob[playerid] = strval(Field);
-			
-			mysql_free_result();
-			LoadSkills(playerid);
-		}
-	}
-	Fetch_UInfo_Thread = -1;
-	return 1;
-}
-
-public UpdatePlayer(playerid)
-{
-	if(!pInfo[playerid][pLoggedIn]) return 1;
-	
-	GetPlayerPos(playerid, pInfo[playerid][pPosX], pInfo[playerid][pPosY], pInfo[playerid][pPosZ]);
-	GetPlayerFacingAngle(playerid, pInfo[playerid][pAngle]);
-	GetPlayerHealth(playerid, pInfo[playerid][pHealth]);
-	
-	new sqlid = pInfo[playerid][pSqlId];
-	
-	new query[MAX_QUERY], table[32];
-	format(table, 32, "%scharacters", MYSQL_PREFIX);
-	
-	MysqlUpdateBuild(query, table);
-	
-	MysqlUpdateInt(query, "money", PlayerMoney[playerid]);
-	MysqlUpdateInt(query, "model", pInfo[playerid][pModel]);
-	MysqlUpdateFlo(query, "posX", pInfo[playerid][pPosX]);
-	MysqlUpdateFlo(query, "posY", pInfo[playerid][pPosY]);
-	MysqlUpdateFlo(query, "posZ", pInfo[playerid][pPosZ]);
-	MysqlUpdateFlo(query, "angle", pInfo[playerid][pAngle]);
-
-	MysqlUpdateInt(query, "VirtualWorld", pInfo[playerid][pVW]);
-	MysqlUpdateInt(query, "interior", pInfo[playerid][pInterior]);
-	MysqlUpdateFlo(query, "health", pInfo[playerid][pHealth]);
-	MysqlUpdateInt(query, "adminLevel", pInfo[playerid][pAdminLevel]);
-	
-	MysqlUpdateFinish(query, "id", sqlid);
-
-	print("Player Updated!");
-	return 1;
-}
-public UpdateAllPlayerPos()
-{
-	foreach(Player, playerid)
-	{
-		if(pInfo[playerid][pLoggedIn])
-		{
-			GetPlayerPos(playerid, pInfo[playerid][pPosX], pInfo[playerid][pPosY], pInfo[playerid][pPosZ]);
-
-			new sqlid = pInfo[playerid][pSqlId];
-			new query[MAX_QUERY], table[32];
-			format(table, 32, "%scharacters", MYSQL_PREFIX);
-			MysqlUpdateBuild(query, table);
-			MysqlUpdateFlo(query, "posX", pInfo[playerid][pPosX]);
-			MysqlUpdateFlo(query, "posY", pInfo[playerid][pPosY]);
-			MysqlUpdateFlo(query, "posZ", pInfo[playerid][pPosZ]);
-			MysqlUpdateFinish(query, "id", sqlid);
-		}
-	}
-	print("All Player Positsions Saved!");
-	return 1;
-}
-
-public UpdateAllPlayers()
-{
-	foreach(Player, i)
-	{
-	    if( pInfo[i][pLoggedIn] )
-	    {
-	    	UpdatePlayer(i);
-			SaveSkills(i);
-		}
-	}
-}
-
-public MysqlUpdateBuild(query[], table[])
-{
-	format(query, MAX_QUERY, "UPDATE %s SET ", table);
-	return 1;
-}
-
-public MysqlUpdateInt(query[], field[], value)
-{
-	new qLen = strlen(query);
-	if(qLen+50 < MAX_QUERY) // It 's safe to add.
-	{
-		format(query, MAX_QUERY, "%s %s = '%d', ", query, field, value);
-	}
-	return 1;
-}
-
-public MysqlUpdateFlo(query[], field[], Float: value)
-{
-	new qLen = strlen(query);
-	if(qLen+50 < MAX_QUERY) // It 's safe to add.
-	{
-		format(query, MAX_QUERY, "%s %s = '%f', ", query, field, value);
-	}
-	return 1;
-}
-
-public MysqlUpdateStr(query[], field[], value[])
-{
-	new qLen = strlen(query);
-	if(qLen+50 < MAX_QUERY) // It 's safe to add.
-	{
-		format(query, MAX_QUERY, "%s %s = '%s', ", query, field, value);
-	}
-	return 1;
-}
-
-public MysqlUpdateFinish(query[], field[], value)
-{
-	new qLen = strlen(query);
-	strdel(query, qLen-2, qLen); // remove the extra comma 
-	
-	format(query, MAX_QUERY, "%s WHERE %s = '%d'", query, field, value);
-	print(query);
-	mysql_query(query);
 }
 
 public WarpPlayerToPlayer(WarpWho, WarpTo)
@@ -2413,138 +1563,6 @@ public NPCHandle(playerid)
 	return 0;
 }
 
-public AddCarToSQL(model, Float:posX, Float:posY, Float:posZ, Float:angle)
-{
-	new query[1028];
-	format(query, sizeof(query), "INSERT INTO `estrpco_portal`.`ph_vehicles` (`vehicleId` ,`vModel` ,`vType` ,`vPosXd` ,`vPosYd` ,`vPosZd` ,`vAngZd` ,`vPosX` ,`vPosY` ,`vPosZ` ,`vAngZ` ,`vColor1` ,`vColor2` ,`vOwner` ,`vValue` ,`vDeaths` ,`vHealth`)VALUES (NULL , '%i', '0', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '-1', '-1', '0', '0', '0', '1000');", model, posX, posY, posZ, angle, posX, posY, posZ, angle);
-	mysql_query(query, FETCH_UINFO_THREAD);
-}
-
-public LoadSkills(playerid)
-{	
-	new query[128];
-	format(query, 128, "SELECT * FROM %sskills WHERE cid = '%d'", MYSQL_PREFIX, pInfo[playerid][pSqlId]);
-	mysql_query(query);
-	
-	if(mysql_store_result() == 1)
-	{
-		if(mysql_num_rows() > 0)
-		{
-			new Field[64], str[12];			
-			for(new i = 0; i < MAX_SKILLS; i++)
-			{
-				format(str, 12, "skill_%d", i);
-				mysql_fetch_field_row(Field, str);
-				pInfo[playerid][pSkill][i]	= strval(Field);
-			}			
-			mysql_free_result();	
-
-			SetSkills(playerid);
-		
-			SendClientMessage(playerid, COLOR_GREEN, LANG_LOGGED_IN);
-			pInfo[playerid][pLoggedIn] = 1;
-			SpawnPlayer(playerid);		
-			return 1;			
-		}
-		else
-		{
-			mysql_free_result();
-			format(query, 128, "INSERT INTO %sskills(id, cid) VALUES(NULL, '%d');", MYSQL_PREFIX, pInfo[playerid][pSqlId]);
-			mysql_query(query);
-			SetTimerEx("LoadSkills", 500, 0, "i", playerid);
-			return 1;
-		}
-	}
-	
-	SendClientMessage(playerid, COLOR_RED, LANG_STATSERROR);
-	Kick(playerid);
-	return 1;
-}
-
-public SaveSkills(playerid)
-{	
-	new sqlid = pInfo[playerid][pSqlId];
-	new query[MAX_QUERY], table[32];
-	format(table, 32, "%sskills", MYSQL_PREFIX);
-	
-	MysqlUpdateBuild(query, table);
-	
-	new str[12];			
-	for(new i = 0; i < MAX_SKILLS; i++)
-	{
-		format(str, 12, "skill_%d", i);
-		MysqlUpdateInt(query, str, pInfo[playerid][pSkill][i]);
-	}
-	
-	MysqlUpdateFinish(query, "cid", sqlid);	
-	return 1;
-}
-
-public XpAdd(playerid, skillId, amount)
-{
-	new xpNeeded;
-	new oldLevel = GetLevel(skillId, pInfo[playerid][pSkill][skillId], xpNeeded);
-	pInfo[playerid][pSkill][skillId] += amount;
-	
-	if( skillId <= 10 )
-	{
-	    if ( IsPlayerInAnyVehicle(playerid) || GetPlayerWeapon(playerid) != SkillWeapon(skillId) )
-		{
-		    if( pInfo[playerid][pSkillTimer] != 0 )
-		    {
-				KillTimer(pInfo[playerid][pSkillTimer]);
-				pInfo[playerid][pSkillTimer] = 0;
-			}
-			return 1;
-		}
-		SkillDelay[playerid][skillId] = 1;
-		SetTimerEx("ClearDelay", 285, 0, "ii", playerid, skillId);
-		if(skillId <= 10)
-		{
-			new wepId = skillId+1;
-			RemAmount(playerid, wepId, 1);
-		}
-	}	
-	
-	if(pInfo[playerid][pSkill][skillId] >= xpNeeded)
-	{	
-		OnLevelUp(playerid, skillId, (oldLevel+1), 1);
-	}
-	
-	//UpdateSkillDraw(playerid, skillId, amount);
-	return 1;
-}
-
-public SetSkills(playerid)
-{
-	for(new i = 0; i < MAX_SKILLS; i++)
-	{
-		new xpNeeded;
-		new level = GetLevel(i, pInfo[playerid][pSkill][i], xpNeeded);
-		OnLevelUp(playerid, i, level, 0);
-	}
-}
-
-public OnLevelUp(playerid, skillId, newLevel, showMsg)
-{
-	if(showMsg == 1)
-	{
-		//	LevelAP
-		new string[128];
-		format(string, 128, LANG_LEVELUP, Skills[skillId][sName], newLevel, pInfo[playerid][pSkill][skillId]);
-		SendClientMessage(playerid, COLOR_GREEN, string);
-	}
-	
-	if(skillId < 11) SetPlayerSkillLevel(playerid, skillId, floatround(newLevel*10));
-	return 1;
-}
-
-public ClearDelay(playerid, skillId)
-{
-	SkillDelay[playerid][skillId] = 0;
-	return 1;
-}
-
 public CheckFalseDeadPlayers(playerid)
 {
 	new Float:health;
@@ -2561,7 +1579,6 @@ public CheckFalseDeadPlayers(playerid)
 	}
 }
 
-
 public Rest(playerid)
 {
 	
@@ -2576,8 +1593,8 @@ public Rest(playerid)
 		SetPlayerPos(playerid, RestPositions[RestPlace][restX], RestPositions[RestPlace][restY],  RestPositions[RestPlace][restZ]);
 		SetPlayerFacingAngle(playerid, RestPositions[RestPlace][restAng]);
 
-		pInfo[playerid][pResting] = 1;
-		RestPositions[RestPlace][Taken] = 1;
+		pInfo[playerid][pResting] = true;
+		RestPositions[RestPlace][Taken] = true;
 		pInfo[playerid][pRestingAt] = RestPlace;
 
 		if(RestPositions[RestPlace][restType] == REST_LAY)
@@ -2600,7 +1617,7 @@ public Rest(playerid)
 		ApplyAnimation(playerid, "BEACH", "null", 4.0, 1, 0, 0, 0, 0);	/// preload
 		ApplyAnimation(playerid,"BEACH", "ParkSit_M_loop", 4.0, 1, 0, 0, 5000, 0);
 		SendEmote(playerid, "istub maha");		
-		pInfo[playerid][pResting] = 1;
+		pInfo[playerid][pResting] = true;
 		pInfo[playerid][pRestingAt] = -1;
 	}
 	return 1;	
@@ -2643,8 +1660,8 @@ public RestingEnd(playerid)
 public ClearResting(playerid)
 {
     new RestPlace = pInfo[playerid][pRestingAt];
-	if(RestPlace != -1 && RestPlace < MAX_REST_POSITIONS) RestPositions[RestPlace][Taken] = 0;
-    pInfo[playerid][pResting] = 0;
+	if(RestPlace != -1 && RestPlace < MAX_REST_POSITIONS) RestPositions[RestPlace][Taken] = false;
+    pInfo[playerid][pResting] = false;
     pInfo[playerid][pRestingAt] = -1;
     
 }

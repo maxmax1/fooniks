@@ -60,3 +60,5 @@
 #define LANG_ADMINMSG "Administraator %s: %s"
 #define LANG_REPORT "(%i)%s teatab: %s"
 #define LANG_TELEPORTED_TO "Teleported to %s."
+
+#define LANG_WAIT "Palun oota..."

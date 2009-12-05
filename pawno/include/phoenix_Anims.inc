@@ -18,6 +18,11 @@
 *    Purpose: Add animations to the gamemode.
 */
 
+#if !defined _phoenix_included
+	#error "Phoenix ERROR #1, You need phoenix base for this gamemode to run!"
+	#endinput
+#endif
+
 #define COLOR_ANIMS 0x33AA33AA
 #define animCmd(%0,%1,%2,%3,%4,%5,%6) if(!strcmp(DcmdFix( (%6)[1], strlen((%6)[1]) ),#%0,true)) return  ApplyAnimation(playerid,%1,%2,1.0,%3,%4,%4,0,%5)
 #define animStop(%0,%1) if(!strcmp(DcmdFix( (%1)[1], strlen((%1)[1]) ),#%0,true)) return stopAnims(playerid)

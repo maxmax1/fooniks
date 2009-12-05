@@ -22,6 +22,12 @@
 
 // Job System functions. - Public
 
+
+#if !defined _phoenix_included
+	#error "Phoenix ERROR #1, You need phoenix base for this gamemode to run!"
+	#endinput
+#endif
+
 #if !defined _phoenix_JobSystem_included
 	#error "StreetCleaner Job needs phoenix_JobSystem!"
 	#endinput

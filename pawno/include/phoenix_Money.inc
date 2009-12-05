@@ -18,6 +18,11 @@
 *    Purpose: Serverside ANTI moneyhack.
 */
 
+#if !defined _phoenix_included
+	#error "Phoenix ERROR #1, You need phoenix base for this gamemode to run!"
+	#endinput
+#endif
+
 #if defined _phoenix_Money_included
   #endinput
 #endif
@@ -37,6 +42,7 @@ stock serverMoneyFix(playerid)
 }
 
 forward GivePlayerMoneyNew(playerid, money);
+forward ResetPlayerMoneyNew(playerid);
 forward MoneyUpdate(playerid);
 
 public GivePlayerMoneyNew(playerid, money)
@@ -46,6 +52,12 @@ public GivePlayerMoneyNew(playerid, money)
 		PlayerPlaySound(playerid, 1149, 0.0, 0.0, 0.0);
 	}
 	PlayerMoney[playerid] += money;
+	MoneyUpdate(playerid);
+}
+
+public ResetPlayerMoneyNew(playerid)
+{
+	PlayerMoney[playerid] = 0;
 	MoneyUpdate(playerid);
 }
 
