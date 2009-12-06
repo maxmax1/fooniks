@@ -47,6 +47,7 @@
 #define COLOR_WHITE 0xffffffff
 
 #define PLAYER_COLOR 0xFFFF0000
+#define COLOR_AFK    0xFFFF3300
 
 #define COLOR_CHAT_IC 0xf2ffacAA
 #define COLOR_CHAT_OOC_GLOBAL 0x8cf8ffAA
@@ -171,8 +172,6 @@ public OnGameModeInit()
 		MysqlConnect();
 		if(!Connection) return 1;
 	}
-	
-	LoadNewsPapers();
 	
     if (funcidx("Phoenix_OnGameModeInit") != -1)
     {

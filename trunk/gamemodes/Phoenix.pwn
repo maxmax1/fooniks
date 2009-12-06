@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"159"
+#define SCRIPT_REVISION 		"160"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -65,6 +65,7 @@
 #include <phoenix_Core>
 #include <phoenix_RealCarnames>
 #include <phoenix_Money>
+#include <phoenix_Status>
 
 #include <phoenix_JobSystem>
 #include <phoenix_StreetCleaner>
@@ -276,34 +277,6 @@ PasswordHash(password[], salt[])
 	format(string, STRING_LENGHT, "%s%s", strtolower(MD5_Hash(password)), salt);
 	format(string, STRING_LENGHT, "%s", strtolower(MD5_Hash(string)));
 	return string;
-}
-
-DcmdFix(text[], size)
-{
-	new fixed[128];
-	strmid(fixed, text, 0, 128, 128);
-	
-	new endreplacing;
-	
-	for( new i; i < size; i++ )
-	{
-		if(endreplacing == 0)
-		{
-			switch( fixed[i] )
-			{
-				case 'ü','Ü': fixed[i] = 'y';
-				case 'õ','Õ': fixed[i] = '6';
-				case 'ö','Ö': fixed[i] = '8';
-				case 'ä','Ä': fixed[i] = '2';
-			}
-			if(fixed[i+1] == ' ' || fixed[i+1] == '\0') endreplacing = 1;
-		}
-		if(endreplacing == 1)
-		{
-			return fixed;	
-		}
-	}
-	return fixed;
 }
 
 stock showAdminDialog(playerid)
@@ -1332,6 +1305,24 @@ COMMAND:td(playerid, params[])
 	return 1;
 }
 
+COMMAND:afk(playerid, params[])
+{
+	if(pInfo[playerid][AFK])
+	{
+		pInfo[playerid][AFK] = false;
+		SetPlayerColor(playerid, PLAYER_COLOR);
+	}
+	else
+	{
+		pInfo[playerid][AFK] = true;
+		SetPlayerColor(playerid, COLOR_AFK);
+	}
+	PlayerStatusChange(playerid, ((pInfo[playerid][AFK])?STATUS_AFK:STATUS_NONE));	
+	TogglePlayerControllableEx(playerid, ((pInfo[playerid][AFK])?0:1), -1);
+	SendFormattedText(playerid, COLOR_GREEN, LANG_AFK, ((pInfo[playerid][AFK])?("oled nüüd"):("ei ole enam")));
+	return 1;
+}
+
 // AJUTISED
 COMMAND:kaklus(playerid, params[])
 {
@@ -1406,7 +1397,24 @@ COMMAND:pasad(playerid, params[])
 
 COMMAND:ajaleht(playerid, params[])
 {
-	ShowNewsPaper(playerid, 0);
+	new id = 0;
+	if(sscanf(params, "i", id)) id = 0;
+	
+	new ret = ShowNewsPaper(playerid, id);
+	SendFormattedText(playerid, COLOR_ADMINCHAT, "ID: %d Ret %d", id, ret);
+	return 1;
+}
+
+COMMAND:epicownage(playerid, params[])
+{
+	if(WritePaper(playerid))
+	{
+		SendClientMessage(playerid, COLOR_GREEN, LANG_WRITE_HEADLINE);
+	}
+	else
+	{
+		SendClientMessage(playerid, COLOR_GREEN, LANG_SOME_ERROR);
+	}	
 	return 1;
 }
 

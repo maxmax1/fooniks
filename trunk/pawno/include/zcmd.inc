@@ -14,8 +14,8 @@
 #define MAX_FUNC_NAME (32)
 
 #define COMMAND:%1(%2)          \
-			forward cmd_%1(%2); \
-			public cmd_%1(%2)		
+forward cmd_%1(%2); \
+public cmd_%1(%2)		
 			
 #define CMD:%1(%2) \
 			COMMAND:%1(%2)
@@ -31,6 +31,34 @@
 				((!(%1[0])) || (((%1[0]) == '\1') && (!(%1[1]))))
 #endif
 
+			
+DcmdFix(text[], size)
+{
+	new fixed[128];
+	strmid(fixed, text, 0, 128, 128);
+	
+	new endreplacing;
+	
+	for( new i; i < size; i++ )
+	{
+		if(endreplacing == 0)
+		{
+			switch( fixed[i] )
+			{
+				case 'ü','Ü': fixed[i] = 'y';
+				case 'õ','Õ': fixed[i] = '6';
+				case 'ö','Ö': fixed[i] = '8';
+				case 'ä','Ä': fixed[i] = '2';
+			}
+			if(fixed[i+1] == ' ' || fixed[i+1] == '\0') endreplacing = 1;
+		}
+		if(endreplacing == 1)
+		{
+			return fixed;	
+		}
+	}
+	return fixed;
+}
 
 forward OnPlayerCommandReceived(playerid, cmdtext[]); 
 forward OnPlayerCommandPerformed(playerid, cmdtext[], success); 
