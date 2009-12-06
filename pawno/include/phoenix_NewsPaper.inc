@@ -35,11 +35,19 @@
 		
 */
 
+/*
+*    DEFINES
+*/
+
 #define NEWSPAPERBACK 0x000000AA
 
 #define FRONT_PAGE 0
 
-#define MAX_NEWSPAPERS 3
+#define MAX_NEWSPAPERS 10
+
+/*
+*    GLOBALS
+*/
 
 new paperActive[MAX_PLAYERS];
 new paperDrawActive[MAX_PLAYERS];
@@ -79,15 +87,62 @@ enum newsInf
 };
 new NewsPapers[MAX_NEWSPAPERS][newsInf];
 
+enum writeInf
+{
+	bool: isWriting,
+	writerId,
+	writingStatus,
+	headline[32],
+	article1[256],
+	article2[256],
+	article3[256],
+	article4[256],	
+	add1[256],
+	add2[256],
+	add3[256],
+	add4[256]	
+};
+new PaperWriter[writeInf] = {false, -1, 0, "_", "_", "_", "_", "_", "_", "_", "_", "_"};
+
+/*
+*    FORWARDS
+*/
+
 forward ShowNewsPaper(playerid, paperid);
 forward HideNewsPaper(playerid, page);
 forward CreatePaperDraw(paperid);
 forward LoadNewsPapers();
+forward WritePaper(playerid);
+forward AddNewsPaper(head_line[], block_1[], block_2[], block_3[], block_4[], add_1[], add_2[], add_3[], add_4[]);
 
+/*
+*    ALS Next Ones
+*/
 forward NewsPaper_OnGameModeInit();
 forward NP_OnPlayerKeyStateChange(playerid, newkeys, oldkeys);
 forward NP_OnPlayerConnect(playerid);
 forward NP_OnPlayerDisconnect(playerid);
+forward NP_OnPlayerText(playerid, text[]);
+
+/*
+*    STOCKS
+*/
+
+stock findFreePaperDraw()
+{
+	for(new i = 0; i < 50; i++)
+	{
+		if(!NewsDraw[i][used])
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+/*
+*    PUBLICS
+*/
  
 public ShowNewsPaper(playerid, paperid)
 {
@@ -244,22 +299,10 @@ public CreatePaperDraw(paperid)
 	TextDrawSetProportional(NewsDraw[paperid][Text6], true);
 }
 
-stock findFreePaperDraw()
-{
-	for(new i = 0; i < 50; i++)
-	{
-		if(!NewsDraw[i][used])
-		{
-			return i;
-		}
-	}
-	return -1;
-}
-
 public LoadNewsPapers()
 {
 	new string[64];
-	format(string, 64, "SELECT * FROM %sNewsPaper ORDER BY date DESC LIMIT %d", MYSQL_PREFIX, MAX_NEWSPAPERS-1);
+	format(string, 64, "SELECT * FROM %sNewsPaper ORDER BY id ASC LIMIT %d", MYSQL_PREFIX, MAX_NEWSPAPERS-1);
 	
 	mysql_query(string);
 	mysql_store_result();
@@ -320,6 +363,76 @@ public LoadNewsPapers()
 	mysql_free_result();
 }
 
+public WritePaper(playerid)
+{
+	if(PaperWriter[isWriting])
+	{
+		return 0;
+	}
+	
+	PaperWriter[isWriting] = true;
+	PaperWriter[writerId] = playerid;
+	PaperWriter[writingStatus] = 0;	
+	return 1;
+}
+
+public AddNewsPaper(head_line[], block_1[], block_2[], block_3[], block_4[], add_1[], add_2[], add_3[], add_4[])
+{
+	mysql_real_escape_string(head_line, head_line);
+	mysql_real_escape_string(block_1, block_1);
+	mysql_real_escape_string(block_2, block_2);
+	mysql_real_escape_string(block_3, block_3);
+	mysql_real_escape_string(block_4, block_4);
+	
+	mysql_real_escape_string(add_1, add_1);
+	mysql_real_escape_string(add_2, add_2);
+	mysql_real_escape_string(add_3, add_3);
+	mysql_real_escape_string(add_4, add_4);
+
+	new string[1024];
+	
+	// Insert some stuff.
+	format(string, 1024, "INSERT INTO %sNewsPaper(id, headLine, Block1, Block2, Block3) VALUES(NULL, '%s', '%s', '%s', '%s')", MYSQL_PREFIX, head_line, block_1, block_2, block_3);
+	if(mysql_query(string))
+	{	
+		// Get The Added ID.
+		new tempSqlID = mysql_insert_id();
+		
+		// Set The aditional values.
+		format(string, 1024, "UPDATE %sNewsPaper SET Block4 = '%s', Add1 = '%s', Add2 = '%s' WHERE id = '%d'", MYSQL_PREFIX, block_4, add_1, add_2, tempSqlID);
+		mysql_query(string);
+		
+		format(string, 768, "UPDATE %sNewsPaper SET Add3 = '%s', Add4 = '%s' WHERE id = '%d'", MYSQL_PREFIX, add_3, add_4, tempSqlID);
+		mysql_query(string);
+		
+		// Get The stats from stat querys.
+		format(string, 64, "SELECT SUM( money )  FROM `%scharacters`", MYSQL_PREFIX);
+		mysql_query(string);
+		mysql_store_result();
+		new stat_1 = mysql_fetch_int();
+		mysql_free_result();
+		
+		format(string, 128, "SELECT COUNT( * )  FROM `%scharacters`  WHERE UNIX_TIMESTAMP( ) - UNIX_TIMESTAMP( `regDate` ) < 166400", MYSQL_PREFIX);
+		mysql_query(string);
+		mysql_store_result();
+		new stat_2 = mysql_fetch_int();
+		mysql_free_result();
+		
+		format(string, 90, "SELECT id FROM `%scharacters`  ORDER BY UNIX_TIMESTAMP( regDate ) ASC LIMIT 1", MYSQL_PREFIX);
+		mysql_query(string);
+		mysql_store_result();
+		new stat_3 = mysql_fetch_int();
+		mysql_free_result();
+		
+		format(string, 128, "UPDATE %sNewsPaper SET stat1 = '%d', stat2 = '%d', stat3 = '%d' WHERE id = '%d'", MYSQL_PREFIX, stat_1, stat_2, stat_3, tempSqlID);
+		mysql_query(string);
+		
+		LoadNewsPapers();
+		return 1;
+	}
+	return 0;
+}
+
 /*
 *    Silent Implentation
 */
@@ -372,7 +485,6 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
     return 1;
 }
 
-
 public OnPlayerConnect(playerid)
 {
 	HideNewsPaper(playerid, true);
@@ -390,9 +502,176 @@ public OnPlayerDisconnect(playerid)
 	HideNewsPaper(playerid, true);
 	paperActive[playerid] = -1;
 	
+	if(PaperWriter[isWriting] && PaperWriter[writerId] == playerid)
+	{
+		PaperWriter[isWriting] = false;
+		PaperWriter[writerId] = -1;
+		format(PaperWriter[article1], 32, "_");
+		format(PaperWriter[article2], 32, "_");
+		format(PaperWriter[article3], 32, "_");
+		format(PaperWriter[article4], 32, "_");
+	}
+	
     if (funcidx("NP_OnPlayerDisconnect") != -1)
     {
         return CallLocalFunction("NP_OnPlayerDisconnect", "i", playerid);
+    }
+    return 1;
+}
+
+public OnPlayerText(playerid, text[])
+{
+	if(PaperWriter[isWriting] && PaperWriter[writerId] == playerid)
+	{
+		new txtLen = strlen(text);
+
+		if(!strcmp("edasi", text, true, strlen("edasi")))
+		{
+			if(PaperWriter[writingStatus] == 0)
+			{
+				SendClientMessage(playerid, COLOR_RED, LANG_MUST_WRITE_HEADLINE);
+				return 0;
+			}
+			PaperWriter[writingStatus]++;
+			SendClientMessage(playerid, COLOR_GREEN, LANG_SKIP_ARTICLE);
+			SendFormattedText(playerid, COLOR_GREEN, LANG_WRITE_ARTICLE, PaperWriter[writingStatus]);
+			if(PaperWriter[writingStatus] < 5) return 0;
+		}
+		
+		if(PaperWriter[writingStatus] == 0)
+		{
+			format(PaperWriter[headline], 32, "%s", text);
+			if(txtLen > 32)
+			{
+				SendClientMessage(playerid, COLOR_RED, LANG_WARNING_TURNCATE);
+			}
+			SendClientMessage(playerid, COLOR_GREEN, LANG_SHOW_HEADLINE);
+			SendClientMessage(playerid, COLOR_GREEN, PaperWriter[headline]);
+			PaperWriter[writingStatus]++;
+			SendFormattedText(playerid, COLOR_GREEN, LANG_WRITE_ARTICLE, PaperWriter[writingStatus]);
+		}
+		else if(PaperWriter[writingStatus] == 1)
+		{
+			if(strlen(PaperWriter[article1]) == 1)
+			{
+				format(PaperWriter[article1], 250, "%s", text);
+			}
+			else
+			{
+				format(PaperWriter[article1], 250, "%s%s", PaperWriter[article1], text);
+			}
+			
+			if(txtLen > 250)
+			{
+				SendClientMessage(playerid, COLOR_RED, LANG_WARNING_TURNCATE);
+				SendClientMessage(playerid, COLOR_GREEN, LANG_SHOW_ARTICLE);
+				SendClientMessage(playerid, COLOR_GREEN, PaperWriter[article1]);
+				PaperWriter[writingStatus]++;
+				SendFormattedText(playerid, COLOR_GREEN, LANG_WRITE_ARTICLE, PaperWriter[writingStatus]+1);
+			}
+			else
+			{
+				new leftChars = 250 - txtLen;
+				SendFormattedText(playerid, COLOR_YELLOW, "Teade: Sellese lõiku mahub veel %d tähemärki.", leftChars);
+				SendClientMessage(playerid, COLOR_YELLOW, "Kirjuta: \"edasi\", et järgmisesse lõiku kirjutada.");
+			}
+		}
+		else if(PaperWriter[writingStatus] == 2)
+		{
+			if(strlen(PaperWriter[article2]) == 1)
+			{
+				format(PaperWriter[article2], 250, "%s", text);
+			}
+			else
+			{
+				format(PaperWriter[article2], 250, "%s%s", PaperWriter[article2], text);
+			}
+			
+			if(txtLen > 250)
+			{
+				SendClientMessage(playerid, COLOR_RED, LANG_WARNING_TURNCATE);
+				SendClientMessage(playerid, COLOR_GREEN, LANG_SHOW_ARTICLE);
+				SendClientMessage(playerid, COLOR_GREEN, PaperWriter[article2]);
+				PaperWriter[writingStatus]++;
+				SendFormattedText(playerid, COLOR_GREEN, LANG_WRITE_ARTICLE, PaperWriter[writingStatus]);
+			}
+			else
+			{
+				new leftChars = 250 - txtLen;
+				SendFormattedText(playerid, COLOR_YELLOW, "Teade: Sellese lõiku mahub veel %d tähemärki.", leftChars);
+				SendClientMessage(playerid, COLOR_YELLOW, "Kirjuta: \"edasi\", et järgmisesse lõiku kirjutada.");
+			}
+		}
+		else if(PaperWriter[writingStatus] == 3)
+		{
+			if(strlen(PaperWriter[article3]) == 1)
+			{
+				format(PaperWriter[article3], 250, "%s", text);
+			}
+			else
+			{
+				format(PaperWriter[article3], 250, "%s%s", PaperWriter[article3], text);
+			}
+			
+			if(txtLen > 250)
+			{
+				SendClientMessage(playerid, COLOR_RED, LANG_WARNING_TURNCATE);
+				SendClientMessage(playerid, COLOR_GREEN, LANG_SHOW_ARTICLE);
+				SendClientMessage(playerid, COLOR_GREEN, PaperWriter[article3]);
+				PaperWriter[writingStatus]++;
+				SendFormattedText(playerid, COLOR_GREEN, LANG_WRITE_ARTICLE, PaperWriter[writingStatus]);
+			}
+			else
+			{
+				new leftChars = 250 - txtLen;
+				SendFormattedText(playerid, COLOR_YELLOW, "Teade: Sellese lõiku mahub veel %d tähemärki.", leftChars);
+				SendClientMessage(playerid, COLOR_YELLOW, "Kirjuta: \"edasi\", et järgmisesse lõiku kirjutada.");
+			}
+		}
+		else if(PaperWriter[writingStatus] == 4)
+		{
+			if(strlen(PaperWriter[article4]) == 1)
+			{
+				format(PaperWriter[article4], 250, "%s", text);
+			}
+			else
+			{
+				format(PaperWriter[article4], 250, "%s%s", PaperWriter[article4], text);
+			}
+			
+			if(txtLen > 250)
+			{
+				SendClientMessage(playerid, COLOR_RED, LANG_WARNING_TURNCATE);
+				SendClientMessage(playerid, COLOR_GREEN, LANG_SHOW_ARTICLE);
+				SendClientMessage(playerid, COLOR_GREEN, PaperWriter[article4]);
+				PaperWriter[writingStatus]++;
+			}
+			else
+			{
+				new leftChars = 250 - txtLen;
+				SendFormattedText(playerid, COLOR_YELLOW, "Teade: Sellese lõiku mahub veel %d tähemärki.", leftChars);
+				SendClientMessage(playerid, COLOR_YELLOW, "Kirjuta: \"edasi\", et järgmisesse lõiku kirjutada.");
+			}
+		}
+		if(PaperWriter[writingStatus] > 4)
+		{			
+			AddNewsPaper(PaperWriter[headline], PaperWriter[article1], PaperWriter[article2], PaperWriter[article3], PaperWriter[article4], "_", "_", "_", "_");
+			SendClientMessage(playerid, COLOR_YELLOW, "TEHTUD!");
+			
+			PaperWriter[isWriting] = false;
+			PaperWriter[writerId] = -1;
+			format(PaperWriter[article1], 32, "_");
+			format(PaperWriter[article2], 32, "_");
+			format(PaperWriter[article3], 32, "_");
+			format(PaperWriter[article4], 32, "_");
+		}
+		
+		return 0;
+	}
+	
+    if (funcidx("NP_OnPlayerText") != -1)
+    {
+        return CallLocalFunction("NP_OnPlayerText", "is", playerid, text);
     }
     return 1;
 }
@@ -424,3 +703,10 @@ public OnPlayerDisconnect(playerid)
     #define _ALS_OnPlayerDisconnect
 #endif
 #define OnPlayerDisconnect NP_OnPlayerDisconnect
+
+#if defined _ALS_OnPlayerText
+    #undef OnPlayerText
+#else
+    #define _ALS_OnPlayerText
+#endif
+#define OnPlayerText NP_OnPlayerText

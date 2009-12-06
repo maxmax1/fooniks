@@ -138,6 +138,7 @@ public HelpDrawHide(playerid, drawId)
 
 public SmallHelpDrawShow(playerid, helpText[], timer)
 {
+	if(gPlayerSmDraw[playerid] != -1) return 0;
 	if(timer < 1000) timer = 1000;
 	
 	new foundId = -1;

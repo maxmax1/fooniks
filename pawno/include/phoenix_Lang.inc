@@ -62,3 +62,21 @@
 #define LANG_TELEPORTED_TO "Teleported to %s."
 
 #define LANG_WAIT "Palun oota..."
+
+#define LANG_SOME_ERROR "Ups, see on nüüd küll piinlik. Juhtus mingi viga."
+#define LANG_WARNING_TURNCATE "Hoiatus: Teie sisestatud teksti lõigati lühemaks."
+
+/*
+*    NewsPaper
+*/
+#define LANG_WRITE_HEADLINE "Kirjuta lehe pealkiri."
+#define LANG_WRITE_ARTICLE "Kirjuta lehe lõik %d."
+#define LANG_SHOW_HEADLINE "*** Pealkiri:"
+#define LANG_SHOW_ARTICLE "*** Lõik:"
+#define LANG_SKIP_ARTICLE "Jätsid selle lõigu vahele."
+#define LANG_MUST_WRITE_HEADLINE "Pealkirja kirjutamine on kohustuslik."
+
+/*
+*    AFK
+*/
+#define LANG_AFK "Sa %s AFK."

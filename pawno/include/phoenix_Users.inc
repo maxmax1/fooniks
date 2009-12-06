@@ -66,6 +66,8 @@ enum pInf
 	bool: pResting,
 	pRestingAt,
 	
+	bool: AFK,
+	
 	pControllable
 };
 new pInfo[MAX_PLAYERS][pInf];

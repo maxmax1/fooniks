@@ -23,1092 +23,1098 @@
 	#endinput
 #endif
 
+#if !defined _zcmd_included
+	#error "Phoenix ERROR #2, You need zcmd for animations to work!"
+	#endinput
+#endif
+
 #define COLOR_ANIMS 0x33AA33AA
-#define animCmd(%0,%1,%2,%3,%4,%5,%6) if(!strcmp(DcmdFix( (%6)[1], strlen((%6)[1]) ),#%0,true)) return  ApplyAnimation(playerid,%1,%2,1.0,%3,%4,%4,0,%5)
-#define animStop(%0,%1) if(!strcmp(DcmdFix( (%1)[1], strlen((%1)[1]) ),#%0,true)) return stopAnims(playerid)
-
-#define animHelper(%0,%1,%2) if(!strcmp(DcmdFix( (%2)[1], strlen((%2)[1]) ),#%0,true)) return SendClientMessage(playerid, COLOR_ANIMS, %1)
-
-public OnPlayerCommandText(playerid, cmdtext[])
-{
-	if(!strcmp("/animatsioonid", cmdtext,true))
-	{
-		SendClientMessage(playerid, COLOR_ANIMS, "/*** Phoenix Animatsioonid ***/");
-		SendClientMessage(playerid, COLOR_ANIMS, "/***       eRP Gaming      ***/");
-		
-		SendClientMessage(playerid, COLOR_ANIMS, "/* /lõpeta /istu /püsti /aken /lehvita /asuitseta /pese /ameedik /suudle /lama   */");		
-		SendClientMessage(playerid, COLOR_ANIMS, "/* /baar /paanika /jõuka /animpomm /atulista /kanna /aplayidle /apiljard /avaene */");		
-		SendClientMessage(playerid, COLOR_ANIMS, "/* /apyyton /arap /ariot /apank /aryder /asyga /apood /astripp /ap2evita /ament  */");		
-		SendClientMessage(playerid, COLOR_ANIMS, "/* /asweet /at2tuu /aspank /asuhuv6tt /akasiino /acrack /aurgas /apeakas /andiiler */");		
-		SendClientMessage(playerid, COLOR_ANIMS, "/* /apõikle /asöök /agäng /aisik /agkäed /asurnuaed /ajuuksur /arööv /akodu /akontor */");		
-		SendClientMessage(playerid, COLOR_ANIMS, "/* /aäri /asületants /amdend /amuu /aluure /apanused /apaulmac */");		
-		
-		SendClientMessage(playerid, COLOR_ANIMS, "/***          -|-          ***/");		
-		return 1;
-	}
-	
-	animCmd("pysti", "Attractors", "Stepsit_out", 0, 0, 0, cmdtext);
-	animCmd("aken", "AIRPORT", "thrw_barl_thrw", 1, 0, 2000, cmdtext);
-	animCmd("lehvita", "BD_FIRE", "BD_GF_Wave", 1, 0, 0, cmdtext);
-	animCmd("pese", "BD_FIRE", "wash_up", 1, 0, 0, cmdtext);
-	animCmd("ameedik", "MEDIC","CPR", 1, 0, 2000, cmdtext);	
-	animStop("l6peta", cmdtext);
-
-	animHelper("istu", "ISTU: /istu [1-2]", cmdtext);		
-	animCmd("istu 1", "Attractors", "Stepsit_loop", 1, 0, 0, cmdtext);
-	animCmd("istu 2", "BEACH", "bather", 1, 0, 0, cmdtext);	
-		
-	animHelper("suudle", "SUUDLE: /suudle [1-16]", cmdtext);				
-	animCmd("suudle 1", "BD_FIRE", "Playa_Kiss_03", 1, 0, 0, cmdtext);
-	animCmd("suudle 2", "KISSING","BD_GF_Wave", 1, 0, 2000, cmdtext);
-	animCmd("suudle 3", "KISSING","gfwave2", 1, 0, 2000, cmdtext);
-	animCmd("suudle 4", "KISSING","GF_CarArgue_01", 1, 0, 2000, cmdtext);
-	animCmd("suudle 5", "KISSING","GF_CarArgue_02", 1, 0, 2000, cmdtext);
-	animCmd("suudle 6", "KISSING","GF_CarSpot", 1, 0, 2000, cmdtext);
-	animCmd("suudle 7", "KISSING","GF_StreetArgue_01", 1, 0, 2000, cmdtext);
-	animCmd("suudle 8", "KISSING","GF_StreetArgue_02", 1, 0, 2000, cmdtext);
-	animCmd("suudle 9", "KISSING","gift_get", 1, 0, 2000, cmdtext);
-	animCmd("suudle 10", "KISSING","gift_give", 1, 0, 2000, cmdtext);
-	animCmd("suudle 11", "KISSING","Grlfrd_Kiss_01", 1, 0, 2000, cmdtext);
-	animCmd("suudle 12", "KISSING","Grlfrd_Kiss_02", 1, 0, 2000, cmdtext);
-	animCmd("suudle 13", "KISSING","Grlfrd_Kiss_03", 1, 0, 2000, cmdtext);
-	animCmd("suudle 14", "KISSING","Playa_Kiss_01", 1, 0, 2000, cmdtext);
-	animCmd("suudle 15", "KISSING","Playa_Kiss_02", 1, 0, 2000, cmdtext);
-	animCmd("suudle 16", "KISSING","Playa_Kiss_03", 1, 0, 2000, cmdtext);		
-	
-	animHelper("lama", "LAMA: /lama [1-3]", cmdtext);		
-	animCmd("lama 1", "BEACH", "Lay_Bac_Loop", 1, 0, 0, cmdtext);
-	animCmd("lama 2", "BEACH", "ParkSit_W_loop", 1, 0, 0, cmdtext);
-	animCmd("lama 3", "BEACH", "SitnWait_loop_W", 1, 0, 0, cmdtext);	
-	
-	animHelper("baar", "BAAR: /baar [1-12]", cmdtext);		
-	animCmd("baar 1", "BAR", "Barcustom_get", 1, 0, 2000, cmdtext);
-	animCmd("baar 2", "BAR", "Barcustom_loop", 1, 0, 0, cmdtext);
-	animCmd("baar 3", "BAR", "Barcustom_order", 1, 0, 2000, cmdtext);
-	animCmd("baar 4", "BAR", "Barserve_bottle", 1, 0, 2000, cmdtext);
-	animCmd("baar 5", "BAR", "Barserve_give", 1, 0, 2000, cmdtext);
-	animCmd("baar 6", "BAR", "Barserve_glass", 1, 0, 2000, cmdtext);
-	animCmd("baar 7", "BAR", "Barserve_in", 1, 0, 2000, cmdtext);
-	animCmd("baar 8", "BAR", "Barserve_loop", 1, 0, 0, cmdtext);
-	animCmd("baar 9", "BAR", "Barserve_order", 1, 0, 2000, cmdtext);
-	animCmd("baar 10", "BAR", "dnk_stndF_loop", 1, 0, 0, cmdtext);
-	animCmd("baar 11", "BAR", "dnk_stndM_loop", 1, 0, 0, cmdtext);
-	animCmd("baar 12", "BAR", "BARman_idle", 1, 0, 0, cmdtext);	
-	
-	animHelper("paanika", "PAANIKA: /paanika [1-5]", cmdtext);	
-	animCmd("paanika 1", "BD_FIRE", "BD_Panic_01", 1, 0, 2000, cmdtext);
-	animCmd("paanika 2", "BD_FIRE", "BD_Panic_02", 1, 0, 2000, cmdtext);
-	animCmd("paanika 3", "BD_FIRE", "BD_Panic_03", 1, 0, 2000, cmdtext);
-	animCmd("paanika 4", "BD_FIRE", "BD_Panic_04", 1, 0, 2000, cmdtext);
-	animCmd("paanika 5", "BD_FIRE", "BD_Panic_Loop", 1, 0, 0, cmdtext);
-
-	animHelper("j6uka", "JÕUKA: /jõuka [1-16]", cmdtext);	
-	animCmd("j6uka 1", "benchpress", "gym_bp_celebrate", 1, 0, 0, cmdtext);
-	animCmd("j6uka 2", "benchpress", "gym_bp_down", 1, 0, 0, cmdtext);
-	animCmd("j6uka 3", "benchpress", "gym_bp_getoff", 1, 0, 0, cmdtext);
-	animCmd("j6uka 4", "benchpress", "gym_bp_geton", 1, 0, 0, cmdtext);
-	animCmd("j6uka 5", "benchpress", "gym_bp_up_A", 1, 0, 0, cmdtext);
-	animCmd("j6uka 6", "benchpress", "gym_bp_up_B", 1, 0, 0, cmdtext);
-	animCmd("j6uka 7", "benchpress", "gym_bp_up_smooth", 1, 0, 0, cmdtext);
-	animCmd("j6uka 8", "Freeweights","gym_barbell", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 9", "Freeweights","gym_free_A", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 10", "Freeweights","gym_free_B", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 11", "Freeweights","gym_free_celebrate", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 12", "Freeweights","gym_free_down", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 13", "Freeweights","gym_free_loop", 1, 0, 0, cmdtext);
-	animCmd("j6uka 14", "Freeweights","gym_free_pickup", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 15", "Freeweights","gym_free_putdown", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 16", "Freeweights","gym_free_up_smooth", 1, 0, 2000, cmdtext);	
-	animCmd("j6uka 17", "GYMNASIUM","GYMshadowbox", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 18", "GYMNASIUM","gym_bike_celebrate", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 19", "GYMNASIUM","gym_bike_fast", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 20", "GYMNASIUM","gym_bike_faster", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 21", "GYMNASIUM","gym_bike_getoff", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 22", "GYMNASIUM","gym_bike_geton", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 23", "GYMNASIUM","gym_bike_pedal", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 24", "GYMNASIUM","gym_bike_slow", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 25", "GYMNASIUM","gym_bike_still", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 26", "GYMNASIUM","gym_jog_falloff", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 27", "GYMNASIUM","gym_shadowbox", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 28", "GYMNASIUM","gym_tread_celebrate", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 29", "GYMNASIUM","gym_tread_falloff", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 30", "GYMNASIUM","gym_tread_getoff", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 31", "GYMNASIUM","gym_tread_geton", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 32", "GYMNASIUM","gym_tread_jog", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 33", "GYMNASIUM","gym_tread_sprint", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 34", "GYMNASIUM","gym_tread_tired", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 35", "GYMNASIUM","gym_tread_walk", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 36", "GYMNASIUM","gym_walk_falloff", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 37", "GYMNASIUM","Pedals_fast", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 38", "GYMNASIUM","Pedals_med", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 39", "GYMNASIUM","Pedals_slow", 1, 0, 2000, cmdtext);
-	animCmd("j6uka 40", "GYMNASIUM","Pedals_still", 1, 0, 2000, cmdtext);	
-
-	animHelper("animpomm", "ANIMPOMM: /animpomm [1-6]", cmdtext);	
-	animCmd("animpomm 1", "BOMBER", "BOM_Plant", 1, 0, 2000, cmdtext);
-	animCmd("animpomm 2", "BOMBER", "BOM_Plant_2Idle", 1, 0, 2000, cmdtext);
-	animCmd("animpomm 3", "BOMBER", "BOM_Plant_Crouch_In", 1, 0, 2000, cmdtext);
-	animCmd("animpomm 4", "BOMBER", "BOM_Plant_Crouch_Out", 1, 0, 2000, cmdtext);
-	animCmd("animpomm 5", "BOMBER", "BOM_Plant_In", 1, 0, 2000, cmdtext);
-	animCmd("animpomm 6", "BOMBER", "BOM_Plant_Loop", 1, 0, 0, cmdtext);
-	
-	animHelper("atulista", "ATULISTA: /atulista [1-5]", cmdtext);		
-	animCmd("atulista 1", "BUDDY","buddy_crouchfire", 1, 0, 2000, cmdtext);
-	animCmd("atulista 2", "BUDDY","buddy_crouchreload", 1, 0, 2000, cmdtext);
-	animCmd("atulista 3", "BUDDY","buddy_fire", 1, 0, 2000, cmdtext);
-	animCmd("atulista 4", "BUDDY","buddy_fire_poor", 1, 0, 2000, cmdtext);
-	animCmd("atulista 5", "BUDDY","buddy_reload", 1, 0, 2000, cmdtext);
-
-	animHelper("kanna", "KANNA: /kanna [1-7]", cmdtext);		
-	animCmd("kanna 1", "CARRY","crry_prtial", 1, 0, 2000, cmdtext);
-	animCmd("kanna 2", "CARRY","liftup", 1, 0, 2000, cmdtext);
-	animCmd("kanna 3", "CARRY","liftup05", 1, 0, 2000, cmdtext);
-	animCmd("kanna 4", "CARRY","liftup105", 1, 0, 2000, cmdtext);
-	animCmd("kanna 5", "CARRY","putdwn", 1, 0, 2000, cmdtext);
-	animCmd("kanna 6", "CARRY","putdwn05", 1, 0, 2000, cmdtext);
-	animCmd("kanna 7", "CARRY","putdwn105", 1, 0, 2000, cmdtext);	
-	
-	animHelper("aplayidle", "APLAYIDLE: /aplayidle [1-5]", cmdtext);			
-	animCmd("aplayidle 1", "PLAYIDLES","shift", 1, 0, 2000, cmdtext);
-	animCmd("aplayidle 2", "PLAYIDLES","shldr", 1, 0, 2000, cmdtext);
-	animCmd("aplayidle 3", "PLAYIDLES","stretch", 1, 0, 2000, cmdtext);
-	animCmd("aplayidle 4", "PLAYIDLES","strleg", 1, 0, 2000, cmdtext);
-	animCmd("aplayidle 5", "PLAYIDLES","time", 1, 0, 2000, cmdtext);
-	
-	animHelper("apiljard", "APILJARD: /apiljard [1-21]", cmdtext);			
-	animCmd("apiljard 1", "POOL","POOL_ChalkCue", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 2", "POOL","POOL_Idle_Stance", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 3", "POOL","POOL_Long_Shot", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 4", "POOL","POOL_Long_Shot_O", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 5", "POOL","POOL_Long_Start", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 6", "POOL","POOL_Long_Start_O", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 7", "POOL","POOL_Med_Shot", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 8", "POOL","POOL_Med_Shot_O", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 9", "POOL","POOL_Med_Start", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 10", "POOL","POOL_Med_Start_O", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 11", "POOL","POOL_Place_White", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 12", "POOL","POOL_Short_Shot", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 13", "POOL","POOL_Short_Shot_O", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 14", "POOL","POOL_Short_Start", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 15", "POOL","POOL_Short_Start_O", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 16", "POOL","POOL_Walk", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 17", "POOL","POOL_Walk_Start", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 18", "POOL","POOL_XLong_Shot", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 19", "POOL","POOL_XLong_Shot_O", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 20", "POOL","POOL_XLong_Start", 1, 0, 2000, cmdtext);
-	animCmd("apiljard 21", "POOL","POOL_XLong_Start_O", 1, 0, 2000, cmdtext);
-
-	animCmd("avaene", "POOR","WINWASH_Wash2Beg", 1, 0, 2000, cmdtext);
-
-	animHelper("apyyton", "APÜÜTON: /apüüton [1-5]", cmdtext);			
-	animCmd("apyyton 1", "PYTHON","python_crouchfire", 1, 0, 2000, cmdtext);
-	animCmd("apyyton 2", "PYTHON","python_crouchreload", 1, 0, 2000, cmdtext);
-	animCmd("apyyton 3", "PYTHON","python_fire", 1, 0, 2000, cmdtext);
-	animCmd("apyyton 4", "PYTHON","python_fire_poor", 1, 0, 2000, cmdtext);
-	animCmd("apyyton 5", "PYTHON","python_reload", 1, 0, 2000, cmdtext);
-
-	animHelper("arap", "ARAP: /arap [1-8]", cmdtext);			
-	animCmd("arap 1", "RAPPING","Laugh_01", 1, 0, 2000, cmdtext);
-	animCmd("arap 2", "RAPPING","RAP_A_IN", 1, 0, 2000, cmdtext);
-	animCmd("arap 3", "RAPPING","RAP_A_Loop", 1, 0, 0, cmdtext);
-	animCmd("arap 4", "RAPPING","RAP_A_OUT", 1, 0, 2000, cmdtext);
-	animCmd("arap 5", "RAPPING","RAP_B_IN", 1, 0, 2000, cmdtext);
-	animCmd("arap 6", "RAPPING","RAP_B_Loop", 1, 0, 0, cmdtext);
-	animCmd("arap 7", "RAPPING","RAP_B_OUT", 1, 0, 2000, cmdtext);
-	animCmd("arap 8", "RAPPING","RAP_C_Loop", 1, 0, 0, cmdtext);
-
-	animHelper("ariot", "ARIOT: /ariot [1-7]", cmdtext);			
-	animCmd("ariot 1", "RIOT","RIOT_ANGRY", 1, 0, 2000, cmdtext);
-	animCmd("ariot 2", "RIOT","RIOT_ANGRY_B", 1, 0, 2000, cmdtext);
-	animCmd("ariot 3", "RIOT","RIOT_challenge", 1, 0, 2000, cmdtext);
-	animCmd("ariot 4", "RIOT","RIOT_CHANT", 1, 0, 2000, cmdtext);
-	animCmd("ariot 5", "RIOT","RIOT_FUKU", 1, 0, 2000, cmdtext);
-	animCmd("ariot 6", "RIOT","RIOT_PUNCHES", 1, 0, 2000, cmdtext);
-	animCmd("ariot 7", "RIOT","RIOT_shout", 1, 0, 2000, cmdtext);
-
-	animHelper("apank", "APANK: /apank [1-5]", cmdtext);			
-	animCmd("apank 1", "ROB_BANK","CAT_Safe_End", 1, 0, 2000, cmdtext);
-	animCmd("apank 2", "ROB_BANK","CAT_Safe_Open", 1, 0, 2000, cmdtext);
-	animCmd("apank 3", "ROB_BANK","CAT_Safe_Open_O", 1, 0, 2000, cmdtext);
-	animCmd("apank 4", "ROB_BANK","CAT_Safe_Rob", 1, 0, 2000, cmdtext);
-	animCmd("apank 5", "ROB_BANK","SHP_HandsUp_Scr", 1, 0, 2000, cmdtext);
-
-	animHelper("aryder", "ARYDER: /aryder [1-5]", cmdtext);			
-	animCmd("aryder 1", "RYDER","RYD_Beckon_01", 1, 0, 2000, cmdtext);
-	animCmd("aryder 2", "RYDER","RYD_Beckon_02", 1, 0, 2000, cmdtext);
-	animCmd("aryder 3", "RYDER","RYD_Beckon_03", 1, 0, 2000, cmdtext);
-	animCmd("aryder 4", "RYDER","RYD_Die_PT1", 1, 0, 2000, cmdtext);
-	animCmd("aryder 5", "RYDER","RYD_Die_PT2", 1, 0, 2000, cmdtext);
-	animCmd("aryder 6", "RYDER","Van_Crate_L", 1, 0, 2000, cmdtext);
-	animCmd("aryder 7", "RYDER","Van_Crate_R", 1, 0, 2000, cmdtext);
-	animCmd("aryder 8", "RYDER","Van_Fall_L", 1, 0, 2000, cmdtext);
-	animCmd("aryder 9", "RYDER","Van_Fall_R", 1, 0, 2000, cmdtext);
-	animCmd("aryder 10", "RYDER","Van_Lean_L", 1, 0, 2000, cmdtext);
-	animCmd("aryder 11", "RYDER","Van_Lean_R", 1, 0, 2000, cmdtext);
-	animCmd("aryder 12", "RYDER","VAN_PickUp_E", 1, 0, 2000, cmdtext);
-	animCmd("aryder 13", "RYDER","VAN_PickUp_S", 1, 0, 2000, cmdtext);
-	animCmd("aryder 14", "RYDER","Van_Stand", 1, 0, 2000, cmdtext);
-	animCmd("aryder 15", "RYDER","Van_Stand_Crate", 1, 0, 2000, cmdtext);
-	animCmd("aryder 16", "RYDER","Van_Throw", 1, 0, 2000, cmdtext);
-
-	animHelper("asyga", "ASÜGA: /asüga [1-12]", cmdtext);			
-	animCmd("asyga 1", "SCRATCHING","scdldlp", 1, 0, 2000, cmdtext);
-	animCmd("asyga 2", "SCRATCHING","scdlulp", 1, 0, 2000, cmdtext);
-	animCmd("asyga 3", "SCRATCHING","scdrdlp", 1, 0, 2000, cmdtext);
-	animCmd("asyga 4", "SCRATCHING","scdrulp", 1, 0, 2000, cmdtext);
-	animCmd("asyga 5", "SCRATCHING","sclng_l", 1, 0, 2000, cmdtext);
-	animCmd("asyga 6", "SCRATCHING","sclng_r", 1, 0, 2000, cmdtext);
-	animCmd("asyga 7", "SCRATCHING","scmid_l", 1, 0, 2000, cmdtext);
-	animCmd("asyga 8", "SCRATCHING","scmid_r", 1, 0, 2000, cmdtext);
-	animCmd("asyga 9", "SCRATCHING","scshrtl", 1, 0, 2000, cmdtext);
-	animCmd("asyga 10", "SCRATCHING","scshrtr", 1, 0, 2000, cmdtext);
-	animCmd("asyga 11", "SCRATCHING","sc_ltor", 1, 0, 2000, cmdtext);
-	animCmd("asyga 12", "SCRATCHING","sc_rtol", 1, 0, 2000, cmdtext);
-
-	animHelper("apood", "APOOD: /apood [1-25]", cmdtext);			
-	animCmd("apood 1", "SHOP","ROB_2Idle", 1, 0, 2000, cmdtext);
-	animCmd("apood 2", "SHOP","ROB_Loop", 1, 0, 0, cmdtext);
-	animCmd("apood 3", "SHOP","ROB_Loop_Threat", 1, 0, 0, cmdtext);
-	animCmd("apood 4", "SHOP","ROB_Shifty", 1, 0, 2000, cmdtext);
-	animCmd("apood 5", "SHOP","ROB_StickUp_In", 1, 0, 2000, cmdtext);
-	animCmd("apood 6", "SHOP","SHP_Duck", 1, 0, 2000, cmdtext);
-	animCmd("apood 7", "SHOP","SHP_Duck_Aim", 1, 0, 2000, cmdtext);
-	animCmd("apood 8", "SHOP","SHP_Duck_Fire", 1, 0, 2000, cmdtext);
-	animCmd("apood 9", "SHOP","SHP_Gun_Aim", 1, 0, 2000, cmdtext);
-	animCmd("apood 10", "SHOP","SHP_Gun_Duck", 1, 0, 2000, cmdtext);
-	animCmd("apood 11", "SHOP","SHP_Gun_Fire", 1, 0, 2000, cmdtext);
-	animCmd("apood 12", "SHOP","SHP_Gun_Grab", 1, 0, 2000, cmdtext);
-	animCmd("apood 13", "SHOP","SHP_Gun_Threat", 1, 0, 2000, cmdtext);
-	animCmd("apood 14", "SHOP","SHP_HandsUp_Scr", 1, 0, 2000, cmdtext);
-	animCmd("apood 15", "SHOP","SHP_Jump_Glide", 1, 0, 2000, cmdtext);
-	animCmd("apood 16", "SHOP","SHP_Jump_Land", 1, 0, 2000, cmdtext);
-	animCmd("apood 17", "SHOP","SHP_Jump_Launch", 1, 0, 2000, cmdtext);
-	animCmd("apood 18", "SHOP","SHP_Rob_GiveCash", 1, 0, 2000, cmdtext);
-	animCmd("apood 19", "SHOP","SHP_Rob_HandsUp", 1, 0, 2000, cmdtext);
-	animCmd("apood 20", "SHOP","SHP_Rob_React", 1, 0, 2000, cmdtext);
-	animCmd("apood 21", "SHOP","SHP_Serve_End", 1, 0, 2000, cmdtext);
-	animCmd("apood 22", "SHOP","SHP_Serve_Idle", 1, 0, 2000, cmdtext);
-	animCmd("apood 23", "SHOP","SHP_Serve_Loop", 1, 0, 0, cmdtext);
-	animCmd("apood 24", "SHOP","SHP_Serve_Start", 1, 0, 2000, cmdtext);
-	animCmd("apood 25", "SHOP","Smoke_RYD", 1, 0, 2000, cmdtext);
-	animCmd("apood 26", "INT_SHOP","shop_cashier", 1, 0, 2000, cmdtext);
-	animCmd("apood 27", "INT_SHOP","shop_in", 1, 0, 2000, cmdtext);
-	animCmd("apood 28", "INT_SHOP","shop_lookA", 1, 0, 2000, cmdtext);
-	animCmd("apood 29", "INT_SHOP","shop_lookB", 1, 0, 2000, cmdtext);
-	animCmd("apood 30", "INT_SHOP","shop_loop", 1, 0, 0, cmdtext);
-	animCmd("apood 31", "INT_SHOP","shop_out", 1, 0, 2000, cmdtext);
-	animCmd("apood 32", "INT_SHOP","shop_pay", 1, 0, 2000, cmdtext);
-	animCmd("apood 33", "INT_SHOP","shop_shelf", 1, 0, 2000, cmdtext);	
-
-	animHelper("asuitseta", "ASUITSETA: /asuitseta [1-9]", cmdtext);			
-	animCmd("asuitseta 1", "BD_FIRE", "M_smklean_loop", 1, 0, 0, cmdtext);		
-	animCmd("asuitseta 2", "SMOKING","M_smklean_loop", 1, 0, 0, cmdtext);
-	animCmd("asuitseta 3", "SMOKING","M_smkstnd_loop", 1, 0, 0, cmdtext);
-	animCmd("asuitseta 4", "SMOKING","M_smk_drag", 1, 0, 2000, cmdtext);
-	animCmd("asuitseta 5", "SMOKING","M_smk_in", 1, 0, 2000, cmdtext);
-	animCmd("asuitseta 6", "SMOKING","M_smk_loop", 1, 0, 0, cmdtext);
-	animCmd("asuitseta 7", "SMOKING","M_smk_out", 1, 0, 2000, cmdtext);
-	animCmd("asuitseta 8", "SMOKING","M_smk_tap", 1, 0, 2000, cmdtext);
-	animCmd("asuitseta 9", "SMOKING","F_smklean_loop", 1, 0, 0, cmdtext);	
-
-	animHelper("astripp", "ASTRIPP: /astripp [1-20]", cmdtext);			
-	animCmd("astripp 1", "STRIP","PLY_CASH", 1, 0, 2000, cmdtext);
-	animCmd("astripp 2", "STRIP","PUN_CASH", 1, 0, 2000, cmdtext);
-	animCmd("astripp 3", "STRIP","PUN_HOLLER", 1, 0, 2000, cmdtext);
-	animCmd("astripp 4", "STRIP","PUN_LOOP", 1, 0, 0, cmdtext);
-	animCmd("astripp 5", "STRIP","strip_A", 1, 0, 2000, cmdtext);
-	animCmd("astripp 6", "STRIP","strip_B", 1, 0, 2000, cmdtext);
-	animCmd("astripp 7", "STRIP","strip_C", 1, 0, 2000, cmdtext);
-	animCmd("astripp 8", "STRIP","strip_D", 1, 0, 2000, cmdtext);
-	animCmd("astripp 9", "STRIP","strip_E", 1, 0, 2000, cmdtext);
-	animCmd("astripp 10", "STRIP","strip_F", 1, 0, 2000, cmdtext);
-	animCmd("astripp 11", "STRIP","strip_G", 1, 0, 2000, cmdtext);
-	animCmd("astripp 12", "STRIP","STR_A2B", 1, 0, 2000, cmdtext);
-	animCmd("astripp 13", "STRIP","STR_B2A", 1, 0, 2000, cmdtext);
-	animCmd("astripp 14", "STRIP","STR_B2C", 1, 0, 2000, cmdtext);
-	animCmd("astripp 15", "STRIP","STR_C1", 1, 0, 2000, cmdtext);
-	animCmd("astripp 16", "STRIP","STR_C2", 1, 0, 2000, cmdtext);
-	animCmd("astripp 17", "STRIP","STR_C2B", 1, 0, 2000, cmdtext);
-	animCmd("astripp 18", "STRIP","STR_Loop_A", 1, 0, 0, cmdtext);
-	animCmd("astripp 19", "STRIP","STR_Loop_B", 1, 0, 0, cmdtext);
-	animCmd("astripp 20", "STRIP","STR_Loop_C", 1, 0, 0, cmdtext);
-
-	animHelper("ap2evita", "APÄEVITA: /apäevita [1-18]", cmdtext);			
-	animCmd("ap2evita 1 ", "SUNBATHE","batherdown", 1, 0, 2000, cmdtext);
-	animCmd("ap2evita 2", "SUNBATHE","batherup", 1, 0, 2000, cmdtext);
-	animCmd("ap2evita 3", "SUNBATHE","Lay_Bac_in", 1, 0, 2000, cmdtext);
-	animCmd("ap2evita 4", "SUNBATHE","Lay_Bac_out", 1, 0, 2000, cmdtext);
-	animCmd("ap2evita 5", "SUNBATHE","ParkSit_M_IdleA", 1, 0, 2000, cmdtext);
-	animCmd("ap2evita 6", "SUNBATHE","ParkSit_M_IdleB", 1, 0, 2000, cmdtext);
-	animCmd("ap2evita 7", "SUNBATHE","ParkSit_M_IdleC", 1, 0, 2000, cmdtext);
-	animCmd("ap2evita 8", "SUNBATHE","ParkSit_M_in", 1, 0, 2000, cmdtext);
-	animCmd("ap2evita 9", "SUNBATHE","ParkSit_M_out", 1, 0, 2000, cmdtext);
-	animCmd("ap2evita 10", "SUNBATHE","ParkSit_W_idleA", 1, 0, 2000, cmdtext);
-	animCmd("ap2evita 11", "SUNBATHE","ParkSit_W_idleB", 1, 0, 2000, cmdtext);
-	animCmd("ap2evita 12", "SUNBATHE","ParkSit_W_idleC", 1, 0, 2000, cmdtext);
-	animCmd("ap2evita 13", "SUNBATHE","ParkSit_W_in", 1, 0, 2000, cmdtext);
-	animCmd("ap2evita 14", "SUNBATHE","ParkSit_W_out", 1, 0, 2000, cmdtext);
-	animCmd("ap2evita 15", "SUNBATHE","SBATHE_F_LieB2Sit", 1, 0, 2000, cmdtext);
-	animCmd("ap2evita 16", "SUNBATHE","SBATHE_F_Out", 1, 0, 2000, cmdtext);
-	animCmd("ap2evita 17", "SUNBATHE","SitnWait_in_W", 1, 0, 2000, cmdtext);
-	animCmd("ap2evita 18", "SUNBATHE","SitnWait_out_W", 1, 0, 2000, cmdtext);
-
-	animHelper("ament", "AMENT: /ament [1-35]", cmdtext);			
-	animCmd("ament 1", "SWAT","gnstwall_injurd", 1, 0, 2000, cmdtext);
-	animCmd("ament 2", "SWAT","JMP_Wall1m_180", 1, 0, 2000, cmdtext);
-	animCmd("ament 3", "SWAT","Rail_fall", 1, 0, 2000, cmdtext);
-	animCmd("ament 4", "SWAT","Rail_fall_crawl", 1, 0, 2000, cmdtext);
-	animCmd("ament 5", "SWAT","swt_breach_01", 1, 0, 2000, cmdtext);
-	animCmd("ament 6", "SWAT","swt_breach_02", 1, 0, 2000, cmdtext);
-	animCmd("ament 7", "SWAT","swt_breach_03", 1, 0, 2000, cmdtext);
-	animCmd("ament 8", "SWAT","swt_go", 1, 0, 2000, cmdtext);
-	animCmd("ament 9", "SWAT","swt_lkt", 1, 0, 2000, cmdtext);
-	animCmd("ament 10", "SWAT","swt_sty", 1, 0, 2000, cmdtext);
-	animCmd("ament 11", "SWAT","swt_vent_01", 1, 0, 2000, cmdtext);
-	animCmd("ament 12", "SWAT","swt_vent_02", 1, 0, 2000, cmdtext);
-	animCmd("ament 13", "SWAT","swt_vnt_sht_die", 1, 0, 2000, cmdtext);
-	animCmd("ament 14", "SWAT","swt_vnt_sht_in", 1, 0, 2000, cmdtext);
-	animCmd("ament 15", "SWAT","swt_vnt_sht_loop", 1, 0, 0, cmdtext);
-	animCmd("ament 16", "SWAT","swt_wllpk_L", 1, 0, 2000, cmdtext);
-	animCmd("ament 17", "SWAT","swt_wllpk_L_back", 1, 0, 2000, cmdtext);
-	animCmd("ament 18", "SWAT","swt_wllpk_R", 1, 0, 2000, cmdtext);
-	animCmd("ament 19", "SWAT","swt_wllpk_R_back", 1, 0, 2000, cmdtext);
-	animCmd("ament 20", "SWAT","swt_wllshoot_in_L", 1, 0, 2000, cmdtext);
-	animCmd("ament 21", "SWAT","swt_wllshoot_in_R", 1, 0, 2000, cmdtext);
-	animCmd("ament 22", "SWAT","swt_wllshoot_out_L", 1, 0, 2000, cmdtext);
-	animCmd("ament 23", "SWAT","swt_wllshoot_out_R", 1, 0, 2000, cmdtext);
-	animCmd("ament 24", "COP_AMBIENT","Copbrowse_in", 1, 0, 2000, cmdtext);
-	animCmd("ament 25", "COP_AMBIENT","Copbrowse_loop", 1, 0, 0, cmdtext);
-	animCmd("ament 26", "COP_AMBIENT","Copbrowse_nod", 1, 0, 2000, cmdtext);
-	animCmd("ament 27", "COP_AMBIENT","Copbrowse_out", 1, 0, 2000, cmdtext);
-	animCmd("ament 28", "COP_AMBIENT","Copbrowse_shake", 1, 0, 2000, cmdtext);
-	animCmd("ament 29", "COP_AMBIENT","Coplook_in", 1, 0, 2000, cmdtext);
-	animCmd("ament 30", "COP_AMBIENT","Coplook_loop", 1, 0, 0, cmdtext);
-	animCmd("ament 31", "COP_AMBIENT","Coplook_nod", 1, 0, 2000, cmdtext);
-	animCmd("ament 32", "COP_AMBIENT","Coplook_out", 1, 0, 2000, cmdtext);
-	animCmd("ament 33", "COP_AMBIENT","Coplook_shake", 1, 0, 2000, cmdtext);
-	animCmd("ament 34", "COP_AMBIENT","Coplook_think", 1, 0, 2000, cmdtext);
-	animCmd("ament 35", "COP_AMBIENT","Coplook_watch", 1, 0, 2000, cmdtext);	
-
-	animHelper("asweet", "ASWEET: /asweet [1-7]", cmdtext);			
-	animCmd("asweet 1", "SWEET","ho_ass_slapped", 1, 0, 2000, cmdtext);
-	animCmd("asweet 2", "SWEET","LaFin_Player", 1, 0, 2000, cmdtext);
-	animCmd("asweet 3", "SWEET","LaFin_Sweet", 1, 0, 2000, cmdtext);
-	animCmd("asweet 4", "SWEET","plyr_hndshldr_01", 1, 0, 2000, cmdtext);
-	animCmd("asweet 5", "SWEET","sweet_ass_slap", 1, 0, 2000, cmdtext);
-	animCmd("asweet 6", "SWEET","sweet_hndshldr_01", 1, 0, 2000, cmdtext);
-	animCmd("asweet 7", "SWEET","Sweet_injuredloop", 1, 0, 0, cmdtext);
-
-	animHelper("at2tuu", "ATÄTUU: /atätuu [1-57]", cmdtext);			
-	animCmd("at2tuu 1", "TATTOOS","TAT_ArmL_In_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 2", "TATTOOS","TAT_ArmL_In_P", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 3", "TATTOOS","TAT_ArmL_In_T", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 4", "TATTOOS","TAT_ArmL_Out_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 5", "TATTOOS","TAT_ArmL_Out_P", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 6", "TATTOOS","TAT_ArmL_Out_T", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 7", "TATTOOS","TAT_ArmL_Pose_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 8", "TATTOOS","TAT_ArmL_Pose_P", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 9", "TATTOOS","TAT_ArmL_Pose_T", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 10", "TATTOOS","TAT_ArmR_In_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 11", "TATTOOS","TAT_ArmR_In_P", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 12", "TATTOOS","TAT_ArmR_In_T", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 13", "TATTOOS","TAT_ArmR_Out_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 14", "TATTOOS","TAT_ArmR_Out_P", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 15", "TATTOOS","TAT_ArmR_Out_T", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 16", "TATTOOS","TAT_ArmR_Pose_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 17", "TATTOOS","TAT_ArmR_Pose_P", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 18", "TATTOOS","TAT_ArmR_Pose_T", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 19", "TATTOOS","TAT_Back_In_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 20", "TATTOOS","TAT_Back_In_P", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 21", "TATTOOS","TAT_Back_In_T", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 22", "TATTOOS","TAT_Back_Out_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 23", "TATTOOS","TAT_Back_Out_P", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 24", "TATTOOS","TAT_Back_Out_T", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 25", "TATTOOS","TAT_Back_Pose_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 26", "TATTOOS","TAT_Back_Pose_P", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 27", "TATTOOS","TAT_Back_Pose_T", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 28", "TATTOOS","TAT_Back_Sit_In_P", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 29", "TATTOOS","TAT_Back_Sit_Loop_P", 1, 0, 0, cmdtext);
-	animCmd("at2tuu 30", "TATTOOS","TAT_Back_Sit_Out_P", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 31", "TATTOOS","TAT_Bel_In_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 32", "TATTOOS","TAT_Bel_In_T", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 33", "TATTOOS","TAT_Bel_Out_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 34", "TATTOOS","TAT_Bel_Out_T", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 35", "TATTOOS","TAT_Bel_Pose_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 36", "TATTOOS","TAT_Bel_Pose_T", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 37", "TATTOOS","TAT_Che_In_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 38", "TATTOOS","TAT_Che_In_P", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 39", "TATTOOS","TAT_Che_In_T", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 40", "TATTOOS","TAT_Che_Out_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 41", "TATTOOS","TAT_Che_Out_P", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 42", "TATTOOS","TAT_Che_Out_T", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 43", "TATTOOS","TAT_Che_Pose_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 44", "TATTOOS","TAT_Che_Pose_P", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 45", "TATTOOS","TAT_Che_Pose_T", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 46", "TATTOOS","TAT_Drop_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 47", "TATTOOS","TAT_Idle_Loop_O", 1, 0, 0, cmdtext);
-	animCmd("at2tuu 48", "TATTOOS","TAT_Idle_Loop_T", 1, 0, 0, cmdtext);
-	animCmd("at2tuu 49", "TATTOOS","TAT_Sit_In_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 50", "TATTOOS","TAT_Sit_In_P", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 51", "TATTOOS","TAT_Sit_In_T", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 52", "TATTOOS","TAT_Sit_Loop_O", 1, 0, 0, cmdtext);
-	animCmd("at2tuu 53", "TATTOOS","TAT_Sit_Loop_P", 1, 0, 0, cmdtext);
-	animCmd("at2tuu 54", "TATTOOS","TAT_Sit_Loop_T", 1, 0, 0, cmdtext);
-	animCmd("at2tuu 55", "TATTOOS","TAT_Sit_Out_O", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 56", "TATTOOS","TAT_Sit_Out_P", 1, 0, 2000, cmdtext);
-	animCmd("at2tuu 57", "TATTOOS","TAT_Sit_Out_T", 1, 0, 2000, cmdtext);
-
-	animHelper("aspank", "ASPANK: /aspank [1-8]", cmdtext);			
-	animCmd("aspank 1", "SNM","SPANKING_IDLEW", 1, 0, 2000, cmdtext);
-	animCmd("aspank 2", "SNM","SPANKING_IDLEP", 1, 0, 2000, cmdtext);
-	animCmd("aspank 3", "SNM","SPANKINGW", 1, 0, 2000, cmdtext);
-	animCmd("aspank 4", "SNM","SPANKINGP", 1, 0, 2000, cmdtext);
-	animCmd("aspank 5", "SNM","SPANKEDW", 1, 0, 2000, cmdtext);
-	animCmd("aspank 6", "SNM","SPANKEDP", 1, 0, 2000, cmdtext);
-	animCmd("aspank 7", "SNM","SPANKING_ENDW", 1, 0, 2000, cmdtext);
-	animCmd("aspank 8", "SNM","SPANKING_ENDP", 1, 0, 2000, cmdtext);
-
-	animHelper("asuhuv6tt", "ASUHUVÕTT: /asuhuvõtt [1-12]", cmdtext);			
-	animCmd("asuhuv6tt 1", "BLOWJOBZ","BJ_COUCH_START_P", 1, 0, 2000, cmdtext);
-	animCmd("asuhuv6tt 2", "BLOWJOBZ","BJ_COUCH_START_W", 1, 0, 2000, cmdtext);
-	animCmd("asuhuv6tt 3", "BLOWJOBZ","BJ_COUCH_LOOP_P", 1, 0, 0, cmdtext);
-	animCmd("asuhuv6tt 4", "BLOWJOBZ","BJ_COUCH_LOOP_W", 1, 0, 0, cmdtext);
-	animCmd("asuhuv6tt 5", "BLOWJOBZ","BJ_COUCH_END_P", 1, 0, 2000, cmdtext);
-	animCmd("asuhuv6tt 6", "BLOWJOBZ","BJ_COUCH_END_W", 1, 0, 2000, cmdtext);
-	animCmd("asuhuv6tt 7", "BLOWJOBZ","BJ_STAND_START_P", 1, 0, 2000, cmdtext);
-	animCmd("asuhuv6tt 8", "BLOWJOBZ","BJ_STAND_START_W", 1, 0, 2000, cmdtext);
-	animCmd("asuhuv6tt 9", "BLOWJOBZ","BJ_STAND_LOOP_P", 1, 0, 0, cmdtext);
-	animCmd("asuhuv6tt 10", "BLOWJOBZ","BJ_STAND_LOOP_W", 1, 0, 0, cmdtext);
-	animCmd("asuhuv6tt 11", "BLOWJOBZ","BJ_STAND_END_P", 1, 0, 2000, cmdtext);
-	animCmd("asuhuv6tt 12", "BLOWJOBZ","BJ_STAND_END_W", 1, 0, 2000, cmdtext);	
-	
-	animHelper("akasiino", "AKASIINO: /akasiino [1-25]", cmdtext);				
-	animCmd("akasiino 1", "CASINO","cards_in", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 2", "CASINO","cards_loop", 1, 0, 0, cmdtext);
-	animCmd("akasiino 3", "CASINO","cards_lose", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 4", "CASINO","cards_out", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 5", "CASINO","cards_pick_01", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 6", "CASINO","cards_pick_02", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 7", "CASINO","cards_raise", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 8", "CASINO","cards_win", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 9", "CASINO","dealone", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 10", "CASINO","manwinb", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 11", "CASINO","manwind", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 12", "CASINO","Roulette_bet", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 13", "CASINO","Roulette_in", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 14", "CASINO","Roulette_loop", 1, 0, 0, cmdtext);
-	animCmd("akasiino 15", "CASINO","Roulette_lose", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 16", "CASINO","Roulette_out", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 17", "CASINO","Roulette_win", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 18", "CASINO","Slot_bet_01", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 19", "CASINO","Slot_bet_02", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 20", "CASINO","Slot_in", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 21", "CASINO","Slot_lose_out", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 22", "CASINO","Slot_Plyr", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 23", "CASINO","Slot_wait", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 24", "CASINO","Slot_win_out", 1, 0, 2000, cmdtext);
-	animCmd("akasiino 25", "CASINO","wof", 1, 0, 2000, cmdtext);
-
-	animHelper("acrack", "ACRACK: /acrack [1-10]", cmdtext);				
-	animCmd("acrack 1", "CRACK","Bbalbat_Idle_01", 1, 0, 2000, cmdtext);
-	animCmd("acrack 2", "CRACK","Bbalbat_Idle_02", 1, 0, 2000, cmdtext);
-	animCmd("acrack 3", "CRACK","crckdeth1", 1, 0, 2000, cmdtext);
-	animCmd("acrack 4", "CRACK","crckdeth2", 1, 0, 2000, cmdtext);
-	animCmd("acrack 5", "CRACK","crckdeth3", 1, 0, 2000, cmdtext);
-	animCmd("acrack 6", "CRACK","crckdeth4", 1, 0, 2000, cmdtext);
-	animCmd("acrack 7", "CRACK","crckidle1", 1, 0, 2000, cmdtext);
-	animCmd("acrack 8", "CRACK","crckidle2", 1, 0, 2000, cmdtext);
-	animCmd("acrack 9", "CRACK","crckidle3", 1, 0, 2000, cmdtext);
-	animCmd("acrack 10", "CRACK","crckidle4", 1, 0, 2000, cmdtext);
-
-	animHelper("aurgas", "AURGAS: /aurgas [1-5]", cmdtext);				
-	animCmd("aurgas 1", "CRIB","CRIB_Console_Loop", 1, 0, 0, cmdtext);
-	animCmd("aurgas 2", "CRIB","CRIB_Use_Switch", 1, 0, 2000, cmdtext);
-	animCmd("aurgas 3", "CRIB","PED_Console_Loop", 1, 0, 0, cmdtext);
-	animCmd("aurgas 4", "CRIB","PED_Console_Loose", 1, 0, 2000, cmdtext);
-	animCmd("aurgas 5", "CRIB","PED_Console_Win", 1, 0, 2000, cmdtext);	
-
-	animHelper("apeakas", "APEAKAS: /apeakas [1-5]", cmdtext);				
-	animCmd("apeakas 1", "DAM_JUMP","DAM_Dive_Loop", 1, 0, 0, cmdtext);
-	animCmd("apeakas 2", "DAM_JUMP","DAM_Land", 1, 0, 2000, cmdtext);
-	animCmd("apeakas 3", "DAM_JUMP","DAM_Launch", 1, 0, 2000, cmdtext);
-	animCmd("apeakas 4", "DAM_JUMP","Jump_Roll", 1, 0, 2000, cmdtext);
-	animCmd("apeakas 5", "DAM_JUMP","SF_JumpWall", 1, 0, 2000, cmdtext);
-
-	animHelper("andiiler", "ANDIILER: /andiiler [1-7]", cmdtext);				
-	animCmd("andiiler 1", "DEALER","DEALER_DEAL", 1, 0, 2000, cmdtext);
-	animCmd("andiiler 2", "DEALER","DEALER_IDLE", 1, 0, 2000, cmdtext);
-	animCmd("andiiler 3", "DEALER","DEALER_IDLE_01", 1, 0, 2000, cmdtext);
-	animCmd("andiiler 4", "DEALER","DEALER_IDLE_02", 1, 0, 2000, cmdtext);
-	animCmd("andiiler 5", "DEALER","DEALER_IDLE_03", 1, 0, 2000, cmdtext);
-	animCmd("andiiler 6", "DEALER","DRUGS_BUY", 1, 0, 2000, cmdtext);
-	animCmd("andiiler 7", "DEALER","shop_pay", 1, 0, 2000, cmdtext);
-
-	animHelper("ap6ikle", "APÕIKLE: /apõikle [1-4]", cmdtext);				
-	animCmd("ap6ikle 1", "DODGE","Cover_Dive_01", 1, 0, 2000, cmdtext);
-	animCmd("ap6ikle 2", "DODGE","Cover_Dive_02", 1, 0, 2000, cmdtext);
-	animCmd("ap6ikle 3", "DODGE","Crushed", 1, 0, 2000, cmdtext);
-	animCmd("ap6ikle 4", "DODGE","Crush_Jump", 1, 0, 2000, cmdtext);
-
-	animHelper("as88k", "ASÖÖK: /asöök [1-33]", cmdtext);				
-	animCmd("as88k 1", "FOOD","EAT_Burger", 1, 0, 2000, cmdtext);
-	animCmd("as88k 2", "FOOD","EAT_Chicken", 1, 0, 2000, cmdtext);
-	animCmd("as88k 3", "FOOD","EAT_Pizza", 1, 0, 2000, cmdtext);
-	animCmd("as88k 4", "FOOD","EAT_Vomit_P", 1, 0, 2000, cmdtext);
-	animCmd("as88k 5", "FOOD","EAT_Vomit_SK", 1, 0, 2000, cmdtext);
-	animCmd("as88k 6", "FOOD","FF_Dam_Bkw", 1, 0, 2000, cmdtext);
-	animCmd("as88k 7", "FOOD","FF_Dam_Fwd", 1, 0, 2000, cmdtext);
-	animCmd("as88k 8", "FOOD","FF_Dam_Left", 1, 0, 2000, cmdtext);
-	animCmd("as88k 9", "FOOD","FF_Dam_Right", 1, 0, 2000, cmdtext);
-	animCmd("as88k 10", "FOOD","FF_Die_Bkw", 1, 0, 2000, cmdtext);
-	animCmd("as88k 11", "FOOD","FF_Die_Fwd", 1, 0, 2000, cmdtext);
-	animCmd("as88k 12", "FOOD","FF_Die_Left", 1, 0, 2000, cmdtext);
-	animCmd("as88k 13", "FOOD","FF_Die_Right", 1, 0, 2000, cmdtext);
-	animCmd("as88k 14", "FOOD","FF_Sit_Eat1", 1, 0, 2000, cmdtext);
-	animCmd("as88k 15", "FOOD","FF_Sit_Eat2", 1, 0, 2000, cmdtext);
-	animCmd("as88k 16", "FOOD","FF_Sit_Eat3", 1, 0, 2000, cmdtext);
-	animCmd("as88k 17", "FOOD","FF_Sit_In", 1, 0, 2000, cmdtext);
-	animCmd("as88k 18", "FOOD","FF_Sit_In_L", 1, 0, 2000, cmdtext);
-	animCmd("as88k 19", "FOOD","FF_Sit_In_R", 1, 0, 2000, cmdtext);
-	animCmd("as88k 20", "FOOD","FF_Sit_Look", 1, 0, 2000, cmdtext);
-	animCmd("as88k 21", "FOOD","FF_Sit_Loop", 1, 0, 0, cmdtext);
-	animCmd("as88k 22", "FOOD","FF_Sit_Out_180", 1, 0, 2000, cmdtext);
-	animCmd("as88k 23", "FOOD","FF_Sit_Out_L_180", 1, 0, 2000, cmdtext);
-	animCmd("as88k 24", "FOOD","FF_Sit_Out_R_180", 1, 0, 2000, cmdtext);
-	animCmd("as88k 25", "FOOD","SHP_Thank", 1, 0, 2000, cmdtext);
-	animCmd("as88k 26", "FOOD","SHP_Tray_In", 1, 0, 2000, cmdtext);
-	animCmd("as88k 27", "FOOD","SHP_Tray_Lift", 1, 0, 2000, cmdtext);
-	animCmd("as88k 28", "FOOD","SHP_Tray_Lift_In", 1, 0, 2000, cmdtext);
-	animCmd("as88k 29", "FOOD","SHP_Tray_Lift_Loop", 1, 0, 0, cmdtext);
-	animCmd("as88k 30", "FOOD","SHP_Tray_Lift_Out", 1, 0, 2000, cmdtext);
-	animCmd("as88k 31", "FOOD","SHP_Tray_Out", 1, 0, 2000, cmdtext);
-	animCmd("as88k 32", "FOOD","SHP_Tray_Pose", 1, 0, 2000, cmdtext);
-	animCmd("as88k 33", "FOOD","SHP_Tray_Return", 1, 0, 2000, cmdtext);
-
-	animHelper("ag2ng", "AGÄNG: /agäng [1-33]", cmdtext);				
-	animCmd("ag2ng 1", "GANGS","DEALER_DEAL", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 2", "GANGS","DEALER_IDLE", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 3", "GANGS","drnkbr_prtl", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 4", "GANGS","drnkbr_prtl_F", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 5", "GANGS","DRUGS_BUY", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 6", "GANGS","hndshkaa", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 7", "GANGS","hndshkba", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 8", "GANGS","hndshkca", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 9", "GANGS","hndshkcb", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 10", "GANGS","hndshkda", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 11", "GANGS","hndshkea", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 12", "GANGS","hndshkfa", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 13", "GANGS","hndshkfa_swt", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 14", "GANGS","Invite_No", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 15", "GANGS","Invite_Yes", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 16", "GANGS","leanIDLE", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 17", "GANGS","leanIN", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 18", "GANGS","leanOUT", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 19", "GANGS","prtial_gngtlkA", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 20", "GANGS","prtial_gngtlkB", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 21", "GANGS","prtial_gngtlkCt", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 22", "GANGS","prtial_gngtlkD", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 23", "GANGS","prtial_gngtlkE", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 24", "GANGS","prtial_gngtlkF", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 25", "GANGS","prtial_gngtlkG", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 26", "GANGS","prtial_gngtlkH", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 27", "GANGS","prtial_hndshk_01", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 28", "GANGS","prtial_hndshk_biz_01", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 29", "GANGS","shake_cara", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 30", "GANGS","shake_carK", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 31", "GANGS","shake_carSH", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 32", "GANGS","smkcig_prtl", 1, 0, 2000, cmdtext);
-	animCmd("ag2ng 33", "GANGS","smkcig_prtl_F", 1, 0, 2000, cmdtext);	
-	
-	animHelper("aisik", "AISIK: /aisik [1-295]", cmdtext);					
-	animCmd("aisik 1", "PED","abseil", 1, 0, 2000, cmdtext);
-	animCmd("aisik 2", "PED","ARRESTgun", 1, 0, 2000, cmdtext);
-	animCmd("aisik 3", "PED","ATM", 1, 0, 2000, cmdtext);
-	animCmd("aisik 4", "PED","BIKE_elbowL", 1, 0, 2000, cmdtext);
-	animCmd("aisik 5", "PED","BIKE_elbowR", 1, 0, 2000, cmdtext);
-	animCmd("aisik 6", "PED","BIKE_fallR", 1, 0, 2000, cmdtext);
-	animCmd("aisik 7", "PED","BIKE_fall_off", 1, 0, 2000, cmdtext);
-	animCmd("aisik 8", "PED","BIKE_pickupL", 1, 0, 2000, cmdtext);
-	animCmd("aisik 9", "PED","BIKE_pickupR", 1, 0, 2000, cmdtext);
-	animCmd("aisik 10", "PED","BIKE_pullupL", 1, 0, 2000, cmdtext);
-	animCmd("aisik 11", "PED","BIKE_pullupR", 1, 0, 2000, cmdtext);
-	animCmd("aisik 12", "PED","bomber", 1, 0, 2000, cmdtext);
-	animCmd("aisik 13", "PED","CAR_alignHI_LHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 14", "PED","CAR_alignHI_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 15", "PED","CAR_align_LHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 16", "PED","CAR_align_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 17", "PED","CAR_closedoorL_LHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 18", "PED","CAR_closedoorL_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 19", "PED","CAR_closedoor_LHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 20", "PED","CAR_closedoor_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 21", "PED","CAR_close_LHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 22", "PED","CAR_close_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 23", "PED","CAR_crawloutRHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 24", "PED","CAR_dead_LHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 25", "PED","CAR_dead_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 26", "PED","CAR_doorlocked_LHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 27", "PED","CAR_doorlocked_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 28", "PED","CAR_fallout_LHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 29", "PED","CAR_fallout_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 30", "PED","CAR_getinL_LHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 31", "PED","CAR_getinL_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 32", "PED","CAR_getin_LHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 33", "PED","CAR_getin_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 34", "PED","CAR_getoutL_LHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 35", "PED","CAR_getoutL_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 36", "PED","CAR_getout_LHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 37", "PED","CAR_getout_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 38", "PED","car_hookertalk", 1, 0, 2000, cmdtext);
-	animCmd("aisik 39", "PED","CAR_jackedLHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 40", "PED","CAR_jackedRHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 41", "PED","CAR_jumpin_LHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 42", "PED","CAR_LB", 1, 0, 2000, cmdtext);
-	animCmd("aisik 43", "PED","CAR_LB_pro", 1, 0, 2000, cmdtext);
-	animCmd("aisik 44", "PED","CAR_LB_weak", 1, 0, 2000, cmdtext);
-	animCmd("aisik 45", "PED","CAR_LjackedLHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 46", "PED","CAR_LjackedRHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 47", "PED","CAR_Lshuffle_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 48", "PED","CAR_Lsit", 1, 0, 2000, cmdtext);
-	animCmd("aisik 49", "PED","CAR_open_LHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 50", "PED","CAR_open_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 51", "PED","CAR_pulloutL_LHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 52", "PED","CAR_pulloutL_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 53", "PED","CAR_pullout_LHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 54", "PED","CAR_pullout_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 55", "PED","CAR_Qjacked", 1, 0, 2000, cmdtext);
-	animCmd("aisik 56", "PED","CAR_rolldoor", 1, 0, 2000, cmdtext);
-	animCmd("aisik 57", "PED","CAR_rolldoorLO", 1, 0, 2000, cmdtext);
-	animCmd("aisik 58", "PED","CAR_rollout_LHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 59", "PED","CAR_rollout_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 60", "PED","CAR_shuffle_RHS", 1, 0, 2000, cmdtext);
-	animCmd("aisik 61", "PED","CAR_sit", 1, 0, 2000, cmdtext);
-	animCmd("aisik 62", "PED","CAR_sitp", 1, 0, 2000, cmdtext);
-	animCmd("aisik 63", "PED","CAR_sitpLO", 1, 0, 2000, cmdtext);
-	animCmd("aisik 64", "PED","CAR_sit_pro", 1, 0, 2000, cmdtext);
-	animCmd("aisik 65", "PED","CAR_sit_weak", 1, 0, 2000, cmdtext);
-	animCmd("aisik 66", "PED","CAR_tune_radio", 1, 0, 2000, cmdtext);
-	animCmd("aisik 67", "PED","CLIMB_idle", 1, 0, 2000, cmdtext);
-	animCmd("aisik 68", "PED","CLIMB_jump", 1, 0, 2000, cmdtext);
-	animCmd("aisik 69", "PED","CLIMB_jump2fall", 1, 0, 2000, cmdtext);
-	animCmd("aisik 70", "PED","CLIMB_jump_B", 1, 0, 2000, cmdtext);
-	animCmd("aisik 71", "PED","CLIMB_Pull", 1, 0, 2000, cmdtext);
-	animCmd("aisik 72", "PED","CLIMB_Stand", 1, 0, 2000, cmdtext);
-	animCmd("aisik 73", "PED","CLIMB_Stand_finish", 1, 0, 2000, cmdtext);
-	animCmd("aisik 74", "PED","cower", 1, 0, 2000, cmdtext);
-	animCmd("aisik 75", "PED","Crouch_Roll_L", 1, 0, 2000, cmdtext);
-	animCmd("aisik 76", "PED","Crouch_Roll_R", 1, 0, 2000, cmdtext);
-	animCmd("aisik 77", "PED","DAM_armL_frmBK", 1, 0, 2000, cmdtext);
-	animCmd("aisik 78", "PED","DAM_armL_frmFT", 1, 0, 2000, cmdtext);
-	animCmd("aisik 79", "PED","DAM_armL_frmLT", 1, 0, 2000, cmdtext);
-	animCmd("aisik 80", "PED","DAM_armR_frmBK", 1, 0, 2000, cmdtext);
-	animCmd("aisik 81", "PED","DAM_armR_frmFT", 1, 0, 2000, cmdtext);
-	animCmd("aisik 82", "PED","DAM_armR_frmRT", 1, 0, 2000, cmdtext);
-	animCmd("aisik 83", "PED","DAM_LegL_frmBK", 1, 0, 2000, cmdtext);
-	animCmd("aisik 84", "PED","DAM_LegL_frmFT", 1, 0, 2000, cmdtext);
-	animCmd("aisik 85", "PED","DAM_LegL_frmLT", 1, 0, 2000, cmdtext);
-	animCmd("aisik 86", "PED","DAM_LegR_frmBK", 1, 0, 2000, cmdtext);
-	animCmd("aisik 87", "PED","DAM_LegR_frmFT", 1, 0, 2000, cmdtext);
-	animCmd("aisik 88", "PED","DAM_LegR_frmRT", 1, 0, 2000, cmdtext);
-	animCmd("aisik 89", "PED","DAM_stomach_frmBK", 1, 0, 2000, cmdtext);
-	animCmd("aisik 90", "PED","DAM_stomach_frmFT", 1, 0, 2000, cmdtext);
-	animCmd("aisik 91", "PED","DAM_stomach_frmLT", 1, 0, 2000, cmdtext);
-	animCmd("aisik 92", "PED","DAM_stomach_frmRT", 1, 0, 2000, cmdtext);
-	animCmd("aisik 93", "PED","DOOR_LHinge_O", 1, 0, 2000, cmdtext);
-	animCmd("aisik 94", "PED","DOOR_RHinge_O", 1, 0, 2000, cmdtext);
-	animCmd("aisik 94", "PED","DrivebyL_L", 1, 0, 2000, cmdtext);
-	animCmd("aisik 95", "PED","DrivebyL_R", 1, 0, 2000, cmdtext);
-	animCmd("aisik 96", "PED","Driveby_L", 1, 0, 2000, cmdtext);
-	animCmd("aisik 97", "PED","Driveby_R", 1, 0, 2000, cmdtext);
-	animCmd("aisik 98", "PED","DRIVE_BOAT", 1, 0, 2000, cmdtext);
-	animCmd("aisik 99", "PED","DRIVE_BOAT_back", 1, 0, 2000, cmdtext);
-	animCmd("aisik 100", "PED","DRIVE_BOAT_L", 1, 0, 2000, cmdtext);
-	animCmd("aisik 101", "PED","DRIVE_BOAT_R", 1, 0, 2000, cmdtext);
-	animCmd("aisik 102", "PED","Drive_L", 1, 0, 2000, cmdtext);
-	animCmd("aisik 103", "PED","Drive_LO_l", 1, 0, 2000, cmdtext);
-	animCmd("aisik 104", "PED","Drive_LO_R", 1, 0, 2000, cmdtext);
-	animCmd("aisik 105", "PED","Drive_L_pro", 1, 0, 2000, cmdtext);
-	animCmd("aisik 106", "PED","Drive_L_pro_slow", 1, 0, 2000, cmdtext);
-	animCmd("aisik 107", "PED","Drive_L_slow", 1, 0, 2000, cmdtext);
-	animCmd("aisik 108", "PED","Drive_L_weak", 1, 0, 2000, cmdtext);
-	animCmd("aisik 109", "PED","Drive_L_weak_slow", 1, 0, 2000, cmdtext);
-	animCmd("aisik 110", "PED","Drive_R", 1, 0, 2000, cmdtext);
-	animCmd("aisik 111", "PED","Drive_R_pro", 1, 0, 2000, cmdtext);
-	animCmd("aisik 112", "PED","Drive_R_pro_slow", 1, 0, 2000, cmdtext);
-	animCmd("aisik 113", "PED","Drive_R_slow", 1, 0, 2000, cmdtext);
-	animCmd("aisik 114", "PED","Drive_R_weak", 1, 0, 2000, cmdtext);
-	animCmd("aisik 115", "PED","Drive_R_weak_slow", 1, 0, 2000, cmdtext);
-	animCmd("aisik 116", "PED","Drive_truck", 1, 0, 2000, cmdtext);
-	animCmd("aisik 117", "PED","DRIVE_truck_back", 1, 0, 2000, cmdtext);
-	animCmd("aisik 118", "PED","DRIVE_truck_L", 1, 0, 2000, cmdtext);
-	animCmd("aisik 119", "PED","DRIVE_truck_R", 1, 0, 2000, cmdtext);
-	animCmd("aisik 120", "PED","Drown", 1, 0, 2000, cmdtext);
-	animCmd("aisik 121", "PED","DUCK_cower", 1, 0, 2000, cmdtext);
-	animCmd("aisik 122", "PED","endchat_01", 1, 0, 2000, cmdtext);
-	animCmd("aisik 123", "PED","endchat_02", 1, 0, 2000, cmdtext);
-	animCmd("aisik 124", "PED","endchat_03", 1, 0, 2000, cmdtext);
-	animCmd("aisik 125", "PED","EV_dive", 1, 0, 2000, cmdtext);
-	animCmd("aisik 126", "PED","EV_step", 1, 0, 2000, cmdtext);
-	animCmd("aisik 127", "PED","facanger", 1, 0, 2000, cmdtext);
-	animCmd("aisik 128", "PED","facanger", 1, 0, 2000, cmdtext);
-	animCmd("aisik 129", "PED","facgum", 1, 0, 2000, cmdtext);
-	animCmd("aisik 130", "PED","facsurp", 1, 0, 2000, cmdtext);
-	animCmd("aisik 131", "PED","facsurpm", 1, 0, 2000, cmdtext);
-	animCmd("aisik 132", "PED","factalk", 1, 0, 2000, cmdtext);
-	animCmd("aisik 133", "PED","facurios", 1, 0, 2000, cmdtext);
-	animCmd("aisik 134", "PED","FALL_back", 1, 0, 2000, cmdtext);
-	animCmd("aisik 135", "PED","FALL_collapse", 1, 0, 2000, cmdtext);
-	animCmd("aisik 136", "PED","FALL_fall", 1, 0, 2000, cmdtext);
-	animCmd("aisik 137", "PED","FALL_front", 1, 0, 2000, cmdtext);
-	animCmd("aisik 138", "PED","FALL_glide", 1, 0, 2000, cmdtext);
-	animCmd("aisik 139", "PED","FALL_land", 1, 0, 2000, cmdtext);
-	animCmd("aisik 140", "PED","FALL_skyDive", 1, 0, 2000, cmdtext);
-	animCmd("aisik 141", "PED","Fight2Idle", 1, 0, 2000, cmdtext);
-	animCmd("aisik 142", "PED","FightA_1", 1, 0, 2000, cmdtext);
-	animCmd("aisik 143", "PED","FightA_2", 1, 0, 2000, cmdtext);
-	animCmd("aisik 144", "PED","FightA_3", 1, 0, 2000, cmdtext);
-	animCmd("aisik 145", "PED","FightA_block", 1, 0, 2000, cmdtext);
-	animCmd("aisik 146", "PED","FightA_G", 1, 0, 2000, cmdtext);
-	animCmd("aisik 147", "PED","FightA_M", 1, 0, 2000, cmdtext);
-	animCmd("aisik 148", "PED","FIGHTIDLE", 1, 0, 2000, cmdtext);
-	animCmd("aisik 149", "PED","FightShB", 1, 0, 2000, cmdtext);
-	animCmd("aisik 150", "PED","FightShF", 1, 0, 2000, cmdtext);
-	animCmd("aisik 151", "PED","FightSh_BWD", 1, 0, 2000, cmdtext);
-	animCmd("aisik 152", "PED","FightSh_FWD", 1, 0, 2000, cmdtext);
-	animCmd("aisik 153", "PED","FightSh_Left", 1, 0, 2000, cmdtext);
-	animCmd("aisik 154", "PED","FightSh_Right", 1, 0, 2000, cmdtext);
-	animCmd("aisik 155", "PED","flee_lkaround_01", 1, 0, 2000, cmdtext);
-	animCmd("aisik 156", "PED","FLOOR_hit", 1, 0, 2000, cmdtext);
-	animCmd("aisik 157", "PED","FLOOR_hit_f", 1, 0, 2000, cmdtext);
-	animCmd("aisik 158", "PED","fucku", 1, 0, 2000, cmdtext);
-	animCmd("aisik 159", "PED","gang_gunstand", 1, 0, 2000, cmdtext);
-	animCmd("aisik 160", "PED","gas_cwr", 1, 0, 2000, cmdtext);
-	animCmd("aisik 161", "PED","getup", 1, 0, 2000, cmdtext);
-	animCmd("aisik 162", "PED","getup_front", 1, 0, 2000, cmdtext);
-	animCmd("aisik 163", "PED","gum_eat", 1, 0, 2000, cmdtext);
-	animCmd("aisik 164", "PED","GunCrouchBwd", 1, 0, 2000, cmdtext);
-	animCmd("aisik 165", "PED","GunCrouchFwd", 1, 0, 2000, cmdtext);
-	animCmd("aisik 166", "PED","GunMove_BWD", 1, 0, 2000, cmdtext);
-	animCmd("aisik 167", "PED","GunMove_FWD", 1, 0, 2000, cmdtext);
-	animCmd("aisik 168", "PED","GunMove_L", 1, 0, 2000, cmdtext);
-	animCmd("aisik 169", "PED","GunMove_R", 1, 0, 2000, cmdtext);
-	animCmd("aisik 170", "PED","Gun_2_IDLE", 1, 0, 2000, cmdtext);
-	animCmd("aisik 171", "PED","GUN_BUTT", 1, 0, 2000, cmdtext);
-	animCmd("aisik 172", "PED","GUN_BUTT_crouch", 1, 0, 2000, cmdtext);
-	animCmd("aisik 173", "PED","Gun_stand", 1, 0, 2000, cmdtext);
-	animCmd("aisik 174", "PED","handscower", 1, 0, 2000, cmdtext);
-	animCmd("aisik 175", "PED","handsup", 1, 0, 2000, cmdtext);
-	animCmd("aisik 176", "PED","HitA_1", 1, 0, 2000, cmdtext);
-	animCmd("aisik 177", "PED","HitA_2", 1, 0, 2000, cmdtext);
-	animCmd("aisik 178", "PED","HitA_3", 1, 0, 2000, cmdtext);
-	animCmd("aisik 179", "PED","HIT_back", 1, 0, 2000, cmdtext);
-	animCmd("aisik 180", "PED","HIT_behind", 1, 0, 2000, cmdtext);
-	animCmd("aisik 181", "PED","HIT_front", 1, 0, 2000, cmdtext);
-	animCmd("aisik 182", "PED","HIT_GUN_BUTT", 1, 0, 2000, cmdtext);
-	animCmd("aisik 183", "PED","HIT_L", 1, 0, 2000, cmdtext);
-	animCmd("aisik 184", "PED","HIT_R", 1, 0, 2000, cmdtext);
-	animCmd("aisik 185", "PED","HIT_walk", 1, 0, 2000, cmdtext);
-	animCmd("aisik 186", "PED","HIT_wall", 1, 0, 2000, cmdtext);
-	animCmd("aisik 187", "PED","Idlestance_fat", 1, 0, 2000, cmdtext);
-	animCmd("aisik 189", "PED","idlestance_old", 1, 0, 2000, cmdtext);
-	animCmd("aisik 190", "PED","IDLE_armed", 1, 0, 2000, cmdtext);
-	animCmd("aisik 191", "PED","IDLE_chat", 1, 0, 2000, cmdtext);
-	animCmd("aisik 192", "PED","IDLE_csaw", 1, 0, 2000, cmdtext);
-	animCmd("aisik 193", "PED","Idle_Gang1", 1, 0, 2000, cmdtext);
-	animCmd("aisik 194", "PED","IDLE_HBHB", 1, 0, 2000, cmdtext);
-	animCmd("aisik 195", "PED","IDLE_ROCKET", 1, 0, 2000, cmdtext);
-	animCmd("aisik 196", "PED","IDLE_stance", 1, 0, 2000, cmdtext);
-	animCmd("aisik 197", "PED","IDLE_taxi", 1, 0, 2000, cmdtext);
-	animCmd("aisik 198", "PED","IDLE_tired", 1, 0, 2000, cmdtext);
-	animCmd("aisik 199", "PED","Jetpack_Idle", 1, 0, 2000, cmdtext);
-	animCmd("aisik 200", "PED","JOG_femaleA", 1, 0, 2000, cmdtext);
-	animCmd("aisik 201", "PED","JOG_maleA", 1, 0, 2000, cmdtext);
-	animCmd("aisik 202", "PED","JUMP_glide", 1, 0, 2000, cmdtext);
-	animCmd("aisik 203", "PED","JUMP_land", 1, 0, 2000, cmdtext);
-	animCmd("aisik 204", "PED","JUMP_launch", 1, 0, 2000, cmdtext);
-	animCmd("aisik 205", "PED","JUMP_launch_R", 1, 0, 2000, cmdtext);
-	animCmd("aisik 206", "PED","KART_drive", 1, 0, 2000, cmdtext);
-	animCmd("aisik 207", "PED","KART_L", 1, 0, 2000, cmdtext);
-	animCmd("aisik 208", "PED","KART_LB", 1, 0, 2000, cmdtext);
-	animCmd("aisik 209", "PED","KART_R", 1, 0, 2000, cmdtext);
-	animCmd("aisik 210", "PED","KD_left", 1, 0, 2000, cmdtext);
-	animCmd("aisik 211", "PED","KD_right", 1, 0, 2000, cmdtext);
-	animCmd("aisik 212", "PED","KO_shot_face", 1, 0, 2000, cmdtext);
-	animCmd("aisik 213", "PED","KO_shot_front", 1, 0, 2000, cmdtext);
-	animCmd("aisik 214", "PED","KO_shot_stom", 1, 0, 2000, cmdtext);
-	animCmd("aisik 215", "PED","KO_skid_back", 1, 0, 2000, cmdtext);
-	animCmd("aisik 216", "PED","KO_skid_front", 1, 0, 2000, cmdtext);
-	animCmd("aisik 217", "PED","KO_spin_L", 1, 0, 2000, cmdtext);
-	animCmd("aisik 218", "PED","KO_spin_R", 1, 0, 2000, cmdtext);
-	animCmd("aisik 219", "PED","pass_Smoke_in_car", 1, 0, 2000, cmdtext);
-	animCmd("aisik 220", "PED","phone_in", 1, 0, 2000, cmdtext);
-	animCmd("aisik 221", "PED","phone_out", 1, 0, 2000, cmdtext);
-	animCmd("aisik 222", "PED","phone_talk", 1, 0, 2000, cmdtext);
-	animCmd("aisik 223", "PED","Player_Sneak", 1, 0, 2000, cmdtext);
-	animCmd("aisik 224", "PED","Player_Sneak_walkstart", 1, 0, 2000, cmdtext);
-	animCmd("aisik 225", "PED","roadcross", 1, 0, 2000, cmdtext);
-	animCmd("aisik 226", "PED","roadcross_female", 1, 0, 2000, cmdtext);
-	animCmd("aisik 227", "PED","roadcross_gang", 1, 0, 2000, cmdtext);
-	animCmd("aisik 228", "PED","roadcross_old", 1, 0, 2000, cmdtext);
-	animCmd("aisik 229", "PED","run_1armed", 1, 0, 2000, cmdtext);
-	animCmd("aisik 230", "PED","run_armed", 1, 0, 2000, cmdtext);
-	animCmd("aisik 231", "PED","run_civi", 1, 0, 2000, cmdtext);
-	animCmd("aisik 232", "PED","run_csaw", 1, 0, 2000, cmdtext);
-	animCmd("aisik 233", "PED","run_fat", 1, 0, 2000, cmdtext);
-	animCmd("aisik 234", "PED","run_fatold", 1, 0, 2000, cmdtext);
-	animCmd("aisik 235", "PED","run_gang1", 1, 0, 2000, cmdtext);
-	animCmd("aisik 236", "PED","run_left", 1, 0, 2000, cmdtext);
-	animCmd("aisik 237", "PED","run_old", 1, 0, 2000, cmdtext);
-	animCmd("aisik 238", "PED","run_player", 1, 0, 2000, cmdtext);
-	animCmd("aisik 239", "PED","run_right", 1, 0, 2000, cmdtext);
-	animCmd("aisik 240", "PED","run_rocket", 1, 0, 2000, cmdtext);
-	animCmd("aisik 241", "PED","Run_stop", 1, 0, 2000, cmdtext);
-	animCmd("aisik 242", "PED","Run_stopR", 1, 0, 2000, cmdtext);
-	animCmd("aisik 243", "PED","Run_Wuzi", 1, 0, 2000, cmdtext);
-	animCmd("aisik 244", "PED","SEAT_down", 1, 0, 2000, cmdtext);
-	animCmd("aisik 245", "PED","SEAT_idle", 1, 0, 2000, cmdtext);
-	animCmd("aisik 246", "PED","SEAT_up", 1, 0, 2000, cmdtext);
-	animCmd("aisik 247", "PED","SHOT_leftP", 1, 0, 2000, cmdtext);
-	animCmd("aisik 248", "PED","SHOT_partial", 1, 0, 2000, cmdtext);
-	animCmd("aisik 249", "PED","SHOT_partial_B", 1, 0, 2000, cmdtext);
-	animCmd("aisik 250", "PED","SHOT_rightP", 1, 0, 2000, cmdtext);
-	animCmd("aisik 251", "PED","Shove_Partial", 1, 0, 2000, cmdtext);
-	animCmd("aisik 252", "PED","Smoke_in_car", 1, 0, 2000, cmdtext);
-	animCmd("aisik 253", "PED","sprint_civi", 1, 0, 2000, cmdtext);
-	animCmd("aisik 254", "PED","sprint_panic", 1, 0, 2000, cmdtext);
-	animCmd("aisik 255", "PED","Sprint_Wuzi", 1, 0, 2000, cmdtext);
-	animCmd("aisik 256", "PED","swat_run", 1, 0, 2000, cmdtext);
-	animCmd("aisik 257", "PED","Swim_Tread", 1, 0, 2000, cmdtext);
-	animCmd("aisik 258", "PED","Tap_hand", 1, 0, 2000, cmdtext);
-	animCmd("aisik 259", "PED","Tap_handP", 1, 0, 2000, cmdtext);
-	animCmd("aisik 260", "PED","turn_180", 1, 0, 2000, cmdtext);
-	animCmd("aisik 261", "PED","Turn_L", 1, 0, 2000, cmdtext);
-	animCmd("aisik 262", "PED","Turn_R", 1, 0, 2000, cmdtext);
-	animCmd("aisik 263", "PED","WALK_armed", 1, 0, 2000, cmdtext);
-	animCmd("aisik 264", "PED","WALK_civi", 1, 0, 2000, cmdtext);
-	animCmd("aisik 265", "PED","WALK_csaw", 1, 0, 2000, cmdtext);
-	animCmd("aisik 266", "PED","Walk_DoorPartial", 1, 0, 2000, cmdtext);
-	animCmd("aisik 267", "PED","WALK_drunk", 1, 0, 2000, cmdtext);
-	animCmd("aisik 268", "PED","WALK_fat", 1, 0, 2000, cmdtext);
-	animCmd("aisik 269", "PED","WALK_fatold", 1, 0, 2000, cmdtext);
-	animCmd("aisik 270", "PED","WALK_gang1", 1, 0, 2000, cmdtext);
-	animCmd("aisik 271", "PED","WALK_gang2", 1, 0, 2000, cmdtext);
-	animCmd("aisik 272", "PED","WALK_old", 1, 0, 2000, cmdtext);
-	animCmd("aisik 273", "PED","WALK_player", 1, 0, 2000, cmdtext);
-	animCmd("aisik 274", "PED","WALK_rocket", 1, 0, 2000, cmdtext);
-	animCmd("aisik 275", "PED","WALK_shuffle", 1, 0, 2000, cmdtext);
-	animCmd("aisik 276", "PED","WALK_start", 1, 0, 2000, cmdtext);
-	animCmd("aisik 277", "PED","WALK_start_armed", 1, 0, 2000, cmdtext);
-	animCmd("aisik 278", "PED","WALK_start_csaw", 1, 0, 2000, cmdtext);
-	animCmd("aisik 279", "PED","WALK_start_rocket", 1, 0, 2000, cmdtext);
-	animCmd("aisik 280", "PED","Walk_Wuzi", 1, 0, 2000, cmdtext);
-	animCmd("aisik 281", "PED","WEAPON_crouch", 1, 0, 2000, cmdtext);
-	animCmd("aisik 282", "PED","woman_idlestance", 1, 0, 2000, cmdtext);
-	animCmd("aisik 283", "PED","woman_run", 1, 0, 2000, cmdtext);
-	animCmd("aisik 284", "PED","WOMAN_runbusy", 1, 0, 2000, cmdtext);
-	animCmd("aisik 285", "PED","WOMAN_runfatold", 1, 0, 2000, cmdtext);
-	animCmd("aisik 286", "PED","woman_runpanic", 1, 0, 2000, cmdtext);
-	animCmd("aisik 287", "PED","WOMAN_runsexy", 1, 0, 2000, cmdtext);
-	animCmd("aisik 288", "PED","WOMAN_walkbusy", 1, 0, 2000, cmdtext);
-	animCmd("aisik 289", "PED","WOMAN_walkfatold", 1, 0, 2000, cmdtext);
-	animCmd("aisik 290", "PED","WOMAN_walknorm", 1, 0, 2000, cmdtext);
-	animCmd("aisik 291", "PED","WOMAN_walkold", 1, 0, 2000, cmdtext);
-	animCmd("aisik 292", "PED","WOMAN_walkpro", 1, 0, 2000, cmdtext);
-	animCmd("aisik 293", "PED","WOMAN_walksexy", 1, 0, 2000, cmdtext);
-	animCmd("aisik 294", "PED","WOMAN_walkshop", 1, 0, 2000, cmdtext);
-	animCmd("aisik 295", "PED","XPRESSscratch", 1, 0, 2000, cmdtext);	
-	
-	animHelper("agk2ed", "AGKÄED: /agkäed [1-2]", cmdtext);			
-	animCmd("agk2ed 1", "GHANDS","gsign1", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 2", "GHANDS","gsign1LH", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 3", "GHANDS","gsign2", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 4", "GHANDS","gsign2LH", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 5", "GHANDS","gsign3", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 6", "GHANDS","gsign3LH", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 7", "GHANDS","gsign4", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 8", "GHANDS","gsign4LH", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 9", "GHANDS","gsign5", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 10", "GHANDS","gsign5LH", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 11", "GHANDS","LHGsign1", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 12", "GHANDS","LHGsign2", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 13", "GHANDS","LHGsign3", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 14", "GHANDS","LHGsign4", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 15", "GHANDS","LHGsign5", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 16", "GHANDS","RHGsign1", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 17", "GHANDS","RHGsign2", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 18", "GHANDS","RHGsign3", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 19", "GHANDS","RHGsign4", 1, 0, 2000, cmdtext);
-	animCmd("agk2ed 20", "GHANDS","RHGsign5", 1, 0, 2000, cmdtext);
-
-	animHelper("asurnuaed", "ASURNUAED: /asurnuaed [1-3]", cmdtext);			
-	animCmd("asurnuaed 1", "GRAVEYARD","mrnF_loop", 1, 0, 0, cmdtext);
-	animCmd("asurnuaed 2", "GRAVEYARD","mrnM_loop", 1, 0, 0, cmdtext);
-	animCmd("asurnuaed 3", "GRAVEYARD","prst_loopa", 1, 0, 0, cmdtext);
-
-	animHelper("ajuuksur", "AJUUKSUR: /ajuuksur [1-13]", cmdtext);			
-	animCmd("ajuuksur 1", "HAIRCUTS","BRB_Beard_01", 1, 0, 2000, cmdtext);
-	animCmd("ajuuksur 2", "HAIRCUTS","BRB_Buy", 1, 0, 2000, cmdtext);
-	animCmd("ajuuksur 3", "HAIRCUTS","BRB_Cut", 1, 0, 2000, cmdtext);
-	animCmd("ajuuksur 4", "HAIRCUTS","BRB_Cut_In", 1, 0, 2000, cmdtext);
-	animCmd("ajuuksur 5", "HAIRCUTS","BRB_Cut_Out", 1, 0, 2000, cmdtext);
-	animCmd("ajuuksur 6", "HAIRCUTS","BRB_Hair_01", 1, 0, 2000, cmdtext);
-	animCmd("ajuuksur 7", "HAIRCUTS","BRB_Hair_02", 1, 0, 2000, cmdtext);
-	animCmd("ajuuksur 8", "HAIRCUTS","BRB_In", 1, 0, 2000, cmdtext);
-	animCmd("ajuuksur 9", "HAIRCUTS","BRB_Out", 1, 0, 2000, cmdtext);
-	animCmd("ajuuksur 10", "HAIRCUTS","BRB_Loop", 1, 0, 0, cmdtext);
-	animCmd("ajuuksur 11", "HAIRCUTS","BRB_Sit_In", 1, 0, 2000, cmdtext);
-	animCmd("ajuuksur 12", "HAIRCUTS","BRB_Sit_Loop", 1, 0, 0, cmdtext);
-	animCmd("ajuuksur 13", "HAIRCUTS","BRB_Sit_Out", 1, 0, 2000, cmdtext);
-
-	animHelper("ar88v", "ARÖÖV: /arööv [1-10]", cmdtext);			
-	animCmd("ar88v 1", "HEIST9","CAS_G2_GasKO", 1, 0, 2000, cmdtext);
-	animCmd("ar88v 2", "HEIST9","swt_wllpk_L", 1, 0, 2000, cmdtext);
-	animCmd("ar88v 3", "HEIST9","swt_wllpk_L_back", 1, 0, 2000, cmdtext);
-	animCmd("ar88v 4", "HEIST9","swt_wllpk_R", 1, 0, 2000, cmdtext);
-	animCmd("ar88v 5", "HEIST9","swt_wllpk_R_back", 1, 0, 2000, cmdtext);
-	animCmd("ar88v 6", "HEIST9","swt_wllshoot_in_L", 1, 0, 2000, cmdtext);
-	animCmd("ar88v 7", "HEIST9","swt_wllshoot_in_R", 1, 0, 2000, cmdtext);
-	animCmd("ar88v 8", "HEIST9","swt_wllshoot_out_L", 1, 0, 2000, cmdtext);
-	animCmd("ar88v 9", "HEIST9","swt_wllshoot_out_R", 1, 0, 2000, cmdtext);
-	animCmd("ar88v 10", "HEIST9","Use_SwipeCard", 1, 0, 2000, cmdtext);
-
-	animHelper("akodu", "AKODU: /akodu [1-10]", cmdtext);			
-	animCmd("akodu 1", "INT_HOUSE","BED_In_L", 1, 0, 2000, cmdtext);
-	animCmd("akodu 2", "INT_HOUSE","BED_In_R", 1, 0, 2000, cmdtext);
-	animCmd("akodu 3", "INT_HOUSE","BED_Loop_L", 1, 0, 0, cmdtext);
-	animCmd("akodu 4", "INT_HOUSE","BED_Loop_R", 1, 0, 0, cmdtext);
-	animCmd("akodu 5", "INT_HOUSE","BED_Out_L", 1, 0, 2000, cmdtext);
-	animCmd("akodu 6", "INT_HOUSE","BED_Out_R", 1, 0, 2000, cmdtext);
-	animCmd("akodu 7", "INT_HOUSE","LOU_In", 1, 0, 2000, cmdtext);
-	animCmd("akodu 8", "INT_HOUSE","LOU_Loop", 1, 0, 0, cmdtext);
-	animCmd("akodu 9", "INT_HOUSE","LOU_Out", 1, 0, 2000, cmdtext);
-	animCmd("akodu 10", "INT_HOUSE","wash_up", 1, 0, 2000, cmdtext);
-
-	animHelper("akontor", "AKONTOR: /akontor [1-10]", cmdtext);			
-	animCmd("akontor 1", "INT_OFFICE","FF_Dam_Fwd", 1, 0, 2000, cmdtext);
-	animCmd("akontor 2", "INT_OFFICE","OFF_Sit_2Idle_180", 1, 0, 2000, cmdtext);
-	animCmd("akontor 3", "INT_OFFICE","OFF_Sit_Bored_Loop", 1, 0, 0, cmdtext);
-	animCmd("akontor 4", "INT_OFFICE","OFF_Sit_Crash", 1, 0, 2000, cmdtext);
-	animCmd("akontor 5", "INT_OFFICE","OFF_Sit_Drink", 1, 0, 2000, cmdtext);
-	animCmd("akontor 6", "INT_OFFICE","OFF_Sit_Idle_Loop", 1, 0, 0, cmdtext);
-	animCmd("akontor 7", "INT_OFFICE","OFF_Sit_In", 1, 0, 2000, cmdtext);
-	animCmd("akontor 8", "INT_OFFICE","OFF_Sit_Read", 1, 0, 2000, cmdtext);
-	animCmd("akontor 9", "INT_OFFICE","OFF_Sit_Type_Loop", 1, 0, 0, cmdtext);
-	animCmd("akontor 10", "INT_OFFICE","OFF_Sit_Watch", 1, 0, 2000, cmdtext);
-
-	animHelper("a2ri", "AÄRI: /aäri [1-4]", cmdtext);			
-	animCmd("a2ri 1", "JST_BUISNESS","girl_01", 1, 0, 2000, cmdtext);
-	animCmd("a2ri 2", "JST_BUISNESS","girl_02", 1, 0, 2000, cmdtext);
-	animCmd("a2ri 3", "JST_BUISNESS","player_01", 1, 0, 2000, cmdtext);
-	animCmd("a2ri 4", "JST_BUISNESS","smoke_01", 1, 0, 2000, cmdtext);
-
-	animHelper("asyletants", "ASÜLETANTS: /asületants [1-6]", cmdtext);			
-	animCmd("asyletants 1", "LAPDAN1","LAPDAN_D", 1, 0, 2000, cmdtext);
-	animCmd("asyletants 2", "LAPDAN1","LAPDAN_P", 1, 0, 2000, cmdtext);
-	animCmd("asyletants 3", "LAPDAN2","LAPDAN_D", 1, 0, 2000, cmdtext);
-	animCmd("asyletants 4", "LAPDAN2","LAPDAN_P", 1, 0, 2000, cmdtext);
-	animCmd("asyletants 5", "LAPDAN3","LAPDAN_D", 1, 0, 2000, cmdtext);
-	animCmd("asyletants 6", "LAPDAN3","LAPDAN_P", 1, 0, 2000, cmdtext);
-
-	animHelper("amdend", "AMDEND: /amdend [1-8]", cmdtext);			
-	animCmd("amdend 1", "MD_END","END_SC1_PLY", 1, 0, 2000, cmdtext);
-	animCmd("amdend 2", "MD_END","END_SC1_RYD", 1, 0, 2000, cmdtext);
-	animCmd("amdend 3", "MD_END","END_SC1_SMO", 1, 0, 2000, cmdtext);
-	animCmd("amdend 4", "MD_END","END_SC1_SWE", 1, 0, 2000, cmdtext);
-	animCmd("amdend 5", "MD_END","END_SC2_PLY", 1, 0, 2000, cmdtext);
-	animCmd("amdend 6", "MD_END","END_SC2_RYD", 1, 0, 2000, cmdtext);
-	animCmd("amdend 7", "MD_END","END_SC2_SMO", 1, 0, 2000, cmdtext);
-	animCmd("amdend 8", "MD_END","END_SC2_SWE", 1, 0, 2000, cmdtext);
-
-	animHelper("amuu", "AMUU: /amuu [1-18]", cmdtext);			
-	animCmd("amuu 1", "MISC","bitchslap", 1, 0, 2000, cmdtext);
-	animCmd("amuu 2", "MISC","bng_wndw", 1, 0, 2000, cmdtext);
-	animCmd("amuu 3", "MISC","bng_wndw_02", 1, 0, 2000, cmdtext);
-	animCmd("amuu 4", "MISC","Case_pickup", 1, 0, 2000, cmdtext);
-	animCmd("amuu 5", "MISC","door_jet", 1, 0, 2000, cmdtext);
-	animCmd("amuu 6", "MISC","Hiker_Pose", 1, 0, 2000, cmdtext);
-	animCmd("amuu 7", "MISC","Hiker_Pose_L", 1, 0, 2000, cmdtext);
-	animCmd("amuu 8", "MISC","Idle_Chat_02", 1, 0, 2000, cmdtext);
-	animCmd("amuu 9", "MISC","pickup_box", 1, 0, 2000, cmdtext);
-	animCmd("amuu 10", "MISC","Plunger_01", 1, 0, 2000, cmdtext);
-	animCmd("amuu 11", "MISC","Plyrlean_loop", 1, 0, 0, cmdtext);
-	animCmd("amuu 12", "MISC","plyr_shkhead", 1, 0, 2000, cmdtext);
-	animCmd("amuu 13", "MISC","Run_Dive", 1, 0, 2000, cmdtext);
-	animCmd("amuu 14", "MISC","Scratchballs_01", 1, 0, 2000, cmdtext);
-	animCmd("amuu 15", "MISC","SEAT_LR", 1, 0, 2000, cmdtext);
-	animCmd("amuu 16", "MISC","Seat_talk_01", 1, 0, 2000, cmdtext);
-	animCmd("amuu 17", "MISC","Seat_talk_02", 1, 0, 2000, cmdtext);
-	animCmd("amuu 18", "MISC","SEAT_watch", 1, 0, 2000, cmdtext);
-
-	animHelper("aluure", "ALUURE: /aluure [1-29]", cmdtext);			
-	animCmd("aluure 1", "ON_LOOKERS","lkaround_in", 1, 0, 2000, cmdtext);
-	animCmd("aluure 2", "ON_LOOKERS","lkaround_loop", 1, 0, 0, cmdtext);
-	animCmd("aluure 3", "ON_LOOKERS","lkaround_out", 1, 0, 2000, cmdtext);
-	animCmd("aluure 4", "ON_LOOKERS","lkup_in", 1, 0, 2000, cmdtext);
-	animCmd("aluure 5", "ON_LOOKERS","lkup_loop", 1, 0, 0, cmdtext);
-	animCmd("aluure 6", "ON_LOOKERS","lkup_out", 1, 0, 2000, cmdtext);
-	animCmd("aluure 7", "ON_LOOKERS","lkup_point", 1, 0, 2000, cmdtext);
-	animCmd("aluure 8", "ON_LOOKERS","panic_cower", 1, 0, 2000, cmdtext);
-	animCmd("aluure 9", "ON_LOOKERS","panic_hide", 1, 0, 2000, cmdtext);
-	animCmd("aluure 10", "ON_LOOKERS","panic_in", 1, 0, 2000, cmdtext);
-	animCmd("aluure 11", "ON_LOOKERS","panic_loop", 1, 0, 0, cmdtext);
-	animCmd("aluure 12", "ON_LOOKERS","panic_out", 1, 0, 2000, cmdtext);
-	animCmd("aluure 13", "ON_LOOKERS","panic_point", 1, 0, 2000, cmdtext);
-	animCmd("aluure 14", "ON_LOOKERS","panic_shout", 1, 0, 2000, cmdtext);
-	animCmd("aluure 15", "ON_LOOKERS","Pointup_in", 1, 0, 2000, cmdtext);
-	animCmd("aluure 16", "ON_LOOKERS","Pointup_loop", 1, 0, 0, cmdtext);
-	animCmd("aluure 17", "ON_LOOKERS","Pointup_out", 1, 0, 2000, cmdtext);
-	animCmd("aluure 18", "ON_LOOKERS","Pointup_shout", 1, 0, 2000, cmdtext);
-	animCmd("aluure 19", "ON_LOOKERS","point_in", 1, 0, 2000, cmdtext);
-	animCmd("aluure 20", "ON_LOOKERS","point_loop", 1, 0, 0, cmdtext);
-	animCmd("aluure 21", "ON_LOOKERS","point_out", 1, 0, 2000, cmdtext);
-	animCmd("aluure 22", "ON_LOOKERS","shout_01", 1, 0, 2000, cmdtext);
-	animCmd("aluure 23", "ON_LOOKERS","shout_02", 1, 0, 2000, cmdtext);
-	animCmd("aluure 24", "ON_LOOKERS","shout_in", 1, 0, 2000, cmdtext);
-	animCmd("aluure 25", "ON_LOOKERS","shout_loop", 1, 0, 0, cmdtext);
-	animCmd("aluure 26", "ON_LOOKERS","shout_out", 1, 0, 2000, cmdtext);
-	animCmd("aluure 27", "ON_LOOKERS","wave_in", 1, 0, 2000, cmdtext);
-	animCmd("aluure 28", "ON_LOOKERS","wave_loop", 1, 0, 0, cmdtext);
-	animCmd("aluure 29", "ON_LOOKERS","wave_out", 1, 0, 2000, cmdtext);
-
-	animHelper("apanused", "APANUSED: /apanused [1-11]", cmdtext);			
-	animCmd("apanused 1", "OTB","betslp_in", 1, 0, 2000, cmdtext);
-	animCmd("apanused 2", "OTB","betslp_lkabt", 1, 0, 2000, cmdtext);
-	animCmd("apanused 3", "OTB","betslp_loop", 1, 0, 0, cmdtext);
-	animCmd("apanused 4", "OTB","betslp_out", 1, 0, 2000, cmdtext);
-	animCmd("apanused 5", "OTB","betslp_tnk", 1, 0, 2000, cmdtext);
-	animCmd("apanused 6", "OTB","wtchrace_cmon", 1, 0, 2000, cmdtext);
-	animCmd("apanused 7", "OTB","wtchrace_in", 1, 0, 2000, cmdtext);
-	animCmd("apanused 8", "OTB","wtchrace_loop", 1, 0, 0, cmdtext);
-	animCmd("apanused 9", "OTB","wtchrace_lose", 1, 0, 2000, cmdtext);
-	animCmd("apanused 10", "OTB","wtchrace_out", 1, 0, 2000, cmdtext);
-	animCmd("apanused 11", "OTB","wtchrace_win", 1, 0, 2000, cmdtext);
-
-	animHelper("apaulmac", "APAULMAC: /apaulmac [1-9]", cmdtext);			
-	animCmd("apaulmac 1", "PAULNMAC","PnM_Argue1_A", 1, 0, 2000, cmdtext);
-	animCmd("apaulmac 2", "PAULNMAC","PnM_Argue1_B", 1, 0, 2000, cmdtext);
-	animCmd("apaulmac 3", "PAULNMAC","PnM_Argue2_A", 1, 0, 2000, cmdtext);
-	animCmd("apaulmac 4", "PAULNMAC","PnM_Argue2_B", 1, 0, 2000, cmdtext);
-	animCmd("apaulmac 5", "PAULNMAC","PnM_Loop_A", 1, 0, 0, cmdtext);
-	animCmd("apaulmac 6", "PAULNMAC","PnM_Loop_B", 1, 0, 0, cmdtext);
-	animCmd("apaulmac 7", "PAULNMAC","wank_in", 1, 0, 2000, cmdtext);
-	animCmd("apaulmac 8", "PAULNMAC","wank_loop", 1, 0, 0, cmdtext);
-	animCmd("apaulmac 9", "PAULNMAC","wank_out", 1, 0, 2000, cmdtext);
-
-    if (funcidx("phAnims_OnPlayerCommandText") != -1)
-    {
-        return CallLocalFunction("phAnims_OnPlayerCommandText", "is", playerid, cmdtext);
-    }
-    return 1;
+#define animCmd(%0,%1,%2,%3,%4,%5) \
+COMMAND:%0(playerid, params[]) \
+{ \
+	return ApplyAnimation(playerid,#%1,#%2,1.0,%3,%4,%4,0,%5); \
 }
 
-forward phAnims_OnPlayerCommandText(playerid, cmdtext[]);
+#define animStop(%0,%1) if(!strcmp(DcmdFix( (%1)[1], strlen((%1)[1]) ),#%0,true)) return stopAnims(playerid)
 
-#if defined _ALS_OnPlayerCommandText
-    #undef OnPlayerCommandText
-#else
-    #define _ALS_OnPlayerCommandText
-#endif
-#define OnPlayerCommandText phAnims_OnPlayerCommandText
+#define animHelper(%0,%1,%2) \
+COMMAND:%0(playerid, params[]) \
+{ \
+	new animId; \
+	if(sscanf(params, "i", animId) || (animId < 1 || animId > %1)) return SendClientMessage(playerid, COLOR_ANIMS, #%2); \
+	new str[32]; \
+	format(str, 32, "cmd_%s_%d", #%0, animId); \
+	if(funcidx(str) != -1) return CallLocalFunction(str, "is", playerid, params); \
+	return 1; \
+}
+
+COMMAND:animatsioonid(playerid, params[])
+{
+	SendClientMessage(playerid, COLOR_ANIMS, "/*** Phoenix Animatsioonid ***/");
+	SendClientMessage(playerid, COLOR_ANIMS, "/***       eRP Gaming      ***/");
+	
+	SendClientMessage(playerid, COLOR_ANIMS, "/* /lõpeta /istu /püsti /aken /lehvita /asuitseta /pese /ameedik /suudle /lama   */");		
+	SendClientMessage(playerid, COLOR_ANIMS, "/* /baar /paanika /jõuka /animpomm /atulista /kanna /aplayidle /apiljard /avaene */");		
+	SendClientMessage(playerid, COLOR_ANIMS, "/* /apyyton /arap /ariot /apank /aryder /asyga /apood /astripp /ap2evita /ament  */");		
+	SendClientMessage(playerid, COLOR_ANIMS, "/* /asweet /at2tuu /aspank /asuhuv6tt /akasiino /acrack /aurgas /apeakas /andiiler */");		
+	SendClientMessage(playerid, COLOR_ANIMS, "/* /apõikle /asöök /agäng /aisik_/agkäed /asurnuaed /ajuuksur /arööv /akodu /akontor */");		
+	SendClientMessage(playerid, COLOR_ANIMS, "/* /aäri /asületants /amdend /amuu /aluure /apanused /apaulmac */");		
+	
+	SendClientMessage(playerid, COLOR_ANIMS, "/***         --|8|--         ***/");		
+	return 1;
+}
+	
+animCmd(pysti, "Attractors", "Stepsit_out", 0, 0, 0)
+animCmd(aken, "AIRPORT", "thrw_barl_thrw", 1, 0, 2000)
+animCmd(lehvita, "BD_FIRE", "BD_GF_Wave", 1, 0, 0)
+animCmd(pese, "BD_FIRE", "wash_up", 1, 0, 0)
+animCmd(ameedik, "MEDIC","CPR", 1, 0, 2000)
+animCmd(avaene, "POOR","WINWASH_Wash2Beg", 1, 0, 2000)
+
+COMMAND:l6peta(playerid, params[])
+{
+	return stopAnims(playerid);
+}
+
+animHelper(istu,2,"ISTU: /istu [1-2]")	
+animCmd(istu_1,"Attractors","Stepsit_loop",1,0,0)
+animCmd(istu_2, "BEACH", "bather", 1, 0, 0)
+	
+
+animHelper(suudle,16,"SUUDLE: /suudle [1-16]")		
+animCmd(suudle_1, "BD_FIRE", "Playa_Kiss_03", 1, 0, 0)
+animCmd(suudle_2, "KISSING","BD_GF_Wave", 1, 0, 2000)
+animCmd(suudle_3, "KISSING","gfwave2", 1, 0, 2000)
+animCmd(suudle_4, "KISSING","GF_CarArgue_01", 1, 0, 2000)
+animCmd(suudle_5, "KISSING","GF_CarArgue_02", 1, 0, 2000)
+animCmd(suudle_6, "KISSING","GF_CarSpot", 1, 0, 2000)
+animCmd(suudle_7, "KISSING","GF_StreetArgue_01", 1, 0, 2000)
+animCmd(suudle_8, "KISSING","GF_StreetArgue_02", 1, 0, 2000)
+animCmd(suudle_9, "KISSING","gift_get", 1, 0, 2000)
+animCmd(suudle_10, "KISSING","gift_give", 1, 0, 2000)
+animCmd(suudle_11, "KISSING","Grlfrd_Kiss_01", 1, 0, 2000)
+animCmd(suudle_12, "KISSING","Grlfrd_Kiss_02", 1, 0, 2000)
+animCmd(suudle_13, "KISSING","Grlfrd_Kiss_03", 1, 0, 2000)
+animCmd(suudle_14, "KISSING","Playa_Kiss_01", 1, 0, 2000)
+animCmd(suudle_15, "KISSING","Playa_Kiss_02", 1, 0, 2000)
+animCmd(suudle_16, "KISSING","Playa_Kiss_03", 1, 0, 2000)
+
+animHelper(lama, 3, "LAMA: /lama [1-3]")
+animCmd(lama_1, "BEACH", "Lay_Bac_Loop", 1, 0, 0)
+animCmd(lama_2, "BEACH", "ParkSit_W_loop", 1, 0, 0)
+animCmd(lama_3, "BEACH", "SitnWait_loop_W", 1, 0, 0)
+
+animHelper(baar, 12, "BAAR: /baar [1-12]")		
+animCmd(baar_1, "BAR", "Barcustom_get", 1, 0, 2000)
+animCmd(baar_2, "BAR", "Barcustom_loop", 1, 0, 0)
+animCmd(baar_3, "BAR", "Barcustom_order", 1, 0, 2000)
+animCmd(baar_4, "BAR", "Barserve_bottle", 1, 0, 2000)
+animCmd(baar_5, "BAR", "Barserve_give", 1, 0, 2000)
+animCmd(baar_6, "BAR", "Barserve_glass", 1, 0, 2000)
+animCmd(baar_7, "BAR", "Barserve_in", 1, 0, 2000)
+animCmd(baar_8, "BAR", "Barserve_loop", 1, 0, 0)
+animCmd(baar_9, "BAR", "Barserve_order", 1, 0, 2000)
+animCmd(baar_10, "BAR", "dnk_stndF_loop", 1, 0, 0)
+animCmd(baar_11, "BAR", "dnk_stndM_loop", 1, 0, 0)
+animCmd(baar_12, "BAR", "BARman_idle", 1, 0, 0)	
+
+animHelper(paanika, 5, "PAANIKA: /paanika [1-5]")	
+animCmd(paanika_1, "BD_FIRE", "BD_Panic_01", 1, 0, 2000)
+animCmd(paanika_2, "BD_FIRE", "BD_Panic_02", 1, 0, 2000)
+animCmd(paanika_3, "BD_FIRE", "BD_Panic_03", 1, 0, 2000)
+animCmd(paanika_4, "BD_FIRE", "BD_Panic_04", 1, 0, 2000)
+animCmd(paanika_5, "BD_FIRE", "BD_Panic_Loop", 1, 0, 0)
+
+animHelper(j6uka, 40, "JÕUKA: /jõuka [1-40]")	
+animCmd(j6uka_1, "benchpress", "gym_bp_celebrate", 1, 0, 0)
+animCmd(j6uka_2, "benchpress", "gym_bp_down", 1, 0, 0)
+animCmd(j6uka_3, "benchpress", "gym_bp_getoff", 1, 0, 0)
+animCmd(j6uka_4, "benchpress", "gym_bp_geton", 1, 0, 0)
+animCmd(j6uka_5, "benchpress", "gym_bp_up_A", 1, 0, 0)
+animCmd(j6uka_6, "benchpress", "gym_bp_up_B", 1, 0, 0)
+animCmd(j6uka_7, "benchpress", "gym_bp_up_smooth", 1, 0, 0)
+animCmd(j6uka_8, "Freeweights","gym_barbell", 1, 0, 2000)
+animCmd(j6uka_9, "Freeweights","gym_free_A", 1, 0, 2000)
+animCmd(j6uka_10, "Freeweights","gym_free_B", 1, 0, 2000)
+animCmd(j6uka_11, "Freeweights","gym_free_celebrate", 1, 0, 2000)
+animCmd(j6uka_12, "Freeweights","gym_free_down", 1, 0, 2000)
+animCmd(j6uka_13, "Freeweights","gym_free_loop", 1, 0, 0)
+animCmd(j6uka_14, "Freeweights","gym_free_pickup", 1, 0, 2000)
+animCmd(j6uka_15, "Freeweights","gym_free_putdown", 1, 0, 2000)
+animCmd(j6uka_16, "Freeweights","gym_free_up_smooth", 1, 0, 2000)	
+animCmd(j6uka_17, "GYMNASIUM","GYMshadowbox", 1, 0, 2000)
+animCmd(j6uka_18, "GYMNASIUM","gym_bike_celebrate", 1, 0, 2000)
+animCmd(j6uka_19, "GYMNASIUM","gym_bike_fast", 1, 0, 2000)
+animCmd(j6uka_20, "GYMNASIUM","gym_bike_faster", 1, 0, 2000)
+animCmd(j6uka_21, "GYMNASIUM","gym_bike_getoff", 1, 0, 2000)
+animCmd(j6uka_22, "GYMNASIUM","gym_bike_geton", 1, 0, 2000)
+animCmd(j6uka_23, "GYMNASIUM","gym_bike_pedal", 1, 0, 2000)
+animCmd(j6uka_24, "GYMNASIUM","gym_bike_slow", 1, 0, 2000)
+animCmd(j6uka_25, "GYMNASIUM","gym_bike_still", 1, 0, 2000)
+animCmd(j6uka_26, "GYMNASIUM","gym_jog_falloff", 1, 0, 2000)
+animCmd(j6uka_27, "GYMNASIUM","gym_shadowbox", 1, 0, 2000)
+animCmd(j6uka_28, "GYMNASIUM","gym_tread_celebrate", 1, 0, 2000)
+animCmd(j6uka_29, "GYMNASIUM","gym_tread_falloff", 1, 0, 2000)
+animCmd(j6uka_30, "GYMNASIUM","gym_tread_getoff", 1, 0, 2000)
+animCmd(j6uka_31, "GYMNASIUM","gym_tread_geton", 1, 0, 2000)
+animCmd(j6uka_32, "GYMNASIUM","gym_tread_jog", 1, 0, 2000)
+animCmd(j6uka_33, "GYMNASIUM","gym_tread_sprint", 1, 0, 2000)
+animCmd(j6uka_34, "GYMNASIUM","gym_tread_tired", 1, 0, 2000)
+animCmd(j6uka_35, "GYMNASIUM","gym_tread_walk", 1, 0, 2000)
+animCmd(j6uka_36, "GYMNASIUM","gym_walk_falloff", 1, 0, 2000)
+animCmd(j6uka_37, "GYMNASIUM","Pedals_fast", 1, 0, 2000)
+animCmd(j6uka_38, "GYMNASIUM","Pedals_med", 1, 0, 2000)
+animCmd(j6uka_39, "GYMNASIUM","Pedals_slow", 1, 0, 2000)
+animCmd(j6uka_40, "GYMNASIUM","Pedals_still", 1, 0, 2000)	
+
+animHelper(animpomm, 6, "ANIMPOMM: /animpomm [1-6]")	
+animCmd(animpomm_1, "BOMBER", "BOM_Plant", 1, 0, 2000)
+animCmd(animpomm_2, "BOMBER", "BOM_Plant_2Idle", 1, 0, 2000)
+animCmd(animpomm_3, "BOMBER", "BOM_Plant_Crouch_In", 1, 0, 2000)
+animCmd(animpomm_4, "BOMBER", "BOM_Plant_Crouch_Out", 1, 0, 2000)
+animCmd(animpomm_5, "BOMBER", "BOM_Plant_In", 1, 0, 2000)
+animCmd(animpomm_6, "BOMBER", "BOM_Plant_Loop", 1, 0, 0)
+
+animHelper(atulista, 5, "ATULISTA: /atulista [1-5]")		
+animCmd(atulista_1, "BUDDY","buddy_crouchfire", 1, 0, 2000)
+animCmd(atulista_2, "BUDDY","buddy_crouchreload", 1, 0, 2000)
+animCmd(atulista_3, "BUDDY","buddy_fire", 1, 0, 2000)
+animCmd(atulista_4, "BUDDY","buddy_fire_poor", 1, 0, 2000)
+animCmd(atulista_5, "BUDDY","buddy_reload", 1, 0, 2000)
+
+animHelper(kanna, 7, "KANNA: /kanna [1-7]")		
+animCmd(kanna_1, "CARRY","crry_prtial", 1, 0, 2000)
+animCmd(kanna_2, "CARRY","liftup", 1, 0, 2000)
+animCmd(kanna_3, "CARRY","liftup05", 1, 0, 2000)
+animCmd(kanna_4, "CARRY","liftup105", 1, 0, 2000)
+animCmd(kanna_5, "CARRY","putdwn", 1, 0, 2000)
+animCmd(kanna_6, "CARRY","putdwn05", 1, 0, 2000)
+animCmd(kanna_7, "CARRY","putdwn105", 1, 0, 2000)	
+
+animHelper(aplayidle, 5, "APLAYIDLE: /aplayidle [1-5]")			
+animCmd(aplayidle_1, "PLAYIDLES","shift", 1, 0, 2000)
+animCmd(aplayidle_2, "PLAYIDLES","shldr", 1, 0, 2000)
+animCmd(aplayidle_3, "PLAYIDLES","stretch", 1, 0, 2000)
+animCmd(aplayidle_4, "PLAYIDLES","strleg", 1, 0, 2000)
+animCmd(aplayidle_5, "PLAYIDLES","time", 1, 0, 2000)
+
+animHelper(apiljard, 21, "APILJARD: /apiljard [1-21]")			
+animCmd(apiljard_1, "POOL","POOL_ChalkCue", 1, 0, 2000)
+animCmd(apiljard_2, "POOL","POOL_Idle_Stance", 1, 0, 2000)
+animCmd(apiljard_3, "POOL","POOL_Long_Shot", 1, 0, 2000)
+animCmd(apiljard_4, "POOL","POOL_Long_Shot_O", 1, 0, 2000)
+animCmd(apiljard_5, "POOL","POOL_Long_Start", 1, 0, 2000)
+animCmd(apiljard_6, "POOL","POOL_Long_Start_O", 1, 0, 2000)
+animCmd(apiljard_7, "POOL","POOL_Med_Shot", 1, 0, 2000)
+animCmd(apiljard_8, "POOL","POOL_Med_Shot_O", 1, 0, 2000)
+animCmd(apiljard_9, "POOL","POOL_Med_Start", 1, 0, 2000)
+animCmd(apiljard_10, "POOL","POOL_Med_Start_O", 1, 0, 2000)
+animCmd(apiljard_11, "POOL","POOL_Place_White", 1, 0, 2000)
+animCmd(apiljard_12, "POOL","POOL_Short_Shot", 1, 0, 2000)
+animCmd(apiljard_13, "POOL","POOL_Short_Shot_O", 1, 0, 2000)
+animCmd(apiljard_14, "POOL","POOL_Short_Start", 1, 0, 2000)
+animCmd(apiljard_15, "POOL","POOL_Short_Start_O", 1, 0, 2000)
+animCmd(apiljard_16, "POOL","POOL_Walk", 1, 0, 2000)
+animCmd(apiljard_17, "POOL","POOL_Walk_Start", 1, 0, 2000)
+animCmd(apiljard_18, "POOL","POOL_XLong_Shot", 1, 0, 2000)
+animCmd(apiljard_19, "POOL","POOL_XLong_Shot_O", 1, 0, 2000)
+animCmd(apiljard_20, "POOL","POOL_XLong_Start", 1, 0, 2000)
+animCmd(apiljard_21, "POOL","POOL_XLong_Start_O", 1, 0, 2000)
+
+animHelper(apyyton, 5, "APÜÜTON: /apüüton [1-5]")			
+animCmd(apyyton_1, "PYTHON","python_crouchfire", 1, 0, 2000)
+animCmd(apyyton_2, "PYTHON","python_crouchreload", 1, 0, 2000)
+animCmd(apyyton_3, "PYTHON","python_fire", 1, 0, 2000)
+animCmd(apyyton_4, "PYTHON","python_fire_poor", 1, 0, 2000)
+animCmd(apyyton_5, "PYTHON","python_reload", 1, 0, 2000)
+
+animHelper(arap, 8, "ARAP: /arap [1-8]")			
+animCmd(arap_1, "RAPPING","Laugh_01", 1, 0, 2000)
+animCmd(arap_2, "RAPPING","RAP_A_IN", 1, 0, 2000)
+animCmd(arap_3, "RAPPING","RAP_A_Loop", 1, 0, 0)
+animCmd(arap_4, "RAPPING","RAP_A_OUT", 1, 0, 2000)
+animCmd(arap_5, "RAPPING","RAP_B_IN", 1, 0, 2000)
+animCmd(arap_6, "RAPPING","RAP_B_Loop", 1, 0, 0)
+animCmd(arap_7, "RAPPING","RAP_B_OUT", 1, 0, 2000)
+animCmd(arap_8, "RAPPING","RAP_C_Loop", 1, 0, 0)
+
+animHelper(ariot, 7, "ARIOT: /ariot [1-7]")			
+animCmd(ariot_1, "RIOT","RIOT_ANGRY", 1, 0, 2000)
+animCmd(ariot_2, "RIOT","RIOT_ANGRY_B", 1, 0, 2000)
+animCmd(ariot_3, "RIOT","RIOT_challenge", 1, 0, 2000)
+animCmd(ariot_4, "RIOT","RIOT_CHANT", 1, 0, 2000)
+animCmd(ariot_5, "RIOT","RIOT_FUKU", 1, 0, 2000)
+animCmd(ariot_6, "RIOT","RIOT_PUNCHES", 1, 0, 2000)
+animCmd(ariot_7, "RIOT","RIOT_shout", 1, 0, 2000)
+
+animHelper(apank, 5, "APANK: /apank [1-5]")			
+animCmd(apank_1, "ROB_BANK","CAT_Safe_End", 1, 0, 2000)
+animCmd(apank_2, "ROB_BANK","CAT_Safe_Open", 1, 0, 2000)
+animCmd(apank_3, "ROB_BANK","CAT_Safe_Open_O", 1, 0, 2000)
+animCmd(apank_4, "ROB_BANK","CAT_Safe_Rob", 1, 0, 2000)
+animCmd(apank_5, "ROB_BANK","SHP_HandsUp_Scr", 1, 0, 2000)
+
+animHelper(aryder, 16, "ARYDER: /aryder [1-16]")			
+animCmd(aryder_1, "RYDER","RYD_Beckon_01", 1, 0, 2000)
+animCmd(aryder_2, "RYDER","RYD_Beckon_02", 1, 0, 2000)
+animCmd(aryder_3, "RYDER","RYD_Beckon_03", 1, 0, 2000)
+animCmd(aryder_4, "RYDER","RYD_Die_PT1", 1, 0, 2000)
+animCmd(aryder_5, "RYDER","RYD_Die_PT2", 1, 0, 2000)
+animCmd(aryder_6, "RYDER","Van_Crate_L", 1, 0, 2000)
+animCmd(aryder_7, "RYDER","Van_Crate_R", 1, 0, 2000)
+animCmd(aryder_8, "RYDER","Van_Fall_L", 1, 0, 2000)
+animCmd(aryder_9, "RYDER","Van_Fall_R", 1, 0, 2000)
+animCmd(aryder_10, "RYDER","Van_Lean_L", 1, 0, 2000)
+animCmd(aryder_11, "RYDER","Van_Lean_R", 1, 0, 2000)
+animCmd(aryder_12, "RYDER","VAN_PickUp_E", 1, 0, 2000)
+animCmd(aryder_13, "RYDER","VAN_PickUp_S", 1, 0, 2000)
+animCmd(aryder_14, "RYDER","Van_Stand", 1, 0, 2000)
+animCmd(aryder_15, "RYDER","Van_Stand_Crate", 1, 0, 2000)
+animCmd(aryder_16, "RYDER","Van_Throw", 1, 0, 2000)
+
+animHelper(asyga, 12, "ASÜGA: /asüga [1-12]")			
+animCmd(asyga_1, "SCRATCHING","scdldlp", 1, 0, 2000)
+animCmd(asyga_2, "SCRATCHING","scdlulp", 1, 0, 2000)
+animCmd(asyga_3, "SCRATCHING","scdrdlp", 1, 0, 2000)
+animCmd(asyga_4, "SCRATCHING","scdrulp", 1, 0, 2000)
+animCmd(asyga_5, "SCRATCHING","sclng_l", 1, 0, 2000)
+animCmd(asyga_6, "SCRATCHING","sclng_r", 1, 0, 2000)
+animCmd(asyga_7, "SCRATCHING","scmid_l", 1, 0, 2000)
+animCmd(asyga_8, "SCRATCHING","scmid_r", 1, 0, 2000)
+animCmd(asyga_9, "SCRATCHING","scshrtl", 1, 0, 2000)
+animCmd(asyga_10, "SCRATCHING","scshrtr", 1, 0, 2000)
+animCmd(asyga_11, "SCRATCHING","sc_ltor", 1, 0, 2000)
+animCmd(asyga_12, "SCRATCHING","sc_rtol", 1, 0, 2000)
+
+animHelper(apood, 25, "APOOD: /apood [1-25]")			
+animCmd(apood_1, "SHOP","ROB_2Idle", 1, 0, 2000)
+animCmd(apood_2, "SHOP","ROB_Loop", 1, 0, 0)
+animCmd(apood_3, "SHOP","ROB_Loop_Threat", 1, 0, 0)
+animCmd(apood_4, "SHOP","ROB_Shifty", 1, 0, 2000)
+animCmd(apood_5, "SHOP","ROB_StickUp_In", 1, 0, 2000)
+animCmd(apood_6, "SHOP","SHP_Duck", 1, 0, 2000)
+animCmd(apood_7, "SHOP","SHP_Duck_Aim", 1, 0, 2000)
+animCmd(apood_8, "SHOP","SHP_Duck_Fire", 1, 0, 2000)
+animCmd(apood_9, "SHOP","SHP_Gun_Aim", 1, 0, 2000)
+animCmd(apood_10, "SHOP","SHP_Gun_Duck", 1, 0, 2000)
+animCmd(apood_11, "SHOP","SHP_Gun_Fire", 1, 0, 2000)
+animCmd(apood_12, "SHOP","SHP_Gun_Grab", 1, 0, 2000)
+animCmd(apood_13, "SHOP","SHP_Gun_Threat", 1, 0, 2000)
+animCmd(apood_14, "SHOP","SHP_HandsUp_Scr", 1, 0, 2000)
+animCmd(apood_15, "SHOP","SHP_Jump_Glide", 1, 0, 2000)
+animCmd(apood_16, "SHOP","SHP_Jump_Land", 1, 0, 2000)
+animCmd(apood_17, "SHOP","SHP_Jump_Launch", 1, 0, 2000)
+animCmd(apood_18, "SHOP","SHP_Rob_GiveCash", 1, 0, 2000)
+animCmd(apood_19, "SHOP","SHP_Rob_HandsUp", 1, 0, 2000)
+animCmd(apood_20, "SHOP","SHP_Rob_React", 1, 0, 2000)
+animCmd(apood_21, "SHOP","SHP_Serve_End", 1, 0, 2000)
+animCmd(apood_22, "SHOP","SHP_Serve_Idle", 1, 0, 2000)
+animCmd(apood_23, "SHOP","SHP_Serve_Loop", 1, 0, 0)
+animCmd(apood_24, "SHOP","SHP_Serve_Start", 1, 0, 2000)
+animCmd(apood_25, "SHOP","Smoke_RYD", 1, 0, 2000)
+animCmd(apood_26, "INT_SHOP","shop_cashier", 1, 0, 2000)
+animCmd(apood_27, "INT_SHOP","shop_in", 1, 0, 2000)
+animCmd(apood_28, "INT_SHOP","shop_lookA", 1, 0, 2000)
+animCmd(apood_29, "INT_SHOP","shop_lookB", 1, 0, 2000)
+animCmd(apood_30, "INT_SHOP","shop_loop", 1, 0, 0)
+animCmd(apood_31, "INT_SHOP","shop_out", 1, 0, 2000)
+animCmd(apood_32, "INT_SHOP","shop_pay", 1, 0, 2000)
+animCmd(apood_33, "INT_SHOP","shop_shelf", 1, 0, 2000)	
+
+animHelper(asuitseta, 9, "ASUITSETA: /asuitseta [1-9]")			
+animCmd(asuitseta_1, "BD_FIRE", "M_smklean_loop", 1, 0, 0)		
+animCmd(asuitseta_2, "SMOKING","M_smklean_loop", 1, 0, 0)
+animCmd(asuitseta_3, "SMOKING","M_smkstnd_loop", 1, 0, 0)
+animCmd(asuitseta_4, "SMOKING","M_smk_drag", 1, 0, 2000)
+animCmd(asuitseta_5, "SMOKING","M_smk_in", 1, 0, 2000)
+animCmd(asuitseta_6, "SMOKING","M_smk_loop", 1, 0, 0)
+animCmd(asuitseta_7, "SMOKING","M_smk_out", 1, 0, 2000)
+animCmd(asuitseta_8, "SMOKING","M_smk_tap", 1, 0, 2000)
+animCmd(asuitseta_9, "SMOKING","F_smklean_loop", 1, 0, 0)	
+
+animHelper(astripp, 20, "ASTRIPP: /astripp [1-20]")			
+animCmd(astripp_1, "STRIP","PLY_CASH", 1, 0, 2000)
+animCmd(astripp_2, "STRIP","PUN_CASH", 1, 0, 2000)
+animCmd(astripp_3, "STRIP","PUN_HOLLER", 1, 0, 2000)
+animCmd(astripp_4, "STRIP","PUN_LOOP", 1, 0, 0)
+animCmd(astripp_5, "STRIP","strip_A", 1, 0, 2000)
+animCmd(astripp_6, "STRIP","strip_B", 1, 0, 2000)
+animCmd(astripp_7, "STRIP","strip_C", 1, 0, 2000)
+animCmd(astripp_8, "STRIP","strip_D", 1, 0, 2000)
+animCmd(astripp_9, "STRIP","strip_E", 1, 0, 2000)
+animCmd(astripp_10, "STRIP","strip_F", 1, 0, 2000)
+animCmd(astripp_11, "STRIP","strip_G", 1, 0, 2000)
+animCmd(astripp_12, "STRIP","STR_A2B", 1, 0, 2000)
+animCmd(astripp_13, "STRIP","STR_B2A", 1, 0, 2000)
+animCmd(astripp_14, "STRIP","STR_B2C", 1, 0, 2000)
+animCmd(astripp_15, "STRIP","STR_C1", 1, 0, 2000)
+animCmd(astripp_16, "STRIP","STR_C2", 1, 0, 2000)
+animCmd(astripp_17, "STRIP","STR_C2B", 1, 0, 2000)
+animCmd(astripp_18, "STRIP","STR_Loop_A", 1, 0, 0)
+animCmd(astripp_19, "STRIP","STR_Loop_B", 1, 0, 0)
+animCmd(astripp_20, "STRIP","STR_Loop_C", 1, 0, 0)
+
+animHelper(ap2evita, 18, "APÄEVITA: /apäevita [1-18]")			
+animCmd(ap2evita_1, "SUNBATHE","batherdown", 1, 0, 2000)
+animCmd(ap2evita_2, "SUNBATHE","batherup", 1, 0, 2000)
+animCmd(ap2evita_3, "SUNBATHE","Lay_Bac_in", 1, 0, 2000)
+animCmd(ap2evita_4, "SUNBATHE","Lay_Bac_out", 1, 0, 2000)
+animCmd(ap2evita_5, "SUNBATHE","ParkSit_M_IdleA", 1, 0, 2000)
+animCmd(ap2evita_6, "SUNBATHE","ParkSit_M_IdleB", 1, 0, 2000)
+animCmd(ap2evita_7, "SUNBATHE","ParkSit_M_IdleC", 1, 0, 2000)
+animCmd(ap2evita_8, "SUNBATHE","ParkSit_M_in", 1, 0, 2000)
+animCmd(ap2evita_9, "SUNBATHE","ParkSit_M_out", 1, 0, 2000)
+animCmd(ap2evita_10, "SUNBATHE","ParkSit_W_idleA", 1, 0, 2000)
+animCmd(ap2evita_11, "SUNBATHE","ParkSit_W_idleB", 1, 0, 2000)
+animCmd(ap2evita_12, "SUNBATHE","ParkSit_W_idleC", 1, 0, 2000)
+animCmd(ap2evita_13, "SUNBATHE","ParkSit_W_in", 1, 0, 2000)
+animCmd(ap2evita_14, "SUNBATHE","ParkSit_W_out", 1, 0, 2000)
+animCmd(ap2evita_15, "SUNBATHE","SBATHE_F_LieB2Sit", 1, 0, 2000)
+animCmd(ap2evita_16, "SUNBATHE","SBATHE_F_Out", 1, 0, 2000)
+animCmd(ap2evita_17, "SUNBATHE","SitnWait_in_W", 1, 0, 2000)
+animCmd(ap2evita_18, "SUNBATHE","SitnWait_out_W", 1, 0, 2000)
+
+animHelper(ament, 35, "AMENT: /ament [1-35]")			
+animCmd(ament_1, "SWAT","gnstwall_injurd", 1, 0, 2000)
+animCmd(ament_2, "SWAT","JMP_Wall1m_180", 1, 0, 2000)
+animCmd(ament_3, "SWAT","Rail_fall", 1, 0, 2000)
+animCmd(ament_4, "SWAT","Rail_fall_crawl", 1, 0, 2000)
+animCmd(ament_5, "SWAT","swt_breach_01", 1, 0, 2000)
+animCmd(ament_6, "SWAT","swt_breach_02", 1, 0, 2000)
+animCmd(ament_7, "SWAT","swt_breach_03", 1, 0, 2000)
+animCmd(ament_8, "SWAT","swt_go", 1, 0, 2000)
+animCmd(ament_9, "SWAT","swt_lkt", 1, 0, 2000)
+animCmd(ament_10, "SWAT","swt_sty", 1, 0, 2000)
+animCmd(ament_11, "SWAT","swt_vent_01", 1, 0, 2000)
+animCmd(ament_12, "SWAT","swt_vent_02", 1, 0, 2000)
+animCmd(ament_13, "SWAT","swt_vnt_sht_die", 1, 0, 2000)
+animCmd(ament_14, "SWAT","swt_vnt_sht_in", 1, 0, 2000)
+animCmd(ament_15, "SWAT","swt_vnt_sht_loop", 1, 0, 0)
+animCmd(ament_16, "SWAT","swt_wllpk_L", 1, 0, 2000)
+animCmd(ament_17, "SWAT","swt_wllpk_L_back", 1, 0, 2000)
+animCmd(ament_18, "SWAT","swt_wllpk_R", 1, 0, 2000)
+animCmd(ament_19, "SWAT","swt_wllpk_R_back", 1, 0, 2000)
+animCmd(ament_20, "SWAT","swt_wllshoot_in_L", 1, 0, 2000)
+animCmd(ament_21, "SWAT","swt_wllshoot_in_R", 1, 0, 2000)
+animCmd(ament_22, "SWAT","swt_wllshoot_out_L", 1, 0, 2000)
+animCmd(ament_23, "SWAT","swt_wllshoot_out_R", 1, 0, 2000)
+animCmd(ament_24, "COP_AMBIENT","Copbrowse_in", 1, 0, 2000)
+animCmd(ament_25, "COP_AMBIENT","Copbrowse_loop", 1, 0, 0)
+animCmd(ament_26, "COP_AMBIENT","Copbrowse_nod", 1, 0, 2000)
+animCmd(ament_27, "COP_AMBIENT","Copbrowse_out", 1, 0, 2000)
+animCmd(ament_28, "COP_AMBIENT","Copbrowse_shake", 1, 0, 2000)
+animCmd(ament_29, "COP_AMBIENT","Coplook_in", 1, 0, 2000)
+animCmd(ament_30, "COP_AMBIENT","Coplook_loop", 1, 0, 0)
+animCmd(ament_31, "COP_AMBIENT","Coplook_nod", 1, 0, 2000)
+animCmd(ament_32, "COP_AMBIENT","Coplook_out", 1, 0, 2000)
+animCmd(ament_33, "COP_AMBIENT","Coplook_shake", 1, 0, 2000)
+animCmd(ament_34, "COP_AMBIENT","Coplook_think", 1, 0, 2000)
+animCmd(ament_35, "COP_AMBIENT","Coplook_watch", 1, 0, 2000)	
+
+animHelper(asweet, 7, "ASWEET: /asweet [1-7]")			
+animCmd(asweet_1, "SWEET","ho_ass_slapped", 1, 0, 2000)
+animCmd(asweet_2, "SWEET","LaFin_Player", 1, 0, 2000)
+animCmd(asweet_3, "SWEET","LaFin_Sweet", 1, 0, 2000)
+animCmd(asweet_4, "SWEET","plyr_hndshldr_01", 1, 0, 2000)
+animCmd(asweet_5, "SWEET","sweet_ass_slap", 1, 0, 2000)
+animCmd(asweet_6, "SWEET","sweet_hndshldr_01", 1, 0, 2000)
+animCmd(asweet_7, "SWEET","Sweet_injuredloop", 1, 0, 0)
+
+animHelper(at2tuu, 57, "ATÄTUU: /atätuu [1-57]")			
+animCmd(at2tuu_1, "TATTOOS","TAT_ArmL_In_O", 1, 0, 2000)
+animCmd(at2tuu_2, "TATTOOS","TAT_ArmL_In_P", 1, 0, 2000)
+animCmd(at2tuu_3, "TATTOOS","TAT_ArmL_In_T", 1, 0, 2000)
+animCmd(at2tuu_4, "TATTOOS","TAT_ArmL_Out_O", 1, 0, 2000)
+animCmd(at2tuu_5, "TATTOOS","TAT_ArmL_Out_P", 1, 0, 2000)
+animCmd(at2tuu_6, "TATTOOS","TAT_ArmL_Out_T", 1, 0, 2000)
+animCmd(at2tuu_7, "TATTOOS","TAT_ArmL_Pose_O", 1, 0, 2000)
+animCmd(at2tuu_8, "TATTOOS","TAT_ArmL_Pose_P", 1, 0, 2000)
+animCmd(at2tuu_9, "TATTOOS","TAT_ArmL_Pose_T", 1, 0, 2000)
+animCmd(at2tuu_10, "TATTOOS","TAT_ArmR_In_O", 1, 0, 2000)
+animCmd(at2tuu_11, "TATTOOS","TAT_ArmR_In_P", 1, 0, 2000)
+animCmd(at2tuu_12, "TATTOOS","TAT_ArmR_In_T", 1, 0, 2000)
+animCmd(at2tuu_13, "TATTOOS","TAT_ArmR_Out_O", 1, 0, 2000)
+animCmd(at2tuu_14, "TATTOOS","TAT_ArmR_Out_P", 1, 0, 2000)
+animCmd(at2tuu_15, "TATTOOS","TAT_ArmR_Out_T", 1, 0, 2000)
+animCmd(at2tuu_16, "TATTOOS","TAT_ArmR_Pose_O", 1, 0, 2000)
+animCmd(at2tuu_17, "TATTOOS","TAT_ArmR_Pose_P", 1, 0, 2000)
+animCmd(at2tuu_18, "TATTOOS","TAT_ArmR_Pose_T", 1, 0, 2000)
+animCmd(at2tuu_19, "TATTOOS","TAT_Back_In_O", 1, 0, 2000)
+animCmd(at2tuu_20, "TATTOOS","TAT_Back_In_P", 1, 0, 2000)
+animCmd(at2tuu_21, "TATTOOS","TAT_Back_In_T", 1, 0, 2000)
+animCmd(at2tuu_22, "TATTOOS","TAT_Back_Out_O", 1, 0, 2000)
+animCmd(at2tuu_23, "TATTOOS","TAT_Back_Out_P", 1, 0, 2000)
+animCmd(at2tuu_24, "TATTOOS","TAT_Back_Out_T", 1, 0, 2000)
+animCmd(at2tuu_25, "TATTOOS","TAT_Back_Pose_O", 1, 0, 2000)
+animCmd(at2tuu_26, "TATTOOS","TAT_Back_Pose_P", 1, 0, 2000)
+animCmd(at2tuu_27, "TATTOOS","TAT_Back_Pose_T", 1, 0, 2000)
+animCmd(at2tuu_28, "TATTOOS","TAT_Back_Sit_In_P", 1, 0, 2000)
+animCmd(at2tuu_29, "TATTOOS","TAT_Back_Sit_Loop_P", 1, 0, 0)
+animCmd(at2tuu_30, "TATTOOS","TAT_Back_Sit_Out_P", 1, 0, 2000)
+animCmd(at2tuu_31, "TATTOOS","TAT_Bel_In_O", 1, 0, 2000)
+animCmd(at2tuu_32, "TATTOOS","TAT_Bel_In_T", 1, 0, 2000)
+animCmd(at2tuu_33, "TATTOOS","TAT_Bel_Out_O", 1, 0, 2000)
+animCmd(at2tuu_34, "TATTOOS","TAT_Bel_Out_T", 1, 0, 2000)
+animCmd(at2tuu_35, "TATTOOS","TAT_Bel_Pose_O", 1, 0, 2000)
+animCmd(at2tuu_36, "TATTOOS","TAT_Bel_Pose_T", 1, 0, 2000)
+animCmd(at2tuu_37, "TATTOOS","TAT_Che_In_O", 1, 0, 2000)
+animCmd(at2tuu_38, "TATTOOS","TAT_Che_In_P", 1, 0, 2000)
+animCmd(at2tuu_39, "TATTOOS","TAT_Che_In_T", 1, 0, 2000)
+animCmd(at2tuu_40, "TATTOOS","TAT_Che_Out_O", 1, 0, 2000)
+animCmd(at2tuu_41, "TATTOOS","TAT_Che_Out_P", 1, 0, 2000)
+animCmd(at2tuu_42, "TATTOOS","TAT_Che_Out_T", 1, 0, 2000)
+animCmd(at2tuu_43, "TATTOOS","TAT_Che_Pose_O", 1, 0, 2000)
+animCmd(at2tuu_44, "TATTOOS","TAT_Che_Pose_P", 1, 0, 2000)
+animCmd(at2tuu_45, "TATTOOS","TAT_Che_Pose_T", 1, 0, 2000)
+animCmd(at2tuu_46, "TATTOOS","TAT_Drop_O", 1, 0, 2000)
+animCmd(at2tuu_47, "TATTOOS","TAT_Idle_Loop_O", 1, 0, 0)
+animCmd(at2tuu_48, "TATTOOS","TAT_Idle_Loop_T", 1, 0, 0)
+animCmd(at2tuu_49, "TATTOOS","TAT_Sit_In_O", 1, 0, 2000)
+animCmd(at2tuu_50, "TATTOOS","TAT_Sit_In_P", 1, 0, 2000)
+animCmd(at2tuu_51, "TATTOOS","TAT_Sit_In_T", 1, 0, 2000)
+animCmd(at2tuu_52, "TATTOOS","TAT_Sit_Loop_O", 1, 0, 0)
+animCmd(at2tuu_53, "TATTOOS","TAT_Sit_Loop_P", 1, 0, 0)
+animCmd(at2tuu_54, "TATTOOS","TAT_Sit_Loop_T", 1, 0, 0)
+animCmd(at2tuu_55, "TATTOOS","TAT_Sit_Out_O", 1, 0, 2000)
+animCmd(at2tuu_56, "TATTOOS","TAT_Sit_Out_P", 1, 0, 2000)
+animCmd(at2tuu_57, "TATTOOS","TAT_Sit_Out_T", 1, 0, 2000)
+
+animHelper(aspank, 8, "ASPANK: /aspank [1-8]")			
+animCmd(aspank_1, "SNM","SPANKING_IDLEW", 1, 0, 2000)
+animCmd(aspank_2, "SNM","SPANKING_IDLEP", 1, 0, 2000)
+animCmd(aspank_3, "SNM","SPANKINGW", 1, 0, 2000)
+animCmd(aspank_4, "SNM","SPANKINGP", 1, 0, 2000)
+animCmd(aspank_5, "SNM","SPANKEDW", 1, 0, 2000)
+animCmd(aspank_6, "SNM","SPANKEDP", 1, 0, 2000)
+animCmd(aspank_7, "SNM","SPANKING_ENDW", 1, 0, 2000)
+animCmd(aspank_8, "SNM","SPANKING_ENDP", 1, 0, 2000)
+
+animHelper(asuhuv6tt, 12, "ASUHUVÕTT: /asuhuvõtt [1-12]")			
+animCmd(asuhuv6tt_1, "BLOWJOBZ","BJ_COUCH_START_P", 1, 0, 2000)
+animCmd(asuhuv6tt_2, "BLOWJOBZ","BJ_COUCH_START_W", 1, 0, 2000)
+animCmd(asuhuv6tt_3, "BLOWJOBZ","BJ_COUCH_LOOP_P", 1, 0, 0)
+animCmd(asuhuv6tt_4, "BLOWJOBZ","BJ_COUCH_LOOP_W", 1, 0, 0)
+animCmd(asuhuv6tt_5, "BLOWJOBZ","BJ_COUCH_END_P", 1, 0, 2000)
+animCmd(asuhuv6tt_6, "BLOWJOBZ","BJ_COUCH_END_W", 1, 0, 2000)
+animCmd(asuhuv6tt_7, "BLOWJOBZ","BJ_STAND_START_P", 1, 0, 2000)
+animCmd(asuhuv6tt_8, "BLOWJOBZ","BJ_STAND_START_W", 1, 0, 2000)
+animCmd(asuhuv6tt_9, "BLOWJOBZ","BJ_STAND_LOOP_P", 1, 0, 0)
+animCmd(asuhuv6tt_10, "BLOWJOBZ","BJ_STAND_LOOP_W", 1, 0, 0)
+animCmd(asuhuv6tt_11, "BLOWJOBZ","BJ_STAND_END_P", 1, 0, 2000)
+animCmd(asuhuv6tt_12, "BLOWJOBZ","BJ_STAND_END_W", 1, 0, 2000)	
+
+animHelper(akasiino, 25, "AKASIINO: /akasiino [1-25]")				
+animCmd(akasiino_1, "CASINO","cards_in", 1, 0, 2000)
+animCmd(akasiino_2, "CASINO","cards_loop", 1, 0, 0)
+animCmd(akasiino_3, "CASINO","cards_lose", 1, 0, 2000)
+animCmd(akasiino_4, "CASINO","cards_out", 1, 0, 2000)
+animCmd(akasiino_5, "CASINO","cards_pick_01", 1, 0, 2000)
+animCmd(akasiino_6, "CASINO","cards_pick_02", 1, 0, 2000)
+animCmd(akasiino_7, "CASINO","cards_raise", 1, 0, 2000)
+animCmd(akasiino_8, "CASINO","cards_win", 1, 0, 2000)
+animCmd(akasiino_9, "CASINO","dealone", 1, 0, 2000)
+animCmd(akasiino_10, "CASINO","manwinb", 1, 0, 2000)
+animCmd(akasiino_11, "CASINO","manwind", 1, 0, 2000)
+animCmd(akasiino_12, "CASINO","Roulette_bet", 1, 0, 2000)
+animCmd(akasiino_13, "CASINO","Roulette_in", 1, 0, 2000)
+animCmd(akasiino_14, "CASINO","Roulette_loop", 1, 0, 0)
+animCmd(akasiino_15, "CASINO","Roulette_lose", 1, 0, 2000)
+animCmd(akasiino_16, "CASINO","Roulette_out", 1, 0, 2000)
+animCmd(akasiino_17, "CASINO","Roulette_win", 1, 0, 2000)
+animCmd(akasiino_18, "CASINO","Slot_bet_01", 1, 0, 2000)
+animCmd(akasiino_19, "CASINO","Slot_bet_02", 1, 0, 2000)
+animCmd(akasiino_20, "CASINO","Slot_in", 1, 0, 2000)
+animCmd(akasiino_21, "CASINO","Slot_lose_out", 1, 0, 2000)
+animCmd(akasiino_22, "CASINO","Slot_Plyr", 1, 0, 2000)
+animCmd(akasiino_23, "CASINO","Slot_wait", 1, 0, 2000)
+animCmd(akasiino_24, "CASINO","Slot_win_out", 1, 0, 2000)
+animCmd(akasiino_25, "CASINO","wof", 1, 0, 2000)
+
+animHelper(acrack, 10, "ACRACK: /acrack [1-10]")				
+animCmd(acrack_1, "CRACK","Bbalbat_Idle_01", 1, 0, 2000)
+animCmd(acrack_2, "CRACK","Bbalbat_Idle_02", 1, 0, 2000)
+animCmd(acrack_3, "CRACK","crckdeth1", 1, 0, 2000)
+animCmd(acrack_4, "CRACK","crckdeth2", 1, 0, 2000)
+animCmd(acrack_5, "CRACK","crckdeth3", 1, 0, 2000)
+animCmd(acrack_6, "CRACK","crckdeth4", 1, 0, 2000)
+animCmd(acrack_7, "CRACK","crckidle1", 1, 0, 2000)
+animCmd(acrack_8, "CRACK","crckidle2", 1, 0, 2000)
+animCmd(acrack_9, "CRACK","crckidle3", 1, 0, 2000)
+animCmd(acrack_10, "CRACK","crckidle4", 1, 0, 2000)
+
+animHelper(aurgas, 5, "AURGAS: /aurgas [1-5]")				
+animCmd(aurgas_1, "CRIB","CRIB_Console_Loop", 1, 0, 0)
+animCmd(aurgas_2, "CRIB","CRIB_Use_Switch", 1, 0, 2000)
+animCmd(aurgas_3, "CRIB","PED_Console_Loop", 1, 0, 0)
+animCmd(aurgas_4, "CRIB","PED_Console_Loose", 1, 0, 2000)
+animCmd(aurgas_5, "CRIB","PED_Console_Win", 1, 0, 2000)	
+
+animHelper(apeakas, 5, "APEAKAS: /apeakas [1-5]")				
+animCmd(apeakas_1, "DAM_JUMP","DAM_Dive_Loop", 1, 0, 0)
+animCmd(apeakas_2, "DAM_JUMP","DAM_Land", 1, 0, 2000)
+animCmd(apeakas_3, "DAM_JUMP","DAM_Launch", 1, 0, 2000)
+animCmd(apeakas_4, "DAM_JUMP","Jump_Roll", 1, 0, 2000)
+animCmd(apeakas_5, "DAM_JUMP","SF_JumpWall", 1, 0, 2000)
+
+animHelper(andiiler, 7, "ANDIILER: /andiiler [1-7]")				
+animCmd(andiiler_1, "DEALER","DEALER_DEAL", 1, 0, 2000)
+animCmd(andiiler_2, "DEALER","DEALER_IDLE", 1, 0, 2000)
+animCmd(andiiler_3, "DEALER","DEALER_IDLE_01", 1, 0, 2000)
+animCmd(andiiler_4, "DEALER","DEALER_IDLE_02", 1, 0, 2000)
+animCmd(andiiler_5, "DEALER","DEALER_IDLE_03", 1, 0, 2000)
+animCmd(andiiler_6, "DEALER","DRUGS_BUY", 1, 0, 2000)
+animCmd(andiiler_7, "DEALER","shop_pay", 1, 0, 2000)
+
+animHelper(ap6ikle, 4, "APÕIKLE: /apõikle [1-4]")				
+animCmd(ap6ikle_1, "DODGE","Cover_Dive_01", 1, 0, 2000)
+animCmd(ap6ikle_2, "DODGE","Cover_Dive_02", 1, 0, 2000)
+animCmd(ap6ikle_3, "DODGE","Crushed", 1, 0, 2000)
+animCmd(ap6ikle_4, "DODGE","Crush_Jump", 1, 0, 2000)
+
+animHelper(as88k, 33, "ASÖÖK: /asöök [1-33]")				
+animCmd(as88k_1, "FOOD","EAT_Burger", 1, 0, 2000)
+animCmd(as88k_2, "FOOD","EAT_Chicken", 1, 0, 2000)
+animCmd(as88k_3, "FOOD","EAT_Pizza", 1, 0, 2000)
+animCmd(as88k_4, "FOOD","EAT_Vomit_P", 1, 0, 2000)
+animCmd(as88k_5, "FOOD","EAT_Vomit_SK", 1, 0, 2000)
+animCmd(as88k_6, "FOOD","FF_Dam_Bkw", 1, 0, 2000)
+animCmd(as88k_7, "FOOD","FF_Dam_Fwd", 1, 0, 2000)
+animCmd(as88k_8, "FOOD","FF_Dam_Left", 1, 0, 2000)
+animCmd(as88k_9, "FOOD","FF_Dam_Right", 1, 0, 2000)
+animCmd(as88k_10, "FOOD","FF_Die_Bkw", 1, 0, 2000)
+animCmd(as88k_11, "FOOD","FF_Die_Fwd", 1, 0, 2000)
+animCmd(as88k_12, "FOOD","FF_Die_Left", 1, 0, 2000)
+animCmd(as88k_13, "FOOD","FF_Die_Right", 1, 0, 2000)
+animCmd(as88k_14, "FOOD","FF_Sit_Eat1", 1, 0, 2000)
+animCmd(as88k_15, "FOOD","FF_Sit_Eat2", 1, 0, 2000)
+animCmd(as88k_16, "FOOD","FF_Sit_Eat3", 1, 0, 2000)
+animCmd(as88k_17, "FOOD","FF_Sit_In", 1, 0, 2000)
+animCmd(as88k_18, "FOOD","FF_Sit_In_L", 1, 0, 2000)
+animCmd(as88k_19, "FOOD","FF_Sit_In_R", 1, 0, 2000)
+animCmd(as88k_20, "FOOD","FF_Sit_Look", 1, 0, 2000)
+animCmd(as88k_21, "FOOD","FF_Sit_Loop", 1, 0, 0)
+animCmd(as88k_22, "FOOD","FF_Sit_Out_180", 1, 0, 2000)
+animCmd(as88k_23, "FOOD","FF_Sit_Out_L_180", 1, 0, 2000)
+animCmd(as88k_24, "FOOD","FF_Sit_Out_R_180", 1, 0, 2000)
+animCmd(as88k_25, "FOOD","SHP_Thank", 1, 0, 2000)
+animCmd(as88k_26, "FOOD","SHP_Tray_In", 1, 0, 2000)
+animCmd(as88k_27, "FOOD","SHP_Tray_Lift", 1, 0, 2000)
+animCmd(as88k_28, "FOOD","SHP_Tray_Lift_In", 1, 0, 2000)
+animCmd(as88k_29, "FOOD","SHP_Tray_Lift_Loop", 1, 0, 0)
+animCmd(as88k_30, "FOOD","SHP_Tray_Lift_Out", 1, 0, 2000)
+animCmd(as88k_31, "FOOD","SHP_Tray_Out", 1, 0, 2000)
+animCmd(as88k_32, "FOOD","SHP_Tray_Pose", 1, 0, 2000)
+animCmd(as88k_33, "FOOD","SHP_Tray_Return", 1, 0, 2000)
+
+animHelper(ag2ng, 33, "AGÄNG: /agäng [1-33]")				
+animCmd(ag2ng_1, "GANGS","DEALER_DEAL", 1, 0, 2000)
+animCmd(ag2ng_2, "GANGS","DEALER_IDLE", 1, 0, 2000)
+animCmd(ag2ng_3, "GANGS","drnkbr_prtl", 1, 0, 2000)
+animCmd(ag2ng_4, "GANGS","drnkbr_prtl_F", 1, 0, 2000)
+animCmd(ag2ng_5, "GANGS","DRUGS_BUY", 1, 0, 2000)
+animCmd(ag2ng_6, "GANGS","hndshkaa", 1, 0, 2000)
+animCmd(ag2ng_7, "GANGS","hndshkba", 1, 0, 2000)
+animCmd(ag2ng_8, "GANGS","hndshkca", 1, 0, 2000)
+animCmd(ag2ng_9, "GANGS","hndshkcb", 1, 0, 2000)
+animCmd(ag2ng_10, "GANGS","hndshkda", 1, 0, 2000)
+animCmd(ag2ng_11, "GANGS","hndshkea", 1, 0, 2000)
+animCmd(ag2ng_12, "GANGS","hndshkfa", 1, 0, 2000)
+animCmd(ag2ng_13, "GANGS","hndshkfa_swt", 1, 0, 2000)
+animCmd(ag2ng_14, "GANGS","Invite_No", 1, 0, 2000)
+animCmd(ag2ng_15, "GANGS","Invite_Yes", 1, 0, 2000)
+animCmd(ag2ng_16, "GANGS","leanIDLE", 1, 0, 2000)
+animCmd(ag2ng_17, "GANGS","leanIN", 1, 0, 2000)
+animCmd(ag2ng_18, "GANGS","leanOUT", 1, 0, 2000)
+animCmd(ag2ng_19, "GANGS","prtial_gngtlkA", 1, 0, 2000)
+animCmd(ag2ng_20, "GANGS","prtial_gngtlkB", 1, 0, 2000)
+animCmd(ag2ng_21, "GANGS","prtial_gngtlkCt", 1, 0, 2000)
+animCmd(ag2ng_22, "GANGS","prtial_gngtlkD", 1, 0, 2000)
+animCmd(ag2ng_23, "GANGS","prtial_gngtlkE", 1, 0, 2000)
+animCmd(ag2ng_24, "GANGS","prtial_gngtlkF", 1, 0, 2000)
+animCmd(ag2ng_25, "GANGS","prtial_gngtlkG", 1, 0, 2000)
+animCmd(ag2ng_26, "GANGS","prtial_gngtlkH", 1, 0, 2000)
+animCmd(ag2ng_27, "GANGS","prtial_hndshk_01", 1, 0, 2000)
+animCmd(ag2ng_28, "GANGS","prtial_hndshk_biz_01", 1, 0, 2000)
+animCmd(ag2ng_29, "GANGS","shake_cara", 1, 0, 2000)
+animCmd(ag2ng_30, "GANGS","shake_carK", 1, 0, 2000)
+animCmd(ag2ng_31, "GANGS","shake_carSH", 1, 0, 2000)
+animCmd(ag2ng_32, "GANGS","smkcig_prtl", 1, 0, 2000)
+animCmd(ag2ng_33, "GANGS","smkcig_prtl_F", 1, 0, 2000)	
+
+animHelper(aisik, 296, "AISIK: /aisik_[1-296]")					
+animCmd(aisik_1, "PED","abseil", 1, 0, 2000)
+animCmd(aisik_2, "PED","ARRESTgun", 1, 0, 2000)
+animCmd(aisik_3, "PED","ATM", 1, 0, 2000)
+animCmd(aisik_4, "PED","BIKE_elbowL", 1, 0, 2000)
+animCmd(aisik_5, "PED","BIKE_elbowR", 1, 0, 2000)
+animCmd(aisik_6, "PED","BIKE_fallR", 1, 0, 2000)
+animCmd(aisik_7, "PED","BIKE_fall_off", 1, 0, 2000)
+animCmd(aisik_8, "PED","BIKE_pickupL", 1, 0, 2000)
+animCmd(aisik_9, "PED","BIKE_pickupR", 1, 0, 2000)
+animCmd(aisik_10, "PED","BIKE_pullupL", 1, 0, 2000)
+animCmd(aisik_11, "PED","BIKE_pullupR", 1, 0, 2000)
+animCmd(aisik_12, "PED","bomber", 1, 0, 2000)
+animCmd(aisik_13, "PED","CAR_alignHI_LHS", 1, 0, 2000)
+animCmd(aisik_14, "PED","CAR_alignHI_RHS", 1, 0, 2000)
+animCmd(aisik_15, "PED","CAR_align_LHS", 1, 0, 2000)
+animCmd(aisik_16, "PED","CAR_align_RHS", 1, 0, 2000)
+animCmd(aisik_17, "PED","CAR_closedoorL_LHS", 1, 0, 2000)
+animCmd(aisik_18, "PED","CAR_closedoorL_RHS", 1, 0, 2000)
+animCmd(aisik_19, "PED","CAR_closedoor_LHS", 1, 0, 2000)
+animCmd(aisik_20, "PED","CAR_closedoor_RHS", 1, 0, 2000)
+animCmd(aisik_21, "PED","CAR_close_LHS", 1, 0, 2000)
+animCmd(aisik_22, "PED","CAR_close_RHS", 1, 0, 2000)
+animCmd(aisik_23, "PED","CAR_crawloutRHS", 1, 0, 2000)
+animCmd(aisik_24, "PED","CAR_dead_LHS", 1, 0, 2000)
+animCmd(aisik_25, "PED","CAR_dead_RHS", 1, 0, 2000)
+animCmd(aisik_26, "PED","CAR_doorlocked_LHS", 1, 0, 2000)
+animCmd(aisik_27, "PED","CAR_doorlocked_RHS", 1, 0, 2000)
+animCmd(aisik_28, "PED","CAR_fallout_LHS", 1, 0, 2000)
+animCmd(aisik_29, "PED","CAR_fallout_RHS", 1, 0, 2000)
+animCmd(aisik_30, "PED","CAR_getinL_LHS", 1, 0, 2000)
+animCmd(aisik_31, "PED","CAR_getinL_RHS", 1, 0, 2000)
+animCmd(aisik_32, "PED","CAR_getin_LHS", 1, 0, 2000)
+animCmd(aisik_33, "PED","CAR_getin_RHS", 1, 0, 2000)
+animCmd(aisik_34, "PED","CAR_getoutL_LHS", 1, 0, 2000)
+animCmd(aisik_35, "PED","CAR_getoutL_RHS", 1, 0, 2000)
+animCmd(aisik_36, "PED","CAR_getout_LHS", 1, 0, 2000)
+animCmd(aisik_37, "PED","CAR_getout_RHS", 1, 0, 2000)
+animCmd(aisik_38, "PED","car_hookertalk", 1, 0, 2000)
+animCmd(aisik_39, "PED","CAR_jackedLHS", 1, 0, 2000)
+animCmd(aisik_40, "PED","CAR_jackedRHS", 1, 0, 2000)
+animCmd(aisik_41, "PED","CAR_jumpin_LHS", 1, 0, 2000)
+animCmd(aisik_42, "PED","CAR_LB", 1, 0, 2000)
+animCmd(aisik_43, "PED","CAR_LB_pro", 1, 0, 2000)
+animCmd(aisik_44, "PED","CAR_LB_weak", 1, 0, 2000)
+animCmd(aisik_45, "PED","CAR_LjackedLHS", 1, 0, 2000)
+animCmd(aisik_46, "PED","CAR_LjackedRHS", 1, 0, 2000)
+animCmd(aisik_47, "PED","CAR_Lshuffle_RHS", 1, 0, 2000)
+animCmd(aisik_48, "PED","CAR_Lsit", 1, 0, 2000)
+animCmd(aisik_49, "PED","CAR_open_LHS", 1, 0, 2000)
+animCmd(aisik_50, "PED","CAR_open_RHS", 1, 0, 2000)
+animCmd(aisik_51, "PED","CAR_pulloutL_LHS", 1, 0, 2000)
+animCmd(aisik_52, "PED","CAR_pulloutL_RHS", 1, 0, 2000)
+animCmd(aisik_53, "PED","CAR_pullout_LHS", 1, 0, 2000)
+animCmd(aisik_54, "PED","CAR_pullout_RHS", 1, 0, 2000)
+animCmd(aisik_55, "PED","CAR_Qjacked", 1, 0, 2000)
+animCmd(aisik_56, "PED","CAR_rolldoor", 1, 0, 2000)
+animCmd(aisik_57, "PED","CAR_rolldoorLO", 1, 0, 2000)
+animCmd(aisik_58, "PED","CAR_rollout_LHS", 1, 0, 2000)
+animCmd(aisik_59, "PED","CAR_rollout_RHS", 1, 0, 2000)
+animCmd(aisik_60, "PED","CAR_shuffle_RHS", 1, 0, 2000)
+animCmd(aisik_61, "PED","CAR_sit", 1, 0, 2000)
+animCmd(aisik_62, "PED","CAR_sitp", 1, 0, 2000)
+animCmd(aisik_63, "PED","CAR_sitpLO", 1, 0, 2000)
+animCmd(aisik_64, "PED","CAR_sit_pro", 1, 0, 2000)
+animCmd(aisik_65, "PED","CAR_sit_weak", 1, 0, 2000)
+animCmd(aisik_66, "PED","CAR_tune_radio", 1, 0, 2000)
+animCmd(aisik_67, "PED","CLIMB_idle", 1, 0, 2000)
+animCmd(aisik_68, "PED","CLIMB_jump", 1, 0, 2000)
+animCmd(aisik_69, "PED","CLIMB_jump2fall", 1, 0, 2000)
+animCmd(aisik_70, "PED","CLIMB_jump_B", 1, 0, 2000)
+animCmd(aisik_71, "PED","CLIMB_Pull", 1, 0, 2000)
+animCmd(aisik_72, "PED","CLIMB_Stand", 1, 0, 2000)
+animCmd(aisik_73, "PED","CLIMB_Stand_finish", 1, 0, 2000)
+animCmd(aisik_74, "PED","cower", 1, 0, 2000)
+animCmd(aisik_75, "PED","Crouch_Roll_L", 1, 0, 2000)
+animCmd(aisik_76, "PED","Crouch_Roll_R", 1, 0, 2000)
+animCmd(aisik_77, "PED","DAM_armL_frmBK", 1, 0, 2000)
+animCmd(aisik_78, "PED","DAM_armL_frmFT", 1, 0, 2000)
+animCmd(aisik_79, "PED","DAM_armL_frmLT", 1, 0, 2000)
+animCmd(aisik_80, "PED","DAM_armR_frmBK", 1, 0, 2000)
+animCmd(aisik_81, "PED","DAM_armR_frmFT", 1, 0, 2000)
+animCmd(aisik_82, "PED","DAM_armR_frmRT", 1, 0, 2000)
+animCmd(aisik_83, "PED","DAM_LegL_frmBK", 1, 0, 2000)
+animCmd(aisik_84, "PED","DAM_LegL_frmFT", 1, 0, 2000)
+animCmd(aisik_85, "PED","DAM_LegL_frmLT", 1, 0, 2000)
+animCmd(aisik_86, "PED","DAM_LegR_frmBK", 1, 0, 2000)
+animCmd(aisik_87, "PED","DAM_LegR_frmFT", 1, 0, 2000)
+animCmd(aisik_88, "PED","DAM_LegR_frmRT", 1, 0, 2000)
+animCmd(aisik_89, "PED","DAM_stomach_frmBK", 1, 0, 2000)
+animCmd(aisik_90, "PED","DAM_stomach_frmFT", 1, 0, 2000)
+animCmd(aisik_91, "PED","DAM_stomach_frmLT", 1, 0, 2000)
+animCmd(aisik_92, "PED","DAM_stomach_frmRT", 1, 0, 2000)
+animCmd(aisik_93, "PED","DOOR_LHinge_O", 1, 0, 2000)
+animCmd(aisik_94, "PED","DOOR_RHinge_O", 1, 0, 2000)
+animCmd(aisik_95, "PED","DrivebyL_L", 1, 0, 2000)
+animCmd(aisik_96, "PED","DrivebyL_R", 1, 0, 2000)
+animCmd(aisik_97, "PED","Driveby_L", 1, 0, 2000)
+animCmd(aisik_98, "PED","Driveby_R", 1, 0, 2000)
+animCmd(aisik_99, "PED","DRIVE_BOAT", 1, 0, 2000)
+animCmd(aisik_100, "PED","DRIVE_BOAT_back", 1, 0, 2000)
+animCmd(aisik_101, "PED","DRIVE_BOAT_L", 1, 0, 2000)
+animCmd(aisik_102, "PED","DRIVE_BOAT_R", 1, 0, 2000)
+animCmd(aisik_103, "PED","Drive_L", 1, 0, 2000)
+animCmd(aisik_104, "PED","Drive_LO_l", 1, 0, 2000)
+animCmd(aisik_105, "PED","Drive_LO_R", 1, 0, 2000)
+animCmd(aisik_106, "PED","Drive_L_pro", 1, 0, 2000)
+animCmd(aisik_107, "PED","Drive_L_pro_slow", 1, 0, 2000)
+animCmd(aisik_108, "PED","Drive_L_slow", 1, 0, 2000)
+animCmd(aisik_109, "PED","Drive_L_weak", 1, 0, 2000)
+animCmd(aisik_110, "PED","Drive_L_weak_slow", 1, 0, 2000)
+animCmd(aisik_111, "PED","Drive_R", 1, 0, 2000)
+animCmd(aisik_112, "PED","Drive_R_pro", 1, 0, 2000)
+animCmd(aisik_113, "PED","Drive_R_pro_slow", 1, 0, 2000)
+animCmd(aisik_114, "PED","Drive_R_slow", 1, 0, 2000)
+animCmd(aisik_115, "PED","Drive_R_weak", 1, 0, 2000)
+animCmd(aisik_116, "PED","Drive_R_weak_slow", 1, 0, 2000)
+animCmd(aisik_117, "PED","Drive_truck", 1, 0, 2000)
+animCmd(aisik_118, "PED","DRIVE_truck_back", 1, 0, 2000)
+animCmd(aisik_119, "PED","DRIVE_truck_L", 1, 0, 2000)
+animCmd(aisik_120, "PED","DRIVE_truck_R", 1, 0, 2000)
+animCmd(aisik_121, "PED","DUCK_cower", 1, 0, 2000)
+animCmd(aisik_122, "PED","endchat_01", 1, 0, 2000)
+animCmd(aisik_123, "PED","endchat_02", 1, 0, 2000)
+animCmd(aisik_124, "PED","endchat_03", 1, 0, 2000)
+animCmd(aisik_125, "PED","EV_dive", 1, 0, 2000)
+animCmd(aisik_126, "PED","EV_step", 1, 0, 2000)
+animCmd(aisik_127, "PED","facanger", 1, 0, 2000)
+animCmd(aisik_128, "PED","facanger", 1, 0, 2000)
+animCmd(aisik_129, "PED","facgum", 1, 0, 2000)
+animCmd(aisik_130, "PED","facsurp", 1, 0, 2000)
+animCmd(aisik_131, "PED","facsurpm", 1, 0, 2000)
+animCmd(aisik_132, "PED","factalk", 1, 0, 2000)
+animCmd(aisik_133, "PED","facurios", 1, 0, 2000)
+animCmd(aisik_134, "PED","FALL_back", 1, 0, 2000)
+animCmd(aisik_135, "PED","FALL_collapse", 1, 0, 2000)
+animCmd(aisik_136, "PED","FALL_fall", 1, 0, 2000)
+animCmd(aisik_137, "PED","FALL_front", 1, 0, 2000)
+animCmd(aisik_138, "PED","FALL_glide", 1, 0, 2000)
+animCmd(aisik_139, "PED","FALL_land", 1, 0, 2000)
+animCmd(aisik_140, "PED","FALL_skyDive", 1, 0, 2000)
+animCmd(aisik_141, "PED","Fight2Idle", 1, 0, 2000)
+animCmd(aisik_142, "PED","FightA_1", 1, 0, 2000)
+animCmd(aisik_143, "PED","FightA_2", 1, 0, 2000)
+animCmd(aisik_144, "PED","FightA_3", 1, 0, 2000)
+animCmd(aisik_145, "PED","FightA_block", 1, 0, 2000)
+animCmd(aisik_146, "PED","FightA_G", 1, 0, 2000)
+animCmd(aisik_147, "PED","FightA_M", 1, 0, 2000)
+animCmd(aisik_148, "PED","FIGHTIDLE", 1, 0, 2000)
+animCmd(aisik_149, "PED","FightShB", 1, 0, 2000)
+animCmd(aisik_150, "PED","FightShF", 1, 0, 2000)
+animCmd(aisik_151, "PED","FightSh_BWD", 1, 0, 2000)
+animCmd(aisik_152, "PED","FightSh_FWD", 1, 0, 2000)
+animCmd(aisik_153, "PED","FightSh_Left", 1, 0, 2000)
+animCmd(aisik_154, "PED","FightSh_Right", 1, 0, 2000)
+animCmd(aisik_155, "PED","flee_lkaround_01", 1, 0, 2000)
+animCmd(aisik_156, "PED","FLOOR_hit", 1, 0, 2000)
+animCmd(aisik_157, "PED","FLOOR_hit_f", 1, 0, 2000)
+animCmd(aisik_158, "PED","fucku", 1, 0, 2000)
+animCmd(aisik_159, "PED","gang_gunstand", 1, 0, 2000)
+animCmd(aisik_160, "PED","gas_cwr", 1, 0, 2000)
+animCmd(aisik_161, "PED","getup", 1, 0, 2000)
+animCmd(aisik_162, "PED","getup_front", 1, 0, 2000)
+animCmd(aisik_163, "PED","gum_eat", 1, 0, 2000)
+animCmd(aisik_164, "PED","GunCrouchBwd", 1, 0, 2000)
+animCmd(aisik_165, "PED","GunCrouchFwd", 1, 0, 2000)
+animCmd(aisik_166, "PED","GunMove_BWD", 1, 0, 2000)
+animCmd(aisik_167, "PED","GunMove_FWD", 1, 0, 2000)
+animCmd(aisik_168, "PED","GunMove_L", 1, 0, 2000)
+animCmd(aisik_169, "PED","GunMove_R", 1, 0, 2000)
+animCmd(aisik_170, "PED","Gun_2_IDLE", 1, 0, 2000)
+animCmd(aisik_171, "PED","GUN_BUTT", 1, 0, 2000)
+animCmd(aisik_172, "PED","GUN_BUTT_crouch", 1, 0, 2000)
+animCmd(aisik_173, "PED","Gun_stand", 1, 0, 2000)
+animCmd(aisik_174, "PED","handscower", 1, 0, 2000)
+animCmd(aisik_175, "PED","handsup", 1, 0, 2000)
+animCmd(aisik_176, "PED","HitA_1", 1, 0, 2000)
+animCmd(aisik_177, "PED","HitA_2", 1, 0, 2000)
+animCmd(aisik_178, "PED","HitA_3", 1, 0, 2000)
+animCmd(aisik_179, "PED","HIT_back", 1, 0, 2000)
+animCmd(aisik_180, "PED","HIT_behind", 1, 0, 2000)
+animCmd(aisik_181, "PED","HIT_front", 1, 0, 2000)
+animCmd(aisik_182, "PED","HIT_GUN_BUTT", 1, 0, 2000)
+animCmd(aisik_183, "PED","HIT_L", 1, 0, 2000)
+animCmd(aisik_184, "PED","HIT_R", 1, 0, 2000)
+animCmd(aisik_185, "PED","HIT_walk", 1, 0, 2000)
+animCmd(aisik_186, "PED","HIT_wall", 1, 0, 2000)
+animCmd(aisik_187, "PED","Idlestance_fat", 1, 0, 2000)
+animCmd(aisik_189, "PED","idlestance_old", 1, 0, 2000)
+animCmd(aisik_190, "PED","IDLE_armed", 1, 0, 2000)
+animCmd(aisik_191, "PED","IDLE_chat", 1, 0, 2000)
+animCmd(aisik_192, "PED","IDLE_csaw", 1, 0, 2000)
+animCmd(aisik_193, "PED","Idle_Gang1", 1, 0, 2000)
+animCmd(aisik_194, "PED","IDLE_HBHB", 1, 0, 2000)
+animCmd(aisik_195, "PED","IDLE_ROCKET", 1, 0, 2000)
+animCmd(aisik_196, "PED","IDLE_stance", 1, 0, 2000)
+animCmd(aisik_197, "PED","IDLE_taxi", 1, 0, 2000)
+animCmd(aisik_198, "PED","IDLE_tired", 1, 0, 2000)
+animCmd(aisik_199, "PED","Jetpack_Idle", 1, 0, 2000)
+animCmd(aisik_200, "PED","JOG_femaleA", 1, 0, 2000)
+animCmd(aisik_201, "PED","JOG_maleA", 1, 0, 2000)
+animCmd(aisik_202, "PED","JUMP_glide", 1, 0, 2000)
+animCmd(aisik_203, "PED","JUMP_land", 1, 0, 2000)
+animCmd(aisik_204, "PED","JUMP_launch", 1, 0, 2000)
+animCmd(aisik_205, "PED","JUMP_launch_R", 1, 0, 2000)
+animCmd(aisik_206, "PED","KART_drive", 1, 0, 2000)
+animCmd(aisik_207, "PED","KART_L", 1, 0, 2000)
+animCmd(aisik_208, "PED","KART_LB", 1, 0, 2000)
+animCmd(aisik_209, "PED","KART_R", 1, 0, 2000)
+animCmd(aisik_210, "PED","KD_left", 1, 0, 2000)
+animCmd(aisik_211, "PED","KD_right", 1, 0, 2000)
+animCmd(aisik_212, "PED","KO_shot_face", 1, 0, 2000)
+animCmd(aisik_213, "PED","KO_shot_front", 1, 0, 2000)
+animCmd(aisik_214, "PED","KO_shot_stom", 1, 0, 2000)
+animCmd(aisik_215, "PED","KO_skid_back", 1, 0, 2000)
+animCmd(aisik_216, "PED","KO_skid_front", 1, 0, 2000)
+animCmd(aisik_217, "PED","KO_spin_L", 1, 0, 2000)
+animCmd(aisik_218, "PED","KO_spin_R", 1, 0, 2000)
+animCmd(aisik_219, "PED","pass_Smoke_in_car", 1, 0, 2000)
+animCmd(aisik_220, "PED","phone_in", 1, 0, 2000)
+animCmd(aisik_221, "PED","phone_out", 1, 0, 2000)
+animCmd(aisik_222, "PED","phone_talk", 1, 0, 2000)
+animCmd(aisik_223, "PED","Player_Sneak", 1, 0, 2000)
+animCmd(aisik_224, "PED","Player_Sneak_walkstart", 1, 0, 2000)
+animCmd(aisik_225, "PED","roadcross", 1, 0, 2000)
+animCmd(aisik_226, "PED","roadcross_female", 1, 0, 2000)
+animCmd(aisik_227, "PED","roadcross_gang", 1, 0, 2000)
+animCmd(aisik_228, "PED","roadcross_old", 1, 0, 2000)
+animCmd(aisik_229, "PED","run_1armed", 1, 0, 2000)
+animCmd(aisik_230, "PED","run_armed", 1, 0, 2000)
+animCmd(aisik_231, "PED","run_civi", 1, 0, 2000)
+animCmd(aisik_232, "PED","run_csaw", 1, 0, 2000)
+animCmd(aisik_233, "PED","run_fat", 1, 0, 2000)
+animCmd(aisik_234, "PED","run_fatold", 1, 0, 2000)
+animCmd(aisik_235, "PED","run_gang1", 1, 0, 2000)
+animCmd(aisik_236, "PED","run_left", 1, 0, 2000)
+animCmd(aisik_237, "PED","run_old", 1, 0, 2000)
+animCmd(aisik_238, "PED","run_player", 1, 0, 2000)
+animCmd(aisik_239, "PED","run_right", 1, 0, 2000)
+animCmd(aisik_240, "PED","run_rocket", 1, 0, 2000)
+animCmd(aisik_241, "PED","Run_stop", 1, 0, 2000)
+animCmd(aisik_242, "PED","Run_stopR", 1, 0, 2000)
+animCmd(aisik_243, "PED","Run_Wuzi", 1, 0, 2000)
+animCmd(aisik_244, "PED","SEAT_down", 1, 0, 2000)
+animCmd(aisik_245, "PED","SEAT_idle", 1, 0, 2000)
+animCmd(aisik_246, "PED","SEAT_up", 1, 0, 2000)
+animCmd(aisik_247, "PED","SHOT_leftP", 1, 0, 2000)
+animCmd(aisik_248, "PED","SHOT_partial", 1, 0, 2000)
+animCmd(aisik_249, "PED","SHOT_partial_B", 1, 0, 2000)
+animCmd(aisik_250, "PED","SHOT_rightP", 1, 0, 2000)
+animCmd(aisik_251, "PED","Shove_Partial", 1, 0, 2000)
+animCmd(aisik_252, "PED","Smoke_in_car", 1, 0, 2000)
+animCmd(aisik_253, "PED","sprint_civi", 1, 0, 2000)
+animCmd(aisik_254, "PED","sprint_panic", 1, 0, 2000)
+animCmd(aisik_255, "PED","Sprint_Wuzi", 1, 0, 2000)
+animCmd(aisik_256, "PED","swat_run", 1, 0, 2000)
+animCmd(aisik_257, "PED","Swim_Tread", 1, 0, 2000)
+animCmd(aisik_258, "PED","Tap_hand", 1, 0, 2000)
+animCmd(aisik_259, "PED","Tap_handP", 1, 0, 2000)
+animCmd(aisik_260, "PED","turn_180", 1, 0, 2000)
+animCmd(aisik_261, "PED","Turn_L", 1, 0, 2000)
+animCmd(aisik_262, "PED","Turn_R", 1, 0, 2000)
+animCmd(aisik_263, "PED","WALK_armed", 1, 0, 2000)
+animCmd(aisik_264, "PED","WALK_civi", 1, 0, 2000)
+animCmd(aisik_265, "PED","WALK_csaw", 1, 0, 2000)
+animCmd(aisik_266, "PED","Walk_DoorPartial", 1, 0, 2000)
+animCmd(aisik_267, "PED","WALK_drunk", 1, 0, 2000)
+animCmd(aisik_268, "PED","WALK_fat", 1, 0, 2000)
+animCmd(aisik_269, "PED","WALK_fatold", 1, 0, 2000)
+animCmd(aisik_270, "PED","WALK_gang1", 1, 0, 2000)
+animCmd(aisik_271, "PED","WALK_gang2", 1, 0, 2000)
+animCmd(aisik_272, "PED","WALK_old", 1, 0, 2000)
+animCmd(aisik_273, "PED","WALK_player", 1, 0, 2000)
+animCmd(aisik_274, "PED","WALK_rocket", 1, 0, 2000)
+animCmd(aisik_275, "PED","WALK_shuffle", 1, 0, 2000)
+animCmd(aisik_276, "PED","WALK_start", 1, 0, 2000)
+animCmd(aisik_277, "PED","WALK_start_armed", 1, 0, 2000)
+animCmd(aisik_278, "PED","WALK_start_csaw", 1, 0, 2000)
+animCmd(aisik_279, "PED","WALK_start_rocket", 1, 0, 2000)
+animCmd(aisik_280, "PED","Walk_Wuzi", 1, 0, 2000)
+animCmd(aisik_281, "PED","WEAPON_crouch", 1, 0, 2000)
+animCmd(aisik_282, "PED","woman_idlestance", 1, 0, 2000)
+animCmd(aisik_283, "PED","woman_run", 1, 0, 2000)
+animCmd(aisik_284, "PED","WOMAN_runbusy", 1, 0, 2000)
+animCmd(aisik_285, "PED","WOMAN_runfatold", 1, 0, 2000)
+animCmd(aisik_286, "PED","woman_runpanic", 1, 0, 2000)
+animCmd(aisik_287, "PED","WOMAN_runsexy", 1, 0, 2000)
+animCmd(aisik_288, "PED","WOMAN_walkbusy", 1, 0, 2000)
+animCmd(aisik_289, "PED","WOMAN_walkfatold", 1, 0, 2000)
+animCmd(aisik_290, "PED","WOMAN_walknorm", 1, 0, 2000)
+animCmd(aisik_291, "PED","WOMAN_walkold", 1, 0, 2000)
+animCmd(aisik_292, "PED","WOMAN_walkpro", 1, 0, 2000)
+animCmd(aisik_293, "PED","WOMAN_walksexy", 1, 0, 2000)
+animCmd(aisik_294, "PED","WOMAN_walkshop", 1, 0, 2000)
+animCmd(aisik_295, "PED","XPRESSscratch", 1, 0, 2000)	
+animCmd(aisik_296, "PED","Drown", 1, 0, 2000)
+
+animHelper(agk2ed, 20, "AGKÄED: /agkäed [1-20]")			
+animCmd(agk2ed_1, "GHANDS","gsign1", 1, 0, 2000)
+animCmd(agk2ed_2, "GHANDS","gsign1LH", 1, 0, 2000)
+animCmd(agk2ed_3, "GHANDS","gsign2", 1, 0, 2000)
+animCmd(agk2ed_4, "GHANDS","gsign2LH", 1, 0, 2000)
+animCmd(agk2ed_5, "GHANDS","gsign3", 1, 0, 2000)
+animCmd(agk2ed_6, "GHANDS","gsign3LH", 1, 0, 2000)
+animCmd(agk2ed_7, "GHANDS","gsign4", 1, 0, 2000)
+animCmd(agk2ed_8, "GHANDS","gsign4LH", 1, 0, 2000)
+animCmd(agk2ed_9, "GHANDS","gsign5", 1, 0, 2000)
+animCmd(agk2ed_10, "GHANDS","gsign5LH", 1, 0, 2000)
+animCmd(agk2ed_11, "GHANDS","LHGsign1", 1, 0, 2000)
+animCmd(agk2ed_12, "GHANDS","LHGsign2", 1, 0, 2000)
+animCmd(agk2ed_13, "GHANDS","LHGsign3", 1, 0, 2000)
+animCmd(agk2ed_14, "GHANDS","LHGsign4", 1, 0, 2000)
+animCmd(agk2ed_15, "GHANDS","LHGsign5", 1, 0, 2000)
+animCmd(agk2ed_16, "GHANDS","RHGsign1", 1, 0, 2000)
+animCmd(agk2ed_17, "GHANDS","RHGsign2", 1, 0, 2000)
+animCmd(agk2ed_18, "GHANDS","RHGsign3", 1, 0, 2000)
+animCmd(agk2ed_19, "GHANDS","RHGsign4", 1, 0, 2000)
+animCmd(agk2ed_20, "GHANDS","RHGsign5", 1, 0, 2000)
+
+animHelper(asurnuaed, 3, "ASURNUAED: /asurnuaed [1-3]")			
+animCmd(asurnuaed_1, "GRAVEYARD","mrnF_loop", 1, 0, 0)
+animCmd(asurnuaed_2, "GRAVEYARD","mrnM_loop", 1, 0, 0)
+animCmd(asurnuaed_3, "GRAVEYARD","prst_loopa", 1, 0, 0)
+
+animHelper(ajuuksur, 13, "AJUUKSUR: /ajuuksur [1-13]")			
+animCmd(ajuuksur_1, "HAIRCUTS","BRB_Beard_01", 1, 0, 2000)
+animCmd(ajuuksur_2, "HAIRCUTS","BRB_Buy", 1, 0, 2000)
+animCmd(ajuuksur_3, "HAIRCUTS","BRB_Cut", 1, 0, 2000)
+animCmd(ajuuksur_4, "HAIRCUTS","BRB_Cut_In", 1, 0, 2000)
+animCmd(ajuuksur_5, "HAIRCUTS","BRB_Cut_Out", 1, 0, 2000)
+animCmd(ajuuksur_6, "HAIRCUTS","BRB_Hair_01", 1, 0, 2000)
+animCmd(ajuuksur_7, "HAIRCUTS","BRB_Hair_02", 1, 0, 2000)
+animCmd(ajuuksur_8, "HAIRCUTS","BRB_In", 1, 0, 2000)
+animCmd(ajuuksur_9, "HAIRCUTS","BRB_Out", 1, 0, 2000)
+animCmd(ajuuksur_10, "HAIRCUTS","BRB_Loop", 1, 0, 0)
+animCmd(ajuuksur_11, "HAIRCUTS","BRB_Sit_In", 1, 0, 2000)
+animCmd(ajuuksur_12, "HAIRCUTS","BRB_Sit_Loop", 1, 0, 0)
+animCmd(ajuuksur_13, "HAIRCUTS","BRB_Sit_Out", 1, 0, 2000)
+
+animHelper(ar88v, 10, "ARÖÖV: /arööv [1-10]")			
+animCmd(ar88v_1, "HEIST9","CAS_G2_GasKO", 1, 0, 2000)
+animCmd(ar88v_2, "HEIST9","swt_wllpk_L", 1, 0, 2000)
+animCmd(ar88v_3, "HEIST9","swt_wllpk_L_back", 1, 0, 2000)
+animCmd(ar88v_4, "HEIST9","swt_wllpk_R", 1, 0, 2000)
+animCmd(ar88v_5, "HEIST9","swt_wllpk_R_back", 1, 0, 2000)
+animCmd(ar88v_6, "HEIST9","swt_wllshoot_in_L", 1, 0, 2000)
+animCmd(ar88v_7, "HEIST9","swt_wllshoot_in_R", 1, 0, 2000)
+animCmd(ar88v_8, "HEIST9","swt_wllshoot_out_L", 1, 0, 2000)
+animCmd(ar88v_9, "HEIST9","swt_wllshoot_out_R", 1, 0, 2000)
+animCmd(ar88v_10, "HEIST9","Use_SwipeCard", 1, 0, 2000)
+
+animHelper(akodu, 10, "AKODU: /akodu [1-10]")			
+animCmd(akodu_1, "INT_HOUSE","BED_In_L", 1, 0, 2000)
+animCmd(akodu_2, "INT_HOUSE","BED_In_R", 1, 0, 2000)
+animCmd(akodu_3, "INT_HOUSE","BED_Loop_L", 1, 0, 0)
+animCmd(akodu_4, "INT_HOUSE","BED_Loop_R", 1, 0, 0)
+animCmd(akodu_5, "INT_HOUSE","BED_Out_L", 1, 0, 2000)
+animCmd(akodu_6, "INT_HOUSE","BED_Out_R", 1, 0, 2000)
+animCmd(akodu_7, "INT_HOUSE","LOU_In", 1, 0, 2000)
+animCmd(akodu_8, "INT_HOUSE","LOU_Loop", 1, 0, 0)
+animCmd(akodu_9, "INT_HOUSE","LOU_Out", 1, 0, 2000)
+animCmd(akodu_10, "INT_HOUSE","wash_up", 1, 0, 2000)
+
+animHelper(akontor, 10, "AKONTOR: /akontor [1-10]")			
+animCmd(akontor_1, "INT_OFFICE","FF_Dam_Fwd", 1, 0, 2000)
+animCmd(akontor_2, "INT_OFFICE","OFF_Sit_2Idle_180", 1, 0, 2000)
+animCmd(akontor_3, "INT_OFFICE","OFF_Sit_Bored_Loop", 1, 0, 0)
+animCmd(akontor_4, "INT_OFFICE","OFF_Sit_Crash", 1, 0, 2000)
+animCmd(akontor_5, "INT_OFFICE","OFF_Sit_Drink", 1, 0, 2000)
+animCmd(akontor_6, "INT_OFFICE","OFF_Sit_Idle_Loop", 1, 0, 0)
+animCmd(akontor_7, "INT_OFFICE","OFF_Sit_In", 1, 0, 2000)
+animCmd(akontor_8, "INT_OFFICE","OFF_Sit_Read", 1, 0, 2000)
+animCmd(akontor_9, "INT_OFFICE","OFF_Sit_Type_Loop", 1, 0, 0)
+animCmd(akontor_10, "INT_OFFICE","OFF_Sit_Watch", 1, 0, 2000)
+
+animHelper(a2ri, 4, "AÄRI: /aäri [1-4]")			
+animCmd(a2ri_1, "JST_BUISNESS","girl_01", 1, 0, 2000)
+animCmd(a2ri_2, "JST_BUISNESS","girl_02", 1, 0, 2000)
+animCmd(a2ri_3, "JST_BUISNESS","player_01", 1, 0, 2000)
+animCmd(a2ri_4, "JST_BUISNESS","smoke_01", 1, 0, 2000)
+
+animHelper(asyletants, 6, "ASÜLETANTS: /asületants [1-6]")			
+animCmd(asyletants_1, "LAPDAN1","LAPDAN_D", 1, 0, 2000)
+animCmd(asyletants_2, "LAPDAN1","LAPDAN_P", 1, 0, 2000)
+animCmd(asyletants_3, "LAPDAN2","LAPDAN_D", 1, 0, 2000)
+animCmd(asyletants_4, "LAPDAN2","LAPDAN_P", 1, 0, 2000)
+animCmd(asyletants_5, "LAPDAN3","LAPDAN_D", 1, 0, 2000)
+animCmd(asyletants_6, "LAPDAN3","LAPDAN_P", 1, 0, 2000)
+
+animHelper(amdend, 8, "AMDEND: /amdend [1-8]")			
+animCmd(amdend_1, "MD_END","END_SC1_PLY", 1, 0, 2000)
+animCmd(amdend_2, "MD_END","END_SC1_RYD", 1, 0, 2000)
+animCmd(amdend_3, "MD_END","END_SC1_SMO", 1, 0, 2000)
+animCmd(amdend_4, "MD_END","END_SC1_SWE", 1, 0, 2000)
+animCmd(amdend_5, "MD_END","END_SC2_PLY", 1, 0, 2000)
+animCmd(amdend_6, "MD_END","END_SC2_RYD", 1, 0, 2000)
+animCmd(amdend_7, "MD_END","END_SC2_SMO", 1, 0, 2000)
+animCmd(amdend_8, "MD_END","END_SC2_SWE", 1, 0, 2000)
+
+animHelper(amuu, 18, "AMUU: /amuu [1-18]")			
+animCmd(amuu_1, "MISC","bitchslap", 1, 0, 2000)
+animCmd(amuu_2, "MISC","bng_wndw", 1, 0, 2000)
+animCmd(amuu_3, "MISC","bng_wndw_02", 1, 0, 2000)
+animCmd(amuu_4, "MISC","Case_pickup", 1, 0, 2000)
+animCmd(amuu_5, "MISC","door_jet", 1, 0, 2000)
+animCmd(amuu_6, "MISC","Hiker_Pose", 1, 0, 2000)
+animCmd(amuu_7, "MISC","Hiker_Pose_L", 1, 0, 2000)
+animCmd(amuu_8, "MISC","Idle_Chat_02", 1, 0, 2000)
+animCmd(amuu_9, "MISC","pickup_box", 1, 0, 2000)
+animCmd(amuu_10, "MISC","Plunger_01", 1, 0, 2000)
+animCmd(amuu_11, "MISC","Plyrlean_loop", 1, 0, 0)
+animCmd(amuu_12, "MISC","plyr_shkhead", 1, 0, 2000)
+animCmd(amuu_13, "MISC","Run_Dive", 1, 0, 2000)
+animCmd(amuu_14, "MISC","Scratchballs_01", 1, 0, 2000)
+animCmd(amuu_15, "MISC","SEAT_LR", 1, 0, 2000)
+animCmd(amuu_16, "MISC","Seat_talk_01", 1, 0, 2000)
+animCmd(amuu_17, "MISC","Seat_talk_02", 1, 0, 2000)
+animCmd(amuu_18, "MISC","SEAT_watch", 1, 0, 2000)
+
+animHelper(aluure, 29, "ALUURE: /aluure [1-29]")			
+animCmd(aluure_1, "ON_LOOKERS","lkaround_in", 1, 0, 2000)
+animCmd(aluure_2, "ON_LOOKERS","lkaround_loop", 1, 0, 0)
+animCmd(aluure_3, "ON_LOOKERS","lkaround_out", 1, 0, 2000)
+animCmd(aluure_4, "ON_LOOKERS","lkup_in", 1, 0, 2000)
+animCmd(aluure_5, "ON_LOOKERS","lkup_loop", 1, 0, 0)
+animCmd(aluure_6, "ON_LOOKERS","lkup_out", 1, 0, 2000)
+animCmd(aluure_7, "ON_LOOKERS","lkup_point", 1, 0, 2000)
+animCmd(aluure_8, "ON_LOOKERS","panic_cower", 1, 0, 2000)
+animCmd(aluure_9, "ON_LOOKERS","panic_hide", 1, 0, 2000)
+animCmd(aluure_10, "ON_LOOKERS","panic_in", 1, 0, 2000)
+animCmd(aluure_11, "ON_LOOKERS","panic_loop", 1, 0, 0)
+animCmd(aluure_12, "ON_LOOKERS","panic_out", 1, 0, 2000)
+animCmd(aluure_13, "ON_LOOKERS","panic_point", 1, 0, 2000)
+animCmd(aluure_14, "ON_LOOKERS","panic_shout", 1, 0, 2000)
+animCmd(aluure_15, "ON_LOOKERS","Pointup_in", 1, 0, 2000)
+animCmd(aluure_16, "ON_LOOKERS","Pointup_loop", 1, 0, 0)
+animCmd(aluure_17, "ON_LOOKERS","Pointup_out", 1, 0, 2000)
+animCmd(aluure_18, "ON_LOOKERS","Pointup_shout", 1, 0, 2000)
+animCmd(aluure_19, "ON_LOOKERS","point_in", 1, 0, 2000)
+animCmd(aluure_20, "ON_LOOKERS","point_loop", 1, 0, 0)
+animCmd(aluure_21, "ON_LOOKERS","point_out", 1, 0, 2000)
+animCmd(aluure_22, "ON_LOOKERS","shout_01", 1, 0, 2000)
+animCmd(aluure_23, "ON_LOOKERS","shout_02", 1, 0, 2000)
+animCmd(aluure_24, "ON_LOOKERS","shout_in", 1, 0, 2000)
+animCmd(aluure_25, "ON_LOOKERS","shout_loop", 1, 0, 0)
+animCmd(aluure_26, "ON_LOOKERS","shout_out", 1, 0, 2000)
+animCmd(aluure_27, "ON_LOOKERS","wave_in", 1, 0, 2000)
+animCmd(aluure_28, "ON_LOOKERS","wave_loop", 1, 0, 0)
+animCmd(aluure_29, "ON_LOOKERS","wave_out", 1, 0, 2000)
+
+animHelper(apanused, 11, "APANUSED: /apanused [1-11]")			
+animCmd(apanused_1, "OTB","betslp_in", 1, 0, 2000)
+animCmd(apanused_2, "OTB","betslp_lkabt", 1, 0, 2000)
+animCmd(apanused_3, "OTB","betslp_loop", 1, 0, 0)
+animCmd(apanused_4, "OTB","betslp_out", 1, 0, 2000)
+animCmd(apanused_5, "OTB","betslp_tnk", 1, 0, 2000)
+animCmd(apanused_6, "OTB","wtchrace_cmon", 1, 0, 2000)
+animCmd(apanused_7, "OTB","wtchrace_in", 1, 0, 2000)
+animCmd(apanused_8, "OTB","wtchrace_loop", 1, 0, 0)
+animCmd(apanused_9, "OTB","wtchrace_lose", 1, 0, 2000)
+animCmd(apanused_10, "OTB","wtchrace_out", 1, 0, 2000)
+animCmd(apanused_11, "OTB","wtchrace_win", 1, 0, 2000)
+
+animHelper(apaulmac, 9, "APAULMAC: /apaulmac [1-9]")			
+animCmd(apaulmac_1, "PAULNMAC","PnM_Argue1_A", 1, 0, 2000)
+animCmd(apaulmac_2, "PAULNMAC","PnM_Argue1_B", 1, 0, 2000)
+animCmd(apaulmac_3, "PAULNMAC","PnM_Argue2_A", 1, 0, 2000)
+animCmd(apaulmac_4, "PAULNMAC","PnM_Argue2_B", 1, 0, 2000)
+animCmd(apaulmac_5, "PAULNMAC","PnM_Loop_A", 1, 0, 0)
+animCmd(apaulmac_6, "PAULNMAC","PnM_Loop_B", 1, 0, 0)
+animCmd(apaulmac_7, "PAULNMAC","wank_in", 1, 0, 2000)
+animCmd(apaulmac_8, "PAULNMAC","wank_loop", 1, 0, 0)
+animCmd(apaulmac_9, "PAULNMAC","wank_out", 1, 0, 2000)
+
 
 stock stopAnims(playerid)
 {
