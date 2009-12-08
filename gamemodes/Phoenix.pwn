@@ -613,11 +613,11 @@ public OnGameModeExit()
 public OnPlayerConnect(playerid)
 {
 	MysqlCheck();
-	if(IsPlayerNPC(playerid)) return NPCHandle(playerid);
-	
+
 	ClearPlayerData(playerid);
-	
     GetPlayerName(playerid, pInfo[playerid][pCharName], 30);
+	
+	if(IsPlayerNPC(playerid)) return NPCHandle(playerid);
 	SendClientMessage(playerid, COLOR_YELLOW, WelcomeStr);
 	InfoBarTimer[playerid] = -1;
 	CheckCharacter(playerid);
@@ -927,10 +927,6 @@ public OnPlayerText(playerid, text[])
 	new delay = ( strlen(text) * 150 ) + 2000;
 	new str[STRING_LENGHT];
 	format(str, sizeof(str),"%s:  %s", pInfo[playerid][pCharName], text);	
-	if(IsPlayerNPC(playerid))
-	{
-		format(str, sizeof(str),"Igor_Yakov:  %s", text);
-	}
 
 	if(IsPlayerInAnyVehicle(playerid))
 	{

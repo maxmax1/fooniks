@@ -34,8 +34,11 @@ public SendSmartMessage(string[])
 	new Float: x, Float: y, Float: z;
 	GetPlayerPos(mySelf, x, y, z);
 	
-	foreach(Player, i)
+	for(new i; i < MAX_PLAYERS; i++)
 	{
+		if(i == mySelf) continue;
+		if(!IsPlayerConnected(i)) continue;
+		
 		if(IsPlayerInRangeOfPoint(i, 10.0, x, y, z))
 		{
 			SendClientMessage(i, COLOR_CHAT, string);
@@ -48,15 +51,16 @@ public SendSmartMessage(string[])
 
 public SmartChatWithMe(myName[], playerid, text[])
 {
-	if(mySelf == -1) return 0;
-	if(strcmp(myName, MY_NAME)) return 0;
+	if(mySelf == -1) return 2;
+	if(strcmp(myName, MY_NAME)) return 3;
 	
 	new string[136];
 	format(string, sizeof(string), "%d %s", playerid, text);
 	
 	#if defined GLOBALCHAT
 	
-	SendClientMessage(mySelf, SMART_COLOR, text);
+	SendClientMessage(mySelf, SMART_COLOR, string);
+	return 0;
 	
 	#else
 	new Float: x, Float: y, Float: z;
@@ -64,10 +68,11 @@ public SmartChatWithMe(myName[], playerid, text[])
 
 	if(IsPlayerInRangeOfPoint(playerid, 10.0, x, y, z))
 	{
-		SendClientMessage(mySelf, SMART_COLOR, text);
+		SendClientMessage(mySelf, SMART_COLOR, string);
+		return 1;
 	}	
+	return 0;
 	#endif
-	return 1;
 }
 
 public AutoMessageTimer()
@@ -150,9 +155,11 @@ public OnPlayerConnect(playerid)
 {
 	if(IsPlayerNPC(playerid))
 	{
-		new tempStr[MAX_PLAYER_NAME];
+		new tempStr[MAX_PLAYER_NAME], tempStr2[64];
 		GetPlayerIp(playerid, tempStr, sizeof(tempStr));
-		if(!strcmp(tempStr, "127.0.0.1"))
+		GetServerVarAsString("bind", tempStr2, 64);
+		
+		if(!strcmp(tempStr, tempStr))
 		{
 			GetPlayerName(playerid, tempStr, sizeof(tempStr));
 			if(!strcmp(tempStr, MY_NAME))
@@ -207,43 +214,64 @@ public OnPlayerDisconnect(playerid)
 
 forward SmartNPC_OnPlayerDisconnect(playerid);
 
-public OnPlayerCommandText(playerid, cmdtext[])
+COMMAND:smartspawn(playerid, params[])
 {
-	if(mySelf != -1 && playerid == mySelf)
+	if(mySelf == -1 || playerid != mySelf) return 0;
+
+	new skin, Float:x, Float:y, Float:z, Float:a;
+	if(sscanf(params, "dffff", skin, x, y, z, a) == 0)
 	{
-		if(!strcmp(cmdtext, "/smartAnwser", false, 12))
-		{
-			new str[128];
-			if(sscanf(cmdtext[12], "s", str) == 0)
-			{
-				SendSmartMessage(str);
-			}
-		}
-		if(!strcmp(cmdtext, "/smartlog", false, 9))
-		{
-			new str[128];
-			if(sscanf(cmdtext[9], "s", str) == 0)
-			{
-				print(str);
-			}
-		}
+		SetPlayerSkin(playerid, skin);
+		SetPlayerPos(playerid, x, y, z);
+		SetPlayerFacingAngle(playerid, a);
 	}
-	
-	if (funcidx("SmartNPC_OnPlayerCommandText") != -1)
-    {
-        return CallLocalFunction("SmartNPC_OnPlayerCommandText", "is", playerid, cmdtext);
-    }	
-    return 1;	
+	return 1;
 }
 
-#if defined _ALS_OnPlayerCommandText
-    #undef OnPlayerCommandText
-#else
-    #define _ALS_OnPlayerCommandText
-#endif
-#define OnPlayerCommandText SmartNPC_OnPlayerCommandText
+COMMAND:smartAnwser(playerid, params[])
+{
+	if(mySelf == -1 || playerid != mySelf) return 0;
+	new str[128];
+	if(sscanf(params, "s", str) == 0)
+	{
+		SendSmartMessage(str);
+	}
+	return 1;
+}
 
-forward SmartNPC_OnPlayerCommandText(playerid, cmdtext[]);
+COMMAND:smartlog(playerid, params[])
+{
+	if(mySelf == -1 || playerid != mySelf) return 0;
+	new str[128];
+	if(sscanf(params, "s", str) == 0)
+	{
+		print(str);
+	}
+	return 1;
+}
+
+COMMAND:smartanim(playerid, params[])
+{
+	if(mySelf == -1 || playerid != mySelf) return 0;
+	new str1[32], str2[32];
+	if(sscanf(params, "ss", str1, str2) == 0)
+	{
+		ApplyAnimation(playerid, str1, str2,1.0,1,1,1,1,0);
+		ApplyAnimation(playerid, str1, str2,1.0,1,1,1,1,0);
+	}
+	return 1;
+}
+
+COMMAND:callpfunction(playerid, params[])
+{
+	if(mySelf == -1 || playerid != mySelf) return 0;
+	new str1[32], val;
+	if(sscanf(params, "sd", str1, val) == 0)
+	{
+		CallRemoteFunction(str1, "d", val);
+	}
+	return 1;
+}
 
 #if !defined SMART_NO_ONTEXT
 

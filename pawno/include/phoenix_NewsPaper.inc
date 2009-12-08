@@ -103,6 +103,11 @@ enum writeInf
 	add4[256]	
 };
 new PaperWriter[writeInf] = {false, -1, 0, "_", "_", "_", "_", "_", "_", "_", "_", "_"};
+/*
+new JobAds[3][jAddInf] =
+{
+	{"Prügivedaja", }
+};*/
 
 /*
 *    FORWARDS
