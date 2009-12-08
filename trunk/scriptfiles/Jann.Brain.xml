@@ -1,0 +1,188 @@
+<smartNPC>
+	<npc>
+		<name>Jann</name>
+		<skin>242</skin>
+		<spawnX>2441.3633</spawnX>
+		<spawnY>-1422.0017</spawnY>
+		<spawnZ>24.0</spawnZ>		
+		<spawnAng>270.0</spawnAng>		
+	</npc>
+
+	<moods>
+		<mood value="0">Kuri</mood>
+		<mood value="1">Vihane</mood>
+		<mood value="2">Hea</mood>
+		<mood value="3">Super</mood>
+	</moods>
+
+	<triggergroup name="tere">
+		<moodMod>1</moodMod>
+		<word>tere</word>
+		<word>jou</word>
+		<word>jõu</word>
+		<word>hey</word>
+	</triggergroup>
+
+	<triggergroup name="solvang">
+		<moodMod>-1</moodMod>
+		<word>käi(and)perse</word>
+		<word>käi(and)vittu</word>
+		<word>munn</word>
+		<word>pede</word>
+	</triggergroup>
+	
+	<triggergroup name="t66">
+		<moodMod>1</moodMod>
+		<word>tööd</word>
+		<word>teha</word>
+	</triggergroup>
+	
+	<sentence>
+		<mood>0</mood>
+		<group>tere</group>
+		<text>Kasi minema!</text>
+	</sentence>	
+	
+	<sentence>
+		<mood>0</mood>
+		<group>tere</group>
+		<text>Kao ära!</text>
+	</sentence>	
+	
+	<sentence>
+		<mood>0</mood>
+		<group>tere</group>
+		<text>Ma lõpetan oma suitsu ära ja tulen õpetan sind väheke!</text>
+	</sentence>	
+	
+	<sentence>
+		<mood>1</mood>
+		<group>tere</group>
+		<text>Ole vait!</text>
+	</sentence>
+	
+	<sentence>
+		<mood>1</mood>
+		<group>tere</group>
+		<text>Kui ma su kätte saan!</text>
+	</sentence>
+	
+	<sentence>
+		<mood>2</mood>
+		<group>tere</group>
+		<text>Tere tere.</text>
+	</sentence>
+	
+	<sentence>
+		<mood>2</mood>
+		<group>tere</group>
+		<text>Tervist noorhärra!</text>
+	</sentence>
+	
+	<sentence>
+		<mood>2</mood>
+		<group>tere</group>
+		<text>Kena päeva teilegi.</text>
+	</sentence>
+	
+	<sentence>
+		<mood>3</mood>
+		<group>tere</group>
+		<text>Tere, tööd tahad?</text>
+	</sentence>
+	
+	<sentence>
+		<mood>3</mood>
+		<group>tere</group>
+		<text>Tere jah, ma olen Jann.</text>
+	</sentence>
+	
+	<sentence>
+		<mood>0</mood>
+		<group>solvang</group>
+		<text>Ma tapan su ära!</text>
+	</sentence>	
+	
+	<sentence>
+		<mood>0</mood>
+		<group>solvang</group>
+		<text>Kui ma su kätte saan, raisk!</text>
+	</sentence>	
+	
+	<sentence>
+		<mood>1</mood>
+		<group>solvang</group>
+		<text>Käi õige kuradile!</text>
+	</sentence>	
+	
+	<sentence>
+		<mood>1</mood>
+		<group>solvang</group>
+		<text>Ole parem vait.</text>
+	</sentence>		
+	
+	<sentence>
+		<mood>2</mood>
+		<group>solvang</group>
+		<text>Sama sullegi.</text>
+	</sentence>	
+	
+	<sentence>
+		<mood>2</mood>
+		<group>solvang</group>
+		<text>Edu.</text>
+	</sentence>		
+	
+	<sentence>
+		<mood>3</mood>
+		<group>solvang</group>
+		<text>Vaiki!</text>
+	</sentence>		
+	
+	<sentence>
+		<mood>0</mood>
+		<group>t66</group>
+		<text>Ei saa sa mingit tööd...</text>
+	</sentence>
+	
+	<sentence>
+		<mood>0</mood>
+		<group>t66</group>
+		<text>Sina ja tööd, Ahh käi parem ****.</text>
+	</sentence>
+	
+	<sentence>
+		<mood>1</mood>
+		<group>t66</group>
+		<text>Kui sa vähe korralikumalt käituda mõistaksid siis ehk saaksid tööle.</text>
+	</sentence>
+	
+	<sentence>
+		<mood>1</mood>
+		<group>t66</group>
+		<text></text>
+	</sentence>	
+	
+	<sentence>
+		<mood>1</mood>
+		<group>t66</group>
+		<text></text>
+		<pfunction>SetPlayerJob</pfunction>
+	</sentence>	
+	
+	<sentence>
+		<mood>2</mood>
+		<group>t66</group>
+		<text></text>
+		<pfunction>SetPlayerJob</pfunction>
+	</sentence>	
+		
+	<automessages>
+		<automessage mood="0">Mis sa siit otsid?</automessage>
+		<automessage mood="1">Mis vahid siin, kao minema!</automessage>
+		<automessage mood="2">Aega on?</automessage>
+		<automessage mood="2">Tööd tahad?</automessage>
+		<automessage mood="3">Hei sina, tööd tahad?</automessage>
+	</automessages>
+	
+</smartNPC>

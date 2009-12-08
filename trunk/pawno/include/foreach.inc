@@ -333,7 +333,7 @@ Notes:
 		#endif
 		if (YSI_g_OPC)
 		{
-			CallLocalFunction("Itter_OnPlayerConnect", "i", playerid);
+			return CallLocalFunction("Itter_OnPlayerConnect", "i", playerid);
 		}
 		return 1;
 	}
@@ -360,12 +360,38 @@ Notes:
 	this hopefully fixes them.
 -*----------------------------------------------------------------------------*/
 
-#if !defined FILTERSCRIPT
-
-	#if !defined BOTSYNC_IS_BOT
+#if !defined BOTSYNC_IS_BOT
+	#if defined FILTERSCRIPT
+		public OnFilterScriptInit()
+		{
+			if (YSI_gPlayerC)
+			{
+				print("foreach error: Something went wrong again!  Please tell Y_less");
+				#if defined _FOREACH_BOT && !defined FOREACH_NO_BOTS
+					printf("%d", YSI_gBotS);
+					printf("%d", YSI_gBotC);
+					printf("%d", YSI_gCharacterS);
+					printf("%d", YSI_gCharacterC);
+				#endif
+				printf("%d", YSI_gPlayerS);
+				printf("%d", YSI_gPlayerC);
+			}
+			YSI_g_OPC = (funcidx("Itter_OnPlayerConnect") != -1);
+			YSI_g_OPDC = (funcidx("Itter_OnPlayerDisconnect") != -1);
+			CallLocalFunction("Itter_OnFilterScriptInit", "");
+		}
+		
+		#if defined _ALS_OnFilterScriptInit
+			#undef OnFilterScriptInit
+		#else
+			#define _ALS_OnFilterScriptInit
+		#endif
+		#define OnFilterScriptInit Itter_OnFilterScriptInit
+		
+		forward Itter_OnFilterScriptInit();
+	#else
 		public OnGameModeInit()
 		{
-			printf("foreach called");
 			if (YSI_gPlayerC)
 			{
 				print("foreach error: Something went wrong again!  Please tell Y_less");
@@ -392,41 +418,6 @@ Notes:
 		
 		forward Itter_OnGameModeInit();
 	#endif
-
-#else
-
-	#if !defined BOTSYNC_IS_BOT
-		public OnFilterScriptInit()
-		{
-			printf("foreach called");
-			if (YSI_gPlayerC)
-			{
-				print("foreach error: Something went wrong again!  Please tell Y_less");
-				#if defined _FOREACH_BOT && !defined FOREACH_NO_BOTS
-					printf("%d", YSI_gBotS);
-					printf("%d", YSI_gBotC);
-					printf("%d", YSI_gCharacterS);
-					printf("%d", YSI_gCharacterC);
-				#endif
-				printf("%d", YSI_gPlayerS);
-				printf("%d", YSI_gPlayerC);
-			}
-			YSI_g_OPC = (funcidx("Itter_OnPlayerConnect") != -1);
-			YSI_g_OPDC = (funcidx("Itter_OnPlayerDisconnect") != -1);
-			for(new i = 0; i < MAX_PLAYERS; i++) if(IsPlayerConnected(i)) OnPlayerConnect(i);
-			CallLocalFunction("Itter_OnFilterScriptInit", "");
-		}
-		
-		#if defined _ALS_OnFilterScriptInit
-			#undef OnFilterScriptInit
-		#else
-			#define _ALS_OnFilterScriptInit
-		#endif
-		#define OnFilterScriptInit Itter_OnFilterScriptInit
-		
-		forward Itter_OnFilterScriptInit();
-	#endif
-
 #endif
 
 /*----------------------------------------------------------------------------*-
@@ -461,7 +452,7 @@ Notes:
 		#endif
 		if (YSI_g_OPDC)
 		{
-			CallLocalFunction("Itter_OnPlayerDisconnect", "ii", playerid, reason);
+			return CallLocalFunction("Itter_OnPlayerDisconnect", "ii", playerid, reason);
 		}
 		return 1;
 	}
