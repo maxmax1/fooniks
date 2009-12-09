@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"160"
+#define SCRIPT_REVISION 		"162"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -55,12 +55,13 @@
 */
 #include <a_samp>
 #include <a_mysql>
-#include <md5_core>  // author: Alex "Y_Less" Cole, External Credit #2
-#include <Y_server>  // author: Alex "Y_Less" Cole, External Credit #3
-#include <strlib>  	 // author: Westie, External Credit #8
-#include <foreach>   // author: Alex "Y_Less" Cole, External Credit #9
-#include <zcmd> 	 // author: Zeex, External Credit #5
-#include <stuff> 	 // some Stuff Needed EveryWhere
+#include <md5_core> 		 // author: Alex "Y_Less" Cole, External Credit #2
+#include <Y_server> 		 // author: Alex "Y_Less" Cole, External Credit #3
+#include <strlib>  			 // author: Westie, External Credit #8
+#include <foreach>   		 // author: Alex "Y_Less" Cole, External Credit #9
+#include <zcmd> 			 // author: Zeex, External Credit #5
+#include <stuff> 	 		 // some Stuff Needed EveryWhere
+//#include <smart_npc_samp> 	 // SmartNPC
 
 #include <phoenix_Core>
 #include <phoenix_RealCarnames>
@@ -84,8 +85,13 @@
 
 public AddAllJobs()
 {
-	JOBS_RegisterJob(CLEAN_JOB_ID, "SCleaner");
+	JOBS_RegisterJob(GARBAGE_JOB_ID, "GCollector", "Prügivedaja");
 }
+
+/*public RegisterAllSmartNPC()
+{
+	RegisterSmartNpc("Jann", "Jann");
+}*/
 
 /*
 *    DEFINES 2
@@ -632,8 +638,11 @@ public OnPlayerConnect(playerid)
 public OnPlayerDisconnect(playerid)
 {
 	if(IsPlayerNPC(playerid)) return 1;
-	UpdatePlayer(playerid);
-	SaveSkills(playerid);
+	if(pInfo[playerid][pLoggedIn])
+	{
+		UpdatePlayer(playerid);
+		SaveSkills(playerid);
+	}
 	if( pInfo[playerid][pResting] ) ClearResting(playerid);
 	ClearPlayerData(playerid);	
 	return 1;
@@ -668,6 +677,7 @@ public OnPlayerSpawn(playerid)
 			}
 			Kick(playerid);
 		}
+		else return 1;
 	}
 	
 	// Make Spawning safe.
@@ -1563,6 +1573,7 @@ public NPCHandle(playerid)
 		strmid(pInfo[playerid][pCharName], "Igor_Yakov", 0, 30);
 		return 1;
 	}
+	else pInfo[playerid][npcId] = 99;
 	//Kick(playerid);
 	return 0;
 }
@@ -1744,6 +1755,12 @@ public RestUpdate()
 			if(progressInf[restBar][innerPrecent][playerid] != pInfo[playerid][pRest]) setProgressBar(restBar, playerid, pInfo[playerid][pRest]);
 		}
 	}
+}
+
+public OnPlayerJobChange(playerid)
+{
+	SendFormattedText(playerid, COLOR_GREEN, LANG_GOT_JOB_EX, gJobsNames[gMyJob[playerid]], gMyContract[playerid]);
+	SendClientMessage(playerid, COLOR_GREEN, LANG_JOBHELP);
 }
 
 /*

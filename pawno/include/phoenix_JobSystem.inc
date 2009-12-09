@@ -28,14 +28,27 @@
 *    Defines 
 */
 #define MAX_JOBS 5
+#define MAX_JOBCOMMANDS 10
 
 /*
 *    Global Variables
 */
 new gMyJob[MAX_PLAYERS];
+new gMyContract[MAX_PLAYERS];
+
+new bool: gJobsRegistred[MAX_JOBS];
+new gJobsNames[MAX_JOBS][32];
 new gJobsArray[MAX_JOBS][32];
 
 Itter_Create(Jobs, MAX_JOBS);
+
+enum jobCMD
+{
+	jCmd[32],
+	jobID	
+};	
+new JobCommands[MAX_JOBCOMMANDS][jobCMD];
+Itter_Create(JobCommand, MAX_JOBCOMMANDS);
 
 /*
 *    Macro Defines
@@ -56,20 +69,78 @@ Itter_Create(Jobs, MAX_JOBS);
 /*
 *    Forwards
 */
+
+forward JOBS_RegisterJob(id, string[], safeString[]);
+forward SetPlayerJob(playerid, jobId, cTime);
+
+/*
+*    Custom Callbacks
+*/
+
+forward AddAllJobs();
+forward OnPlayerJobChange(playerid);
+forward AddJobCommand(jobId, myCommand[]);
+	
+/*
+*    ALS NEXT ONES
+*/
+
 forward JobSystem_OnGameModeInit();
 forward JobSystem_OnPlayerConnect(playerid);
 forward JobSystem_OnPlayerDisconnect(playerid);
 
-forward JOBS_RegisterJob(id, string[]);
-forward AddAllJobs();
-
 /*
 *    Public
 */
-public JOBS_RegisterJob(id, string[])
+public JOBS_RegisterJob(id, string[], safeString[])
 {
 	format(gJobsArray[id], 32, "%s", string);
+	format(gJobsNames[id], 32, "%s", safeString);
+	gJobsRegistred[id] = true;
 	Itter_Add(Jobs, id);
+}
+
+public SetPlayerJob(playerid, jobId, cTime)
+{
+	if(!gJobsRegistred[jobId]) return 0;
+	
+	gMyJob[playerid] = jobId;
+	gMyContract[playerid] = (cTime > 0)?cTime:5;
+
+	OnPlayerJobChange(playerid);
+	return 1;
+}
+
+public AddJobCommand(jobId, myCommand[])
+{
+	new freeId = Itter_Free(JobCommand);
+	if(freeId == -1) return -1;
+	
+	JobCommands[freeId][jobID] = jobId;
+	format(JobCommands[freeId][jCmd], 32, "/%s", myCommand);
+	
+	Itter_Add(JobCommand, freeId);
+	return freeId;
+}
+
+COMMAND:t88abi(playerid, params[])
+{
+	#pragma unused params
+	if(gMyJob[playerid] < 1 || gMyJob[playerid] > MAX_JOBS || !gJobsRegistred[gMyJob[playerid]])
+	{
+		return SendClientMessage(playerid, COLOR_RED, "Sul pole töökohta.");
+	}
+	
+	SendClientMessage(playerid, COLOR_GREEN, "*** Tööabi ***");
+	foreach(JobCommand, i)
+	{
+		if(JobCommands[i][jobID] == gMyJob[playerid])
+		{
+			SendClientMessage(playerid, COLOR_GREEN, JobCommands[i][jCmd]);
+		}
+	}	
+	SendClientMessage(playerid, COLOR_GREEN, "**************");
+	return 1;
 }
 
 /*
