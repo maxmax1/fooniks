@@ -62,10 +62,6 @@ enum pInf
 	pSkillTimer,
 	pSeatbelt,
 	
-	Float: pRest,
-	bool: pResting,
-	pRestingAt,
-	
 	bool: AFK,
 	
 	pControllable
@@ -359,9 +355,6 @@ public ClearPlayerData(playerid)
 	pInfo[playerid][SelectedPlayer] = 0;
 	pInfo[playerid][npcId] = 0;
 	pInfo[playerid][pSeatbelt] = 0;
-	pInfo[playerid][pRest] = 0.0;
-	pInfo[playerid][pResting] = false;
-	pInfo[playerid][pRestingAt] = -1;
 	
 	pInfo[playerid][pControllable] = 1;
 	
