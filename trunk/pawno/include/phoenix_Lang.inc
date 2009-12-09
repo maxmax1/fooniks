@@ -13,6 +13,40 @@
 *    The Initial Developers of the Original Code are Jyrno42 and 13th. 
 */
 
+/*
+*    This File: phoenix_Lang.inc
+*    Purpose: Add Multilanguage support into Phoenix.
+*/
+
+/*
+*    DEFINES
+*/
+
+#define Lang_STR(%0,%1) %1_%0
+
+/*
+*    GLOBALS
+*/
+
+/*
+*    FORWARDS
+*/
+
+/*
+*    PUBLICS
+*/
+
+stock GetLangSTR(langstr[])
+{	
+	new string[128];
+	format(string, 128, "%s", langstr);
+	return string;
+}
+
+/*
+*    DEFINES
+*/
+
 #define LANG_WELCOME_TO				"Tere Tulemast %s-%sr%s-%s, Palun oota..."
 #define LANG_FAILED_TO_CONNECT			"\t\t* %s - Failed to connect to mysql DB."
 #define LANG_CONNECTED				"\t\t* %s - Connected to mysql DB."
@@ -80,3 +114,13 @@
 *    AFK
 */
 #define LANG_AFK "Sa %s AFK."
+
+/*
+*    JOBS
+*/
+#define LANG_GOT_JOB_EX "Õnnitleme, Sind võeti tööle. Töökoht: %s, Töölepingu kehtivus: %d"
+#define LANG_JOB_CONTRACT_TIME "Su tööleping kestab veel %d tundi, ära unusta seda uuendada oma tööandja juures..."
+#define LANG_JOB_CONTRACT_END "Su tööleping on läbi, kui soovid töölepingut pikendada pead rääkima oma ülemusega enne järgmist \"palgapäeva\"."
+#define LANG_JOBHELP "Vaata ka /tööabi."
+
+// EOF

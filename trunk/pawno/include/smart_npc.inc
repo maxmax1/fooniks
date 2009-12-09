@@ -40,6 +40,7 @@
 #define MAX_TRIGGERGROUPS 	5
 #define MAX_SENTENCES 		32
 #define MAX_TRIGGERWORDS 	64
+#define MAX_TEMPA			10
 
 #define SMART_COLOR 0x00000005
 
@@ -117,7 +118,6 @@ enum sentenceInf
 };
 new gSentences[MAX_SENTENCES][sentenceInf];
 Itter_Create(Sentence, MAX_SENTENCES);
-Itter_Create(tempAnwser, 10);
 
 /*
 *    <automessage> 's
@@ -184,41 +184,40 @@ stock SmartCmd(command[], message[])
 */
 findMessage(fromPlayer, anwserGroup)
 {
-	new string[128], hits;
+	new string[128], hits = 0, temp[MAX_TEMPA];
 	foreach(Sentence, i)
 	{
+		if(hits >= MAX_TEMPA) goto jump;
+		
 		if(gSentences[i][sTGroupId] == anwserGroup)
 		{
+			format(string, 128, "%d, %d == %d", i, gSentences[i][mood], gMySelf[myMood]);
 			if(gSentences[i][mood] == gMySelf[myMood])
 			{
+				temp[hits] = i;
 				hits++;
-				Iter_Add(tempAnwser, i);
 			}
 		}
 	}
-	
-	if(hits == 0) format(string, 128, "%s", DEFAULT_NOANWSER);
-	else
-	{
-		new randMemb = Itter_Random(tempAnwser);
-		format(string, 128, "%s", gSentences[randMemb][sentence]);
+jump:
+	new randMemb = (hits>0)?random(hits):-1;
+	if(randMemb != -1)
+	{	
+		new send = temp[randMemb];
+		format(string, 128, "%s", gSentences[send][sentence]);
 		
-		if(gSentences[randMemb][sAnim])
+		if(gSentences[send][sAnim])
 		{
-			SMARTANIM("%s %s", gSentences[randMemb][sAnimLib], gSentences[randMemb][sAnimName]);
+			SMARTANIM("%s %s", gSentences[send][sAnimLib], gSentences[send][sAnimName]);
 		}
 		
-		if(gSentences[randMemb][pFunction])
+		if(gSentences[send][pFunction])
 		{
-			SMARTPFUNC("%s %d", gSentences[randMemb][cFunction], fromPlayer);
+			SMARTPFUNC("%s %d", gSentences[send][cFunction], fromPlayer);
 		}
-		
-		foreach(tempAnwser, e)
-		{
-			Iter_Remove(tempAnwser, e);
-		}
+		return string;
 	}
-	
+	format(string, 128, "%s", DEFAULT_NOANWSER);
 	return string;
 }
 
@@ -228,24 +227,22 @@ findMessage(fromPlayer, anwserGroup)
 stock AutoMessage(toPlayer)
 {
 	#pragma unused toPlayer
-	new hits;
+	new hits, temp[MAX_TEMPA];
 	foreach(AutoMessage, i)
 	{
+		if(hits >= MAX_TEMPA) goto jump;
 		if(gAutoMessages[i][gAutoMood] == gMySelf[myMood])
 		{
-			Iter_Add(tempAnwser, i);
+			temp[hits] = i;
 			hits++;
 		}
 	}
-	if(hits > 0)
+jump:	
+	new randMemb = (hits>0)?random(hits):-1;
+	if(randMemb != -1)
 	{
-		new randMemb = Itter_Random(tempAnwser);
-		sendAnwser(gAutoMessages[randMemb][gAutoMessage]);
-		
-		foreach(tempAnwser, e)
-		{
-			Iter_Remove(tempAnwser, e);
-		}	
+		new send = temp[randMemb];
+		sendAnwser(gAutoMessages[send][gAutoMessage]);
 	}
 }
 

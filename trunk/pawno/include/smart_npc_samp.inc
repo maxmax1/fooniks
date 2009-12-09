@@ -1,42 +1,106 @@
 
+
+/*
+*    DEFINES
+*/
+
 #define COLOR_CHAT 0xf2ffacAA
 #define SMART_COLOR 0x00000005
 
-#if !defined MY_NAME
+#define MAX_SMART_NPC 10
 
-	#define MY_NAME "Smart_NPC"
+/*
+*    GLOBALS
+*/
 
-#endif
+new mySelf[MAX_SMART_NPC] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1}; // SampIds
+new bool: mySelfR[MAX_SMART_NPC]; // SampIds
+new mySelfN[MAX_SMART_NPC][32]; // Names
+new mySelfS[MAX_SMART_NPC][32]; // Scripts
 
-#if !defined NPC_SCRIPT
+new bool: inMyArea[MAX_SMART_NPC][MAX_PLAYERS]; // AutoMSG stuff
 
-	#define NPC_SCRIPT "Smart_NPC"
+/*
+*    FORWARDS
+*/
 
-#endif
+forward RegisterAllSmartNPC();
+forward ConnectAllSmartNPC();
+forward RegisterSmartNpc(name[], script[]);
+forward SendSmartMessage(smartId, string[]);
+forward SmartChatWithMe(playerid, text[]);
+forward AutoMessageTimer(smartId);
 
-new mySelf = -1;
-new bool: inMyArea[MAX_PLAYERS];
+/*
+*    STOCK
+*/
 
-forward SendSmartMessage(string[]);
-forward SmartChatWithMe(myName[], playerid, text[]);
-forward AutoMessageTimer();
-
-public SendSmartMessage(string[])
+stock getSmartId(playerid)
 {
-	if(mySelf == -1) return 0;
+	for(new i = 0; i < MAX_SMART_NPC; i++)
+	{
+		if(!mySelfR[i]) continue;
+		if(mySelf[i] == playerid)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
 
-	#if defined GLOBALCHAT
+stock getSmartIdFromName(smartName[])
+{
+	for(new i = 0; i < MAX_SMART_NPC; i++)
+	{
+		if(!mySelfR[i]) continue;
+		if(!strcmp(mySelfN[i], smartName))
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+/*
+*    PUBLICS
+*/
+
+public ConnectAllSmartNPC()
+{
+	for(new i = 0; i < MAX_SMART_NPC; i++)
+	{
+		if(!mySelfR[i]) continue;
+		printf("%d, ConnectNPC(%s, %s);", i, mySelfN[i], mySelfS[i]);
+		ConnectNPC(mySelfN[i], mySelfS[i]);
+	}	
+}
+
+public RegisterSmartNpc(name[], script[])
+{
+	new freeId = -1;
+	for(new i = 0; i < MAX_SMART_NPC; i++)
+	{
+		if(!mySelfR[i]) freeId = i;
+	}
+	if(freeId == -1) return -1;
 	
-	SendClientMessageToAll(COLOR_CHAT, string);
-	
-	#else
-	
+	format(mySelfN[freeId], 32, "%s", name);
+	format(mySelfS[freeId], 32, "%s", script);
+	mySelfR[freeId] = true;	
+	printf("%d, RegisterSmartNpc(%s, %s);", freeId, mySelfN[freeId], mySelfS[freeId]);
+	return freeId;
+}
+
+public SendSmartMessage(smartId, string[])
+{
+	if(mySelf[smartId] == -1) return 0;
+
 	new Float: x, Float: y, Float: z;
-	GetPlayerPos(mySelf, x, y, z);
+	GetPlayerPos(mySelf[smartId], x, y, z);
 	
 	for(new i; i < MAX_PLAYERS; i++)
 	{
-		if(i == mySelf) continue;
+		if(i == mySelf[smartId]) continue;
 		if(!IsPlayerConnected(i)) continue;
 		
 		if(IsPlayerInRangeOfPoint(i, 10.0, x, y, z))
@@ -44,72 +108,67 @@ public SendSmartMessage(string[])
 			SendClientMessage(i, COLOR_CHAT, string);
 		}
 	}
-	
-	#endif
 	return 1;
 }
 
-public SmartChatWithMe(myName[], playerid, text[])
+public SmartChatWithMe(playerid, text[])
 {
-	if(mySelf == -1) return 2;
-	if(strcmp(myName, MY_NAME)) return 3;
-	
 	new string[136];
 	format(string, sizeof(string), "%d %s", playerid, text);
 	
-	#if defined GLOBALCHAT
-	
-	SendClientMessage(mySelf, SMART_COLOR, string);
-	return 0;
-	
-	#else
 	new Float: x, Float: y, Float: z;
-	GetPlayerPos(mySelf, x, y, z);	
+	GetPlayerPos(playerid, x, y, z);	
 
-	if(IsPlayerInRangeOfPoint(playerid, 10.0, x, y, z))
+	for(new i = 0; i < MAX_SMART_NPC; i++)
 	{
-		SendClientMessage(mySelf, SMART_COLOR, string);
-		return 1;
-	}	
+		if(!mySelfR[i]) continue;
+		if(playerid == mySelf[i]) continue;
+		
+		if(IsPlayerInRangeOfPoint(mySelf[i], 10.0, x, y, z))
+		{
+			SendClientMessage(mySelf[i], SMART_COLOR, string);
+			return 1;
+		}	
+	}
 	return 0;
-	#endif
 }
 
-public AutoMessageTimer()
+public AutoMessageTimer(smartId)
 {
-	if(mySelf == -1) return 0;
 	new Float: x, Float: y, Float: z;
-	GetPlayerPos(mySelf, x, y, z);	
+	GetPlayerPos(mySelf[smartId], x, y, z);	
 
 	foreach(Player, i)
 	{
 		if(IsPlayerInRangeOfPoint(i, 10.0, x, y, z))
 		{
-			if(!inMyArea[i])
+			if(!inMyArea[smartId][i])
 			{
-				inMyArea[i] = true;
+				inMyArea[smartId][i] = true;
 				new string[128];
 				format(string, 128, "%d autoMessage", i);
-				SendClientMessage(mySelf, SMART_COLOR, string);
+				SendClientMessage(smartId, SMART_COLOR, string);
 			}
 		}
-		else if(inMyArea[i])
+		else if(inMyArea[smartId][i])
 		{
-			inMyArea[i] = false;
+			inMyArea[smartId][i] = false;
 		}
 	}
-	SetTimer("AutoMessageTimer", 3000, 0);
+	SetTimerEx("AutoMessageTimer", 3000, 0, "i", smartId);
 	return 1;
 }
 
 /*
-*    IMPLEMENTATION
+*    ALS Silent
 */
+
 #if !defined FILTERSCRIPT
 
 public OnGameModeInit()
 {
-	ConnectNPC(MY_NAME, NPC_SCRIPT);
+	RegisterAllSmartNPC();
+	SetTimer("ConnectAllSmartNPC", 5000, 0);
 	
 	if (funcidx("SmartNPC_OnGameModeInit") != -1)
     {
@@ -129,25 +188,7 @@ forward SmartNPC_OnGameModeInit();
 
 #else
 
-public OnFilterScriptInit()
-{
-	ConnectNPC(MY_NAME, NPC_SCRIPT);
-	
-	if (funcidx("SmartNPC_OnFilterScriptInit") != -1)
-    {
-        return CallLocalFunction("SmartNPC_OnFilterScriptInit", "");
-    }	
-    return 1;	
-}
-
-#if defined _ALS_OnFilterScriptInit
-    #undef OnFilterScriptInit
-#else
-    #define _ALS_OnFilterScriptInit
-#endif
-#define OnFilterScriptInit SmartNPC_OnFilterScriptInit
-
-forward SmartNPC_OnFilterScriptInit();
+#error "See ei tööta FSis!"
 
 #endif
 
@@ -162,16 +203,27 @@ public OnPlayerConnect(playerid)
 		if(!strcmp(tempStr, tempStr))
 		{
 			GetPlayerName(playerid, tempStr, sizeof(tempStr));
-			if(!strcmp(tempStr, MY_NAME))
+			
+			new smID = getSmartIdFromName(tempStr);
+			if(smID == -1)
 			{
-				mySelf = playerid;
-				printf("Me: %d", mySelf);
-				SetTimer("AutoMessageTimer", 3000, 0);
+				Kick(playerid);
+			}
+			else
+			{
+				if(mySelf[smID] == -1) // Not Connected Yet
+				{
+					printf("Me: %d", playerid);
+					SetTimerEx("AutoMessageTimer", 3000, 0, "i", smID);
+					mySelf[smID] = playerid;
+				}
+				else Kick(playerid); // This SmartNPC is already Connected.
 			}
 		}
 		else
 		{
 			print("NPC Flood Attempt!");
+			Kick(playerid);
 		}
 	}
 	
@@ -193,9 +245,11 @@ forward SmartNPC_OnPlayerConnect(playerid);
 
 public OnPlayerDisconnect(playerid)
 {
-	if(mySelf != -1 && playerid == mySelf)
+	new smID = getSmartId(playerid);
+	if(smID != -1)
 	{
-		ConnectNPC(MY_NAME, NPC_SCRIPT);
+		ConnectNPC(mySelfN[smID], mySelfS[smID]);
+		mySelf[smID] = -1;
 	}
 	
 	if (funcidx("SmartNPC_OnPlayerDisconnect") != -1)
@@ -216,7 +270,8 @@ forward SmartNPC_OnPlayerDisconnect(playerid);
 
 COMMAND:smartspawn(playerid, params[])
 {
-	if(mySelf == -1 || playerid != mySelf) return 0;
+	new smID = getSmartId(playerid);
+	if(smID == -1) return 0;
 
 	new skin, Float:x, Float:y, Float:z, Float:a;
 	if(sscanf(params, "dffff", skin, x, y, z, a) == 0)
@@ -230,29 +285,35 @@ COMMAND:smartspawn(playerid, params[])
 
 COMMAND:smartAnwser(playerid, params[])
 {
-	if(mySelf == -1 || playerid != mySelf) return 0;
+	new smID = getSmartId(playerid);
+	if(smID == -1) return 0;
+	
 	new str[128];
 	if(sscanf(params, "s", str) == 0)
 	{
-		SendSmartMessage(str);
+		SendSmartMessage(smID, str);
 	}
 	return 1;
 }
 
 COMMAND:smartlog(playerid, params[])
 {
-	if(mySelf == -1 || playerid != mySelf) return 0;
+	new smID = getSmartId(playerid);
+	if(smID == -1) return 0;
+	
 	new str[128];
 	if(sscanf(params, "s", str) == 0)
 	{
-		print(str);
+		printf("SMART(%s)", mySelfN[smID], str);
 	}
 	return 1;
 }
 
 COMMAND:smartanim(playerid, params[])
 {
-	if(mySelf == -1 || playerid != mySelf) return 0;
+	new smID = getSmartId(playerid);
+	if(smID == -1) return 0;
+	
 	new str1[32], str2[32];
 	if(sscanf(params, "ss", str1, str2) == 0)
 	{
@@ -264,11 +325,13 @@ COMMAND:smartanim(playerid, params[])
 
 COMMAND:callpfunction(playerid, params[])
 {
-	if(mySelf == -1 || playerid != mySelf) return 0;
+	new smID = getSmartId(playerid);
+	if(smID == -1) return 0;
+	
 	new str1[32], val;
 	if(sscanf(params, "sd", str1, val) == 0)
 	{
-		CallRemoteFunction(str1, "d", val);
+		CallLocalFunction(str1, "dds", val, 1, 5);
 	}
 	return 1;
 }
@@ -277,10 +340,7 @@ COMMAND:callpfunction(playerid, params[])
 
 public OnPlayerText(playerid, text[])
 {
-	if(mySelf != playerid && mySelf != -1)
-	{
-		SmartChatWithMe(MY_NAME, playerid, text);
-	}
+	SmartChatWithMe(playerid, text);
 	
 	if (funcidx("SmartNPC_OnPlayerText") != -1)
     {
@@ -288,6 +348,8 @@ public OnPlayerText(playerid, text[])
     }	
     return 1;	
 }
+
+forward SmartNPC_OnPlayerText(playerid, text[]);
 
 #if defined _ALS_OnPlayerText
     #undef OnPlayerText
