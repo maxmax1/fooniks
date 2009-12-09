@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"162"
+#define SCRIPT_REVISION 		"163"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -81,6 +81,7 @@
 #include <phoenix_Pockets>
 #include <phoenix_HelpDraw>
 #include <phoenix_NewsPaper>
+#include <phoenix_Resting>
 //#include <AntiShiit>
 
 public AddAllJobs()
@@ -104,10 +105,6 @@ public AddAllJobs()
 #define STRING_LENGHT 256
 #define MAX_TELEPORTS 10
 
-#define MAX_REST_POSITIONS 14
-#define REST_SIT 0
-#define REST_LAY 1
-
 /* DialogIDs */
 #define DIALOG_LOGIN 2009
 #define DIALOG_PLAYER 2010
@@ -127,7 +124,6 @@ public AddAllJobs()
 new gHour, gMinute, gSecond;
 
 new foodBar;
-new restBar;
 
 new WelcomeStr[64];
 
@@ -157,40 +153,10 @@ new telePositions[MAX_TELEPORTS][posInfo] =
 	{"TenGreen", 2351.5228, -1673.0512, 13.5469, 2351.5228, -1673.0512, 13.1682}
 };
 
-enum restInf
-{
-	restType,
-	Float: restX,
-	Float: restY,
-	Float: restZ,
-	Float: restAng,
-	bool: Taken
-};
-
-new RestPositions[MAX_REST_POSITIONS][restInf] = 
-{
-	{REST_SIT, 0.0, 0.0, 0.0, 0.0, false},
-	{REST_LAY, 2.0, 2.0, 2.0, 2.0, false},
-	{REST_SIT,1202.5208,2.6604,1001.5255,194.8951, false},
-	{REST_SIT,1201.4686,1.3668,1001.5255,271.1574, false},
-	{REST_SIT,1201.4637,0.6496,1001.5255,266.7708, false},
-	{REST_SIT,1201.5294,-0.6220,1001.5255,265.5174, false},
-	{REST_SIT,1201.5164,-2.1263,1001.5255,257.9973, false},
-	{REST_SIT,1201.4718,-3.4100,1001.5255,266.1441, false},
-	{REST_SIT,1201.5441,-4.1636,1001.5255,270.8441, false},
-	{REST_SIT,1201.5792,-5.1626,1001.5255,265.8307, false},
-	{REST_SIT,1201.7568,-6.0220,1001.5255,286.7518, false},
-	{REST_SIT,1202.1875,-7.2701,1001.5255,344.3098, false},
-	{REST_LAY,1201.3108,-7.2603,1001.5255,320.8096, false},
-	{REST_LAY,1201.6097,2.2717,1001.5255,222.9037, false}
-	
-};
-
 /*
 *    FORWARDS
 */
 
-forward ClearResting(playerid);
 forward SyncPlayerTime(playerid);
 forward SyncAllPlayerTime();
 forward UpdateAllPlayerPos();
@@ -210,12 +176,7 @@ forward SCMTAInPlayerRadius(playerid, radius, color, message[]);
 
 forward Velocity(playerid, Float: X, Float: Y, Float: Z);
 forward NPCHandle(playerid);
-forward Rest(playerid);
-forward IsPlayerNearRestingPlace(playerid);
-forward RestingEnd(playerid);
 forward TogglePlayerControllableEx(playerid, toggle, timer);
-forward RestChange();
-forward RestUpdate();
 
 /*
 *    MAIN()
@@ -319,30 +280,23 @@ stock showTeleDialog(playerid)
 	return 1;
 }
 
-stock Float: Distance(Float:x1, Float:y1, Float:z1, Float:x2, Float:y2, Float:z2)
-{
-	new Float: temp = floatsqroot( (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2));
-	if(temp < 0) temp = temp * (-1);
-	return temp;
-}
-
 MegaJump(playerid)
 {
 	new Float: rad = 0.0125;
 	new Float: higher = 0.125;
 	new Float: JumpEnergy = 15.0;
 	
-	if(pInfo[playerid][pRest] > 50.0 && pInfo[playerid][pRest] < 75.0)
+	if(pRest[playerid] > 50.0 && pRest[playerid] < 75.0)
 	{
 		rad = 0.00625;
 		higher = 0.0625;
 	}
-	else if(pInfo[playerid][pRest] > 25.0 && pInfo[playerid][pRest] < 50.0)
+	else if(pRest[playerid] > 25.0 && pRest[playerid] < 50.0)
 	{
 		rad = 0.003125;
 		higher = 0.03125;
 	}
-	else if(pInfo[playerid][pRest] < 25.0)
+	else if(pRest[playerid] < 25.0)
 	{
 		return 1;
 	}
@@ -364,8 +318,8 @@ MegaJump(playerid)
 		SetTimerEx("ClearDelay", 10000, 0, "ii", playerid, SKILL_ATHLETE);
 		XpAdd(playerid, SKILL_ATHLETE, 25);
 		
-		pInfo[playerid][pRest] -= JumpEnergy;
-		setProgressBar(restBar, playerid, pInfo[playerid][pRest]);
+		pRest[playerid] -= JumpEnergy;
+		setProgressBar(restBar, playerid, pRest[playerid]);
 	}
 	return 1;
 }
@@ -425,7 +379,7 @@ public OnGameModeInit()
 	MP5Pickup = CreatePickup(353 , 2, 2526.4465,-1237.0942,43.6563, 0); // mp5
 	AKPickup = CreatePickup(355 , 2, 2345.6289,-1364.8751,28.0859, 0); // AK
 	
-	ConnectNPC("Igor", "Igor_Takso");
+	//ConnectNPC("Igor", "Igor_Takso");
 	
 	//// KARDIRAJA OBJEKTID
 	CreateObject(978, 1801.377563, -1040.903320, 23.426163, 0.0000, 0.0000, 154.6978);
@@ -575,7 +529,6 @@ public OnGameModeInit()
 	//////////KARDIRADA LÕPP
 	
 	foodBar = CreateProgressbar(548.2, 54.5, 53.8, 0.1, 2.0, COLOR_BLACK, COLOR_GREEN, COLOR_WHITE);
-	restBar = CreateProgressbar(548.2, 61.5, 53.8, 0.1, 2.0, COLOR_BLACK, COLOR_YELLOW, COLOR_WHITE);
 	
 	for( new i = 0; i <= 699; i++ )
 	{
@@ -587,8 +540,6 @@ public OnGameModeInit()
 	SetTimer("CheckFalseDeadPlayers", 3000, true);
 	SetTimer("SyncAllPlayerTime", 950, true);
 	SetTimer("UpdateAllPlayerPos", 1000*15, true);
-	SetTimer("RestChange", 10000, true);	
-	SetTimer("RestUpdate", 5000, true);
 	
 	//Add3DStream("http://streamer.sotovik.ee:8500/skyplus_hi.ogg", 1742.8539,-1861.9402, 14.0, 25.0);	
 	
@@ -629,7 +580,6 @@ public OnPlayerConnect(playerid)
 	CheckCharacter(playerid);
 
 	pInfo[playerid][pLoggedIn] = false;
-	pInfo[playerid][pRest] = 100.0;
 	
 	SyncPlayerTime(playerid);
 	return 1;
@@ -643,7 +593,6 @@ public OnPlayerDisconnect(playerid)
 		UpdatePlayer(playerid);
 		SaveSkills(playerid);
 	}
-	if( pInfo[playerid][pResting] ) ClearResting(playerid);
 	ClearPlayerData(playerid);	
 	return 1;
 }
@@ -702,7 +651,6 @@ public OnPlayerSpawn(playerid)
 	SetCameraBehindPlayer(playerid);
 	
 	ProccesBarShowForPlayer(foodBar, playerid);
-	ProccesBarShowForPlayer(restBar, playerid);
 	TogglePlayerClock(playerid, 1);
 	
 	pInfo[playerid][pControllable] = 1;
@@ -926,8 +874,6 @@ public OnPlayerDeath(playerid, killerid, reason)
 	pInfo[playerid][pHealth] = 100;
 	pInfo[playerid][pVW] = 0;
 	pInfo[playerid][pInterior] = 0;
-	
-	if ( pInfo[playerid][pResting] ) ClearResting(playerid);
 	
 	return 1;
 }
@@ -1283,14 +1229,6 @@ COMMAND:turvav88(playerid, params[])
 	return 1;
 }
 
-COMMAND:puhka(playerid, params[])
-{
-	#pragma unused params
-	if(IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_YELLOW, "Sa istud juba!");
-	Rest(playerid);
-	return 1;
-}
-
 COMMAND:tapa(playerid, params[])
 {
 	#pragma unused params
@@ -1594,93 +1532,6 @@ public CheckFalseDeadPlayers(playerid)
 	}
 }
 
-public Rest(playerid)
-{
-	
-	if( pInfo[playerid][pResting] )
-	{
-		RestingEnd(playerid);
-		return 1;
-	}
-	new RestPlace = IsPlayerNearRestingPlace(playerid);
-	if(RestPlace != -1)
-	{
-		SetPlayerPos(playerid, RestPositions[RestPlace][restX], RestPositions[RestPlace][restY],  RestPositions[RestPlace][restZ]);
-		SetPlayerFacingAngle(playerid, RestPositions[RestPlace][restAng]);
-
-		pInfo[playerid][pResting] = true;
-		RestPositions[RestPlace][Taken] = true;
-		pInfo[playerid][pRestingAt] = RestPlace;
-
-		if(RestPositions[RestPlace][restType] == REST_LAY)
-		{
-			ApplyAnimation(playerid, "BEACH", "null", 4.0, 1, 0, 0, 0, 0);	/// preload
-			ApplyAnimation(playerid, "BEACH", "bather", 4.0, 1, 0, 0, 0, 0);
-			SendEmote(playerid, "läheb pikali");
-		}
-		else
-		{
-			ApplyAnimation(playerid, "BEACH", "null", 4.0, 1, 0, 0, 0, 0);	/// preload
-			ApplyAnimation(playerid,"BEACH", "ParkSit_M_loop", 4.0, 1, 0, 0, 0, 0);
-			SendEmote(playerid, "istub");
-		}
-
-		SendClientMessage(playerid, COLOR_YELLOW, "Kirjuta /puhka, et püsti tõusta.");
-	}
-	else
-	{
-		ApplyAnimation(playerid, "BEACH", "null", 4.0, 1, 0, 0, 0, 0);	/// preload
-		ApplyAnimation(playerid,"BEACH", "ParkSit_M_loop", 4.0, 1, 0, 0, 5000, 0);
-		SendEmote(playerid, "istub maha");		
-		pInfo[playerid][pResting] = true;
-		pInfo[playerid][pRestingAt] = -1;
-	}
-	return 1;	
-}
-
-public IsPlayerNearRestingPlace(playerid)
-{
-	new Float: pX, Float: pY, Float: pZ;	
-	GetPlayerPos(playerid, pX, pY, pZ);
-	
-	new Float: kaugus = 5.0;
-	new Float: kaugus2;
-	
-	new ret = -1;
-	
-	for(new i; i < MAX_REST_POSITIONS; i++)
-	{
-		if( !RestPositions[i][Taken] )
-		{
-			kaugus2 = Distance(pX, pY, pZ, RestPositions[i][restX], RestPositions[i][restY],  RestPositions[i][restZ]);
-
-			if(kaugus2 < kaugus)
-			{
-				kaugus = kaugus2;
-				ret = i;
-			}
-		}
-	}	
-	
-	return ret;
-}
-
-public RestingEnd(playerid)
-{
-	ClearResting(playerid);
-	SendEmote(playerid, "tõuseb püsti");
-	ClearAnimations(playerid);
-}
-
-public ClearResting(playerid)
-{
-    new RestPlace = pInfo[playerid][pRestingAt];
-	if(RestPlace != -1 && RestPlace < MAX_REST_POSITIONS) RestPositions[RestPlace][Taken] = false;
-    pInfo[playerid][pResting] = false;
-    pInfo[playerid][pRestingAt] = -1;
-    
-}
-
 public SyncPlayerTime(playerid)
 {
 	SetPlayerTime(playerid, gHour, gMinute);
@@ -1706,54 +1557,6 @@ public TogglePlayerControllableEx(playerid, toggle, timer)
 		new newval = 0;
 		if(toggle == 0) newval = 1;
 		SetTimerEx("TogglePlayerControllableEx", timer, 0, "iii", playerid, newval, -1);
-	}
-}
-
-public RestChange()
-{
-	foreach (Player, playerid)
-	{
-	    if( pInfo[playerid][pLoggedIn] && !IsPlayerNPC(playerid) )
-		{
-			if( pInfo[playerid][pResting] )
-			{
-				new Float: Rem = 1.0, xpNeeded;
-				
-				if(pInfo[playerid][pRestingAt] != -1)
-				{
-					Rem = 2.5;
-					if(RestPositions[pInfo[playerid][pRestingAt]][restType] == REST_LAY) Rem = 5.0;
-				}
-				
-				new level = GetLevel(SKILL_ATHLETE, pInfo[playerid][pSkill][SKILL_ATHLETE], xpNeeded);
-				if(level > 10) Rem = 1.0 + (level / 25);
-				
-				pInfo[playerid][pRest] += Rem;
-				XpAdd(playerid, SKILL_ATHLETE, 25);
-			}
-			else
-			{
-				new Float: Rem = 5.0, xpNeeded;
-				new level = GetLevel(SKILL_ATHLETE, pInfo[playerid][pSkill][SKILL_ATHLETE], xpNeeded);
-				if(level > 10) Rem = 5.0 - (level / 25);
-				
-				if(!IsPlayerInAnyVehicle(playerid)) pInfo[playerid][pRest] -= Rem;
-				else  pInfo[playerid][pRest] += 1.0;
-			}
-			if(pInfo[playerid][pRest] < 0.0) pInfo[playerid][pRest] = 0.0;
-			if(pInfo[playerid][pRest] > 100.0) pInfo[playerid][pRest] = 100.0;
-		}
-	}
-}
-
-public RestUpdate()
-{
-	foreach (Player, playerid)
-	{
-	    if( pInfo[playerid][pLoggedIn] && !IsPlayerNPC(playerid) )
-		{
-			if(progressInf[restBar][innerPrecent][playerid] != pInfo[playerid][pRest]) setProgressBar(restBar, playerid, pInfo[playerid][pRest]);
-		}
 	}
 }
 
