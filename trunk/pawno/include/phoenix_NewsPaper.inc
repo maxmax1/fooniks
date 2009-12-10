@@ -49,7 +49,8 @@
 *    GLOBALS
 */
 
-new paperActive[MAX_PLAYERS];
+new currentPaper[MAX_PLAYERS];
+new bool: paperActive[MAX_PLAYERS];
 new paperDrawActive[MAX_PLAYERS];
 new currentPage[MAX_PLAYERS];
 
@@ -154,7 +155,7 @@ public ShowNewsPaper(playerid, paperid)
 	if(paperid < 0 || paperid > MAX_NEWSPAPERS) return 1;
 	if(!NewsPapers[paperid][paperUsed]) return 2;
 	
-	if(paperDrawActive[playerid] > -1)
+	if(paperActive[playerid])
 	{
 		HideNewsPaper(playerid, false);
 	}
@@ -227,8 +228,9 @@ public ShowNewsPaper(playerid, paperid)
 		TextDrawShowForPlayer(playerid, NewsDraw[i][Text5]); // Block 3
 		TextDrawShowForPlayer(playerid, NewsDraw[i][Text6]); // Block 4
 		NewsDraw[i][used] = true;
-		paperActive[playerid] = paperid;
+		currentPaper[playerid] = paperid;
 		paperDrawActive[playerid] = i;
+		paperActive[playerid] = true;
 		TogglePlayerControllableEx(playerid, 0, -1);
 		return 0;
 	}
@@ -248,7 +250,11 @@ public HideNewsPaper(playerid, page)
 	TextDrawHideForPlayer(playerid, NewsDraw[i][Text6]); // Block 4
 	NewsDraw[i][used] = false;
 	paperDrawActive[playerid] = -1;
-	if(page) currentPage[playerid] = 0;
+	if(page)
+	{
+		currentPage[playerid] = 0;
+		paperActive[playerid] = false;
+	}
 	TogglePlayerControllableEx(playerid, 1, -1);
 	return 0;	
 }
@@ -465,7 +471,7 @@ public OnGameModeInit()
 
 public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 {
-	if(paperActive[playerid] > -1)
+	if(paperActive[playerid])
 	{
 		if(PRESSED(KEY_ANALOG_LEFT)) currentPage[playerid]--;
 		else if(PRESSED(KEY_ANALOG_RIGHT)) currentPage[playerid]++;
@@ -480,7 +486,7 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 		}
 		currentPage[playerid] = (currentPage[playerid] > 3)?0:currentPage[playerid];
 		currentPage[playerid] = (currentPage[playerid] < 0)?3:currentPage[playerid];
-		ShowNewsPaper(playerid, paperActive[playerid]);
+		ShowNewsPaper(playerid, currentPaper[playerid]);
 	}
 	wrong_key:
     if (funcidx("NP_OnPlayerKeyStateChange") != -1)
@@ -493,7 +499,8 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 public OnPlayerConnect(playerid)
 {
 	HideNewsPaper(playerid, true);
-	paperActive[playerid] = -1;
+	currentPaper[playerid] = -1;
+	paperActive[playerid] = false;
 	
     if (funcidx("NP_OnPlayerConnect") != -1)
     {
@@ -505,7 +512,8 @@ public OnPlayerConnect(playerid)
 public OnPlayerDisconnect(playerid)
 {
 	HideNewsPaper(playerid, true);
-	paperActive[playerid] = -1;
+	currentPaper[playerid] = -1;
+	paperActive[playerid] = false;
 	
 	if(PaperWriter[isWriting] && PaperWriter[writerId] == playerid)
 	{

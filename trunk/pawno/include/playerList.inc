@@ -18,9 +18,11 @@
 #define PAGE_SIZE		32
 
 new pList[MAX_PLAYERS][PAGE_SIZE];
+new gMyConfirmBox[MAX_PLAYERS];
 
 forward OnPlayerSelectPlayer(playerid, otherId, btn);
-forward OnPlayerConfirm(playerid, accepted);
+forward OnPlayerConfirm(playerid, response, boxId);
+forward pList_OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]);
 
 stock ShowPlayerList(playerid, Float: dist, showMe)
 {
@@ -57,8 +59,9 @@ stock ShowPlayerList(playerid, Float: dist, showMe)
 	ShowPlayerDialog(playerid, Dialog_pList, DIALOG_STYLE_LIST, "Vali mängija", str, "OK", "Katkesta");		
 }
 
-stock ShowPlayerConfirmbox(playerid, mStr[])
+stock ShowPlayerConfirmbox(playerid, boxId, mStr[])
 {
+	gMyConfirmBox[playerid] = boxId;
 	ShowPlayerDialog(playerid, Dialog_pConfirm, DIALOG_STYLE_MSGBOX, "Kinnita", mStr, "Jah", "Ei");
 }
 
@@ -76,14 +79,13 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	{
 		if (funcidx("OnPlayerConfirm") != -1)
 		{
-			if(pList[playerid][listitem] == -1) response = 0;
-			return CallRemoteFunction("OnPlayerConfirm", "iii", playerid, response);
+			return CallRemoteFunction("OnPlayerConfirm", "iii", playerid, response, gMyConfirmBox[playerid]);
 		}
 	}
 
     if (funcidx("pList_OnDialogResponse") != -1)
     {
-        return CallLocalFunction("pList_OnDialogResponse", "");
+        return CallLocalFunction("pList_OnDialogResponse", "iiiis", playerid, dialogid, response, listitem, inputtext);
     }
     return 1;
 }

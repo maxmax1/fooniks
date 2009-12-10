@@ -32,7 +32,6 @@
 *    Defines
 */
 #define MAX_GARBAGE_POINTS 64
-#define GARBAGE_MONEY 50
 #define GARBAGE_JOB_ID 1
 #define GARBAGE_TRUCK 408
 
@@ -168,12 +167,14 @@ public PathEnd(playerid)
 	GarbagePlayer[playerid][numGPoints] = 0;
 	
     #if defined _phoenix_Money_included
-		GivePlayerMoneyNew(playerid, GARBAGE_MONEY);
+		GivePlayerMoneyNew(playerid, gJobsPay[GARBAGE_JOB_ID]);
 	#else
-		GivePlayerMoney(playerid, GARBAGE_MONEY);
+		GivePlayerMoney(playerid, gJobsPay[GARBAGE_JOB_ID]);
 	#endif
 	
-	SmallHelpDrawShow(playerid, "Lõpetasid prügiringi, teenisid 50 ühikut.", 5);
+	new string[64];
+	format(string, 64, "Lõpetasid prügiringi, teenisid %d ühikut.", gJobsPay[GARBAGE_JOB_ID]);
+	SmallHelpDrawShow(playerid, string, 5);
 	DisablePlayerCheckpoint(playerid);
 	return 1;
 }

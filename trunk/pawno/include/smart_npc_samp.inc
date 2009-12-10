@@ -305,10 +305,10 @@ COMMAND:callpfunction(playerid, params[])
 	new smID = getSmartId(playerid);
 	if(smID == -1) return 0;
 	
-	new str1[32], val;
-	if(sscanf(params, "sd", str1, val) == 0)
+	new str1[32], val, val2;
+	if(sscanf(params, "sdd", str1, val, val2) == 0)
 	{
-		CallLocalFunction(str1, "dds", val, 1, 5);
+		CallLocalFunction(str1, "dd", val, val2);
 	}
 	return 1;
 }

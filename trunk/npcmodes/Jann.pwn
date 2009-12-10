@@ -4,8 +4,7 @@
 
 #define MY_NAME "Jann"
 
-#define DEFAULT_MESSAGE "Oota, Misasja?"
-#define DEFAULT_NOANWSER "pff"
+#define DEFAULT_NOANWSER	"ok siis"
 
 #include <smart_npc>
 
@@ -20,6 +19,15 @@ public SmartInit()
 	MakeSmart(MY_NAME, 242, 2441.3633, -1422.0017, 24.0, 270.0);
 	SetMaxMood(3);	
 	
+	AddDefaultMessage(0, "Räägi ARUSAADAVALT!");
+	AddDefaultMessage(0, "MIDA!??");
+	AddDefaultMessage(1, "Oota, Misasja?");
+	AddDefaultMessage(1, "Ma ei mõista su keelt?");
+	AddDefaultMessage(2, "Ma ei saa sust aru.");
+	AddDefaultMessage(2, "Räägi arusaadavalt.");
+	AddDefaultMessage(3, "Palun räägi selgemalt.");
+	AddDefaultMessage(3, "Palun räägi arusaadavalt.");
+	
 	new tGroup1 = AddTriggerGroup(1);
 	AddTriggerWord(tGroup1, "tere");
 	AddTriggerWord(tGroup1, "jõu");
@@ -27,6 +35,7 @@ public SmartInit()
 	AddTriggerWord(tGroup1, "jann");
 	AddTriggerWord(tGroup1, "hey");
 	AddTriggerWord(tGroup1, "hei");
+	new tempSentenceId;
 	
 	AddSentence(tGroup1, 0, "Kasi minema!");
 	AddSentence(tGroup1, 0, "Kao ära!");
@@ -48,6 +57,8 @@ public SmartInit()
 	AddTriggerWord(tGroup2, "homo");
 	AddTriggerWord(tGroup2, "gey");
 	AddTriggerWord(tGroup2, "lits");
+	AddTriggerWord(tGroup2, "hoor");
+	AddTriggerWord(tGroup2, "munn");
 	AddTriggerWord(tGroup2, "hoor");
 	
 	AddSentence(tGroup2, 0, "Ma tapan su ära!");
@@ -76,12 +87,24 @@ public SmartInit()
 	AddSentence(tGroup3, 1, "Kui sa vähe korralikumalt käituda mõistaksid siis ehk saaksid tööle.");
 	AddSentence(tGroup3, 1, "Mul ei ole sulle küll tööd anda.");
 	
-	new tempSentenceId = AddSentence(tGroup3, 2, "Vaatame kuidas sa hakkama saad.");
-	AddSentencePFunction(tempSentenceId, "SetPlayerJob");
-	tempSentenceId = AddSentence(tGroup3, 2, "Olgu, saad tööle.");
-	AddSentencePFunction(tempSentenceId, "SetPlayerJob");
-	tempSentenceId = AddSentence(tGroup3, 3, "Sa oled tööle võetud.");
-	AddSentencePFunction(tempSentenceId, "SetPlayerJob");	
+	tempSentenceId = AddSentence(tGroup3, 0, "Ei annaks ka sulle.");
+	SetNegative(tempSentenceId);
+	tempSentenceId = AddSentence(tGroup3, 0, "Sulle ma ei annaks ka.");
+	SetNegative(tempSentenceId);
+	tempSentenceId = AddSentence(tGroup3, 1, "Mul ei oleks sulle anda ikka...");
+	SetNegative(tempSentenceId);
+	
+	tempSentenceId = AddSentence(tGroup3, 2, "säh, uuri lepingut.");
+	AddSentenceJobFunction(tempSentenceId, 1);
+	tempSentenceId = AddSentence(tGroup3, 2, "näe uuri lepingut.");
+	AddSentenceJobFunction(tempSentenceId, 1);
+	tempSentenceId = AddSentence(tGroup3, 3, "Palun, uuri lepingut.");
+	AddSentenceJobFunction(tempSentenceId, 1);	
+
+	tempSentenceId = AddSentence(tGroup3, 2, "Kui ei taha, siis ei saa ka.");
+	SetNegative(tempSentenceId);
+	tempSentenceId = AddSentence(tGroup3, 3, "Kui ei taha, siis ei taha.");
+	SetNegative(tempSentenceId);
 
 	AddAutoMessage(0, "Mis sa siit otsid?");
 	AddAutoMessage(1, "Mis vahid siin, kao minema!");

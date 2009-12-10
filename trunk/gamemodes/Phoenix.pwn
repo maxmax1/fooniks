@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"167"
+#define SCRIPT_REVISION 		"168"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -61,6 +61,7 @@
 #include <foreach>   		 // author: Alex "Y_Less" Cole, External Credit #9
 #include <zcmd> 			 // author: Zeex, External Credit #5
 #include <stuff> 	 		 // some Stuff Needed EveryWhere
+#include <playerlist> 		 // colse Players List
 #include <smart_npc_samp> 	 // SmartNPC
 
 #include <phoenix_Core>
@@ -86,7 +87,7 @@
 
 public AddAllJobs()
 {
-	JOBS_RegisterJob(GARBAGE_JOB_ID, "GCollector", "Prügivedaja");
+	JOBS_RegisterJob(GARBAGE_JOB_ID, "GCollector", "Prügivedaja", false, 50, 5);
 }
 
 public RegisterAllSmartNPC()
@@ -1575,6 +1576,22 @@ public TogglePlayerControllableEx(playerid, toggle, timer)
 public OnNewHour()
 {
 	SendFormattedTextToAll(COLOR_GREEN, "Kell on nüüd %d:%d.", gHour, gMinute);
+	
+	foreach(Player, playerid)
+	{
+		if(gMyJob[playerid] > 0)
+		{
+			gMyContract[playerid]--;
+			if(gMyContract[playerid] > 0)
+			{
+				SendFormattedText(playerid, COLOR_GREEN, LANG_JOB_CONTRACT_TIME, gMyContract[playerid]);
+			}
+			else
+			{
+				SendClientMessage(playerid, COLOR_GREEN, LANG_JOB_CONTRACT_END);
+			}			
+		}
+	}
 }
 
 public OnPlayerJobChange(playerid, bool: success)
@@ -1588,6 +1605,26 @@ public OnPlayerJobChange(playerid, bool: success)
 	{
 		SendClientMessage(playerid, COLOR_GREEN, LANG_X_JOB);
 	}
+}
+
+public OnPlayerRequestJob(playerid, jobId)
+{
+	new string[64];
+	format(string, 64, "Kas nõustud töölepinguga?\n\tAmet: %s\n\tPalk: %d %s\n\tTööaeg: %d", gJobsNames[jobId], gJobsPay[jobId], (gJobsPayH[jobId]?(" tunnis"):("(tükitöö)")), gJobsTime[jobId]);
+	ShowPlayerConfirmbox(playerid, JOB_CONFIRM_BOX, string);
+	
+	pJobRequest[playerid] = jobId;
+	pJobRequestT[playerid] = gJobsTime[jobId];
+}
+
+public OnPlayerConfirm(playerid, response, boxId)
+{
+	if(boxId == JOB_CONFIRM_BOX)
+	{
+		if(response != 0) SetPlayerJob(playerid, pJobRequest[playerid], pJobRequestT[playerid]);
+		else SendClientMessage(playerid, COLOR_YELLOW, LANG_REFUSE_JOB);
+	}
+	else SendClientMessage(playerid, COLOR_YELLOW, "VALE KAST!");
 }
 
 /*

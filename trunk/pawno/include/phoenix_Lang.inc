@@ -123,5 +123,6 @@ stock GetLangSTR(langstr[])
 #define LANG_JOB_CONTRACT_END "Su tööleping on läbi, kui soovid töölepingut pikendada pead rääkima oma ülemusega enne järgmist \"palgapäeva\"."
 #define LANG_JOBHELP "Vaata ka /tööabi."
 #define LANG_X_JOB "Sul on juba töö."
+#define LANG_REFUSE_JOB "Sa otsustasid tööd mitte võtta."
 
 // EOF
