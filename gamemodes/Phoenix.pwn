@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"163"
+#define SCRIPT_REVISION 		"164"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -121,7 +121,7 @@ public AddAllJobs()
 /*
 *    GLOBAL VARIABLES
 */
-new gHour, gMinute, gSecond;
+new gHour, gMinute, gSecond, bool: gHourChange;
 
 new foodBar;
 
@@ -177,6 +177,7 @@ forward SCMTAInPlayerRadius(playerid, radius, color, message[]);
 forward Velocity(playerid, Float: X, Float: Y, Float: Z);
 forward NPCHandle(playerid);
 forward TogglePlayerControllableEx(playerid, toggle, timer);
+forward OnNewHour();
 
 /*
 *    MAIN()
@@ -1255,11 +1256,13 @@ COMMAND:afk(playerid, params[])
 	{
 		pInfo[playerid][AFK] = false;
 		SetPlayerColor(playerid, PLAYER_COLOR);
+		gAnimsDisabled[playerid] = false;
 	}
 	else
 	{
 		pInfo[playerid][AFK] = true;
 		SetPlayerColor(playerid, COLOR_AFK);
+		gAnimsDisabled[playerid] = true;
 	}
 	PlayerStatusChange(playerid, ((pInfo[playerid][AFK])?STATUS_AFK:STATUS_NONE));	
 	TogglePlayerControllableEx(playerid, ((pInfo[playerid][AFK])?0:1), -1);
@@ -1539,8 +1542,16 @@ public SyncPlayerTime(playerid)
 
 public SyncAllPlayerTime()
 {
+	new old = gHour;
 	gettime(gHour, gMinute, gSecond);
 	gHour = gHour + TIME_OFFSET;
+	if(old != gHour) SetWorldTime(gHour);
+	if(gMinute == 0 && !gHourChange) 
+	{
+		OnNewHour();
+	}
+	else if(gMinute != 0 && gHourChange) gHourChange = false;
+	
 	foreach(Player, playerid)
 	{
 		SyncPlayerTime(playerid);
@@ -1558,6 +1569,11 @@ public TogglePlayerControllableEx(playerid, toggle, timer)
 		if(toggle == 0) newval = 1;
 		SetTimerEx("TogglePlayerControllableEx", timer, 0, "iii", playerid, newval, -1);
 	}
+}
+
+public OnNewHour()
+{
+	SendFormattedTextToAll(COLOR_GREEN, "Kell on nüüd %d:%d.", gHour, gMinute);
 }
 
 public OnPlayerJobChange(playerid)

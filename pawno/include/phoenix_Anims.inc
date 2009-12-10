@@ -28,10 +28,21 @@
 	#endinput
 #endif
 
+/*
+*    GLOBALS
+*/
+
+new bool: gAnimsDisabled[MAX_PLAYERS];
+
+/*
+*    DEFINES
+*/
+
 #define COLOR_ANIMS 0x33AA33AA
 #define animCmd(%0,%1,%2,%3,%4,%5) \
 COMMAND:%0(playerid, params[]) \
 { \
+	if(gAnimsDisabled[playerid]) return SendClientMessage(playerid, COLOR_ANIMS, "Sul on hetkel animatsioonid keelatud."); \
 	return ApplyAnimation(playerid,#%1,#%2,1.0,%3,%4,%4,0,%5); \
 }
 
@@ -47,6 +58,10 @@ COMMAND:%0(playerid, params[]) \
 	if(funcidx(str) != -1) return CallLocalFunction(str, "is", playerid, params); \
 	return 1; \
 }
+
+/*
+*    COMMANDS
+*/
 
 COMMAND:animatsioonid(playerid, params[])
 {
