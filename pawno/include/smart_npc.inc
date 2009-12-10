@@ -15,15 +15,15 @@
 
 #endif
 
-#if !defined DEFAULT_MESSAGE
-
-	#define DEFAULT_MESSAGE		"Speak slowly and precicely, I cannot understand what you're saying."
-	
-#endif
-
 #if !defined DEFAULT_NOANWSER
 
 	#define DEFAULT_NOANWSER	"I have nothing to say to you!"
+	
+#endif
+
+#if !defined NO
+
+	#define NO "no"
 	
 #endif
 
@@ -33,12 +33,10 @@
 	
 #endif
 
-#include <YSI_XML>
-
 #define MAX_MOODS 			6
 #define MAX_AUTOMESSAGES 	6
 #define MAX_TRIGGERGROUPS 	5
-#define MAX_SENTENCES 		32
+#define MAX_SENTENCES 		40
 #define MAX_TRIGGERWORDS 	64
 #define MAX_TEMPA			10
 
@@ -49,7 +47,6 @@ new FALSE = false;
 #define NPCLOG(%0,%1) do{new str[128]; format(str, 128, %0, %1); SmartCmd("smartlog", str);}while(FALSE)
 #define SMARTSPAWN(%0,%1) do{new str[128]; format(str, 128, %0, %1); SmartCmd("smartspawn", str);}while(FALSE)
 #define SMARTANIM(%0,%1) do{new str[128]; format(str, 128, %0, %1); SmartCmd("smartanim", str);}while(FALSE)
-#define SMARTPFUNC(%0,%1) do{new str[128]; format(str, 128, %0, %1); SmartCmd("callpfunction", str);}while(FALSE)
 
 forward SmartInit();
 forward MakeSmart(SmartName[], skin, Float: posX, Float: posY, Float: posZ, Float: posAng);
@@ -58,8 +55,10 @@ forward SetMaxMood(max);
 forward AddTriggerGroup(moodMod);
 forward AddTriggerWord(tGroup, word[]);
 forward AddSentence(tGroup, moodLevel, sent[]);
-forward AddSentencePFunction(sentenceId, pFunc[]);
+forward AddDefaultMessage(moodLevel, sent[]);
+forward AddSentenceJobFunction(sentenceId, pFunc);
 forward AddAutoMessage(moodLevel, msg[]);
+forward SetNegative(sentenceId);
 
 /*
 *
@@ -112,9 +111,10 @@ enum sentenceInf
 	sentence[128],
 	sAnimLib[16],
 	sAnimName[32],
-	cFunction[32],
+	cFunction,
 	bool: pFunction,
-	bool: sAnim
+	bool: sAnim,
+	bool: sTNegative
 };
 new gSentences[MAX_SENTENCES][sentenceInf];
 Itter_Create(Sentence, MAX_SENTENCES);
@@ -135,7 +135,19 @@ Itter_Create(AutoMessage, MAX_AUTOMESSAGES);
 */
 stock AnwserCheck(fromPlayer, gotMessage[])
 {
-	new anwsGroup = scanForTriggerWords(gotMessage);
+	new anwsGroup = -1, bool: neg;
+	if(strfind(gotMessage, "ei", true) != -1) neg = true;
+	else neg = false;
+	
+	foreach(TriggerWord, i)
+	{
+		if(strfind(gotMessage, gTriggerWords[i][word1], true, 0) != -1)
+		{			
+			anwsGroup = gTriggerWords[i][tGroupId];
+			break;
+		}
+	}
+	
 	if(anwsGroup > -1)
 	{
 		// if mood after mod is bigger than max or smaller than 0 fix the error, else set it to a new value.
@@ -143,26 +155,11 @@ stock AnwserCheck(fromPlayer, gotMessage[])
 		
 		if(gMySelf[myMood] >= gMaxMood) gMySelf[myMood] = gMaxMood;
 		else if(gMySelf[myMood] < 0) gMySelf[myMood] = 0;
-		
-		// Send The Anwser..
-		sendAnwser(findMessage(fromPlayer, anwsGroup));
-		return 1;
 	}
-	sendAnwser(DEFAULT_MESSAGE);
+	sendAnwser(findMessage(fromPlayer, anwsGroup, neg));
 	return 1;
 }
 
-/*
-*    scanForTriggerWords
-*/
-stock scanForTriggerWords(sentenceToScan[])
-{
-	foreach(TriggerWord, i)
-	{
-		if(strfind(sentenceToScan, gTriggerWords[i][word1], true, 0) != -1) return gTriggerWords[i][tGroupId];
-	}
-	return -1;
-}
 
 /*
 *    SendAnwser
@@ -174,32 +171,30 @@ stock sendAnwser(message[])
 
 stock SmartCmd(command[], message[])
 {
-	new string[128];
-	format(string, 128, "/%s %s", command, message);
+	new string[256];
+	format(string, 256, "/%s %s", command, message);
 	SendCommand(string);
 }
 
 /*
 *    FindMessage
 */
-findMessage(fromPlayer, anwserGroup)
+findMessage(fromPlayer, anwserGroup, bool: negative)
 {
 	new string[128], hits = 0, temp[MAX_TEMPA];
 	foreach(Sentence, i)
 	{
-		if(hits >= MAX_TEMPA) goto jump;
+		if(hits >= MAX_TEMPA) break;
 		
 		if(gSentences[i][sTGroupId] == anwserGroup)
 		{
-			format(string, 128, "%d, %d == %d", i, gSentences[i][mood], gMySelf[myMood]);
-			if(gSentences[i][mood] == gMySelf[myMood])
+			if(gSentences[i][mood] == gMySelf[myMood] && (anwserGroup < 2 || negative == gSentences[i][sTNegative]))
 			{
 				temp[hits] = i;
 				hits++;
 			}
 		}
 	}
-jump:
 	new randMemb = (hits>0)?random(hits):-1;
 	if(randMemb != -1)
 	{	
@@ -213,7 +208,9 @@ jump:
 		
 		if(gSentences[send][pFunction])
 		{
-			SMARTPFUNC("%s %d", gSentences[send][cFunction], fromPlayer);
+			new str[128];
+			format(str, 128, "OnPlayerRequestJob %d %d", gSentences[send][cFunction], fromPlayer);
+			SmartCmd("callpfunction", str);
 		}
 		return string;
 	}
@@ -230,14 +227,14 @@ stock AutoMessage(toPlayer)
 	new hits, temp[MAX_TEMPA];
 	foreach(AutoMessage, i)
 	{
-		if(hits >= MAX_TEMPA) goto jump;
+		if(hits >= MAX_TEMPA) break;
 		if(gAutoMessages[i][gAutoMood] == gMySelf[myMood])
 		{
 			temp[hits] = i;
 			hits++;
 		}
 	}
-jump:	
+
 	new randMemb = (hits>0)?random(hits):-1;
 	if(randMemb != -1)
 	{
@@ -304,11 +301,24 @@ public AddSentence(tGroup, moodLevel, sent[])
 	return freeId;
 }
 
-public AddSentencePFunction(sentenceId, pFunc[])
+public AddDefaultMessage(moodLevel, sent[])
+{
+	new freeId = Itter_Free(Sentence);
+	if(freeId == -1) return -1;
+	
+	gSentences[freeId][sTGroupId] = -1;
+	gSentences[freeId][mood] = moodLevel;
+	format(gSentences[freeId][sentence], 32, "%s", sent);
+	
+	Itter_Add(Sentence, freeId);
+	return freeId;
+}
+
+public AddSentenceJobFunction(sentenceId, pFunc)
 {
 	if(sentenceId < 0 || sentenceId >= MAX_SENTENCES) return 0;
 	
-	format(gSentences[sentenceId][cFunction], 32, "%s", pFunc);	
+	gSentences[sentenceId][cFunction] = pFunc;	
 	gSentences[sentenceId][pFunction] = true;
 	return 1;
 }
@@ -323,4 +333,11 @@ public AddAutoMessage(moodLevel, msg[])
 	
 	Itter_Add(AutoMessage, freeId);
 	return freeId;	
+}
+
+public SetNegative(sentenceId)
+{
+	if(sentenceId < 0 || sentenceId >= MAX_SENTENCES) return 0;
+	gSentences[sentenceId][sTNegative] = true;
+	return 1;
 }

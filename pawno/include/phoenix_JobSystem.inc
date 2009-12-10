@@ -30,13 +30,23 @@
 #define MAX_JOBS 5
 #define MAX_JOBCOMMANDS 10
 
+#define JOB_CONFIRM_BOX 1
+
 /*
 *    Global Variables
 */
 new gMyJob[MAX_PLAYERS];
 new gMyContract[MAX_PLAYERS];
 
+new pJobRequest[MAX_PLAYERS];
+new pJobRequestT[MAX_PLAYERS];
+
 new bool: gJobsRegistred[MAX_JOBS];
+
+new gJobsPay[MAX_JOBS];
+new gJobsTime[MAX_JOBS];
+new bool: gJobsPayH[MAX_JOBS];
+
 new gJobsNames[MAX_JOBS][32];
 new gJobsArray[MAX_JOBS][32];
 
@@ -70,7 +80,7 @@ Itter_Create(JobCommand, MAX_JOBCOMMANDS);
 *    Forwards
 */
 
-forward JOBS_RegisterJob(id, string[], safeString[]);
+forward JOBS_RegisterJob(id, string[], safeString[], bool: payPerHour, payAmount, cTime);
 forward SetPlayerJob(playerid, jobId, cTime);
 
 /*
@@ -78,6 +88,7 @@ forward SetPlayerJob(playerid, jobId, cTime);
 */
 
 forward AddAllJobs();
+forward OnPlayerRequestJob(playerid, jobId);
 forward OnPlayerJobChange(playerid, bool: success);
 forward AddJobCommand(jobId, myCommand[]);
 	
@@ -92,11 +103,14 @@ forward JobSystem_OnPlayerDisconnect(playerid);
 /*
 *    Public
 */
-public JOBS_RegisterJob(id, string[], safeString[])
+public JOBS_RegisterJob(id, string[], safeString[], bool: payPerHour, payAmount, cTime)
 {
 	format(gJobsArray[id], 32, "%s", string);
 	format(gJobsNames[id], 32, "%s", safeString);
 	gJobsRegistred[id] = true;
+	gJobsPayH[id] = payPerHour;
+	gJobsPay[id] = payAmount;
+	gJobsTime[id] = cTime;	
 	Itter_Add(Jobs, id);
 }
 
