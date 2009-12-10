@@ -119,20 +119,6 @@ JOBS_OnJobInit(GCollector)
 	AddJobCommand(GARBAGE_JOB_ID, "prügiring");
 }
 
-JOBS_OnPlayerConnect(GCollector)
-{
-	GarbagePlayer[playerid][cpId] = -1;
-	GarbagePlayer[playerid][onGRound] = false;
-	GarbagePlayer[playerid][numGPoints] = 0;
-}
-
-JOBS_OnPlayerDisconnect(GCollector)
-{
-	GarbagePlayer[playerid][cpId] = -1;
-	GarbagePlayer[playerid][onGRound] = false;
-	GarbagePlayer[playerid][numGPoints] = 0;
-}
-
 public AddGarbagePoint(Float: x, Float: y, Float: z)
 {
 	if(garbPointsUsed >= MAX_GARBAGE_POINTS) return -1;
@@ -159,7 +145,7 @@ public GarbagePath(playerid)
 	if(GarbagePlayer[playerid][numGPoints] == 16)
 	{
 		GarbagePlayer[playerid][cpId] = SetPlayerCheckpoint(playerid, 2413.7822, -1425.1913, 23.9835, 3.0);
-		SmallHelpDrawShow(playerid, "Masin on täis, tühjenda see Taaskasutuskeskuses.", 5);
+		SmallHelpDrawShow(playerid, "Masin on täis, tühjenda see Taaskasutuskeskuses.", 5000);
 	}
 	else if(GarbagePlayer[playerid][numGPoints] > 16)
 	{
@@ -172,7 +158,7 @@ public GarbagePath(playerid)
 		
 		new string[128];
 		format(string, 128, "~b~Masin: ~n~~n~~w~%d/16", GarbagePlayer[playerid][numGPoints]-1);
-		SmallHelpDrawShow(playerid, string, 5);
+		SmallHelpDrawShow(playerid, string, 5000);
 	}
 }
 
