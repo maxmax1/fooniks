@@ -280,6 +280,7 @@ public UpdatePlayer(playerid)
 	MysqlUpdateInt(query, "interior", pInfo[playerid][pInterior]);
 	MysqlUpdateFlo(query, "health", pInfo[playerid][pHealth]);
 	MysqlUpdateInt(query, "adminLevel", pInfo[playerid][pAdminLevel]);
+	MysqlUpdateInt(query, "playerJob", gMyJob[playerid]);
 	
 	MysqlUpdateFinish(query, "id", sqlid);
 
@@ -361,6 +362,16 @@ public ClearPlayerData(playerid)
 	ResetPlayerMoneyNew(playerid);
 	#endif	
 	
+	
+	#if defined _phoenix_JobSystem_included
+  gMyJob[playerid] = 0;
+	#endif
+	
+	#if defined MAX_GARBAGE_POINTS
+	GarbagePlayer[playerid][cpId] = -1;
+	GarbagePlayer[playerid][onGRound] = false;
+	GarbagePlayer[playerid][numGPoints] = 0;
+	#endif
 }
 
 // EOF
