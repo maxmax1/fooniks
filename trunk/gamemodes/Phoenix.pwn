@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"164"
+#define SCRIPT_REVISION 		"165"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -98,7 +98,7 @@ public AddAllJobs()
 *    DEFINES 2
 */
 
-#define TIME_OFFSET -3
+#define TIME_OFFSET 0
 #define CHAT_RADIUS 25
 #define CHAT_RADIUS_SHOUT 40
 
