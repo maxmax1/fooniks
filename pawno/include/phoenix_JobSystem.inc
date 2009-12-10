@@ -78,7 +78,7 @@ forward SetPlayerJob(playerid, jobId, cTime);
 */
 
 forward AddAllJobs();
-forward OnPlayerJobChange(playerid);
+forward OnPlayerJobChange(playerid, bool: success);
 forward AddJobCommand(jobId, myCommand[]);
 	
 /*
@@ -104,10 +104,14 @@ public SetPlayerJob(playerid, jobId, cTime)
 {
 	if(!gJobsRegistred[jobId]) return 0;
 	
-	gMyJob[playerid] = jobId;
-	gMyContract[playerid] = (cTime > 0)?cTime:5;
+	if(gMyJob[playerid] == 0)
+	{
+		gMyJob[playerid] = jobId;
+		gMyContract[playerid] = (cTime > 0)?cTime:5;
+		OnPlayerJobChange(playerid, true);
+	}
+	else OnPlayerJobChange(playerid, false);
 
-	OnPlayerJobChange(playerid);
 	return 1;
 }
 

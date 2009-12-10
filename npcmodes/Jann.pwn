@@ -24,6 +24,7 @@ public SmartInit()
 	AddTriggerWord(tGroup1, "tere");
 	AddTriggerWord(tGroup1, "jõu");
 	AddTriggerWord(tGroup1, "jou");
+	AddTriggerWord(tGroup1, "jann");
 	AddTriggerWord(tGroup1, "hey");
 	AddTriggerWord(tGroup1, "hei");
 	
@@ -67,6 +68,8 @@ public SmartInit()
 	AddTriggerWord(tGroup3, "tööd");
 	AddTriggerWord(tGroup3, "tahan");
 	AddTriggerWord(tGroup3, "teha");	
+	AddTriggerWord(tGroup3, "küll");	
+	AddTriggerWord(tGroup3, "ikka");	
 	
 	AddSentence(tGroup3, 0, "Ei saa sa mingit tööd...");
 	AddSentence(tGroup3, 0, "Sina ja tööd, Ahh käi parem perse.");
@@ -97,17 +100,26 @@ public OnClientMessage(color, text[])
 {
 	if(color == SMART_COLOR)
 	{
+		if(!strcmp(text, "myPOS"))
+		{
+			SMARTSPAWN("%d %f %f %f %f", gMySelf[mySkin], gMySelf[myPosX], gMySelf[myPosY], gMySelf[myPosZ], gMySelf[myPosAng]);
+			return 1;
+		}
+		
 		new fromPlayer, text2[128];
 		if(sscanf(text, "ds", fromPlayer, text2) == 0)
 		{
 			if(!strcmp(text2, "autoMessage"))
 			{
 				AutoMessage(fromPlayer);
+				return 1;
 			}
 			else
 			{			
 				AnwserCheck(fromPlayer, text2);
+				return 1;
 			}
 		}
 	}
+	return 0;
 }

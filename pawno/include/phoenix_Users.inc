@@ -41,7 +41,6 @@ enum pInf
 	pCharName[30],
 	pSqlId,
 	pAdmin,
-	pJob,
 	pMember,
 	pLeader,
 	pModel,
@@ -336,7 +335,7 @@ public ClearPlayerData(playerid)
 	pInfo[playerid][pLoggedIn] = false;
 	pInfo[playerid][pSqlId] = 0;
 	pInfo[playerid][pAdmin] = 0;
-	pInfo[playerid][pJob] = 0;
+	gMyJob[playerid] = 0;
 	pInfo[playerid][pMember] = 0;
 	pInfo[playerid][pLeader] = 0;
 	pInfo[playerid][pModel] = 0;
