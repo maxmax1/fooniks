@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"165"
+#define SCRIPT_REVISION 		"166"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -61,7 +61,7 @@
 #include <foreach>   		 // author: Alex "Y_Less" Cole, External Credit #9
 #include <zcmd> 			 // author: Zeex, External Credit #5
 #include <stuff> 	 		 // some Stuff Needed EveryWhere
-//#include <smart_npc_samp> 	 // SmartNPC
+#include <smart_npc_samp> 	 // SmartNPC
 
 #include <phoenix_Core>
 #include <phoenix_RealCarnames>
@@ -89,10 +89,10 @@ public AddAllJobs()
 	JOBS_RegisterJob(GARBAGE_JOB_ID, "GCollector", "Prügivedaja");
 }
 
-/*public RegisterAllSmartNPC()
+public RegisterAllSmartNPC()
 {
 	RegisterSmartNpc("Jann", "Jann");
-}*/
+}
 
 /*
 *    DEFINES 2
@@ -1548,6 +1548,7 @@ public SyncAllPlayerTime()
 	if(old != gHour) SetWorldTime(gHour);
 	if(gMinute == 0 && !gHourChange) 
 	{
+		gHourChange = true;
 		OnNewHour();
 	}
 	else if(gMinute != 0 && gHourChange) gHourChange = false;
@@ -1576,10 +1577,17 @@ public OnNewHour()
 	SendFormattedTextToAll(COLOR_GREEN, "Kell on nüüd %d:%d.", gHour, gMinute);
 }
 
-public OnPlayerJobChange(playerid)
+public OnPlayerJobChange(playerid, bool: success)
 {
-	SendFormattedText(playerid, COLOR_GREEN, LANG_GOT_JOB_EX, gJobsNames[gMyJob[playerid]], gMyContract[playerid]);
-	SendClientMessage(playerid, COLOR_GREEN, LANG_JOBHELP);
+	if(success)
+	{
+		SendFormattedText(playerid, COLOR_GREEN, LANG_GOT_JOB_EX, gJobsNames[gMyJob[playerid]], gMyContract[playerid]);
+		SendClientMessage(playerid, COLOR_GREEN, LANG_JOBHELP);
+	}
+	else
+	{
+		SendClientMessage(playerid, COLOR_GREEN, LANG_X_JOB);
+	}
 }
 
 /*

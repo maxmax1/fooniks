@@ -273,7 +273,7 @@ public OnDriverEnterVehicle(playerid)
 		else if	(Vehicles[vId][vType] == VEHICLE_JOB)
 		{
 			if(Vehicles[vId][vOwner] == 0) Remove = false;
-			else if(pInfo[playerid][pJob] != Vehicles[vId][vOwner]) Remove = true;
+			else if(gMyJob[playerid] != Vehicles[vId][vOwner]) Remove = true;
 		}
 		else if	(Vehicles[vId][vType] == VEHICLE_BUYABLE)
 		{

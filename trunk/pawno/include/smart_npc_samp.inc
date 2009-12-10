@@ -13,12 +13,16 @@
 *    GLOBALS
 */
 
-new mySelf[MAX_SMART_NPC] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1}; // SampIds
-new bool: mySelfR[MAX_SMART_NPC]; // SampIds
+new mySelf[MAX_SMART_NPC] = {-1,...}; // SampIds
 new mySelfN[MAX_SMART_NPC][32]; // Names
 new mySelfS[MAX_SMART_NPC][32]; // Scripts
+new mySelfT[MAX_SMART_NPC];
+new bool: mySelfC[MAX_SMART_NPC];
+new bool: myPosSet[MAX_SMART_NPC];
 
 new bool: inMyArea[MAX_SMART_NPC][MAX_PLAYERS]; // AutoMSG stuff
+
+Itter_Create(SmartNPC, MAX_SMART_NPC);
 
 /*
 *    FORWARDS
@@ -27,9 +31,9 @@ new bool: inMyArea[MAX_SMART_NPC][MAX_PLAYERS]; // AutoMSG stuff
 forward RegisterAllSmartNPC();
 forward ConnectAllSmartNPC();
 forward RegisterSmartNpc(name[], script[]);
-forward SendSmartMessage(smartId, string[]);
 forward SmartChatWithMe(playerid, text[]);
 forward AutoMessageTimer(smartId);
+forward RequestPosition(smartId);
 
 /*
 *    STOCK
@@ -37,9 +41,8 @@ forward AutoMessageTimer(smartId);
 
 stock getSmartId(playerid)
 {
-	for(new i = 0; i < MAX_SMART_NPC; i++)
+	foreach(SmartNPC, i)
 	{
-		if(!mySelfR[i]) continue;
 		if(mySelf[i] == playerid)
 		{
 			return i;
@@ -50,9 +53,8 @@ stock getSmartId(playerid)
 
 stock getSmartIdFromName(smartName[])
 {
-	for(new i = 0; i < MAX_SMART_NPC; i++)
+	foreach(SmartNPC, i)
 	{
-		if(!mySelfR[i]) continue;
 		if(!strcmp(mySelfN[i], smartName))
 		{
 			return i;
@@ -67,9 +69,8 @@ stock getSmartIdFromName(smartName[])
 
 public ConnectAllSmartNPC()
 {
-	for(new i = 0; i < MAX_SMART_NPC; i++)
+	foreach(SmartNPC, i)
 	{
-		if(!mySelfR[i]) continue;
 		printf("%d, ConnectNPC(%s, %s);", i, mySelfN[i], mySelfS[i]);
 		ConnectNPC(mySelfN[i], mySelfS[i]);
 	}	
@@ -77,38 +78,14 @@ public ConnectAllSmartNPC()
 
 public RegisterSmartNpc(name[], script[])
 {
-	new freeId = -1;
-	for(new i = 0; i < MAX_SMART_NPC; i++)
-	{
-		if(!mySelfR[i]) freeId = i;
-	}
+	new freeId = Itter_Free(SmartNPC);
 	if(freeId == -1) return -1;
 	
 	format(mySelfN[freeId], 32, "%s", name);
 	format(mySelfS[freeId], 32, "%s", script);
-	mySelfR[freeId] = true;	
 	printf("%d, RegisterSmartNpc(%s, %s);", freeId, mySelfN[freeId], mySelfS[freeId]);
+	Itter_Add(SmartNPC, freeId);
 	return freeId;
-}
-
-public SendSmartMessage(smartId, string[])
-{
-	if(mySelf[smartId] == -1) return 0;
-
-	new Float: x, Float: y, Float: z;
-	GetPlayerPos(mySelf[smartId], x, y, z);
-	
-	for(new i; i < MAX_PLAYERS; i++)
-	{
-		if(i == mySelf[smartId]) continue;
-		if(!IsPlayerConnected(i)) continue;
-		
-		if(IsPlayerInRangeOfPoint(i, 10.0, x, y, z))
-		{
-			SendClientMessage(i, COLOR_CHAT, string);
-		}
-	}
-	return 1;
 }
 
 public SmartChatWithMe(playerid, text[])
@@ -119,12 +96,9 @@ public SmartChatWithMe(playerid, text[])
 	new Float: x, Float: y, Float: z;
 	GetPlayerPos(playerid, x, y, z);	
 
-	for(new i = 0; i < MAX_SMART_NPC; i++)
-	{
-		if(!mySelfR[i]) continue;
-		if(playerid == mySelf[i]) continue;
-		
-		if(IsPlayerInRangeOfPoint(mySelf[i], 10.0, x, y, z))
+	foreach(SmartNPC, i)
+	{		
+		if(playerid != mySelf[i] && IsPlayerInRangeOfPoint(mySelf[i], 10.0, x, y, z))
 		{
 			SendClientMessage(mySelf[i], SMART_COLOR, string);
 			return 1;
@@ -135,19 +109,24 @@ public SmartChatWithMe(playerid, text[])
 
 public AutoMessageTimer(smartId)
 {
+	if(!myPosSet[smartId])
+	{
+		RequestPosition(smartId);
+	}
+
 	new Float: x, Float: y, Float: z;
 	GetPlayerPos(mySelf[smartId], x, y, z);	
 
 	foreach(Player, i)
 	{
-		if(IsPlayerInRangeOfPoint(i, 10.0, x, y, z))
+		if(i != mySelf[smartId] && IsPlayerInRangeOfPoint(i, 10.0, x, y, z))
 		{
 			if(!inMyArea[smartId][i])
 			{
 				inMyArea[smartId][i] = true;
 				new string[128];
 				format(string, 128, "%d autoMessage", i);
-				SendClientMessage(smartId, SMART_COLOR, string);
+				SendClientMessage(mySelf[smartId], SMART_COLOR, string);
 			}
 		}
 		else if(inMyArea[smartId][i])
@@ -155,7 +134,12 @@ public AutoMessageTimer(smartId)
 			inMyArea[smartId][i] = false;
 		}
 	}
-	SetTimerEx("AutoMessageTimer", 3000, 0, "i", smartId);
+	return 1;
+}
+
+public RequestPosition(smartId)
+{
+	SendClientMessage(mySelf[smartId], SMART_COLOR, "myPOS");
 	return 1;
 }
 
@@ -211,11 +195,13 @@ public OnPlayerConnect(playerid)
 			}
 			else
 			{
-				if(mySelf[smID] == -1) // Not Connected Yet
+				if(!mySelfC[smID]) // Not Connected Yet
 				{
 					printf("Me: %d", playerid);
-					SetTimerEx("AutoMessageTimer", 3000, 0, "i", smID);
+					myPosSet[smID] = false;
+					mySelfT[smID] = SetTimerEx("AutoMessageTimer", 3000, 1, "i", smID);
 					mySelf[smID] = playerid;
+					mySelfC[smID] = true;
 				}
 				else Kick(playerid); // This SmartNPC is already Connected.
 			}
@@ -248,8 +234,11 @@ public OnPlayerDisconnect(playerid)
 	new smID = getSmartId(playerid);
 	if(smID != -1)
 	{
-		ConnectNPC(mySelfN[smID], mySelfS[smID]);
 		mySelf[smID] = -1;
+		KillTimer(mySelfT[smID]);
+		mySelfC[smID] = false;
+		myPosSet[smID] = false;
+		ConnectNPC(mySelfN[smID], mySelfS[smID]);
 	}
 	
 	if (funcidx("SmartNPC_OnPlayerDisconnect") != -1)
@@ -279,19 +268,7 @@ COMMAND:smartspawn(playerid, params[])
 		SetPlayerSkin(playerid, skin);
 		SetPlayerPos(playerid, x, y, z);
 		SetPlayerFacingAngle(playerid, a);
-	}
-	return 1;
-}
-
-COMMAND:smartAnwser(playerid, params[])
-{
-	new smID = getSmartId(playerid);
-	if(smID == -1) return 0;
-	
-	new str[128];
-	if(sscanf(params, "s", str) == 0)
-	{
-		SendSmartMessage(smID, str);
+		myPosSet[smID] = true;
 	}
 	return 1;
 }
