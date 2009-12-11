@@ -11,3 +11,28 @@
 
 #define DistanceCheck(%0,%1,%2,%3,%4,%5) \
 ((((%0) - (%3)) * ((%0) - (%3))) + (((%1) - (%4)) * ((%1) - (%4))) + (((%2) - (%5)) * ((%2) - (%5)))) // Y_Less's macro
+
+stock TextDrawFix(text[])
+{
+	new fixed[260];
+	format(fixed, 256, "%s", text);
+	
+	for( new i; i < 256; i++ )
+	{
+		switch( fixed[i] )
+		{
+			case 'ü','Ü': fixed[i] = '¬';
+			case 'õ','Õ': fixed[i] = '§';
+			case 'ö','Ö': fixed[i] = '¨';
+			case 'ä','Ä': fixed[i] = 'š';
+		}
+	}
+	return fixed;
+}
+			
+forward TextDrawSetStringEx(Text: textID, txt[]);
+public TextDrawSetStringEx(Text: textID, txt[])
+{
+	TextDrawSetString(textID, TextDrawFix(txt));
+	return 1;
+}

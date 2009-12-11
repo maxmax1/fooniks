@@ -244,6 +244,8 @@ public FetchCharacterInformationFinish(playerid)
 			pInfo[playerid][pAdminLevel] = strval(Field);
 			mysql_fetch_field_row(Field, "playerJob");
 			gMyJob[playerid] = strval(Field);
+			mysql_fetch_field_row(Field, "playerCTime");
+			gMyContract[playerid] = strval(Field);
 			
 			mysql_free_result();
 			LoadSkills(playerid);
@@ -281,6 +283,7 @@ public UpdatePlayer(playerid)
 	MysqlUpdateFlo(query, "health", pInfo[playerid][pHealth]);
 	MysqlUpdateInt(query, "adminLevel", pInfo[playerid][pAdminLevel]);
 	MysqlUpdateInt(query, "playerJob", gMyJob[playerid]);
+	MysqlUpdateInt(query, "playerCTime", gMyContract[playerid]);
 	
 	MysqlUpdateFinish(query, "id", sqlid);
 

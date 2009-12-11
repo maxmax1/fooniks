@@ -104,17 +104,41 @@ enum writeInf
 	add4[256]	
 };
 new PaperWriter[writeInf] = {false, -1, 0, "_", "_", "_", "_", "_", "_", "_", "_", "_"};
-/*
-new JobAds[3][jAddInf] =
+
+enum jAddInf
 {
-	{"Prügivedaja", }
-};*/
+	jobName[16],
+	jobContact[10],
+	Float: jPosX,
+	Float: jPosY,
+	Float: jPosZ
+};
+
+#define ADDED_JADS 3
+
+new JobAds[ADDED_JADS][jAddInf] =
+{
+	{"Prügivedaja", "Jann", 2441.3633, -1422.0017, 24.0},
+	{"Suvakas", "Test", 1492.5065, 1007.7800, 10.8203},
+	{"Kolmas", "Kolm", 1492.5065, 1007.7800, 10.8203}
+	
+};
+
+new PlayerKey[MAX_PLAYERS][4];
+new addSel[MAX_PLAYERS];
+
+/*
+*    HAS
+*/
+new gPaperHas_OPU;
 
 /*
 *    FORWARDS
 */
 
 forward ShowNewsPaper(playerid, paperid);
+forward RedrawJobAds(playerid, tdID);
+forward OnPlayerKeys(playerid, pressedkey);
 forward HideNewsPaper(playerid, page);
 forward CreatePaperDraw(paperid);
 forward LoadNewsPapers();
@@ -173,51 +197,52 @@ public ShowNewsPaper(playerid, paperid)
 		
 		if(currentPage[playerid] == 0)
 		{
-			TextDrawSetString(NewsDraw[i][Text1], NewsPapers[paperid][headLine]);
-			TextDrawSetString(NewsDraw[i][Text2], "1 / 4");
+			TextDrawSetStringEx(NewsDraw[i][Text1], NewsPapers[paperid][headLine]);
+			TextDrawSetStringEx(NewsDraw[i][Text2], "1 / 4");
 			
-			TextDrawSetString(NewsDraw[i][Text3], NewsPapers[paperid][article1]);
-			TextDrawSetString(NewsDraw[i][Text4], NewsPapers[paperid][article2]);
-			TextDrawSetString(NewsDraw[i][Text5], NewsPapers[paperid][article3]);
-			TextDrawSetString(NewsDraw[i][Text6], NewsPapers[paperid][article4]);
+			TextDrawSetStringEx(NewsDraw[i][Text3], NewsPapers[paperid][article1]);
+			TextDrawSetStringEx(NewsDraw[i][Text4], NewsPapers[paperid][article2]);
+			TextDrawSetStringEx(NewsDraw[i][Text5], NewsPapers[paperid][article3]);
+			TextDrawSetStringEx(NewsDraw[i][Text6], NewsPapers[paperid][article4]);
 		}
 		else if(currentPage[playerid] == 1)
 		{
-			TextDrawSetString(NewsDraw[i][Text1], "F88niks Numbrites");
-			TextDrawSetString(NewsDraw[i][Text2], "2 / 4");
+			TextDrawSetStringEx(NewsDraw[i][Text1], "Fööniks Numbrites");
+			TextDrawSetStringEx(NewsDraw[i][Text2], "2 / 4");
 			
 			new string[150];
-			format(string, 150, "~b~Majandus~n~~n~~g~Sularaha: ~w~%d~n~~g~Pangas: ~w~x~n~~g~Kinnisvaraturul: ~w~x~n~~g~Autoturul: ~w~x~n~~g~Arimaailmas: ~w~x", NewsPapers[i][stat1]);
-			TextDrawSetString(NewsDraw[i][Text3], string);
+			format(string, 150, "~b~Majandus~n~~n~~g~Sularaha: ~w~%d~n~~g~Pangas: ~w~x~n~~g~Kinnisvaraturul: ~w~x~n~~g~Autoturul: ~w~x~n~~g~Ärimaailmas: ~w~x", NewsPapers[i][stat1]);
+			TextDrawSetStringEx(NewsDraw[i][Text3], string);
 
-			format(string, 128, "~b~Sotsiaalelu~n~~n~~g~Syndide Arv: ~w~%d~n~~g~Vanim isik: ~w~%s", NewsPapers[i][stat2], GetCharacterName(NewsPapers[i][stat3]));
-			TextDrawSetString(NewsDraw[i][Text4], string);
+			format(string, 128, "~b~Sotsiaalelu~n~~n~~g~Sündide Arv: ~w~%d~n~~g~Vanim isik: ~w~%s", NewsPapers[i][stat2], GetCharacterName(NewsPapers[i][stat3]));
+			TextDrawSetStringEx(NewsDraw[i][Text4], string);
 
-			format(string, 128, "~b~Kuritegevus~n~~n~M6rvu: x~n~Varguseid: x~n~2Randamisi: x~n~Trahvide arv: x");
-			TextDrawSetString(NewsDraw[i][Text5], string);
+			format(string, 128, "~b~Kuritegevus~n~~n~Mõrvu: x~n~Varguseid: x~n~Ärandamisi: x~n~Trahvide arv: x");
+			TextDrawSetStringEx(NewsDraw[i][Text5], string);
 			
 			format(string, 100, "Infot vahendab Riigi Statistikaamet.~n~Kontaktisik: Martin_Mets~n~53934751~n~Linnavalitsus: ~n~113");
-			TextDrawSetString(NewsDraw[i][Text6], string);
+			TextDrawSetStringEx(NewsDraw[i][Text6], string);
 		}
 		else if(currentPage[playerid] == 2)
 		{
-			TextDrawSetString(NewsDraw[i][Text1], "T88kuulutused");
-			TextDrawSetString(NewsDraw[i][Text2], "3 / 4");
+			TextDrawSetStringEx(NewsDraw[i][Text1], "Töökuulutused");
+			TextDrawSetStringEx(NewsDraw[i][Text2], "3 / 4");
 			
-			TextDrawSetString(NewsDraw[i][Text3], " ");
-			TextDrawSetString(NewsDraw[i][Text4], " ");
-			TextDrawSetString(NewsDraw[i][Text5], " ");
-			TextDrawSetString(NewsDraw[i][Text6], " ");
+			addSel[playerid] = 0;
+			RedrawJobAds(playerid, i);
+			TextDrawSetStringEx(NewsDraw[i][Text4], "~b~Vali töökoht:~n~~w~~k~~PED_SPRINT~");
+			TextDrawSetStringEx(NewsDraw[i][Text5], "~b~Liikumiseks kasuta:~n~~n~~n~~n~");
+			TextDrawSetStringEx(NewsDraw[i][Text6], "~g~Üles: ~w~~k~~GO_FORWARD~~n~~g~Alla: ~w~~k~~GO_BACK~~n~");
 		}
 		else if(currentPage[playerid] == 3)
 		{
-			TextDrawSetString(NewsDraw[i][Text1], "Kuulutused");
-			TextDrawSetString(NewsDraw[i][Text2], "4 / 4");
+			TextDrawSetStringEx(NewsDraw[i][Text1], "Kuulutused");
+			TextDrawSetStringEx(NewsDraw[i][Text2], "4 / 4");
 			
-			TextDrawSetString(NewsDraw[i][Text3], NewsPapers[paperid][add1]);
-			TextDrawSetString(NewsDraw[i][Text4], NewsPapers[paperid][add2]);
-			TextDrawSetString(NewsDraw[i][Text5], NewsPapers[paperid][add3]);
-			TextDrawSetString(NewsDraw[i][Text6], NewsPapers[paperid][add4]);
+			TextDrawSetStringEx(NewsDraw[i][Text3], NewsPapers[paperid][add1]);
+			TextDrawSetStringEx(NewsDraw[i][Text4], NewsPapers[paperid][add2]);
+			TextDrawSetStringEx(NewsDraw[i][Text5], NewsPapers[paperid][add3]);
+			TextDrawSetStringEx(NewsDraw[i][Text6], NewsPapers[paperid][add4]);
 		}
 		
 		TextDrawShowForPlayer(playerid, NewsDraw[i][Text0]); // Taust
@@ -235,6 +260,38 @@ public ShowNewsPaper(playerid, paperid)
 		return 0;
 	}
 	return 4;
+}
+
+public RedrawJobAds(playerid, tdID)
+{
+	new string[256], temp[64];
+	for(new i; i < ADDED_JADS; i++)
+	{
+		if(strlen(string) > 200) break;
+		format(temp, 256, "~%s~%s - %s", ((addSel[playerid] == i)?("g"):("w")), JobAds[i][jobName], JobAds[i][jobContact]);
+		
+		format(string, 256, "%s~n~%s", string, temp);
+	}
+	TextDrawSetStringEx(NewsDraw[tdID][Text3], string);
+}
+
+public OnPlayerKeys(playerid, pressedkey)
+{
+	if(paperActive[playerid] && currentPage[playerid] == 2)
+	{
+		if(pressedkey == 16)
+		{
+			addSel[playerid]--;
+			addSel[playerid] = (addSel[playerid]<0)?0:addSel[playerid];
+			RedrawJobAds(playerid, paperDrawActive[playerid]);
+		}
+		else if(pressedkey == 32)
+		{
+			addSel[playerid]++;
+			addSel[playerid] = (addSel[playerid]>=ADDED_JADS)?ADDED_JADS-1:addSel[playerid];
+			RedrawJobAds(playerid, paperDrawActive[playerid]);
+		}		
+	}
 }
 
 public HideNewsPaper(playerid, page)
@@ -462,6 +519,8 @@ public OnGameModeInit()
 	
 	LoadNewsPapers();
 	
+	gPaperHas_OPU = funcidx("NP_OnPlayerUpdate");
+	
     if (funcidx("NewsPaper_OnGameModeInit") != -1)
     {
         return CallLocalFunction("NewsPaper_OnGameModeInit", "");
@@ -473,22 +532,41 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 {
 	if(paperActive[playerid])
 	{
-		if(PRESSED(KEY_ANALOG_LEFT)) currentPage[playerid]--;
-		else if(PRESSED(KEY_ANALOG_RIGHT)) currentPage[playerid]++;
+		new bool: got;
+		if(PRESSED(KEY_ANALOG_LEFT))
+		{
+			currentPage[playerid]--;
+			got = true;
+		}
+		else if(PRESSED(KEY_ANALOG_RIGHT))
+		{
+			currentPage[playerid]++;
+			got = true;
+		}
 		else if(PRESSED(KEY_SECONDARY_ATTACK))
 		{
 			HideNewsPaper(playerid, true);
-			goto wrong_key;
 		}
-		else
+		else if(currentPage[playerid] == 2 && PRESSED(KEY_SPRINT))
 		{
-			goto wrong_key;
+			if(addSel[playerid] < 0 || addSel[playerid] >= ADDED_JADS)
+			{
+				addSel[playerid] = 0;
+				RedrawJobAds(playerid, paperDrawActive[playerid]);
+				return 0;
+			}
+			
+			SetPlayerCheckpoint(playerid, JobAds[addSel[playerid]][jPosX], JobAds[addSel[playerid]][jPosY], JobAds[addSel[playerid]][jPosZ], 5.0);			
+			SendClientMessage(playerid, COLOR_GREEN, "Kaardile tekkis punane märge, mine selle järgi.");
 		}
-		currentPage[playerid] = (currentPage[playerid] > 3)?0:currentPage[playerid];
-		currentPage[playerid] = (currentPage[playerid] < 0)?3:currentPage[playerid];
-		ShowNewsPaper(playerid, currentPaper[playerid]);
+		
+		if(got)
+		{
+			currentPage[playerid] = (currentPage[playerid] > 3)?0:currentPage[playerid];
+			currentPage[playerid] = (currentPage[playerid] < 0)?3:currentPage[playerid];
+			ShowNewsPaper(playerid, currentPaper[playerid]);
+		}
 	}
-	wrong_key:
     if (funcidx("NP_OnPlayerKeyStateChange") != -1)
     {
         return CallLocalFunction("NP_OnPlayerKeyStateChange", "iii", playerid, newkeys, oldkeys);
@@ -689,6 +767,44 @@ public OnPlayerText(playerid, text[])
     return 1;
 }
 
+public OnPlayerUpdate(playerid)
+{
+	new keys, updown, leftright;
+	GetPlayerKeys(playerid, keys, updown, leftright);
+	
+	if(updown == KEY_UP && PlayerKey[playerid][0] == 0)
+	{
+		OnPlayerKeys(playerid, 16); // KEY_UP
+		PlayerKey[playerid][0] = true;
+	}
+	else if(updown == KEY_DOWN && PlayerKey[playerid][1] == 0)
+	{
+		OnPlayerKeys(playerid, 32); // KEY_DOWN
+    	PlayerKey[playerid][1] = true;
+	}
+	else if(leftright == KEY_LEFT && PlayerKey[playerid][2] == 0)
+	{
+		OnPlayerKeys(playerid, 64); // KEY_LEFT
+    	PlayerKey[playerid][2] = true;
+	}
+	else if(leftright == KEY_RIGHT && PlayerKey[playerid][3] == 0)
+	{
+		OnPlayerKeys(playerid, 128); // KEY_RIGHT
+    	PlayerKey[playerid][3] = true;
+	}
+	
+	if(updown != KEY_UP) PlayerKey[playerid][0] = false;
+	if(updown != KEY_DOWN) PlayerKey[playerid][1] = false;
+	if(leftright != KEY_LEFT) PlayerKey[playerid][2] = false;
+	if(leftright != KEY_RIGHT) PlayerKey[playerid][3] = false;
+	
+    if (gPaperHas_OPU != -1)
+    {
+        return CallLocalFunction("NP_OnPlayerUpdate", "i", playerid);
+    }	
+	return 1;
+}
+
 #if defined _ALS_OnGameModeInit
     #undef OnGameModeInit
 #else
@@ -723,3 +839,10 @@ public OnPlayerText(playerid, text[])
     #define _ALS_OnPlayerText
 #endif
 #define OnPlayerText NP_OnPlayerText
+
+#if defined _ALS_OnPlayerUpdate
+    #undef OnPlayerUpdate
+#else
+    #define _ALS_OnPlayerUpdate
+#endif
+#define OnPlayerUpdate NP_OnPlayerUpdate
