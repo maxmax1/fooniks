@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"168"
+#define SCRIPT_REVISION 		"169"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -827,7 +827,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		}
 		else
 		{
-			SetVehiclePos(playerid, telePositions[listitem][tvX], telePositions[listitem][tvY], telePositions[listitem][tvZ]);
+			SetVehiclePos(vehId, telePositions[listitem][tvX], telePositions[listitem][tvY], telePositions[listitem][tvZ]);
 		}
 		
 		SendFormattedText(playerid, COLOR_GREEN, LANG_TELEPORTED_TO, telePositions[listitem][tName]);
@@ -1042,6 +1042,7 @@ COMMAND:o(playerid, params[])
 	
 	return 1;
 }
+
 COMMAND:b(playerid, params[])
 {
 	new text[STRING_LENGHT], str[STRING_LENGHT];
@@ -1053,6 +1054,21 @@ COMMAND:b(playerid, params[])
 	SCMTAInPlayerRadius(playerid, CHAT_RADIUS, COLOR_CHAT_OOC_LOCAL, str);
 	return 1;
 }
+
+COMMAND:c(playerid, params[])
+{
+	new text[STRING_LENGHT], str[STRING_LENGHT];
+	sscanf(params, "s", text);
+
+	if(strlen(text) == 0) return SendClientMessage(playerid, COLOR_RED, "KASUTUS: /c tekst");
+
+	new delay = ( strlen(text) * 150 ) + 2000;
+	format(str, sizeof(str),"%s:  %s", pInfo[playerid][pCharName], text);	
+	SetPlayerChatBubble(playerid, str, COLOR_CHAT_IC, CHAT_RADIUS, delay);
+	SCMTAInPlayerRadius(playerid, CHAT_RADIUS, COLOR_CHAT_IC, str);
+	return 1;
+}
+
 COMMAND:me(playerid, params[])
 {
 	new text[STRING_LENGHT];
@@ -1092,6 +1108,15 @@ COMMAND:mjuurde(playerid, params[])
 	new selectedplayer;
 	if ( sscanf(params, "u", selectedplayer) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /mjuurde [ID/NIMI]");
     WarpPlayerToPlayer(playerid, selectedplayer);
+    return 1;
+}
+
+COMMAND:m2m(playerid, params[])
+{
+	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
+	new selectedplayer, selectedplayer2;
+	if ( sscanf(params, "uu", selectedplayer, selectedplayer2) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /m2m [ID/NIMI] [ID/NIMI]");
+    WarpPlayerToPlayer(selectedplayer, selectedplayer2);
     return 1;
 }
 
@@ -1270,6 +1295,73 @@ COMMAND:afk(playerid, params[])
 	SendFormattedText(playerid, COLOR_GREEN, LANG_AFK, ((pInfo[playerid][AFK])?("oled nüüd"):("ei ole enam")));
 	return 1;
 }
+
+COMMAND:abi(playerid, params[])
+{
+	#pragma unused params
+	SendClientMessage(playerid, COLOR_YELLOW, "*** ABI");
+	SendClientMessage(playerid, COLOR_YELLOW, " ");
+	
+	SendClientMessage(playerid, COLOR_YELLOW, "/ic - Saad teada mis on ic.");	
+	SendClientMessage(playerid, COLOR_YELLOW, "/ooc - Saad teada mis on ooc.");	
+
+	SendClientMessage(playerid, COLOR_YELLOW, "/rääkimisabi - Erinevate suhtluskanalite abi.");	
+	SendClientMessage(playerid, COLOR_YELLOW, "/animatsioonid - Animatsioonide käsud.");	
+	
+	SendClientMessage(playerid, COLOR_YELLOW, "MUUD ASJAD:");	
+	
+	SendClientMessage(playerid, COLOR_YELLOW, "/oskus /teata /kiirusepiirang /turvavöö /taskud /tapa /afk");	
+	
+	SendClientMessage(playerid, COLOR_YELLOW, " ");
+	SendClientMessage(playerid, COLOR_YELLOW, "*** ABI");
+	return 1;
+}
+
+COMMAND:r22kimisabi(playerid, params[])
+{
+	#pragma unused params
+	SendClientMessage(playerid, COLOR_YELLOW, "*** RÄÄKIMISABI");
+	SendClientMessage(playerid, COLOR_YELLOW, " ");
+	
+	SendClientMessage(playerid, COLOR_YELLOW, "/o - Globaalne OOC(vaata /ooc) suhtluskanal..");	
+	SendClientMessage(playerid, COLOR_YELLOW, "/b - Lokaalne OOC(vaata /ooc) suhtluskanal..");	
+	SendClientMessage(playerid, COLOR_YELLOW, "/es - Teise mängijaga privaatne OOC(vaata /ooc) suhtluskanal..");
+	
+	SendClientMessage(playerid, COLOR_YELLOW, "/c - IC(vaata /ic) sosistamine.");
+	SendClientMessage(playerid, COLOR_YELLOW, "/s - IC(vaata /ic) karjumine.");
+	SendClientMessage(playerid, COLOR_YELLOW, "/me - Saad väljendada oma IC(vaata /ic) tegevust, tundeid.");
+	
+	SendClientMessage(playerid, COLOR_YELLOW, " ");
+	SendClientMessage(playerid, COLOR_YELLOW, "*** RÄÄKIMISABI");	
+	return 1;
+}
+
+COMMAND:ic(playerid, params[])
+{
+	#pragma unused params
+	SendClientMessage(playerid, COLOR_YELLOW, "*** IC");
+	SendClientMessage(playerid, COLOR_YELLOW, " ");	
+	
+	SendClientMessage(playerid, COLOR_YELLOW, "In Character ehk tegelasesisene on kõik mida ütleb/mõtleb/teeb sinu karakter mitte isik kes karakterit kontrollib.");		
+	
+	SendClientMessage(playerid, COLOR_YELLOW, " ");
+	SendClientMessage(playerid, COLOR_YELLOW, "*** IC");	
+	return 1;
+}
+
+COMMAND:ooc(playerid, params[])
+{
+	#pragma unused params
+	SendClientMessage(playerid, COLOR_YELLOW, "*** OOC");
+	SendClientMessage(playerid, COLOR_YELLOW, " ");	
+	
+	SendClientMessage(playerid, COLOR_YELLOW, "Out of Character ehk tegelaseväline on kõik mida ütled/mõtled/teed sina mitte isik kes mängus rooliratast keerab.");
+	
+	SendClientMessage(playerid, COLOR_YELLOW, " ");
+	SendClientMessage(playerid, COLOR_YELLOW, "*** OOC");	
+	return 1;
+}
+	
 
 // AJUTISED
 COMMAND:kaklus(playerid, params[])
@@ -1575,7 +1667,7 @@ public TogglePlayerControllableEx(playerid, toggle, timer)
 
 public OnNewHour()
 {
-	SendFormattedTextToAll(COLOR_GREEN, "Kell on nüüd %d:%d.", gHour, gMinute);
+	SendFormattedTextToAll(COLOR_GREEN, "Kell on nüüd %d:0%d.", gHour, gMinute);
 	
 	foreach(Player, playerid)
 	{

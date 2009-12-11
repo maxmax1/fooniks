@@ -70,7 +70,7 @@ public AddHelpDraw(Float: x, Float: y, Float: z, header[], text[])
 	
 	format(string, 128, "~b~ %s", header);
 	
-	HelpDraws[usedHelpDraws][helpTextDraw] = TextDrawCreate(25, 150, string);
+	HelpDraws[usedHelpDraws][helpTextDraw] = TextDrawCreate(25, 150, TextDrawFix(string));
 	TextDrawUseBox(HelpDraws[usedHelpDraws][helpTextDraw], 1);
 	TextDrawBoxColor(HelpDraws[usedHelpDraws][helpTextDraw], HELPBOX_BACK);
 	TextDrawFont(HelpDraws[usedHelpDraws][helpTextDraw], 2);
@@ -87,7 +87,7 @@ public AddHelpDraw(Float: x, Float: y, Float: z, header[], text[])
 	
 	format(string, 128, "~w~%s", text);
 	
-	HelpDraws[usedHelpDraws][helpTextDraw2] = TextDrawCreate(25, 165, string);
+	HelpDraws[usedHelpDraws][helpTextDraw2] = TextDrawCreate(25, 165, TextDrawFix(string));
 	TextDrawUseBox(HelpDraws[usedHelpDraws][helpTextDraw2], 1);
 	TextDrawBoxColor(HelpDraws[usedHelpDraws][helpTextDraw2], HELPBOX_BACK);
 	TextDrawFont(HelpDraws[usedHelpDraws][helpTextDraw2], 2);
@@ -152,7 +152,7 @@ public SmallHelpDrawShow(playerid, helpText[], timer)
 	}
 	if(foundId == -1) return 0;
 	
-	TextDrawSetString(SmallHelpDraw[foundId][smDraw], helpText);
+	TextDrawSetString(SmallHelpDraw[foundId][smDraw], TextDrawFix(helpText));
 	TextDrawShowForPlayer(playerid, SmallHelpDraw[foundId][smDraw]);
 	SmallHelpDraw[foundId][inUse] = true;
 	SetTimerEx("SmallHelpDrawHide", timer, 0, "i", playerid);

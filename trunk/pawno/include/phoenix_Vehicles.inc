@@ -227,6 +227,9 @@ public SaveAllVehicles(closingdown)
 
 public SaveVehicle(vId)
 {
+	if(vId < 0 || vId > LOADED_VEHICLES) return 0;
+	if(Vehicles[vId][vSqlID] < 1) return 0;
+
 	VehPos(vId);
 	
 	new query[MAX_QUERY], table[32];
