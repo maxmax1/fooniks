@@ -182,6 +182,21 @@ Notes:
 #define Iter_Free Itter_Free
 #define Itter_Free(%1) \
 	Itter_FreeInternal(YSI_g%1S, YSI_g%1C, YSI_g%1A, sizeof (YSI_g%1A))
+	
+/*----------------------------------------------------------------------------*-
+Function:
+	Itter_RandFree
+Params:
+	itter - Name of the itterator to get the random free slot in.
+Return:
+	-
+Notes:
+	Wrapper for Itter_RandFreeInternal.
+-*----------------------------------------------------------------------------*/
+
+#define Iter_RandFree Itter_RandFree
+#define Itter_RandFree(%1) \
+	Itter_RandFreeInternal(YSI_g%1S, YSI_g%1C, YSI_g%1A, sizeof (YSI_g%1A))
 
 /*----------------------------------------------------------------------------*-
 Function:
@@ -580,6 +595,61 @@ stock Itter_FreeInternal(start, count, array[], size)
 			return first;
 		}
 		++first;
+	}
+	return -1;
+}
+
+
+/*----------------------------------------------------------------------------*-
+Function:
+	Itter_RandFreeInternal
+Params:
+	start - Array start index.
+	count - Number of items in the itterator.
+	array[] - Itterator data.
+	size - Size of the itterator.
+Return:
+	-
+Notes:
+	Finds a random free slot in the itterator.  Itterators now HAVE to be
+	sorted for this function to work correctly as it uses that fact to decide
+	wether a slot is unused or the last one.  If you want to use the slot
+	straight after finding it the itterator will need to re-find it to add in
+	the data.
+-*----------------------------------------------------------------------------*/
+
+stock Itter_RandFreeInternal(start, count, array[], size)
+{
+	if (count == size)
+	{
+		return -1;
+	}
+	else if (count == 0)
+	{
+		return 0;
+	}
+	new
+		first = 0,
+		hits = 0,
+		temp[32];
+	while (first != -1)
+	{
+		if (first == start)
+		{
+			start = array[start];
+		}
+		else if (array[first] == -1)
+		{
+			temp[hits] = first;
+			hits++;
+			if(hits == 32) break;
+		}
+		++first;
+	}
+	
+	if(hits > 0)
+	{
+		return temp[random(hits)];
 	}
 	return -1;
 }
