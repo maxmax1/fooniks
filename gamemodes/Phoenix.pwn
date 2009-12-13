@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"169"
+#define SCRIPT_REVISION 		"171"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -82,6 +82,7 @@
 #include <phoenix_Pockets>
 #include <phoenix_HelpDraw>
 #include <phoenix_NewsPaper>
+#include <phoenix_AddSystem>
 #include <phoenix_Resting>
 //#include <AntiShiit>
 

@@ -205,7 +205,10 @@ public OnPlayerEnterCheckpoint(playerid)
 {
 	if(GarbagePlayer[playerid][onGRound])
 	{
-		GarbagePath(playerid);
+		SendClientMessage(playerid, COLOR_YELLOW, "Oota kuni masinale prügi peale laetakse.");
+		TogglePlayerControllableEx(playerid, 0, 2990);
+		SetTimerEx("GarbagePath", 3000, 0, "i", playerid);
+		return 1;
 	}
 	
     if (funcidx("CJob_OnPlayerEnterCheckpoint") != -1)
