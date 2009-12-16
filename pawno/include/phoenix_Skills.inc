@@ -83,6 +83,8 @@ forward ClearDelay(playerid, skillId);
 
 public LoadSkills(playerid)
 {	
+	if(pInfo[playerid][pSqlId] == 0) return 0;
+	
 	new query[128];
 	format(query, 128, "SELECT * FROM %sskills WHERE cid = '%d'", MYSQL_PREFIX, pInfo[playerid][pSqlId]);
 	mysql_query(query);
@@ -91,7 +93,9 @@ public LoadSkills(playerid)
 	{
 		if(mysql_num_rows() > 0)
 		{
-			new Field[64], str[12];			
+			new Field[64], str[12];
+			mysql_fetch_row(Field);	
+			
 			for(new i = 0; i < MAX_SKILLS; i++)
 			{
 				format(str, 12, "skill_%d", i);
@@ -124,6 +128,9 @@ public LoadSkills(playerid)
 
 public SaveSkills(playerid)
 {	
+	if(!pInfo[playerid][pLoggedIn]) return 0;
+	if(pInfo[playerid][pSqlId] == 0) return 0;
+
 	new sqlid = pInfo[playerid][pSqlId];
 	new query[MAX_QUERY], table[32];
 	format(table, 32, "%sskills", MYSQL_PREFIX);

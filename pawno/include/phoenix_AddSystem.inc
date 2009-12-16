@@ -23,7 +23,11 @@
 */
 
 #define MAX_ADDBOARDS 31
-#define ADD_COLOR 0x33AA33FF
+
+#define ADD_COLOR1 0x33AA33FF
+#define ADD_COLOR2 0xFFFF00FF
+#define ADD_COLOR3 0xAA3333FF
+#define ADD_COLOR4 0x0000FFFF
 
 /*
 *    GLOBALS
@@ -65,7 +69,7 @@ public CreateAddboard(Float: x, Float: y, Float: z)
 	new freeId = Itter_Free(AddBoards);
 	if(freeId == -1) return 0;	
 	
-	gAddBoards[freeId] = Create3DTextLabel("Sinu Reklaam siia!\n(( /reklaam ))", ADD_COLOR, x, y, z+1.0, 30.0, 0, 1);
+	gAddBoards[freeId] = Create3DTextLabel("Sinu Reklaam siia!\n(( /reklaam ))", ADD_COLOR1, x, y, z+1.0, 30.0, 0, 1);
 	Itter_Add(AddBoards, freeId);
 	
 	gAddBoardPos[freeId][0] = x;
@@ -95,15 +99,15 @@ public NewBoardAdd(freeId, col, number, text[], time)
 	
 	gAddBoardText[freeId] = true;
 	gAddBoardNR[freeId] = number;
-	format(gAddBoardTexts[freeId], 128, "%s", text);	
-	format(text, 128, "%s\n\n%d", text, number);
+	format(gAddBoardTexts[freeId], 128, "%s", text);
+	format(text, 128, "%s\n\n%d", gAddBoardTexts[freeId], number);
 	
-	new color = COLOR_GREEN;
-	if(col == 1) color = COLOR_YELLOW;
-	else if(col == 2) color = COLOR_RED;
-	else if(col == 3) color = COLOR_BLUE;	
+	new color = ADD_COLOR1;
+	if(col == 1) color = ADD_COLOR2;
+	else if(col == 2) color = ADD_COLOR3;
+	else if(col == 3) color = ADD_COLOR4;	
 	
-	Update3DTextLabelText(gAddBoards[freeId], color, gAddBoardTexts[freeId]);
+	Update3DTextLabelText(gAddBoards[freeId], color, text);
 	
 	gAddBoardTime[freeId] = ((time > 0)?time:15*60*1000);
 	gAddBoardTimeS[freeId] = GetTickCount();	
@@ -119,7 +123,7 @@ public ClearAddBoard(addBoardId)
 	if(addBoardId < 0 || addBoardId >= MAX_ADDBOARDS) return 0;
 	if(gAddBoards[addBoardId] == Text3D: -1) return 0;
 	
-	Update3DTextLabelText(gAddBoards[addBoardId], ADD_COLOR, "Sinu Reklaam siia!\n(( /reklaam ))");
+	Update3DTextLabelText(gAddBoards[addBoardId], ADD_COLOR1, "Sinu Reklaam siia!\n(( /reklaam ))");
 	gAddBoardText[addBoardId] = false;
 	gAddBoardCol[addBoardId] = 0;
 	gAddBoardNR[addBoardId] = 0;

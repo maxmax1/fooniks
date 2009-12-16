@@ -34,11 +34,11 @@ enum pInf
 	bool: u2Fetched,
 	bool: cFetched,
 	uSqlId,
-	uUserName[20],	
-	uPassWordHash[64],
+	uUserName[22],	
+	uPassWordHash[70],
 	uSalt[10],
 	bool: pLoggedIn,
-	pCharName[30],
+	pCharName[32],
 	pSqlId,
 	pAdmin,
 	pMember,
@@ -112,18 +112,15 @@ public CheckCharacter(playerid)
 			GetUserInfo(playerid);
 			return 1;
 		}
-		else
-		{
-	 		SendClientMessage(playerid, COLOR_RED, LANG_NOCHARACTER);
-			Kick(playerid);
-		}
 	}
-	return 1;
+	SendClientMessage(playerid, COLOR_RED, LANG_NOCHARACTER);
+	Kick(playerid);
+	return 0;
 }
 
 public GetUserInfo(playerid)
 {
-	if(!pInfo[playerid][u1Fetched])
+	if(!pInfo[playerid][u1Fetched] || pInfo[playerid][pSqlId] == 0)
 	{
 		CheckCharacter(playerid);
 		return 1;
@@ -141,13 +138,13 @@ public GetUserInfo(playerid)
 			mysql_fetch_row(Data);
 			
 			mysql_fetch_field_row(Field, "username");
-			strmid(pInfo[playerid][uUserName], Field, 0, strlen(Field), MAX_STRING);
+			format(pInfo[playerid][uUserName], 20, "%s", Field);
 			
 			mysql_fetch_field_row(Field, "password");
-			strmid(pInfo[playerid][uPassWordHash], Field, 0, strlen(Field), MAX_STRING);
+			format(pInfo[playerid][uPassWordHash], 64, "%s", Field);
 			
 			mysql_fetch_field_row(Field, "salt");
-			strmid(pInfo[playerid][uSalt], Field, 0, strlen(Field), MAX_STRING);
+			format(pInfo[playerid][uSalt], 8, "%s", Field);
 			mysql_free_result();
 			pInfo[playerid][u2Fetched] = true;
 		}	
@@ -184,7 +181,7 @@ public AuthenticateUser(playerid, givenPassword[])
 
 public FetchCharacterInformation(playerid)
 {
-	if(!pInfo[playerid][u2Fetched])
+	if(!pInfo[playerid][u2Fetched] || pInfo[playerid][pSqlId] == 0)
 	{
 		GetUserInfo(playerid);
 		SendClientMessage(playerid, COLOR_RED, LANG_WAIT);
@@ -209,13 +206,12 @@ public FetchCharacterInformation(playerid)
 public FetchCharacterInformationFinish(playerid)
 {
 	if(Fetch_UInfo_Thread != playerid) return 1;
-	
+	new kick = true;
 	if(mysql_store_result() == 1)
 	{
 		if(mysql_num_rows() < 1)
 		{
-			SendClientMessage(playerid, COLOR_RED, LANG_NOCHARACTER);
-			Kick(playerid);
+			kick = true;
 		}
 		else
 		{
@@ -249,8 +245,16 @@ public FetchCharacterInformationFinish(playerid)
 			
 			mysql_free_result();
 			LoadSkills(playerid);
+			kick = false;
 		}
 	}
+	
+	if(kick)
+	{
+		SendClientMessage(playerid, COLOR_RED, LANG_NOCHARACTER);
+		Kick(playerid);
+	}
+	
 	Fetch_UInfo_Thread = -1;
 	pInfo[playerid][cFetched] = true;
 	return 1;
