@@ -283,7 +283,7 @@ public OnDriverEnterVehicle(playerid)
 			if(Vehicles[vId][vOwner] > 0) Remove = true;
 			else
 			{	
-				format(string, 128, "~y~ %s ~n~~g~ Hind: %d SAK", CarNames[Vehicles[vId][vModel] - 400], Vehicles[vId][vValue]);
+				format(string, 128, "~y~ %s ~n~~g~ Hind: %d SAK", CarData[Vehicles[vId][vModel] - 400][CarName], Vehicles[vId][vValue]);
 				GameTextForPlayer(playerid, string, 3000, 4);
 				
 				format(string, 128, "Kirjuta: /omasin, et seda masinat osta.");
@@ -310,10 +310,6 @@ public OnDriverEnterVehicle(playerid)
 	else
 	{
 		if(Freeze) TogglePlayerControllable(playerid, 0);
-	
-		ShowSpeedo(playerid);
-		format(string, 128, "%s", CarNames[Vehicles[vId][vModel] - 400]);
-		GameTextForPlayer(playerid, string, 6000, 1);
 	}
 	return 1;
 }

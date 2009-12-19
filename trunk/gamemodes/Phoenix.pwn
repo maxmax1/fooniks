@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"174"
+#define SCRIPT_REVISION 		"175"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -66,7 +66,7 @@
 #include <streamer> 	 // SmartNPC
 
 #include <phoenix_Core>
-#include <phoenix_RealCarnames>
+#include <phoenix_RealcarData>
 #include <phoenix_Money>
 #include <phoenix_Status>
 
@@ -1637,23 +1637,28 @@ public SyncPlayerTime(playerid)
 
 public SyncAllPlayerTime()
 {
-	new old = gHour;
+	new old = gMinute;
 	gettime(gHour, gMinute, gSecond);
 	gHour = gHour + TIME_OFFSET;
-	if(old != gHour) SetWorldTime(gHour);
-	if(gMinute == 0 && !gHourChange) 
+	if(old != gMinute) SetWorldTimeEx(gHour, gMinute);
+	if(gMinute == 0 && !gHourChange)
 	{
 		gHourChange = true;
 		OnNewHour();
 	}
 	else if(gMinute != 0 && gHourChange) gHourChange = false;
-	
+
 	foreach(Player, playerid)
 	{
 		SyncPlayerTime(playerid);
 	}
 }
-
+stock SetWorldTimeEx(hour, minute)
+{
+	new string[24];
+	format(string, 24, "worldtime %d:%d", hour, minute);
+	SendRconCommand(string);
+}
 public TogglePlayerControllableEx(playerid, toggle, timer)
 {
 	pInfo[playerid][pControllable] = toggle;
