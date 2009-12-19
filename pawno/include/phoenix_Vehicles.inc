@@ -363,7 +363,7 @@ public OnSpeedoUpdate(playerid)
 		new Float: distance = floatabs(Vehicles[vId][vSpeedX]) + floatabs(Vehicles[vId][vSpeedY]) + floatabs(Vehicles[vId][vSpeedZ]);
 		Vehicles[vId][vSpeed] = floatround(distance * 175);
 		new showspeed = Vehicles[vId][vSpeed];
-		if( Vehicles[vId][SpeedLimit] != 0 && Vehicles[vId][SpeedLimit] < showspeed ) showspeed = Vehicles[vId][SpeedLimit];
+		if( showspeed > Vehicles[vId][SpeedLimit] && Vehicles[vId][SpeedLimit] != 0 ) showspeed = Vehicles[vId][SpeedLimit];
 		format(string,sizeof(string),"~y~~h~Bensiin: %s  ~y~~h~Kiirus: ~w~%i km/h  ~y~~h~Korras: ~w~%d %%", fuel, showspeed, hProtsenti);
 		TextDrawSetString(InfoBar[playerid], string);
 		
@@ -405,8 +405,9 @@ public OnSpeedoUpdate(playerid)
 		}
 		if( Vehicles[vId][vSpeed] > Vehicles[vId][SpeedLimit] && Vehicles[vId][SpeedLimit] != 0 )
 		{
-		    new difference = Vehicles[vId][vSpeed] - Vehicles[vId][SpeedLimit];
-			new Float:SpeedX, Float:SpeedY, Float:PercentX, Float:PercentY, multiplier, Float:newX, Float: newY, NegativeX, NegativeY;
+			new Float:SpeedX, Float:SpeedY, Float:RatioX, Float:RatioY, Float:newX, Float: newY, NegativeX, NegativeY;
+			new Limit = Vehicles[vId][SpeedLimit];
+			
 			SpeedX = Vehicles[vId][vSpeedX];
 			SpeedY = Vehicles[vId][vSpeedY];
 
@@ -414,12 +415,11 @@ public OnSpeedoUpdate(playerid)
 			if(SpeedY < 0) NegativeY = 1;
 			if(NegativeX) SpeedX = SpeedX*-1;
 			if(NegativeY) SpeedY = SpeedY*-1;
-			PercentX = SpeedX/100;
-			PercentY = SpeedY/100;
-			multiplier = difference*4;
-			if( multiplier > 20 ) multiplier = 20;
-			newX = SpeedX - PercentX*multiplier;
-			newY = SpeedY - PercentY*multiplier;
+			RatioX = SpeedX/( SpeedX + SpeedY );
+			RatioY = SpeedY/( SpeedX + SpeedY );
+			new Float:SU_Limit = floatdiv(Limit, 175);
+			newX = floatmul(SU_Limit ,RatioX);
+			newY = floatmul(SU_Limit ,RatioY);
 			if(NegativeX) newX = newX*-1;
 			if(NegativeY) newY = newY*-1;
 
