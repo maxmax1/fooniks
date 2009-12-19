@@ -1,5 +1,5 @@
 /*
-    SA-MP Streamer Plugin v2.1
+    SA-MP Streamer Plugin v2.3.3
     Copyright © 2009 Incognito
 
     This program is free software: you can redistribute it and/or modify
@@ -61,25 +61,27 @@ native CountDynamicObjects();
 
 // Natives (pickups)
 
-native CreateDynamicPickup(modelid, type, Float:x, Float:y, Float:z, worldid = -1, interiorid = -1, playerid = -1, Float:distance = 50.0);
+native CreateDynamicPickup(modelid, type, Float:x, Float:y, Float:z, worldid = -1, interiorid = -1, playerid = -1, Float:distance = 100.0);
 native DestroyDynamicPickup(pickupid);
 native DestroyAllDynamicPickups();
 native CountDynamicPickups();
 
 // Natives (checkpoints)
 
-native CreateDynamicCP(Float:x, Float:y, Float:z, Float:size, worldid = -1, interiorid = -1, playerid = -1, Float:distance = 50.0);
+native CreateDynamicCP(Float:x, Float:y, Float:z, Float:size, worldid = -1, interiorid = -1, playerid = -1, Float:distance = 100.0);
 native DestroyDynamicCP(checkpointid);
 native TogglePlayerDynamicCP(playerid, checkpointid, toggle);
+native TogglePlayerAllDynamicCPs(playerid, toggle);
 native IsPlayerInDynamicCP(playerid, checkpointid);
 native DestroyAllDynamicCPs();
 native CountDynamicCPs();
 
 // Natives (race checkpoints)
 
-native CreateDynamicRaceCP(type, Float:x, Float:y, Float:z, Float:nextx, Float:nexty, Float:nextz, Float:size, worldid = -1, interiorid = -1, playerid = -1, Float:distance = 50.0);
+native CreateDynamicRaceCP(type, Float:x, Float:y, Float:z, Float:nextx, Float:nexty, Float:nextz, Float:size, worldid = -1, interiorid = -1, playerid = -1, Float:distance = 100.0);
 native DestroyDynamicRaceCP(checkpointid);
 native TogglePlayerDynamicRaceCP(playerid, checkpointid, toggle);
+native TogglePlayerAllDynamicRaceCPs(playerid, toggle);
 native IsPlayerInDynamicRaceCP(playerid, checkpointid);
 native DestroyAllDynamicRaceCPs();
 native CountDynamicRaceCPs();
@@ -101,10 +103,10 @@ native CountDynamic3DTextLabels();
 
 // Natives (internals)
 
-native Streamer_IndexPlayer(playerid);
-native Streamer_DeindexPlayer(playerid);
+native Streamer_AddPlayer(playerid);
+native Streamer_RemovePlayer(playerid);
 native Streamer_CheckPickup(playerid, pickupid);
-native Streamer_RegisterGameMode();
+native Streamer_RegisterInterface();
 
 // Callbacks
 
@@ -121,14 +123,44 @@ forward OnPlayerLeaveDynamicRaceCP(playerid, checkpointid);
 static
 	bool:Streamer_g_OPC = false,
 	bool:Streamer_g_OPDC = false,
-	bool:Streamer_g_OPPP = false;
+	bool:Streamer_g_OPPP = false,
+	bool:Streamer_g_RI = false;
+
+public OnFilterScriptInit()
+{
+	if (!Streamer_g_RI)
+	{
+		Streamer_g_OPC = funcidx("Streamer_OnPlayerConnect") != -1;
+		Streamer_g_OPDC = funcidx("Streamer_OnPlayerDisconnect") != -1;
+		Streamer_g_OPPP = funcidx("Streamer_OnPlayerPickUpPickup") != -1;
+		Streamer_g_RI = true;
+		Streamer_RegisterInterface();
+	}
+	if (funcidx("Streamer_OnFilterScriptInit") != -1)
+	{
+		return CallLocalFunction("Streamer_OnFilterScriptInit", "");
+	}
+	return 1;
+}
+
+#if defined _ALS_OnFilterScriptInit
+	#undef OnFilterScriptInit
+#else
+	#define _ALS_OnFilterScriptInit
+#endif
+#define OnFilterScriptInit Streamer_OnFilterScriptInit
+forward Streamer_OnFilterScriptInit();
 
 public OnGameModeInit()
 {
-	Streamer_g_OPC = funcidx("Streamer_OnPlayerConnect") != -1;
-	Streamer_g_OPDC = funcidx("Streamer_OnPlayerDisconnect") != -1;
-	Streamer_g_OPPP = funcidx("Streamer_OnPlayerPickUpPickup") != -1;
-	Streamer_RegisterGameMode();
+	if (!Streamer_g_RI)
+	{
+		Streamer_g_OPC = funcidx("Streamer_OnPlayerConnect") != -1;
+		Streamer_g_OPDC = funcidx("Streamer_OnPlayerDisconnect") != -1;
+		Streamer_g_OPPP = funcidx("Streamer_OnPlayerPickUpPickup") != -1;
+		Streamer_g_RI = true;
+		Streamer_RegisterInterface();
+	}
 	if (funcidx("Streamer_OnGameModeInit") != -1)
 	{
 		return CallLocalFunction("Streamer_OnGameModeInit", "");
@@ -146,7 +178,7 @@ forward Streamer_OnGameModeInit();
 
 public OnPlayerConnect(playerid)
 {
-	Streamer_IndexPlayer(playerid);
+	Streamer_AddPlayer(playerid);
 	if (Streamer_g_OPC)
 	{
 		return CallLocalFunction("Streamer_OnPlayerConnect", "d", playerid);
@@ -162,12 +194,12 @@ public OnPlayerConnect(playerid)
 #define OnPlayerConnect Streamer_OnPlayerConnect
 forward Streamer_OnPlayerConnect(playerid);
 
-public OnPlayerDisconnect(playerid, reason)
+public OnPlayerDisconnect(playerid)
 {
-	Streamer_DeindexPlayer(playerid);
+	Streamer_RemovePlayer(playerid);
 	if (Streamer_g_OPDC)
 	{
-		return CallLocalFunction("Streamer_OnPlayerDisconnect", "dd", playerid, reason);
+		return CallLocalFunction("Streamer_OnPlayerDisconnect", "d", playerid);
 	}
 	return 1;
 }
@@ -198,92 +230,36 @@ public OnPlayerPickUpPickup(playerid, pickupid)
 #define OnPlayerPickUpPickup Streamer_OnPlayerPickUpPickup
 forward Streamer_OnPlayerPickUpPickup(playerid, pickupid);
 
-// Function that contains natives used by the streamer
-// Necessary in order to invoke PAWN in the plugin
+// Public function containing every native used by the streamer
+// Necessary in order to invoke PAWN correctly in the plugin
 
-forward InvokePAWNFunction();
-public InvokePAWNFunction()
+forward Streamer_PublicFunction();
+public Streamer_PublicFunction()
 {
 	new
 		Float:value;
-	GetPlayerPos(0, value, value, value);
-	GetPlayerInterior(0);
-	GetPlayerVirtualWorld(0);
-	CreatePlayerObject(0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-	SetPlayerObjectPos(0, 0, 0.0, 0.0, 0.0);
-	GetPlayerObjectPos(0, 0, value, value, value);
-	SetPlayerObjectRot(0, 0, 0.0, 0.0, 0.0);
-	GetPlayerObjectRot(0, 0, value, value, value);
-	DestroyPlayerObject(0, 0);
-	MovePlayerObject(0, 0, 0.0, 0.0, 0.0, 0.0);
-	StopPlayerObject(0, 0);
 	CreatePickup(0, 0, 0.0, 0.0, 0.0, 0);
-	DestroyPickup(0);
-	SetPlayerCheckpoint(0, 0.0, 0.0, 0.0, 0.0);
-	DisablePlayerCheckpoint(0);
-	SetPlayerRaceCheckpoint(0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-	DisablePlayerRaceCheckpoint(0);
-	SetPlayerMapIcon(0, 0, 0.0, 0.0, 0.0, 0, 0);
-	RemovePlayerMapIcon(0, 0);
 	CreatePlayer3DTextLabel(0, "", 0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0);
+	CreatePlayerObject(0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 	DeletePlayer3DTextLabel(0, PlayerText3D:0);
+	DestroyPickup(0);
+	DestroyPlayerObject(0, 0);
+	DisablePlayerCheckpoint(0);
+	DisablePlayerRaceCheckpoint(0);
+	GetPlayerInterior(0);
+	GetPlayerObjectPos(0, 0, value, value, value);
+	GetPlayerObjectRot(0, 0, value, value, value);
+	GetPlayerPos(0, value, value, value);
+	GetPlayerVirtualWorld(0);
+	GetVehiclePos(0, value, value, value);
+	MovePlayerObject(0, 0, 0.0, 0.0, 0.0, 0.0);
+	RemovePlayerMapIcon(0, 0);
+	SetPlayerCheckpoint(0, 0.0, 0.0, 0.0, 0.0);
+	SetPlayerMapIcon(0, 0, 0.0, 0.0, 0.0, 0, 0);
+	SetPlayerObjectPos(0, 0, 0.0, 0.0, 0.0);
+	SetPlayerObjectRot(0, 0, 0.0, 0.0, 0.0);
+	SetPlayerRaceCheckpoint(0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+	StopPlayerObject(0, 0);
 	UpdatePlayer3DTextLabelText(0, PlayerText3D:0, 0, "");
 	return 1;
-}
-
-// Public functions that wrap a few natives with float parameters
-// Required only for Linux (resolves an issue with invoking PAWN)
-
-forward Streamer_CreateObject(playerid, modelid, Float:x, Float:y, Float:z, Float:rx, Float:ry, Float:rz);
-public Streamer_CreateObject(playerid, modelid, Float:x, Float:y, Float:z, Float:rx, Float:ry, Float:rz)
-{
-	return CreatePlayerObject(playerid, modelid, x, y, z, rx, ry, rz);
-}
-
-forward Streamer_SetObjectPos(playerid, objectid, Float:x, Float:y, Float:z);
-public Streamer_SetObjectPos(playerid, objectid, Float:x, Float:y, Float:z)
-{
-	return SetPlayerObjectPos(playerid, objectid, x, y, z);
-}
-
-forward Streamer_SetObjectRot(playerid, objectid, Float:rx, Float:ry, Float:rz);
-public Streamer_SetObjectRot(playerid, objectid, Float:rx, Float:ry, Float:rz)
-{
-	return SetPlayerObjectRot(playerid, objectid, rx, ry, rz);	
-}
-
-forward Streamer_MoveObject(playerid, objectid, Float:x, Float:y, Float:z, Float:speed);
-public Streamer_MoveObject(playerid, objectid, Float:x, Float:y, Float:z, Float:speed)
-{
-	return MovePlayerObject(playerid, objectid, x, y, z, speed);
-}
-
-forward Streamer_CreatePickup(model, type, Float:x, Float:y, Float:z, worldid);
-public Streamer_CreatePickup(model, type, Float:x, Float:y, Float:z, worldid)
-{
-	return CreatePickup(model, type, x, y, z, worldid);
-}
-
-forward Streamer_CreateCP(playerid, Float:x, Float:y, Float:z, Float:size);
-public Streamer_CreateCP(playerid, Float:x, Float:y, Float:z, Float:size)
-{
-	return SetPlayerCheckpoint(playerid, x, y, z, size);
-}
-
-forward Streamer_CreateRaceCP(playerid, type, Float:x, Float:y, Float:z, Float:nextx, Float:nexty, Float:nextz, Float:size);
-public Streamer_CreateRaceCP(playerid, type, Float:x, Float:y, Float:z, Float:nextx, Float:nexty, Float:nextz, Float:size)
-{
-	return SetPlayerRaceCheckpoint(playerid, type, x, y, z, nextx, nexty, nextz, size);
-}
-
-forward Streamer_CreateMapIcon(playerid, iconid, Float:x, Float:y, Float:z, markertype, color);
-public Streamer_CreateMapIcon(playerid, iconid, Float:x, Float:y, Float:z, markertype, color)
-{
-	return SetPlayerMapIcon(playerid, iconid, x, y, z, markertype, color);
-}
-
-forward PlayerText3D:Streamer_Create3DTextLabel(playerid, text[], color, Float:x, Float:y, Float:z, Float:drawdistance, attachedplayer, attachedvehicle, testlos);
-public PlayerText3D:Streamer_Create3DTextLabel(playerid, text[], color, Float:x, Float:y, Float:z, Float:drawdistance, attachedplayer, attachedvehicle, testlos)
-{
-	return CreatePlayer3DTextLabel(playerid, text, color, x, y, z, drawdistance, attachedplayer, attachedvehicle, testlos);
 }
