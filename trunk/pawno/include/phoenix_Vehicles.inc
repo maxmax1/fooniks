@@ -311,6 +311,7 @@ public OnDriverEnterVehicle(playerid)
 	{
 		if(Freeze) TogglePlayerControllable(playerid, 0);
 	}
+	ShowSpeedo(playerid);
 	return 1;
 }
 
@@ -353,14 +354,14 @@ public OnSpeedoUpdate(playerid)
 		GetVehicleHealth(Vehicles[vId][vSampId], Vehicles[vId][vHealth]);		
 		new hProtsenti = floatround(((Vehicles[vId][vHealth] - 295) / 705) * 100);
 		if(hProtsenti < 0) hProtsenti = 0;
-		new string[128], fuel[3] = "-";
+		new string[128];
 
 		GetVehicleVelocity(Vehicles[vId][vSampId], Vehicles[vId][vSpeedX], Vehicles[vId][vSpeedY], Vehicles[vId][vSpeedZ]);
 		new Float: distance = floatabs(Vehicles[vId][vSpeedX]) + floatabs(Vehicles[vId][vSpeedY]) + floatabs(Vehicles[vId][vSpeedZ]);
 		Vehicles[vId][vSpeed] = floatround(distance * 175);
 		new showspeed = Vehicles[vId][vSpeed];
 		if( showspeed > Vehicles[vId][SpeedLimit] && Vehicles[vId][SpeedLimit] != 0 ) showspeed = Vehicles[vId][SpeedLimit];
-		format(string,sizeof(string),"~y~~h~Bensiin: %s  ~y~~h~Kiirus: ~w~%i km/h  ~y~~h~Korras: ~w~%d %%", fuel, showspeed, hProtsenti);
+		format(string,sizeof(string),"	~y~~h~~h~%s~n~ ~y~Kiirus: ~r~%03ikm/h  ~y~Korras: ~r~%i%%",CarData[Vehicles[vId][vModel]-400][CarName], showspeed, hProtsenti);
 		TextDrawSetString(InfoBar[playerid], string);
 		
 		if((oSpeed - Vehicles[vId][vSpeed]) > 70 && (oHealth - Vehicles[vId][vHealth]) > 100)

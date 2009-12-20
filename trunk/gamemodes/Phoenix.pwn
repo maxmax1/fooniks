@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"175"
+#define SCRIPT_REVISION 		"176"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -365,13 +365,17 @@ public OnGameModeInit()
 	
 	for(new td; td < MAX_PLAYERS; td++)
 	{
-		InfoBar[td] = TextDrawCreate(200.0,418.0,":)"); //minX = 120 // 330
+		InfoBar[td] = TextDrawCreate(0.0,428.0,":)"); //minX = 120 // 330
 		TextDrawAlignment(InfoBar[td],1);
 		TextDrawUseBox(InfoBar[td],1);
 		TextDrawBoxColor(InfoBar[td],0x00000050);
-		TextDrawTextSize(InfoBar[td],640.0,480.0);
-		TextDrawFont(InfoBar[td],1);
-		TextDrawSetOutline(InfoBar[td],0);
+		TextDrawTextSize(InfoBar[td],200.0,200.0);
+        TextDrawSetProportional(InfoBar[td], 1);
+		TextDrawFont(InfoBar[td],2);
+		TextDrawColor(InfoBar[td], 0xffffffff);
+  		TextDrawBackgroundColor(InfoBar[td], 0x000000ff);
+		TextDrawSetOutline(InfoBar[td],1);
+		TextDrawLetterSize(InfoBar[td],0.269999,0.99);
 	}
 	
 	ShowNameTags( 1 );
