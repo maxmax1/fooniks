@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"176"
+#define SCRIPT_REVISION 		"177"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -367,10 +367,7 @@ public OnGameModeInit()
 	{
 		InfoBar[td] = TextDrawCreate(0.0,428.0,":)"); //minX = 120 // 330
 		TextDrawAlignment(InfoBar[td],1);
-		TextDrawUseBox(InfoBar[td],1);
-		TextDrawBoxColor(InfoBar[td],0x00000050);
-		TextDrawTextSize(InfoBar[td],200.0,200.0);
-        TextDrawSetProportional(InfoBar[td], 1);
+		TextDrawSetProportional(InfoBar[td], 1);
 		TextDrawFont(InfoBar[td],2);
 		TextDrawColor(InfoBar[td], 0xffffffff);
   		TextDrawBackgroundColor(InfoBar[td], 0x000000ff);
@@ -1211,7 +1208,7 @@ COMMAND:kiirusepiirang(playerid, params[])
 {
 	new piirang;
 	if( sscanf(params, "i", piirang) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /kiirusepiirang [Piirang KM/H]");
-	if( piirang < 15 && piirang != 0 ) return SendClientMessage(playerid, COLOR_YELLOW, "Piirang ei saa olla väiksem kui 15km/h!, piiraja välja lülitamiseks sisesta 0");
+	if( piirang <= 0 ) piirang = 0;
 	if( piirang > 300 ) piirang = 300;
 	if( GetPlayerState(playerid) == PLAYER_STATE_DRIVER )
 	{
