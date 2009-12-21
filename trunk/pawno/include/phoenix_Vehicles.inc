@@ -383,8 +383,9 @@ public OnSpeedoUpdate(playerid)
 		GetPlayerKeys(playerid, keys, updown, leftright);
 		if( keys == 8 && leftright == 0 )
 		{
-
+			//SetVehicleSpeed(Vehicles[vId][vSampId],Vehicles[vId][Prediction]);
 		}
+		//PredictSpeed(Vehicles[vId][vSampId], Vehicles[vId][vSpeed]);
 ///////////////////////////////
 	}
 	else
@@ -412,6 +413,8 @@ public SetVehicleSpeed(vehicleid, Float:speed)
 	if(NegativeX) newX = newX*-1;
 	if(NegativeY) newY = newY*-1;
 
+    new vId = GetVehicleSqlId(vehicleid);
+    Vehicles[vId][vSpeed] = speed;
 	SetVehicleVelocity(vehicleid, newX, newY, SpeedZ);
 
 	return 1;
@@ -425,10 +428,13 @@ public SetVehicleAcceleration(vehicleid)
 }
 public PredictSpeed(vehicleid, Float:currentspeed)
 {
+	if( currentspeed < 0.001 ) currentspeed = 0.001;
 	new vId = GetVehicleSqlId(vehicleid);
-	new Float:AccelBase = Vehicles[vId][AccelerationBase];
-	Vehicles[vId][Prediction] = currentspeed + ((( AccelBase * ( currentspeed * 0.04 ))* ( SPEEDO_UPDATE / 1000 )) / UNITS_IN_KM );
-
+	new Float: AccelBase = Vehicles[vId][AccelerationBase];
+	new Float: SpeedoUpdate = floatdiv( SPEEDO_UPDATE, 1000 );
+	new Float: SomeMath = ( AccelBase - ( AccelBase * ( currentspeed * 0.04 ))) * SpeedoUpdate;
+	new Float: AccelInSAMPUnits = SomeMath * 27.78;
+	Vehicles[vId][Prediction] = currentspeed + AccelInSAMPUnits;
 	return 1;
 }
 public AddCarToSQL(model, Float:posX, Float:posY, Float:posZ, Float:angle)
