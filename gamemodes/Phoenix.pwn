@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"177"
+#define SCRIPT_REVISION 		"179"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -534,11 +534,6 @@ public OnGameModeInit()
 	//////////KARDIRADA LÕPP
 	
 	foodBar = CreateProgressbar(548.2, 54.5, 53.8, 0.1, 2.0, COLOR_BLACK, COLOR_GREEN, COLOR_WHITE);
-	
-	for( new i = 0; i <= 699; i++ )
-	{
-	    Vehicles[i][SpeedLimit] = 300;
-	}
 	
 	SetTimer("MysqlCheck", 1000*60*5, true);
 	SetTimer("UpdateAllPlayers", 1000*60*15, true);
@@ -1201,41 +1196,6 @@ COMMAND:admin(playerid, params[])
 	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
 	
 	showAdminDialog(playerid);
-	return 1;
-}
-
-COMMAND:kiirusepiirang(playerid, params[])
-{
-	new piirang;
-	if( sscanf(params, "i", piirang) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /kiirusepiirang [Piirang KM/H]");
-	if( piirang <= 0 ) piirang = 0;
-	if( piirang > 300 ) piirang = 300;
-	if( GetPlayerState(playerid) == PLAYER_STATE_DRIVER )
-	{
-	    new vehicleid = GetVehicleSqlId(GetPlayerVehicleID(playerid));
-
-		Vehicles[vehicleid][SpeedLimit] = piirang;
-		SendClientMessage(playerid, COLOR_YELLOW, "Piirang määratud!");
-
-	}
-	else return SendClientMessage(playerid, COLOR_YELLOW, "Sa ei juhi ühtegi autot!");
-	return 1;
-}
-
-COMMAND:turbo(playerid, params[])
-{
-	new Float:turbo;
-	if( sscanf(params, "f", turbo) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /turbo [turbo suurus]");
-	if( turbo > 10 || turbo < 0 ) return SendClientMessage(playerid, COLOR_YELLOW, "Turbo suurus võib olla 0-10");
-	if( GetPlayerState(playerid) == PLAYER_STATE_DRIVER )
-	{
-	    new vehicleid = GetVehicleSqlId(GetPlayerVehicleID(playerid));
-
-		Vehicles[vehicleid][Turbo] = turbo;
-		SendClientMessage(playerid, COLOR_YELLOW, "turbo määratud!");
-
-	}
-	else return SendClientMessage(playerid, COLOR_YELLOW, "Sa ei juhi ühtegi autot!");
 	return 1;
 }
 
