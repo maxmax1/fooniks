@@ -66,6 +66,7 @@
 *    GLOBALS
 */
 new Connection;
+Itter_Create(User, MAX_PLAYERS);
 
 /*
 *    FORWARDS

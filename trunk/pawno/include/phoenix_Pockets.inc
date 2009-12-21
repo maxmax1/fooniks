@@ -24,7 +24,7 @@
 	#endinput
 #endif
 
-#define MAX_ITEMS 13
+#define MAX_ITEMS 14
 #define MAX_POCKETS 10
 #define DIALOG_POCKETS 2017
 
@@ -51,7 +51,8 @@ new Items[MAX_ITEMS][itemInf] =
 	{"AK47", 0, 500, "setWep", 30, -1},
 	{"M4", 0, 500, "setWep", 31, 10},	
 	{"CRifle", 0, 500, "setWep", 33, -1},	
-	{"SRifle", 0, 500, "setWep", 34, 11}
+	{"SRifle", 0, 500, "setWep", 34, 11},
+	{"SIMKAART", 0, 0, "ActivateSimCard", 0, -1}
 };
 
 enum pockInf
@@ -126,7 +127,12 @@ public UseItem(playerid, pocketid)
 	if(Type < 0 || Type > MAX_ITEMS) return 3;
 	
 	new Amount = Pockets[playerid][pocketid][pAmount];
-	CallLocalFunction(Items[Type][itemCallBack], "iii", playerid, Amount, Items[Type][itemOtherId]);
+	new ret = CallLocalFunction(Items[Type][itemCallBack], "iii", playerid, Amount, Items[Type][itemOtherId]);
+	
+	if(ret > 0) // Remove item after usage.
+	{
+	
+	}
 	
 	return 0;
 }
@@ -207,12 +213,12 @@ forward setWep(playerid, amount, weP);
 public UseEmpty(playerid, amount, weP)
 {
 	SendEmote(playerid, "katsub oma tühja taskut.");
-	return 1;
+	return 0;
 }
 
 public setWep(playerid, amount, weP)
 {
 	SetPlayerArmedWeapon(playerid, weP);
 	SendEmote(playerid, "võtab kätte relva.");
-	return 1;
+	return 0;
 }

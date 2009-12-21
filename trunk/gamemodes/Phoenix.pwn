@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"179"
+#define SCRIPT_REVISION 		"180"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -61,7 +61,7 @@
 #include <foreach>   		 // author: Alex "Y_Less" Cole, External Credit #9
 #include <zcmd> 			 // author: Zeex, External Credit #5
 #include <stuff> 	 		 // some Stuff Needed EveryWhere
-#include <playerlist> 		 // colse Players List
+#include <playerlist> 		 // close Players List
 #include <smart_npc_samp> 	 // SmartNPC
 #include <streamer> 	 // SmartNPC
 
@@ -76,6 +76,8 @@
 #include <phoenix_Users>
 #include <phoenix_Skills>
 #include <phoenix_Vehicles>
+
+#include <phoenix_Phone>
 
 #include <phoenix_Anims>
 #include <phoenix_ProgressBar>
@@ -590,8 +592,7 @@ public OnPlayerDisconnect(playerid)
 	if(IsPlayerNPC(playerid)) return 1;
 	if(pInfo[playerid][pLoggedIn])
 	{
-		UpdatePlayer(playerid);
-		SaveSkills(playerid);
+		OnPlayerLogout(playerid);
 	}
 	ClearPlayerData(playerid);	
 	return 1;
@@ -1030,12 +1031,9 @@ COMMAND:o(playerid, params[])
 	if(strlen(text) == 0) return SendClientMessage(playerid, COLOR_RED, "KASUTUS: /o tekst");
 	format(str, sizeof(str), "(( %s: %s ))", pInfo[playerid][pCharName], text);
 	
-	foreach(Player, i)
+	foreach(User, i)
 	{
-	    if( pInfo[i][pLoggedIn] )
-	    {
-			SendClientMessage(i, COLOR_CHAT_OOC_GLOBAL, str);
-	    }
+		SendClientMessage(i, COLOR_CHAT_OOC_GLOBAL, str);
 	}
 	
 	return 1;
@@ -1448,14 +1446,11 @@ public SendEmote(playerid, emote[])
 	GetPlayerPos(playerid, PlayerLocX, PlayerLocY, PlayerLocZ);
 	format(str, sizeof(str),"*%s %s*", pInfo[playerid][pCharName], emote);
 	
-	foreach(Player, i)
+	foreach(User, i)
 	{
-	    if( pInfo[i][pLoggedIn] )
-	    {
-	        if( IsPlayerInRangeOfPoint(i, CHAT_RADIUS, PlayerLocX, PlayerLocY, PlayerLocZ) )
-	        {
-				SendClientMessage(i, COLOR_CHAT_ME, str);
-	        }
+		if( IsPlayerInRangeOfPoint(i, CHAT_RADIUS, PlayerLocX, PlayerLocY, PlayerLocZ) )
+		{
+			SendClientMessage(i, COLOR_CHAT_ME, str);
 	    }
 	}
 }
@@ -1531,9 +1526,9 @@ public SendAdminChat(playerid, text[])
 {
 	new str[STRING_LENGHT];
 	format( str, sizeof(str), "(%i)%s: %s", pInfo[playerid][pAdminLevel], pInfo[playerid][pCharName], text);
-	foreach(Player, i)
+	foreach(User, i)
 	{
-	    if( pInfo[i][pLoggedIn] && pInfo[i][pAdminLevel] > 0 )
+	    if( pInfo[i][pAdminLevel] > 0 )
 	    	SendClientMessage(i, COLOR_ADMINCHAT, str);
 	}
 }
@@ -1541,9 +1536,9 @@ public SendTeata(playerid, text[])
 {
 	new str[STRING_LENGHT];
 	format( str, sizeof(str), LANG_REPORT, playerid, pInfo[playerid][pCharName], text);
-	foreach (Player, i)
+	foreach (User, i)
 	{
-	    if( pInfo[i][pLoggedIn] && pInfo[i][pAdminLevel] > 0 )
+	    if( pInfo[i][pAdminLevel] > 0 )
 	    	SendClientMessage(i, COLOR_TEATA, str);
 	}
 }
@@ -1578,16 +1573,13 @@ public NPCHandle(playerid)
 public CheckFalseDeadPlayers(playerid)
 {
 	new Float:health;
-	foreach (Player, i)
+	foreach (User, i)
 	{
-	    if( pInfo[i][pLoggedIn] )
-	    {
-	    	health = GetPlayerHealth(i, health);
-	    	if( health < 1 )
-	   		{
-				SpawnPlayer(i);
-	    	}
-	    }
+		health = GetPlayerHealth(i, health);
+		if( health < 1 )
+		{
+			SpawnPlayer(i);
+		}
 	}
 }
 
@@ -1609,7 +1601,7 @@ public SyncAllPlayerTime()
 	}
 	else if(gMinute != 0 && gHourChange) gHourChange = false;
 
-	foreach(Player, playerid)
+	foreach(User, playerid)
 	{
 		SyncPlayerTime(playerid);
 	}
@@ -1637,7 +1629,7 @@ public OnNewHour()
 {
 	SendFormattedTextToAll(COLOR_GREEN, "Kell on nüüd %d:0%d.", gHour, gMinute);
 	
-	foreach(Player, playerid)
+	foreach(User, playerid)
 	{
 		if(gMyJob[playerid] > 0)
 		{
@@ -1685,6 +1677,23 @@ public OnPlayerConfirm(playerid, response, boxId)
 		else SendClientMessage(playerid, COLOR_YELLOW, LANG_REFUSE_JOB);
 	}
 	else SendClientMessage(playerid, COLOR_YELLOW, "VALE KAST!");
+}
+
+public OnPlayerLogin(playerid)
+{
+	Itter_Add(User, playerid);
+	SendClientMessage(playerid, COLOR_GREEN, LANG_LOGGED_IN);
+	pInfo[playerid][pLoggedIn] = true;
+	SpawnPlayer(playerid);
+	return 1;
+}
+
+public OnPlayerLogout(playerid)
+{
+	UpdatePlayer(playerid);
+	SaveSkills(playerid);
+	Itter_Remove(User, playerid);
+	return 1;
 }
 
 /*
