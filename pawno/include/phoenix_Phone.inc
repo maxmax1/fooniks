@@ -26,9 +26,32 @@
 rand(minnum = cellmin,maxnum = cellmax) return random(maxnum - minnum + 1) + minnum;
 #endif
 
+#define COLOR_PHONE 0xF0DC82AA
+
 #define MAX_CONTACTS 12
 
 #define MAX_SIMCARDS 300
+
+#define CALL_NONE 			0
+#define CALL_PLAYER 		1
+#define CALL_RECIVE			2
+#define CALL_CONNECTED 		3
+
+#define HANGUP_ME 			0
+#define CALL_PLAYER 		1
+#define CALL_RECIVE			2
+#define CALL_CONNECTED 		3
+
+#define CALL_END_UNKNOWN	0
+#define CALL_END_WRONG_NR	1
+#define CALL_NUMBER_INUSE	2
+#define CALL_END_NO_ANWSER	3
+#define CALL_END_DENIED		4
+#define CALL_END_HANGUP		5
+#define CALL_END_HANGUP_ME	6
+#define CALL_END_HANGUP_OT	7
+
+#define ITEM_SIMCARD 13
 
 /*
 *    GLOBALS
@@ -42,7 +65,7 @@ enum phoneInf
 	simCard,	
 
 	// Callin stuff.
-	bool: onCall,
+	onCall,
 	ringTime,
 	callPlayer	
 };
@@ -53,7 +76,7 @@ enum simInf
 	sNumber,
 	companyId
 };
-new gPlayerSimCards[MAX_SIMCARDS][simInf];
+new gSimCards[MAX_SIMCARDS][simInf];
 Itter_Create(SimCard, MAX_SIMCARDS);
 
 new 
@@ -64,6 +87,12 @@ new
 /*
 *    FORWARDS
 */
+
+forward GiveSimCard(playerid, company);
+forward ActivateSimCard(playerid, selectedCard, other);
+forward PlayerCallNumber(playerid, number);
+forward EndCall(playerid, reason);
+forward PhoneTimer();
 
 forward ph_Phone_OnPlayerText(playerid, text[]);
 
@@ -82,8 +111,18 @@ stock FindNumberFromContactname(simcard, namestr[])
 {
 	for(new i; i < MAX_CONTACTS; i++)
 	{
-		if(!gContactMemoryUsed[simcard][i) continue;
+		if(!gContactMemoryUsed[simcard][i]) continue;
 		if(!strcmp(namestr, gContactMemoryName[simcard][i])) return gContactMemoryNR[simcard][i];
+	}
+	return -1;
+}
+
+stock findPlayerFromNumber(number)
+{
+	foreach(User, i)
+	{
+		if(!gPlayerPhone[i][hasPhone] || !gPlayerPhone[i][simCardIn] || gPlayerPhone[i][simCard] < 0 || gPlayerPhone[i][simCard] > MAX_SIMCARDS) continue;
+		if(gSimCards[gPlayerPhone[i][simCard]][sNumber] == number) return i;
 	}
 	return -1;
 }
@@ -174,7 +213,7 @@ public ActivateSimCard(playerid, selectedCard, other)
 	{
 		return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni kuhu seda simkaarti panna!");
 	}
-	if(!gPlayerPhone[playerid][simCard] == selectedCard)
+	if(gPlayerPhone[playerid][simCard] == selectedCard)
 	{
 		return SendClientMessage(playerid, COLOR_YELLOW, "See simkaart on juba su telefonis.");
 	}
@@ -188,17 +227,24 @@ public PlayerCallNumber(playerid, number)
 {
 	SetPlayerSpecialAction(playerid, SPECIAL_ACTION_USECELLPHONE);
 	gPlayerPhone[playerid][callPlayer] = findPlayerFromNumber(number);
+	gPlayerPhone[playerid][onCall] = CALL_PLAYER;
+	gPlayerPhone[playerid][ringTime] = 5;
 	
 	if(gPlayerPhone[playerid][callPlayer] != -1)
 	{
 		new otherId = gPlayerPhone[playerid][callPlayer];
-		gPlayerPhone[otherId][callPlayer] = playerid;
-		gPlayerPhone[otherId][onCall] = CALL_RECIVE;
-		gPlayerPhone[otherId][ringTime] = 5;
+		
+		if(gPlayerPhone[otherId][onCall] == CALL_NONE)
+		{
+			gPlayerPhone[otherId][callPlayer] = playerid;
+			gPlayerPhone[otherId][onCall] = CALL_RECIVE;
+			gPlayerPhone[otherId][ringTime] = 5;
+		}
+		else
+		{
+			EndCall(playerid, CALL_NUMBER_INUSE);
+		}
 	}
-	
-	gPlayerPhone[playerid][onCall] = 1;
-	gPlayerPhone[playerid][ringTime] = 5;
 	
 	SendClientMessage(playerid, COLOR_PHONE, "kutsub...");
 }
@@ -209,27 +255,31 @@ public EndCall(playerid, reason)
 	gPlayerPhone[playerid][onCall] = CALL_NONE;
 	gPlayerPhone[playerid][ringTime] = 0;
 	
-	if(reason == WRONG_NUMBER)
+	if(reason == CALL_END_WRONG_NR)
 	{
 		SendClientMessage(playerid, COLOR_PHONE, "...telefon millele te helistate ei ole sisse lülitatud või asub väljaspool teeninduspiirkonda...");
 	}
-	else if(reason == NO_ANWSER)
+	else if(reason == CALL_NUMBER_INUSE)
+	{
+		SendClientMessage(playerid, COLOR_PHONE, "...kinnine toon...");
+	}
+	else if(reason == CALL_END_NO_ANWSER)
 	{
 		SendClientMessage(playerid, COLOR_PHONE, "...ei vasta...");
 	}
-	else if(reason == DENIED)
+	else if(reason == CALL_END_DENIED)
 	{
 		SendClientMessage(playerid, COLOR_PHONE, "...kõnest keelduti...");
 	}
-	else if(reason == HANGUP)
+	else if(reason == CALL_END_HANGUP || reason == CALL_END_UNKNOWN)
 	{
 		SendClientMessage(playerid, COLOR_PHONE, "...kõne lõppes...");
 	}
-	else if(reason == HANGUP_ME)
+	else if(reason == CALL_END_HANGUP_ME)
 	{
 		SendClientMessage(playerid, COLOR_PHONE, "panid toru ära");
 	}
-	else if(reason == HANGUP_OTHER)
+	else if(reason == CALL_END_HANGUP_OT)
 	{
 		SendClientMessage(playerid, COLOR_PHONE, "teine mängija pani toru ära");
 	}
@@ -245,31 +295,31 @@ public PhoneTimer()
 		{
 			if(gPlayerPhone[playerid][callPlayer] == -1)
 			{
-				EndCall(playerid, WRONG_NUMBER);
+				EndCall(playerid, CALL_END_WRONG_NR);
 				continue;
 			}
 			
 			gPlayerPhone[playerid][ringTime]--;
 			if(gPlayerPhone[playerid][ringTime] < 0)
 			{
-				EndCall(playerid, NO_ANWSER);
+				EndCall(playerid, CALL_END_NO_ANWSER);
 			}
 			
 			new otherId = gPlayerPhone[playerid][callPlayer];
-			if(otherId < 0 || otherId > MAX_PLAYERS || !IsPlayerConnected(otherId) || gPlayerPhone[otherId][onCall] == CALL_NONE) EndCall(playerid, DENIED);
+			if(otherId < 0 || otherId > MAX_PLAYERS || !IsPlayerConnected(otherId) || gPlayerPhone[otherId][onCall] == CALL_NONE) EndCall(playerid, CALL_END_DENIED);
 		}
 		else if(gPlayerPhone[playerid][onCall] == CALL_CONNECTED)
 		{
 			new otherId = gPlayerPhone[playerid][callPlayer];			
 			if(otherId < 0 || otherId > MAX_PLAYERS || !IsPlayerConnected(otherId) || gPlayerPhone[otherId][onCall] == CALL_NONE)
 			{
-				EndCall(playerid, HANGUP);
+				EndCall(playerid, CALL_END_HANGUP);
 			}
 		}
 		else if(gPlayerPhone[playerid][onCall] == CALL_RECIVE)
 		{
 			new otherId = gPlayerPhone[playerid][callPlayer];
-			if(otherId < 0 || otherId > MAX_PLAYERS || !IsPlayerConnected(otherId) || gPlayerPhone[otherId][onCall] == CALL_NONE) EndCall(playerid, HANGUP_OTHER);
+			if(otherId < 0 || otherId > MAX_PLAYERS || !IsPlayerConnected(otherId) || gPlayerPhone[otherId][onCall] == CALL_NONE) EndCall(playerid, CALL_END_HANGUP_OT);
 			
 			gPlayerPhone[playerid][ringTime]--;
 			if(gPlayerPhone[playerid][ringTime] > 0)
@@ -289,7 +339,10 @@ public OnPlayerText(playerid, text[])
 	if(gPlayerPhone[playerid][onCall] == CALL_CONNECTED)
 	{
 		new otherId = gPlayerPhone[playerid][callPlayer];
-		if(otherId < 0 || otherId > MAX_PLAYERS || !IsPlayerConnected(otherId) || gPlayerPhone[otherId][onCall] == CALL_NONE) EndCall(playerid, HANGUP);
+		if(otherId < 0 || otherId > MAX_PLAYERS || !IsPlayerConnected(otherId) || gPlayerPhone[otherId][onCall] == CALL_NONE)
+		{
+			EndCall(playerid, CALL_END_HANGUP);
+		}
 		else
 		{
 			new string[128];

@@ -106,9 +106,7 @@ public LoadSkills(playerid)
 
 			SetSkills(playerid);
 		
-			SendClientMessage(playerid, COLOR_GREEN, LANG_LOGGED_IN);
-			pInfo[playerid][pLoggedIn] = true;
-			SpawnPlayer(playerid);		
+			OnPlayerLogin(playerid);
 			return 1;			
 		}
 		else

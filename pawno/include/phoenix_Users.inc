@@ -82,6 +82,9 @@ forward UpdatePlayer(playerid);
 forward UpdateAllPlayers();
 forward ClearPlayerData(playerid);
 
+forward OnPlayerLogin(playerid);
+forward OnPlayerLogout(playerid);
+
 /*
 *    PUBLICS
 */
@@ -296,21 +299,17 @@ public UpdatePlayer(playerid)
 }
 public UpdateAllPlayerPos()
 {
-	foreach(Player, playerid)
+	foreach(User, playerid)
 	{
-		if(pInfo[playerid][pLoggedIn])
-		{
-			GetPlayerPos(playerid, pInfo[playerid][pPosX], pInfo[playerid][pPosY], pInfo[playerid][pPosZ]);
-
-			new sqlid = pInfo[playerid][pSqlId];
-			new query[MAX_QUERY], table[32];
-			format(table, 32, "%scharacters", MYSQL_PREFIX);
-			MysqlUpdateBuild(query, table);
-			MysqlUpdateFlo(query, "posX", pInfo[playerid][pPosX]);
-			MysqlUpdateFlo(query, "posY", pInfo[playerid][pPosY]);
-			MysqlUpdateFlo(query, "posZ", pInfo[playerid][pPosZ]);
-			MysqlUpdateFinish(query, "id", sqlid);
-		}
+		GetPlayerPos(playerid, pInfo[playerid][pPosX], pInfo[playerid][pPosY], pInfo[playerid][pPosZ]);
+		new sqlid = pInfo[playerid][pSqlId];
+		new query[MAX_QUERY], table[32];
+		format(table, 32, "%scharacters", MYSQL_PREFIX);
+		MysqlUpdateBuild(query, table);
+		MysqlUpdateFlo(query, "posX", pInfo[playerid][pPosX]);
+		MysqlUpdateFlo(query, "posY", pInfo[playerid][pPosY]);
+		MysqlUpdateFlo(query, "posZ", pInfo[playerid][pPosZ]);
+		MysqlUpdateFinish(query, "id", sqlid);
 	}
 	print("All Player Positsions Saved!");
 	return 1;
@@ -318,13 +317,10 @@ public UpdateAllPlayerPos()
 
 public UpdateAllPlayers()
 {
-	foreach(Player, i)
+	foreach(User, i)
 	{
-	    if( pInfo[i][pLoggedIn] )
-	    {
-	    	UpdatePlayer(i);
-			SaveSkills(i);
-		}
+	    UpdatePlayer(i);
+		SaveSkills(i);
 	}
 }
 
