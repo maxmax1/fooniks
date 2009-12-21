@@ -171,9 +171,10 @@ COMMAND:helista(playerid, params[])
 	if(!gPlayerPhone[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
 	if(gPlayerPhone[playerid][onCall] != CALL_NONE) return SendClientMessage(playerid, COLOR_RED, "Sul on juba kıne pooleli.");
 
-	new nr = -1, name[16], found = true;
-	if(sscanf(params, "d", nr)) found = false;
-	else if(sscanf(params, "s", name)) found = false;
+	new nr = -1, name[16], found;
+	
+	if(sscanf(params, "d", nr) == 0) found = true;
+	else if(sscanf(params, "s", name) == 0) found = true;
 	
 	if(!found) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /helista number/nimi");
 	
@@ -202,8 +203,8 @@ COMMAND:kontaktid(playerid, params[])
 	
 	new id, action[32], bool: found, simcard = gPlayerPhone[playerid][simCardIn];
 	
-	if(sscanf(params, "ds", id, action)) found = true;
-	else if(sscanf(params, "d", id)) found = true;	
+	if(sscanf(params, "ds", id, action) == 0) found = true;
+	else if(sscanf(params, "d", id) == 0) found = true;	
 	
 	if(!found || id < 0 || id > MAX_CONTACTS)
 	{
@@ -231,13 +232,14 @@ COMMAND:kontaktid(playerid, params[])
 				gPlayerCMemoryAdding[playerid] = 1;
 				gPlayerCMemorySlot[playerid] = id;
 				ShowPlayerDialog(playerid, DIALOG_PHONE_ADD, DIALOG_STYLE_INPUT, "Lisa Kontakt", "Nimi mida soovid salvestada:\n", "Edasi", "Katkesta");
+				return SendClientMessage(playerid, COLOR_PHONE, "Lisa kontakt.");
 			}
 		}
 		else if(!strcmp(action, "kustuta"))
 		{
 			if(!gContactMemoryUsed[simcard][id])
 			{			
-				SendClientMessage(playerid, COLOR_PHONE, "See kirje ei sisalda sisaldab kontakti.");
+				SendClientMessage(playerid, COLOR_PHONE, "See kirje ei sisalda kontakti.");
 			}
 			else 
 			{
@@ -268,7 +270,7 @@ COMMAND:valjuh22ldi(playerid, params[])
 	if(!gPlayerPhone[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
 	if(gPlayerPhone[playerid][onCall] != CALL_CONNECTED) return SendClientMessage(playerid, COLOR_RED, "Sul pole kıne pooleli.");
 
-	gPlayerPhone[playerid][onCall] = ((gPlayerPhone[playerid][onCall])?(false):(true));
+	gPlayerPhone[playerid][speakerOn] = ((gPlayerPhone[playerid][speakerOn])?(false):(true));
 	SendFormattedText(playerid, COLOR_PHONE, "Valjuh‰‰ldi %s.", ((gPlayerPhone[playerid][onCall])?("sees"):("v‰ljas")));
 	return 1;
 }
@@ -443,11 +445,31 @@ public PhoneTimer()
 			if(otherId < 0 || otherId > MAX_PLAYERS || !IsPlayerConnected(otherId) || gPlayerPhone[otherId][onCall] == CALL_NONE) EndCall(playerid, CALL_END_HANGUP_OT);
 			
 			gPlayerPhone[playerid][ringTime]--;
-			if(gPlayerPhone[playerid][ringTime] > 0)
+			
+			if(gPlayerPhone[playerid][ringTime] == 14 || gPlayerPhone[playerid][ringTime] == 9 || gPlayerPhone[playerid][ringTime] == 4)
 			{
-				// Play Music
 				SendClientMessage(playerid, COLOR_PHONE, "Su telefon heliseb... Kasuta /vasta vıi /katkesta.");
 				
+				new foundName = -1, simcard = gPlayerPhone[playerid][simCard];
+				for(new i; i < MAX_CONTACTS; i++)
+				{
+					if(!gContactMemoryUsed[simcard][i]) continue;
+					if(gContactMemoryNR[simcard][i] == gSimCards[gPlayerPhone[otherId][simCard]][sNumber]) foundName = i;
+				}
+				
+				if(foundName == -1)
+				{
+					SendFormattedText(playerid, COLOR_PHONE, "Helistab: %d", gSimCards[gPlayerPhone[otherId][simCard]][sNumber]);
+				}
+				else
+				{
+					SendFormattedText(playerid, COLOR_PHONE, "Helistab: %d", gContactMemoryName[simcard][foundName], gContactMemoryNR[simcard][foundName]);
+				}
+			}
+			
+			if(gPlayerPhone[playerid][ringTime] > 0)
+			{
+				// Play Music				
 				new Float: x, Float: y, Float: z;
 				GetPlayerPos(playerid, x, y, z);
 				
@@ -568,6 +590,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			else if(gPlayerCMemoryAdding[playerid] == 2)
 			{
 				gContactMemoryNR[gPlayerPhone[playerid][simCardIn]][gPlayerCMemorySlot[playerid]] = strval(inputtext);
+				gContactMemoryUsed[gPlayerPhone[playerid][simCardIn]][gPlayerCMemorySlot[playerid]] = true;
 				gPlayerCMemoryAdding[playerid] = 0;
 				gPlayerCMemorySlot[playerid] = 0;
 				return 1;
