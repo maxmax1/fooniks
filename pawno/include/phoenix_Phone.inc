@@ -22,10 +22,6 @@
 *    DEFINES
 */
 
-#if !defined rand
-rand(minnum = cellmin,maxnum = cellmax) return random(maxnum - minnum + 1) + minnum;
-#endif
-
 #define COLOR_PHONE 0xF0DC82AA
 
 #define MAX_CONTACTS 12
@@ -71,6 +67,9 @@ enum phoneInf
 };
 new gPlayerPhone[MAX_PLAYERS][phoneInf];
 
+new ringDoneTime[MAX_PLAYERS];
+new ringDoneTimer[MAX_PLAYERS];
+
 enum simInf
 {
 	sNumber,
@@ -84,6 +83,10 @@ new
 	gContactMemoryName[MAX_SIMCARDS][MAX_CONTACTS][16], 
 	bool: gContactMemoryUsed[MAX_SIMCARDS][MAX_CONTACTS];
 
+new 
+	g_Phone_Has_OPT = -1,
+	g_Phone_Has_OPD = -1;
+
 /*
 *    FORWARDS
 */
@@ -93,7 +96,10 @@ forward ActivateSimCard(playerid, selectedCard, other);
 forward PlayerCallNumber(playerid, number);
 forward EndCall(playerid, reason);
 forward PhoneTimer();
+forward PlayerPhoneRing(playerid, Float: x, Float: y, Float: z);
 
+forward ph_Phone_OnGameModeInit();
+forward Phone_OnPlayerDisconnect(playerid);
 forward ph_Phone_OnPlayerText(playerid, text[]);
 
 /*
@@ -101,10 +107,8 @@ forward ph_Phone_OnPlayerText(playerid, text[]);
 */
 
 stock GenerateRandomNumber(company)
-{
-	new number[12];	
-	format(number, 12, "5%d%d", company, rand(100000, 999999));
-	return strval(number);
+{	
+	return 50000000 + (company*1000000) + random(999999);
 }
 
 stock FindNumberFromContactname(simcard, namestr[])
@@ -130,6 +134,29 @@ stock findPlayerFromNumber(number)
 /*
 *    COMMANDS
 */
+
+COMMAND:myphone(playerid, params[])
+{
+	gPlayerPhone[playerid][hasPhone] = true;
+	GiveSimCard(playerid, 3);
+	return 1;
+}
+
+COMMAND:telefon(playerid, params[])
+{
+	if(!gPlayerPhone[playerid][hasPhone]) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
+	
+	new nr, company;
+	if(gPlayerPhone[playerid][simCardIn])
+	{
+		nr = gSimCards[gPlayerPhone[playerid][simCard]][sNumber];
+		company = gSimCards[gPlayerPhone[playerid][simCard]][companyId];
+	}
+	new string[128];
+	format(string, 128, "~b~Telefon~n~~g~Number: ~w~%d~n~~g~Firma: ~w~%d", nr, company);	
+	SmallHelpDrawShow(playerid, string, 10000);	
+	return 1;
+}
 
 COMMAND:helista(playerid, params[])
 {
@@ -167,7 +194,7 @@ COMMAND:vasta(playerid, params[])
 	
 	SendClientMessage(playerid, COLOR_PHONE, "...ühendatud... (( saad nüüd telefoni rääkida ))");
 	SendClientMessage(otherId, COLOR_PHONE, "...ühendatud... (( saad nüüd telefoni rääkida ))");
-	
+	SetPlayerSpecialAction(playerid, SPECIAL_ACTION_USECELLPHONE);
 	return 1;
 }
 
@@ -199,11 +226,13 @@ public GiveSimCard(playerid, company)
 	new freeId = Itter_Free(SimCard);
 	if(freeId == -1) return 1;
 	
-	gSimCards[freeId][sNumber] = GenerateRandomNumber(company);
+	new nr = GenerateRandomNumber(company);
+	gSimCards[freeId][sNumber] = nr;
+	
 	gSimCards[freeId][companyId] = company;
 	Itter_Add(SimCard, freeId);
 	
-	giveItem(playerid, ITEM_SIMCARD, freeId);	
+	giveItem(playerid, ITEM_SIMCARD, freeId);
 	return 0;
 }
 
@@ -211,16 +240,19 @@ public ActivateSimCard(playerid, selectedCard, other)
 {
 	if(!gPlayerPhone[playerid][hasPhone])
 	{
-		return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni kuhu seda simkaarti panna!");
+		SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni kuhu seda simkaarti panna!");
+		return 0;
 	}
-	if(gPlayerPhone[playerid][simCard] == selectedCard)
+	if(gPlayerPhone[playerid][simCardIn] && gPlayerPhone[playerid][simCard] == selectedCard)
 	{
-		return SendClientMessage(playerid, COLOR_YELLOW, "See simkaart on juba su telefonis.");
+		SendClientMessage(playerid, COLOR_YELLOW, "See simkaart on juba su telefonis.");
+		return 0;
 	}
 	
 	gPlayerPhone[playerid][simCard] = selectedCard;
 	gPlayerPhone[playerid][simCardIn] = true;
-	return SendClientMessage(playerid, COLOR_YELLOW, "Paigaldasid oma telefoni edukalt SIM-Kaardi.");
+	SendClientMessage(playerid, COLOR_YELLOW, "Paigaldasid oma telefoni edukalt SIM-Kaardi.");
+	return 1;
 }
 
 public PlayerCallNumber(playerid, number)
@@ -228,7 +260,7 @@ public PlayerCallNumber(playerid, number)
 	SetPlayerSpecialAction(playerid, SPECIAL_ACTION_USECELLPHONE);
 	gPlayerPhone[playerid][callPlayer] = findPlayerFromNumber(number);
 	gPlayerPhone[playerid][onCall] = CALL_PLAYER;
-	gPlayerPhone[playerid][ringTime] = 5;
+	gPlayerPhone[playerid][ringTime] = 20;
 	
 	if(gPlayerPhone[playerid][callPlayer] != -1)
 	{
@@ -238,7 +270,7 @@ public PlayerCallNumber(playerid, number)
 		{
 			gPlayerPhone[otherId][callPlayer] = playerid;
 			gPlayerPhone[otherId][onCall] = CALL_RECIVE;
-			gPlayerPhone[otherId][ringTime] = 5;
+			gPlayerPhone[otherId][ringTime] = 20;
 		}
 		else
 		{
@@ -325,7 +357,35 @@ public PhoneTimer()
 			if(gPlayerPhone[playerid][ringTime] > 0)
 			{
 				// Play Music
-			}			
+				SendClientMessage(playerid, COLOR_PHONE, "Su telefon heliseb... Kasuta /vasta või /katkesta.");
+				
+				new Float: x, Float: y, Float: z;
+				GetPlayerPos(playerid, x, y, z);
+				
+				if(ringDoneTime[playerid] == 0)
+				{
+					ringDoneTimer[playerid] = SetTimerEx("PlayerPhoneRing", 50, 1, "ifff", playerid, x, y, z);
+				}
+			}		
+			else if(gPlayerPhone[playerid][ringTime] == -1) PlayerPlaySound(playerid, 1139, 0.0, 0.0, 0.0);
+		}
+	}
+}
+
+public PlayerPhoneRing(playerid, Float: x, Float: y, Float: z)
+{
+	ringDoneTime[playerid]++;
+	if(ringDoneTime[playerid] > 5)
+	{
+		KillTimer(ringDoneTimer[playerid]);
+		ringDoneTime[playerid] = 0;
+	}
+	
+	foreach(User, i)
+	{
+		if(IsPlayerInRangeOfPoint(i, 5.0, x, y, z))
+		{
+			PlayerPlaySound(i, 1138, 0.0, 0.0, 0.0);
 		}
 	}
 }
@@ -333,6 +393,36 @@ public PhoneTimer()
 /*
 *    ALS
 */
+
+public OnGameModeInit()
+{
+	SetTimer("PhoneTimer", 1013, 1);
+	
+	g_Phone_Has_OPT = funcidx("ph_Phone_OnPlayerText");
+	g_Phone_Has_OPD = funcidx("Phone_OnPlayerDisconnect");
+	
+	if (funcidx("ph_Phone_OnGameModeInit") != -1)
+    {
+        return CallLocalFunction("ph_Phone_OnGameModeInit", "");
+    }
+    return 1;
+}
+
+public OnPlayerDisconnect(playerid)
+{
+	gPlayerPhone[playerid][hasPhone] = false;
+	gPlayerPhone[playerid][simCardIn] = false;
+	gPlayerPhone[playerid][simCard] = -1;
+	gPlayerPhone[playerid][onCall] = CALL_NONE;
+	gPlayerPhone[playerid][callPlayer] = -1;
+	
+    if (g_Phone_Has_OPD != -1)
+    {
+        return CallLocalFunction("Phone_OnPlayerDisconnect", "i", playerid);
+    }
+    return 1;
+}
+
 
 public OnPlayerText(playerid, text[])
 {
@@ -353,14 +443,27 @@ public OnPlayerText(playerid, text[])
 		
 		return 0;
 	}
-
 	
-    if (funcidx("ph_Phone_OnPlayerText") != -1)
+    if (g_Phone_Has_OPT != -1)
     {
         return CallLocalFunction("ph_Phone_OnPlayerText", "is", playerid, text);
     }
     return 1;
 }
+
+#if defined _ALS_OnGameModeInit
+    #undef OnGameModeInit
+#else
+    #define _ALS_OnGameModeInit
+#endif
+#define OnGameModeInit ph_Phone_OnGameModeInit
+
+#if defined _ALS_OnPlayerDisconnect
+    #undef OnPlayerDisconnect
+#else
+    #define _ALS_OnPlayerDisconnect
+#endif
+#define OnPlayerDisconnect Phone_OnPlayerDisconnect
 
 #if defined _ALS_OnPlayerText
     #undef OnPlayerText

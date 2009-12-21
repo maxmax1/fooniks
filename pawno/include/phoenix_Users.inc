@@ -367,7 +367,7 @@ public ClearPlayerData(playerid)
 	
 	
 	#if defined _phoenix_JobSystem_included
-  gMyJob[playerid] = 0;
+		gMyJob[playerid] = 0;
 	#endif
 	
 	#if defined MAX_GARBAGE_POINTS
