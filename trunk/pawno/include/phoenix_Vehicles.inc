@@ -52,7 +52,7 @@ enum vInf
 	Float: vPosX,
 	Float: vPosY,
 	Float: vPosZ,
-	vSpeed,
+	Float: vSpeed,
 	Float: vSpeedX,
 	Float: vSpeedY,
 	Float: vSpeedZ,
@@ -66,8 +66,8 @@ enum vInf
 	
 	vDeaths,
 	Float: vHealth,
-	SpeedLimit = 300,
-	Float:Turbo
+	Float: AccelerationBase,
+	Float: Prediction
 };
 new Vehicles[700][vInf];
 
@@ -105,6 +105,8 @@ stock VehPosd(vId)
 *    FORWARDS
 */
 
+forward SetVehicleAcceleration(vehicleid);
+forward PredictSpeed(vehicleid, Float:currentspeed);
 forward SetVehicleSpeed(vehicleid, Float:speed);
 forward LoadAllVehiclesStart();
 forward LoadAllVehiclesFinish();
@@ -315,6 +317,7 @@ public OnDriverEnterVehicle(playerid)
 		if(Freeze) TogglePlayerControllable(playerid, 0);
 	}
 	ShowSpeedo(playerid);
+	SetVehicleAcceleration(GetPlayerVehicleID(playerid));
 	return 1;
 }
 
@@ -324,7 +327,7 @@ public OnDriverExitVehicle(playerid)
 	new vId = GetVehicleSqlId(GetPlayerVehicleID(playerid));
 	if(vId == -1) return 0;
 	
-	Vehicles[vId][vSpeed] = 0;
+	Vehicles[vId][vSpeed] = 0.0;
 	InfoBarTimer[playerid] = -1;
 	
 	if(pInfo[playerid][pSeatbelt] > 0)
@@ -351,7 +354,7 @@ public OnSpeedoUpdate(playerid)
 		new vId = GetVehicleSqlId(GetPlayerVehicleID(playerid));
 		if(vId == -1) return 0;
 
-		new oSpeed = Vehicles[vId][vSpeed], Float: oHealth = Vehicles[vId][vHealth];
+		new Float:oSpeed = Vehicles[vId][vSpeed], Float: oHealth = Vehicles[vId][vHealth];
 		new Float: oX = Vehicles[vId][vSpeedX], Float: oY = Vehicles[vId][vSpeedY], Float: oZ = Vehicles[vId][vSpeedZ];
 
 		GetVehicleHealth(Vehicles[vId][vSampId], Vehicles[vId][vHealth]);		
@@ -361,37 +364,28 @@ public OnSpeedoUpdate(playerid)
 
 		GetVehicleVelocity(Vehicles[vId][vSampId], Vehicles[vId][vSpeedX], Vehicles[vId][vSpeedY], Vehicles[vId][vSpeedZ]);
 		new Float: distance = floatabs(Vehicles[vId][vSpeedX]) + floatabs(Vehicles[vId][vSpeedY]) + floatabs(Vehicles[vId][vSpeedZ]);
-		Vehicles[vId][vSpeed] = floatround(distance * UNITS_IN_KM);
-		new showspeed = Vehicles[vId][vSpeed];
-		if( showspeed > Vehicles[vId][SpeedLimit] && Vehicles[vId][SpeedLimit] != 0 ) showspeed = Vehicles[vId][SpeedLimit];
+		Vehicles[vId][vSpeed] = distance * UNITS_IN_KM;
+		new showspeed = floatround(Vehicles[vId][vSpeed]);
 		format(string,sizeof(string),"   ~y~~h~~h~%s~n~   ~y~Kiirus: ~r~%03ikm/h  ~y~Korras: ~r~%i%%",CarData[Vehicles[vId][vModel]-400][CarName], showspeed, hProtsenti);
 		TextDrawSetString(InfoBar[playerid], string);
-		
+
+
+//////////////CRASH
 		if((oSpeed - Vehicles[vId][vSpeed]) > 70 && (oHealth - Vehicles[vId][vHealth]) > 100)
 		{
          	new Float:damage = oHealth - Vehicles[vId][vHealth];
 			CrashCar(vId, Vehicles[vId][vSampId], damage, oX, oY, oZ);
 			Vehicles[vId][vSpeed] = 0;
 		}
-		if( Vehicles[vId][Turbo] != 0 )
-		{
-		    new keys, updown, leftright;
-		    GetPlayerKeys(playerid, keys, updown, leftright);
-		    if( keys == 8 && leftright == 0 && showspeed > 10)
-		    {
-		        new Float:Percent, Float:turbo;
-				turbo = Vehicles[vId][Turbo];
-				
-				Percent = showspeed/100;
-				if( showspeed > 200 ) SetVehicleSpeed(Vehicles[vId][vSampId], showspeed+Percent*turbo/4);
-				if( showspeed > 100 ) SetVehicleSpeed(Vehicles[vId][vSampId], showspeed+Percent*turbo/2);
-			}
-		}
-		if( Vehicles[vId][vSpeed] > Vehicles[vId][SpeedLimit] && Vehicles[vId][SpeedLimit] != 0 )
-		{
-			SetVehicleSpeed(Vehicles[vId][vSampId], Vehicles[vId][SpeedLimit] -1);
-		}
 
+////////////SPEED MANAGEMENT
+		new keys, updown, leftright;
+		GetPlayerKeys(playerid, keys, updown, leftright);
+		if( keys == 8 && leftright == 0 )
+		{
+
+		}
+///////////////////////////////
 	}
 	else
 	{
@@ -402,23 +396,40 @@ public OnSpeedoUpdate(playerid)
 }
 public SetVehicleSpeed(vehicleid, Float:speed)
 {
-			new Float:SpeedX, Float:SpeedY, Float:SpeedZ, Float:RatioX, Float:RatioY, Float:newX, Float: newY, NegativeX, NegativeY;
+	new Float:SpeedX, Float:SpeedY, Float:SpeedZ, Float:RatioX, Float:RatioY, Float:newX, Float: newY, NegativeX, NegativeY;
 
-			GetVehicleVelocity(vehicleid, SpeedX, SpeedY, SpeedZ);
+	GetVehicleVelocity(vehicleid, SpeedX, SpeedY, SpeedZ);
 
-			if(SpeedX < 0) NegativeX = true;
-			if(SpeedY < 0) NegativeY = true;
-			if(NegativeX) SpeedX = SpeedX*-1;
-			if(NegativeY) SpeedY = SpeedY*-1;
-			RatioX = SpeedX/( SpeedX + SpeedY );
-			RatioY = SpeedY/( SpeedX + SpeedY );
-			new Float:SU_Speed = floatdiv(speed, UNITS_IN_KM);
-			newX = floatmul(SU_Speed ,RatioX);
-			newY = floatmul(SU_Speed ,RatioY);
-			if(NegativeX) newX = newX*-1;
-			if(NegativeY) newY = newY*-1;
+	if(SpeedX < 0) NegativeX = true;
+	if(SpeedY < 0) NegativeY = true;
+	if(NegativeX) SpeedX = SpeedX*-1;
+	if(NegativeY) SpeedY = SpeedY*-1;
+	RatioX = SpeedX/( SpeedX + SpeedY );
+	RatioY = SpeedY/( SpeedX + SpeedY );
+	new Float:SU_Speed = floatdiv(speed, UNITS_IN_KM);
+	newX = floatmul(SU_Speed ,RatioX);
+	newY = floatmul(SU_Speed ,RatioY);
+	if(NegativeX) newX = newX*-1;
+	if(NegativeY) newY = newY*-1;
 
-			SetVehicleVelocity(vehicleid, newX, newY, SpeedZ);
+	SetVehicleVelocity(vehicleid, newX, newY, SpeedZ);
+
+	return 1;
+}
+public SetVehicleAcceleration(vehicleid)
+{
+    new vId = GetVehicleSqlId(vehicleid);
+	new Float:ZeroToHundred = CarData[GetVehicleModel(vehicleid)-400][Acceleration];
+    Vehicles[vId][AccelerationBase] = (27.78 / ZeroToHundred) * 2;
+    return 1;
+}
+public PredictSpeed(vehicleid, Float:currentspeed)
+{
+	new vId = GetVehicleSqlId(vehicleid);
+	new Float:AccelBase = Vehicles[vId][AccelerationBase];
+	Vehicles[vId][Prediction] = currentspeed + ((( AccelBase * ( currentspeed * 0.04 ))* ( SPEEDO_UPDATE / 1000 )) / UNITS_IN_KM );
+
+	return 1;
 }
 public AddCarToSQL(model, Float:posX, Float:posY, Float:posZ, Float:angle)
 {
