@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"182"
+#define SCRIPT_REVISION 		"183"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -49,6 +49,18 @@
 */
 #define VEHICLE_LOAD_THREAD     1
 #define FETCH_UINFO_THREAD      2
+
+/* DialogIDs */
+#define DIALOG_LOGIN 2009
+#define DIALOG_PLAYER 2010
+#define DIALOG_SENDES 2011
+#define DIALOG_BANPLAYER 2012
+#define DIALOG_KICKPLAYER 2013
+#define DIALOG_ADMINCP 2014
+#define DIALOG_AACTION 2015
+#define DIALOG_TELEPORTS 2016
+//#define DIALOG_POCKETS 2017 // Reserved
+#define DIALOG_PHONE_ADD 2018
 
 /*
 *    INCLUDES
@@ -109,17 +121,6 @@ public RegisterAllSmartNPC()
 
 #define STRING_LENGHT 256
 #define MAX_TELEPORTS 10
-
-/* DialogIDs */
-#define DIALOG_LOGIN 2009
-#define DIALOG_PLAYER 2010
-#define DIALOG_SENDES 2011
-#define DIALOG_BANPLAYER 2012
-#define DIALOG_KICKPLAYER 2013
-#define DIALOG_ADMINCP 2014
-#define DIALOG_AACTION 2015
-#define DIALOG_TELEPORTS 2016
-//#define DIALOG_POCKETS 2017 // Reserved
 
 #define NPC_IGOR 1
 
@@ -1380,19 +1381,6 @@ COMMAND:int(playerid, params[])
 	}
 	
 	setToInt(playerid, id);
-	return 1;
-}
-
-COMMAND:pasad(playerid, params[])
-{
-	new id, id2;
-	if(sscanf(params, "ii", id, id2))
-	{
-		SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /pasad [id] [id2]");
-		return 1;
-	}
-	
-	CallRemoteFunction("poolPostition", "iii", playerid, id, id2);
 	return 1;
 }
 

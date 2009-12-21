@@ -63,12 +63,17 @@ enum phoneInf
 	// Callin stuff.
 	onCall,
 	ringTime,
-	callPlayer	
+	callPlayer,
+	bool: speakerOn
 };
 new gPlayerPhone[MAX_PLAYERS][phoneInf];
 
 new ringDoneTime[MAX_PLAYERS];
 new ringDoneTimer[MAX_PLAYERS];
+
+new 
+	gPlayerCMemoryAdding[MAX_PLAYERS],
+	gPlayerCMemorySlot[MAX_PLAYERS];	
 
 enum simInf
 {
@@ -85,7 +90,8 @@ new
 
 new 
 	g_Phone_Has_OPT = -1,
-	g_Phone_Has_OPD = -1;
+	g_Phone_Has_OPD = -1,
+	g_Phone_Has_ODR = -1;
 
 /*
 *    FORWARDS
@@ -101,6 +107,7 @@ forward PlayerPhoneRing(playerid, Float: x, Float: y, Float: z);
 forward ph_Phone_OnGameModeInit();
 forward Phone_OnPlayerDisconnect(playerid);
 forward ph_Phone_OnPlayerText(playerid, text[]);
+forward Phone_OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]);
 
 /*
 *    STOCKS
@@ -153,7 +160,7 @@ COMMAND:telefon(playerid, params[])
 		company = gSimCards[gPlayerPhone[playerid][simCard]][companyId];
 	}
 	new string[128];
-	format(string, 128, "~b~Telefon~n~~g~Number: ~w~%d~n~~g~Firma: ~w~%d", nr, company);	
+	format(string, 128, "~b~Telefon~n~~g~Number: ~w~%d~n~~g~Firma: ~w~%d~n~/helista /vasta /katkesta /kontaktid /valjuh‰‰ldi", nr, company);	
 	SmallHelpDrawShow(playerid, string, 10000);	
 	return 1;
 }
@@ -162,6 +169,7 @@ COMMAND:helista(playerid, params[])
 {
 	if(!gPlayerPhone[playerid][hasPhone]) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
 	if(!gPlayerPhone[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
+	if(gPlayerPhone[playerid][onCall] != CALL_NONE) return SendClientMessage(playerid, COLOR_RED, "Sul on juba kıne pooleli.");
 
 	new nr = -1, name[16], found = true;
 	if(sscanf(params, "d", nr)) found = false;
@@ -171,14 +179,97 @@ COMMAND:helista(playerid, params[])
 	
 	if(nr != -1)
 	{
-		PlayerCallNumber(playerid, nr);
+		SendFormattedText(playerid, COLOR_PHONE, "helistan %d...", nr);
+		PlayerCallNumber(playerid, nr);		
 	}
 	else
 	{
 		nr = FindNumberFromContactname(gPlayerPhone[playerid][simCard], name);
-		if(nr != -1) PlayerCallNumber(playerid, nr);
-		else SendClientMessage(playerid, COLOR_YELLOW, "Sellist nime pole sinu kontaktide hulgas.");
+		if(nr != -1)
+		{
+			SendFormattedText(playerid, COLOR_PHONE, "helistan %s - %d...", name, nr);
+			PlayerCallNumber(playerid, nr);
+		}
+		else SendClientMessage(playerid, COLOR_PHONE, "Sellist nime pole sinu kontaktide hulgas.");
 	}	
+	return 1;
+}
+
+COMMAND:kontaktid(playerid, params[])
+{
+	if(!gPlayerPhone[playerid][hasPhone]) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
+	if(!gPlayerPhone[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
+	
+	new id, action[32], bool: found, simcard = gPlayerPhone[playerid][simCardIn];
+	
+	if(sscanf(params, "ds", id, action)) found = true;
+	else if(sscanf(params, "d", id)) found = true;	
+	
+	if(!found || id < 0 || id > MAX_CONTACTS)
+	{
+		SendClientMessage(playerid, COLOR_PHONE, "*** Kontaktid");
+		for(new i; i < MAX_CONTACTS; i++)
+		{
+			if(!gContactMemoryUsed[simcard][i]) continue;
+			SendFormattedText(playerid, COLOR_PHONE, "%d) %s - %d.", i, gContactMemoryName[simcard][i], gContactMemoryNR[simcard][i]);
+		}
+		SendClientMessage(playerid, COLOR_PHONE, "*** Vaata ka: /kontaktid id tegevus");
+		return 1;
+	}
+	else
+	{
+		SendClientMessage(playerid, COLOR_PHONE, "*** Kontakt");
+	
+		if(!strcmp(action, "salvesta"))
+		{
+			if(gContactMemoryUsed[simcard][id])
+			{			
+				SendClientMessage(playerid, COLOR_PHONE, "See kirje juba sisaldab kontakti. Pead selle ennem kustutama.");
+			}
+			else 
+			{
+				gPlayerCMemoryAdding[playerid] = 1;
+				gPlayerCMemorySlot[playerid] = id;
+				ShowPlayerDialog(playerid, DIALOG_PHONE_ADD, DIALOG_STYLE_INPUT, "Lisa Kontakt", "Nimi mida soovid salvestada:\n", "Edasi", "Katkesta");
+			}
+		}
+		else if(!strcmp(action, "kustuta"))
+		{
+			if(!gContactMemoryUsed[simcard][id])
+			{			
+				SendClientMessage(playerid, COLOR_PHONE, "See kirje ei sisalda sisaldab kontakti.");
+			}
+			else 
+			{
+				SendFormattedText(playerid, COLOR_PHONE, "%d) %s - %d.", id, gContactMemoryName[simcard][id], gContactMemoryNR[simcard][id]);
+				SendClientMessage(playerid, COLOR_PHONE, "Kustutatud...");
+				
+				format(gContactMemoryName[simcard][id], 2, "_");
+				gContactMemoryNR[simcard][id] = 0;
+				gContactMemoryUsed[simcard][id] = false;
+			}
+		}
+		else
+		{	
+			if(!gContactMemoryUsed[simcard][id])
+			{
+				SendClientMessage(playerid, COLOR_PHONE, "See kirje ei sisalda kontakti. Saad siia nime salvestada kasutades /kontaktid id salvesta.");
+			}
+			else SendFormattedText(playerid, COLOR_PHONE, "%d) %s - %d.", id, gContactMemoryName[simcard][id], gContactMemoryNR[simcard][id]);
+		}
+		SendClientMessage(playerid, COLOR_PHONE, "*** Veel tegevusi: uuri salvesta kustuta");
+	}
+	return 1;
+}
+
+COMMAND:valjuh22ldi(playerid, params[])
+{
+	if(!gPlayerPhone[playerid][hasPhone]) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
+	if(!gPlayerPhone[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
+	if(gPlayerPhone[playerid][onCall] != CALL_CONNECTED) return SendClientMessage(playerid, COLOR_RED, "Sul pole kıne pooleli.");
+
+	gPlayerPhone[playerid][onCall] = ((gPlayerPhone[playerid][onCall])?(false):(true));
+	SendFormattedText(playerid, COLOR_PHONE, "Valjuh‰‰ldi %s.", ((gPlayerPhone[playerid][onCall])?("sees"):("v‰ljas")));
 	return 1;
 }
 
@@ -277,8 +368,6 @@ public PlayerCallNumber(playerid, number)
 			EndCall(playerid, CALL_NUMBER_INUSE);
 		}
 	}
-	
-	SendClientMessage(playerid, COLOR_PHONE, "kutsub...");
 }
 
 public EndCall(playerid, reason)
@@ -400,6 +489,7 @@ public OnGameModeInit()
 	
 	g_Phone_Has_OPT = funcidx("ph_Phone_OnPlayerText");
 	g_Phone_Has_OPD = funcidx("Phone_OnPlayerDisconnect");
+	g_Phone_Has_ODR = funcidx("Phone_OnDialogResponse");
 	
 	if (funcidx("ph_Phone_OnGameModeInit") != -1)
     {
@@ -412,6 +502,7 @@ public OnPlayerDisconnect(playerid)
 {
 	gPlayerPhone[playerid][hasPhone] = false;
 	gPlayerPhone[playerid][simCardIn] = false;
+	gPlayerPhone[playerid][speakerOn] = false;
 	gPlayerPhone[playerid][simCard] = -1;
 	gPlayerPhone[playerid][onCall] = CALL_NONE;
 	gPlayerPhone[playerid][callPlayer] = -1;
@@ -436,9 +527,18 @@ public OnPlayerText(playerid, text[])
 		else
 		{
 			new string[128];
+			new delay = ( strlen(text) * 150 ) + 2000;
+			
 			format(string, 128, "TELEFON %s:  %s", pInfo[playerid][pCharName], text);
-			SendClientMessage(playerid, COLOR_PHONE, string);
-			SendClientMessage(otherId, COLOR_PHONE, string);
+			SetPlayerChatBubble(playerid, string, COLOR_PHONE, 10.0, delay);
+			SCMTAInPlayerRadius(playerid, 10, COLOR_PHONE, string);
+			
+			if(gPlayerPhone[otherId][speakerOn])
+			{
+				SetPlayerChatBubble(playerid, string, COLOR_PHONE, 10.0, delay);
+				SCMTAInPlayerRadius(playerid, 10, COLOR_PHONE, string);
+			}
+			else SendClientMessage(otherId, COLOR_PHONE, string);
 		}		
 		
 		return 0;
@@ -447,6 +547,37 @@ public OnPlayerText(playerid, text[])
     if (g_Phone_Has_OPT != -1)
     {
         return CallLocalFunction("ph_Phone_OnPlayerText", "is", playerid, text);
+    }
+    return 1;
+}
+
+public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
+{
+	if(dialogid == DIALOG_PHONE_ADD)
+	{
+		if(response == 0) return 1;
+		else
+		{
+			if(gPlayerCMemoryAdding[playerid] == 1)
+			{
+				format(gContactMemoryName[gPlayerPhone[playerid][simCardIn]][gPlayerCMemorySlot[playerid]], 16, "%s", inputtext);
+				gPlayerCMemoryAdding[playerid]++;				
+				ShowPlayerDialog(playerid, DIALOG_PHONE_ADD, DIALOG_STYLE_INPUT, "Lisa Kontakt", "Number mida soovid salvestada:\n", "Salvesta", "Katkesta");
+				return 1;
+			}
+			else if(gPlayerCMemoryAdding[playerid] == 2)
+			{
+				gContactMemoryNR[gPlayerPhone[playerid][simCardIn]][gPlayerCMemorySlot[playerid]] = strval(inputtext);
+				gPlayerCMemoryAdding[playerid] = 0;
+				gPlayerCMemorySlot[playerid] = 0;
+				return 1;
+			}
+		}
+	}
+
+    if (g_Phone_Has_ODR != -1)
+    {
+        return CallLocalFunction("Phone_OnDialogResponse", "iiiis", playerid, dialogid, response, listitem, inputtext);
     }
     return 1;
 }
@@ -471,3 +602,10 @@ public OnPlayerText(playerid, text[])
     #define _ALS_OnPlayerText
 #endif
 #define OnPlayerText ph_Phone_OnPlayerText
+
+#if defined _ALS_OnDialogResponse
+    #undef OnDialogResponse
+#else
+    #define _ALS_OnDialogResponse
+#endif
+#define OnDialogResponse Phone_OnDialogResponse
