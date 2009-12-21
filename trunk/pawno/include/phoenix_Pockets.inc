@@ -131,7 +131,8 @@ public UseItem(playerid, pocketid)
 	
 	if(ret > 0) // Remove item after usage.
 	{
-	
+		Pockets[playerid][pocketid][pType] = 0;
+		Pockets[playerid][pocketid][pAmount] = 0;
 	}
 	
 	return 0;
