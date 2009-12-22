@@ -49,8 +49,8 @@
 #define CALL_END_HANGUP_ME	6
 #define CALL_END_HANGUP_OT	7
 
-#define ITEM_SIMCARD 13
-#define ITEM_PHONE 	14
+#define ITEM_SIMCARD 		13
+#define ITEM_PHONE 			14
 
 /*
 *    GLOBALS

@@ -30,7 +30,7 @@
 
 enum itemInf
 {
-	itemName[16],
+	itemName[18],
 	itemMin,
 	itemMax,
 	itemCallBack[16],
@@ -40,18 +40,18 @@ enum itemInf
 new Items[MAX_ITEMS][itemInf] = 
 {
 	{"tühjus", 0, 0, "UseEmpty",  0, -1},	
-	{"püstol", 0, 500, "setWep", 22, -1},
-	{"püstolV", 0, 500, "setWep", 23, 1},
-	{"DEAGLE", 0, 500, "setWep", 24, 1},
-	{"Shotgun", 0, 500, "setWep", 25, -1},
-	{"ShotgunS", 0, 500, "setWep", 26, 4},
-	{"ShotgunSP", 0, 500, "setWep", 27, 4},
-	{"MICROUZI", 0, 500, "setWep", 28, -1},
+	{"Püstol", 0, 500, "setWep", 22, -1},
+	{"Summutatud Püstol", 0, 500, "setWep", 23, 1},
+	{"Deagle", 0, 500, "setWep", 24, 1},
+	{"Pump", 0, 500, "setWep", 25, -1},
+	{"Kaheraudne", 0, 500, "setWep", 26, 4},
+	{"M3", 0, 500, "setWep", 27, 4},
+	{"UZI", 0, 500, "setWep", 28, -1},
 	{"MP5", 0, 500, "setWep", 29, 8},
 	{"AK47", 0, 500, "setWep", 30, -1},
 	{"M4", 0, 500, "setWep", 31, 10},	
-	{"CRifle", 0, 500, "setWep", 33, -1},	
-	{"SRifle", 0, 500, "setWep", 34, 11},
+	{"Vintpüss", 0, 500, "setWep", 33, -1},	
+	{"Snaiper", 0, 500, "setWep", 34, 11},
 	{"SIM-Kaart", 0, 0, "ActivateSimCard", 0, -1},
 	{"Telefon", 0, 0, "forward_Phone", 0, -1}
 };
@@ -104,6 +104,15 @@ stock clearPockets(playerid)
 	return 0;
 }
 
+stock getItemByWeapon(weaponid)
+{
+	for(new i; i < MAX_ITEMS; i++)
+	{
+		if(Items[i][itemOtherId] == weaponid) return i;
+	}
+	return -1;
+}
+
 // Forwards
 
 forward BuildPockets(playerid, string[], len);
@@ -111,6 +120,9 @@ forward UseItem(playerid, pocketid);
 forward giveItem(playerid, itemId, amount);
 forward RemAmount(playerid, itemId, amount);
 forward giveItemOtherStuff(playerid, itemid, amount);
+forward LoadPockets(playerid);
+forward SavePockets(playerid);
+forward SavePocket(playerid, pocketId);
 
 // Publics
 
@@ -195,6 +207,81 @@ public RemAmount(playerid, itemId, amount)
 	{
 		Pockets[playerid][foundSlot][pType] = 0;
 	}
+	return 1;
+}
+
+public LoadPockets(playerid)
+{
+	if(pInfo[playerid][pSqlId] == 0) return 0;
+	clearPockets(playerid);
+	
+	new query[128];
+	format(query, 128, "SELECT * FROM %sPockets WHERE cid = '%d'", MYSQL_PREFIX, pInfo[playerid][pSqlId]);
+	mysql_query(query);
+	
+	if(mysql_store_result() == 1)
+	{
+		if(mysql_num_rows() > 0)
+		{
+			new Field[64], str[12];
+			mysql_fetch_row(Field);	
+			
+			for(new i = 0; i < MAX_POCKETS; i++)
+			{
+				format(str, 12, "pType_%d", i);
+				mysql_fetch_field_row(Field, str);				
+				new itemId = strval(Field);
+				
+				format(str, 12, "pData_%d", i);
+				mysql_fetch_field_row(Field, str);
+				new amount = strval(Field);				
+				SetTimerEx("giveItem", 5000, 0, "iii", playerid, itemId, amount);
+			}			
+			mysql_free_result();
+			OnPlayerLogin(playerid);
+			return 1;			
+		}
+		else
+		{
+			mysql_free_result();
+			format(query, 128, "INSERT INTO %sPockets(id, cid) VALUES(NULL, '%d');", MYSQL_PREFIX, pInfo[playerid][pSqlId]);
+			mysql_query(query);
+			SetTimerEx("LoadPockets", 500, 0, "i", playerid);
+			return 1;
+		}
+	}
+	
+	SendClientMessage(playerid, COLOR_RED, LANG_POCKETSERROR);
+	Kick(playerid);
+	return 1;
+}
+
+public SavePockets(playerid)
+{
+	for(new i = 0; i < MAX_POCKETS; i++)
+	{
+		SavePocket(playerid, i);
+	}
+}
+
+public SavePocket(playerid, pocketId)
+{	
+	if(!pInfo[playerid][pLoggedIn]) return 0;
+	if(pInfo[playerid][pSqlId] == 0) return 0;
+	if(pocketId < 0 || pocketId >= MAX_POCKETS) return 0;
+
+	new sqlid = pInfo[playerid][pSqlId];
+	new query[MAX_QUERY], table[32], str[12];
+	format(table, 32, "%sPockets", MYSQL_PREFIX);
+	
+	MysqlUpdateBuild(query, table);
+	
+	format(str, 12, "pType_%d", pocketId);
+	MysqlUpdateInt(query, str, Pockets[playerid][pocketId][pType]);
+	format(str, 12, "pData_%d", pocketId);
+	MysqlUpdateInt(query, str, Pockets[playerid][pocketId][pAmount]);
+	
+	MysqlUpdateFinish(query, "cid", sqlid);	
 	return 1;
 }
 
