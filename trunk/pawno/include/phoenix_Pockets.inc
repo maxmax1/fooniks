@@ -24,8 +24,8 @@
 	#endinput
 #endif
 
-#define MAX_ITEMS 14
-#define MAX_POCKETS 10
+#define MAX_ITEMS 15
+#define MAX_POCKETS 16
 #define DIALOG_POCKETS 2017
 
 enum itemInf
@@ -52,7 +52,8 @@ new Items[MAX_ITEMS][itemInf] =
 	{"M4", 0, 500, "setWep", 31, 10},	
 	{"CRifle", 0, 500, "setWep", 33, -1},	
 	{"SRifle", 0, 500, "setWep", 34, 11},
-	{"SIMKAART", 0, 0, "ActivateSimCard", 0, -1}
+	{"SIM-Kaart", 0, 0, "ActivateSimCard", 0, -1},
+	{"Telefon", 0, 0, "forward_Phone", 0, -1}
 };
 
 enum pockInf
@@ -91,6 +92,16 @@ stock getSlotByItem(playerid, item)
 		if(Pockets[playerid][i][pType] == item) return i;
 	}
 	return -1;
+}
+
+stock clearPockets(playerid)
+{
+	for(new i; i < MAX_POCKETS; i++)
+	{
+		Pockets[playerid][i][pType] = 0;
+		Pockets[playerid][i][pAmount] = 0;
+	}
+	return 0;
 }
 
 // Forwards
