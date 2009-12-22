@@ -51,16 +51,16 @@ enum sInf
 new Skills[MAX_SKILLS][sInf] = 
 {
 	{"PISTOL", 1000, 1.5},
-	{"PISTOL_VAIKNE", 1250, 1.5},
-	{"DEAGLE", 1500, 1.5},
-	{"SHOTGUN", 2000, 1.5},
-	{"SAWNOFF_SHOTGUN", 2100, 1.5},
-	{"SPAS12_SHOTGUN", 1800, 1.5},
-	{"MICRO_UZI", 3000, 1.5},
-	{"MP5", 1800, 1.5},
-	{"AK47", 3500, 1.5},
-	{"M4", 2000, 1.5},
-	{"SNIPERRIFLE", 5000, 1.5},
+	{"PISTOL_VAIKNE", 1250, 2.0},
+	{"DEAGLE", 1500, 4.0},
+	{"SHOTGUN", 2000, 2.8},
+	{"SAWNOFF_SHOTGUN", 2100, 3.5},
+	{"SPAS12_SHOTGUN", 1800, 3.5},
+	{"MICRO_UZI", 3000, 6.0},
+	{"MP5", 1800, 2.5},
+	{"AK47", 3500, 3.0},
+	{"M4", 2000, 3.0},
+	{"SNIPERRIFLE", 5000, 5.0},
 	{"ATHLETE", 7500, 1.8}
 };
 new SkillDelay[MAX_PLAYERS][MAX_SKILLS];
@@ -218,7 +218,8 @@ public GetLevel(skillId, xP, &xpNeeded)
 	{
 		temp = floatround(temp*Skills[skillId][sRatio]);
 		xpNeeded = floatround(temp * i);
-		if(xP < xpNeeded) return i;
+		if(i == 0 && xP < xpNeeded) return i;
+		else if(xP < xpNeeded && xP > floatround(temp * i-1)) return i;
 	}	
 	xpNeeded = 999;
 	return 99;
