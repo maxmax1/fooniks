@@ -65,6 +65,10 @@ new Skills[MAX_SKILLS][sInf] =
 };
 new SkillDelay[MAX_PLAYERS][MAX_SKILLS];
 
+new pSkill[MAX_PLAYERS][MAX_SKILLS];
+new pSkillLevel[MAX_PLAYERS][MAX_SKILLS];
+new pSkillXPNeeded[MAX_PLAYERS][MAX_SKILLS];
+
 /*
 *    FORWARDS
 */
@@ -100,7 +104,7 @@ public LoadSkills(playerid)
 			{
 				format(str, 12, "skill_%d", i);
 				mysql_fetch_field_row(Field, str);
-				pInfo[playerid][pSkill][i]	= strval(Field);
+				pSkill[playerid][i]	= strval(Field);
 			}			
 			mysql_free_result();	
 
@@ -139,7 +143,7 @@ public SaveSkills(playerid)
 	for(new i = 0; i < MAX_SKILLS; i++)
 	{
 		format(str, 12, "skill_%d", i);
-		MysqlUpdateInt(query, str, pInfo[playerid][pSkill][i]);
+		MysqlUpdateInt(query, str, pSkill[playerid][i]);
 	}
 	
 	MysqlUpdateFinish(query, "cid", sqlid);	
@@ -148,9 +152,8 @@ public SaveSkills(playerid)
 
 public XpAdd(playerid, skillId, amount)
 {
-	new xpNeeded;
-	new oldLevel = GetLevel(skillId, pInfo[playerid][pSkill][skillId], xpNeeded);
-	pInfo[playerid][pSkill][skillId] += amount;
+	pSkillLevel[playerid][skillId] = GetLevel(skillId, pSkill[playerid][skillId], pSkillXPNeeded[playerid][skillId]);
+	pSkill[playerid][skillId] += amount;
 	
 	if( skillId <= 10 )
 	{
@@ -172,9 +175,9 @@ public XpAdd(playerid, skillId, amount)
 		}
 	}	
 	
-	if(pInfo[playerid][pSkill][skillId] >= xpNeeded)
+	if(pSkill[playerid][skillId] >= pSkillXPNeeded[playerid][skillId])
 	{	
-		OnLevelUp(playerid, skillId, (oldLevel+1), 1);
+		OnLevelUp(playerid, skillId, (pSkillLevel[playerid][skillId]+1), 1);
 	}
 	
 	//UpdateSkillDraw(playerid, skillId, amount);
@@ -185,9 +188,8 @@ public SetSkills(playerid)
 {
 	for(new i = 0; i < MAX_SKILLS; i++)
 	{
-		new xpNeeded;
-		new level = GetLevel(i, pInfo[playerid][pSkill][i], xpNeeded);
-		OnLevelUp(playerid, i, level, 0);
+		pSkillLevel[playerid][i] = GetLevel(i, pSkill[playerid][i], pSkillXPNeeded[playerid][i]);
+		OnLevelUp(playerid, i, pSkillLevel[playerid][i], 0);
 	}
 }
 
@@ -197,7 +199,7 @@ public OnLevelUp(playerid, skillId, newLevel, showMsg)
 	{
 		//	LevelAP
 		new string[128];
-		format(string, 128, "Sinu %s oskus on nüüd %d. Oled kogunud %d kogemuspunkti.", Skills[skillId][sName], newLevel, pInfo[playerid][pSkill][skillId]);
+		format(string, 128, "Sinu %s oskus on nüüd %d. Oled kogunud %d kogemuspunkti.", Skills[skillId][sName], newLevel, pSkill[playerid][skillId]);
 		SendClientMessage(playerid, COLOR_GREEN, string);
 	}
 	

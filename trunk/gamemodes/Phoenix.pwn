@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"185"
+#define SCRIPT_REVISION 		"186"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -83,6 +83,9 @@
 #include <phoenix_Status>
 #include <phoenix_Pockets>
 
+#include <phoenix_NewsPaper>
+#include <phoenix_NewCallbacks>
+
 #include <phoenix_JobSystem>
 #include <phoenix_StreetCleaner>
 
@@ -96,7 +99,6 @@
 #include <phoenix_ProgressBar>
 #include <phoenix_Interiors>
 #include <phoenix_HelpDraw>
-#include <phoenix_NewsPaper>
 #include <phoenix_AddSystem>
 #include <phoenix_Resting>
 //#include <AntiShiit>
@@ -346,6 +348,11 @@ stock GetCharacterName(charSqlId)
 	}
 	format(retStr, 32, "Pole");
 	return retStr;
+}
+
+PreloadAnimLib(playerid, animlib[])
+{
+	ApplyAnimation(playerid,animlib,"null",0.0,0,0,0,0,0);
 }
 
 /*
@@ -656,6 +663,21 @@ public OnPlayerSpawn(playerid)
 	TogglePlayerClock(playerid, 1);
 	
 	pInfo[playerid][pControllable] = 1;
+	
+	PreloadAnimLib(playerid,"BOMBER");
+	PreloadAnimLib(playerid,"RAPPING");
+	PreloadAnimLib(playerid,"SHOP");
+	PreloadAnimLib(playerid,"BEACH");
+	PreloadAnimLib(playerid,"SMOKING");
+	PreloadAnimLib(playerid,"FOOD");
+	PreloadAnimLib(playerid,"ON_LOOKERS");
+	PreloadAnimLib(playerid,"DEALER");
+	PreloadAnimLib(playerid,"CRACK");
+	PreloadAnimLib(playerid,"CARRY");
+	PreloadAnimLib(playerid,"COP_AMBIENT");
+	PreloadAnimLib(playerid,"PARK");
+	PreloadAnimLib(playerid,"INT_HOUSE");
+	PreloadAnimLib(playerid,"FOOD");
 	
 	return 1;
 }
@@ -1164,9 +1186,7 @@ COMMAND:oskus(playerid, params[])
 	
 	for(new i = 0; i < MAX_SKILLS; i++)
 	{
-		new xpNeeded;
-		new level = GetLevel(i, pInfo[playerid][pSkill][i], xpNeeded);
-		format(string, 128, "Oskus: %s, Level: %d, XP: %d / %d", Skills[i][sName], level, pInfo[playerid][pSkill][i], xpNeeded);
+		format(string, 128, "Oskus: %s, Level: %d, XP: %d / %d", Skills[i][sName], pSkillLevel[playerid][i], pSkill[playerid][i], pSkillXPNeeded[playerid][i]);
 		SendClientMessage(playerid, COLOR_YELLOW, string);
 	}
 	return 1;
@@ -1696,6 +1716,60 @@ public OnPlayerCallEnd(playerid, cellTime)
 	SendFormattedText(playerid, COLOR_PHONE, "Kõne kokkuvõte: Kestis: %d:%d, hind: %d", cellMin, cellTime, cellCost);
 	GivePlayerMoneyNew(playerid, -(cellCost));	
 	return 1;
+}
+
+public OnPlayerShootPlayer(playerid, weaponid, targetid)
+{
+	new mod = 0;
+	if(weaponid == 22 || weaponid == 23 || weaponid == 28 || weaponid == 29) mod = 3;
+	else if(weaponid == 24 || weaponid >= 28 && weaponid <= 32) mod = -2;
+	else if(weaponid == 33 || weaponid == 34) mod = -4;
+	else if(weaponid == 26 || weaponid == 27) mod = -3;
+	
+	if(random(7+mod) == 1)
+	{
+		SendEmote(targetid, "saab kuulitabamuse ning kukub kokku.");
+		ApplyAnimation(targetid, "CRACK", "crckdeth1", 1.0, 0, 0, 0, 0, 3000);
+		return 1;
+	}
+	else
+	{
+		SendEmote(targetid, "saab kuulitabamuse.");
+	}
+	return 0;
+}
+
+public OnPlayerHitPlayer(playerid, weaponid, targetid)
+{
+	new mod = 0;
+	if(pSkillLevel[playerid][SKILL_ATHLETE] == 0) return 1;
+	
+	if(pRest[playerid] > 75.0)
+	{
+		mod = pSkillLevel[playerid][SKILL_ATHLETE];
+	}
+	else if(pRest[playerid] > 50.0)
+	{
+		mod = floatround(pSkillLevel[playerid][SKILL_ATHLETE]/2);
+	}
+	else if(pRest[playerid] > 25.0)
+	{
+		mod = floatround(pSkillLevel[playerid][SKILL_ATHLETE]/4);
+	}
+	
+	if(mod != 0)
+	{
+		new Float: pH;
+		GetPlayerHealth(targetid, pH);
+		if(pH > 15)
+		{
+			pH -= float(mod);
+			SetPlayerHealth(targetid, pH);
+			
+			pRest[playerid] -= (pRest[playerid] > 25)?25.0:pRest[playerid];
+		}
+	}
+	return 0;
 }
 
 /*

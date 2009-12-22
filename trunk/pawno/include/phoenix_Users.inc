@@ -57,7 +57,6 @@ enum pInf
 	
 	SelectedPlayer,
 	npcId,
-	pSkill[MAX_SKILLS+1],
 	pSkillTimer,
 	pSeatbelt,
 	
