@@ -124,13 +124,7 @@ new JobAds[ADDED_JADS][jAddInf] =
 	
 };
 
-new PlayerKey[MAX_PLAYERS][4];
 new addSel[MAX_PLAYERS];
-
-/*
-*    HAS
-*/
-new gPaperHas_OPU;
 
 /*
 *    FORWARDS
@@ -138,7 +132,6 @@ new gPaperHas_OPU;
 
 forward ShowNewsPaper(playerid, paperid);
 forward RedrawJobAds(playerid, tdID);
-forward OnPlayerKeys(playerid, pressedkey);
 forward HideNewsPaper(playerid, page);
 forward CreatePaperDraw(paperid);
 forward LoadNewsPapers();
@@ -273,25 +266,6 @@ public RedrawJobAds(playerid, tdID)
 		format(string, 256, "%s~n~%s", string, temp);
 	}
 	TextDrawSetStringEx(NewsDraw[tdID][Text3], string);
-}
-
-public OnPlayerKeys(playerid, pressedkey)
-{
-	if(paperActive[playerid] && currentPage[playerid] == 2)
-	{
-		if(pressedkey == 16)
-		{
-			addSel[playerid]--;
-			addSel[playerid] = (addSel[playerid]<0)?0:addSel[playerid];
-			RedrawJobAds(playerid, paperDrawActive[playerid]);
-		}
-		else if(pressedkey == 32)
-		{
-			addSel[playerid]++;
-			addSel[playerid] = (addSel[playerid]>=ADDED_JADS)?ADDED_JADS-1:addSel[playerid];
-			RedrawJobAds(playerid, paperDrawActive[playerid]);
-		}		
-	}
 }
 
 public HideNewsPaper(playerid, page)
@@ -518,8 +492,6 @@ public OnGameModeInit()
 	}
 	
 	LoadNewsPapers();
-	
-	gPaperHas_OPU = funcidx("NP_OnPlayerUpdate");
 	
     if (funcidx("NewsPaper_OnGameModeInit") != -1)
     {
@@ -767,44 +739,6 @@ public OnPlayerText(playerid, text[])
     return 1;
 }
 
-public OnPlayerUpdate(playerid)
-{
-	new keys, updown, leftright;
-	GetPlayerKeys(playerid, keys, updown, leftright);
-	
-	if(updown == KEY_UP && PlayerKey[playerid][0] == 0)
-	{
-		OnPlayerKeys(playerid, 16); // KEY_UP
-		PlayerKey[playerid][0] = true;
-	}
-	else if(updown == KEY_DOWN && PlayerKey[playerid][1] == 0)
-	{
-		OnPlayerKeys(playerid, 32); // KEY_DOWN
-    	PlayerKey[playerid][1] = true;
-	}
-	else if(leftright == KEY_LEFT && PlayerKey[playerid][2] == 0)
-	{
-		OnPlayerKeys(playerid, 64); // KEY_LEFT
-    	PlayerKey[playerid][2] = true;
-	}
-	else if(leftright == KEY_RIGHT && PlayerKey[playerid][3] == 0)
-	{
-		OnPlayerKeys(playerid, 128); // KEY_RIGHT
-    	PlayerKey[playerid][3] = true;
-	}
-	
-	if(updown != KEY_UP) PlayerKey[playerid][0] = false;
-	if(updown != KEY_DOWN) PlayerKey[playerid][1] = false;
-	if(leftright != KEY_LEFT) PlayerKey[playerid][2] = false;
-	if(leftright != KEY_RIGHT) PlayerKey[playerid][3] = false;
-	
-    if (gPaperHas_OPU != -1)
-    {
-        return CallLocalFunction("NP_OnPlayerUpdate", "i", playerid);
-    }	
-	return 1;
-}
-
 #if defined _ALS_OnGameModeInit
     #undef OnGameModeInit
 #else
@@ -839,10 +773,3 @@ public OnPlayerUpdate(playerid)
     #define _ALS_OnPlayerText
 #endif
 #define OnPlayerText NP_OnPlayerText
-
-#if defined _ALS_OnPlayerUpdate
-    #undef OnPlayerUpdate
-#else
-    #define _ALS_OnPlayerUpdate
-#endif
-#define OnPlayerUpdate NP_OnPlayerUpdate

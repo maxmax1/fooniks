@@ -181,7 +181,7 @@ public RestChange()
 		{
 			if( pResting[playerid] )
 			{
-				new Float: Rem = 1.0, xpNeeded;
+				new Float: Rem = 1.0;
 				
 				if(pRestingAt[playerid] != -1)
 				{
@@ -189,20 +189,14 @@ public RestChange()
 					if(RestPositions[pRestingAt[playerid]][restType] == REST_LAY) Rem = 5.0;
 				}
 				
-				new level = GetLevel(SKILL_ATHLETE, pInfo[playerid][pSkill][SKILL_ATHLETE], xpNeeded);
-				if(level > 10) Rem = 1.0 + (level / 25);
+				if(pSkillLevel[playerid][SKILL_ATHLETE] > 10) Rem = 1.0 + (pSkillLevel[playerid][SKILL_ATHLETE] / 25);
 				
 				pRest[playerid] += Rem;
 				XpAdd(playerid, SKILL_ATHLETE, 25);
 			}
 			else
 			{
-				new Float: Rem = 5.0, xpNeeded;
-				new level = GetLevel(SKILL_ATHLETE, pInfo[playerid][pSkill][SKILL_ATHLETE], xpNeeded);
-				if(level > 10) Rem = 5.0 - (level / 25);
-				
-				if(!IsPlayerInAnyVehicle(playerid)) pRest[playerid] -= Rem;
-				else  pRest[playerid] += 1.0;
+				if(IsPlayerInAnyVehicle(playerid)) pRest[playerid] += 1.0;
 			}
 			if(pRest[playerid] < 0.0) pRest[playerid] = 0.0;
 			if(pRest[playerid] > 100.0) pRest[playerid] = 100.0;
@@ -226,6 +220,12 @@ COMMAND:puhka(playerid, params[])
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_YELLOW, "Sa istud juba!");
 	Rest(playerid);
+	return 1;
+}
+
+COMMAND:puhkakiirelt(playerid, params[])
+{
+	pRest[playerid] = 100.0;
 	return 1;
 }
 
