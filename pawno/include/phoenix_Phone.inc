@@ -24,6 +24,8 @@
 
 #define COLOR_PHONE 0xF0DC82AA
 
+#define PHONE_COST 2
+
 #define MAX_CONTACTS 12
 
 #define MAX_SIMCARDS 300
@@ -48,6 +50,7 @@
 #define CALL_END_HANGUP_OT	7
 
 #define ITEM_SIMCARD 13
+#define ITEM_PHONE 	14
 
 /*
 *    GLOBALS
@@ -56,15 +59,16 @@
 enum phoneInf
 {	
 	// Other Inf
-	bool: hasPhone,
 	bool: simCardIn,
 	simCard,	
 
 	// Callin stuff.
 	onCall,
 	ringTime,
+	callTime,
 	callPlayer,
-	bool: speakerOn
+	bool: speakerOn,
+	bool: isCaller,
 };
 new gPlayerPhone[MAX_PLAYERS][phoneInf];
 
@@ -99,10 +103,13 @@ new
 
 forward GiveSimCard(playerid, company);
 forward ActivateSimCard(playerid, selectedCard, other);
+forward Forward_Phone(playerid, selectedCard, other);
 forward PlayerCallNumber(playerid, number);
 forward EndCall(playerid, reason);
 forward PhoneTimer();
 forward PlayerPhoneRing(playerid, Float: x, Float: y, Float: z);
+
+forward OnPlayerCallEnd(playerid, cellTime);
 
 forward ph_Phone_OnGameModeInit();
 forward Phone_OnPlayerDisconnect(playerid);
@@ -132,7 +139,7 @@ stock findPlayerFromNumber(number)
 {
 	foreach(User, i)
 	{
-		if(!gPlayerPhone[i][hasPhone] || !gPlayerPhone[i][simCardIn] || gPlayerPhone[i][simCard] < 0 || gPlayerPhone[i][simCard] > MAX_SIMCARDS) continue;
+		if(getSlotByItem(i, ITEM_PHONE) == -1 || !gPlayerPhone[i][simCardIn] || gPlayerPhone[i][simCard] < 0 || gPlayerPhone[i][simCard] > MAX_SIMCARDS) continue;
 		if(gSimCards[gPlayerPhone[i][simCard]][sNumber] == number) return i;
 	}
 	return -1;
@@ -144,14 +151,14 @@ stock findPlayerFromNumber(number)
 
 COMMAND:myphone(playerid, params[])
 {
-	gPlayerPhone[playerid][hasPhone] = true;
+	giveItem(playerid, ITEM_PHONE, 1);
 	GiveSimCard(playerid, 3);
 	return 1;
 }
 
 COMMAND:telefon(playerid, params[])
 {
-	if(!gPlayerPhone[playerid][hasPhone]) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
+	if(getSlotByItem(playerid, ITEM_PHONE) == -1) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
 	
 	new nr, company;
 	if(gPlayerPhone[playerid][simCardIn])
@@ -167,7 +174,7 @@ COMMAND:telefon(playerid, params[])
 
 COMMAND:helista(playerid, params[])
 {
-	if(!gPlayerPhone[playerid][hasPhone]) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
+	if(getSlotByItem(playerid, ITEM_PHONE) == -1) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
 	if(!gPlayerPhone[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
 	if(gPlayerPhone[playerid][onCall] != CALL_NONE) return SendClientMessage(playerid, COLOR_RED, "Sul on juba kõne pooleli.");
 
@@ -198,7 +205,7 @@ COMMAND:helista(playerid, params[])
 
 COMMAND:kontaktid(playerid, params[])
 {
-	if(!gPlayerPhone[playerid][hasPhone]) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
+	if(getSlotByItem(playerid, ITEM_PHONE) == -1) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
 	if(!gPlayerPhone[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
 	
 	new id, action[32], bool: found, simcard = gPlayerPhone[playerid][simCardIn];
@@ -266,7 +273,7 @@ COMMAND:kontaktid(playerid, params[])
 
 COMMAND:valjuh22ldi(playerid, params[])
 {
-	if(!gPlayerPhone[playerid][hasPhone]) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
+	if(getSlotByItem(playerid, ITEM_PHONE) == -1) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
 	if(!gPlayerPhone[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
 	if(gPlayerPhone[playerid][onCall] != CALL_CONNECTED) return SendClientMessage(playerid, COLOR_RED, "Sul pole kõne pooleli.");
 
@@ -277,7 +284,7 @@ COMMAND:valjuh22ldi(playerid, params[])
 
 COMMAND:vasta(playerid, params[])
 {
-	if(!gPlayerPhone[playerid][hasPhone]) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
+	if(getSlotByItem(playerid, ITEM_PHONE) == -1) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
 	if(!gPlayerPhone[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
 	if(gPlayerPhone[playerid][onCall] != CALL_RECIVE) return SendClientMessage(playerid, COLOR_RED, "Keegi ei helista sulle!");
 	
@@ -293,7 +300,7 @@ COMMAND:vasta(playerid, params[])
 
 COMMAND:katkesta(playerid, params[])
 {
-	if(!gPlayerPhone[playerid][hasPhone]) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
+	if(getSlotByItem(playerid, ITEM_PHONE) == -1) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
 	if(!gPlayerPhone[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
 	
 	if(gPlayerPhone[playerid][onCall] == CALL_RECIVE)
@@ -331,7 +338,7 @@ public GiveSimCard(playerid, company)
 
 public ActivateSimCard(playerid, selectedCard, other)
 {
-	if(!gPlayerPhone[playerid][hasPhone])
+	if(getSlotByItem(playerid, ITEM_PHONE) == -1)
 	{
 		SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni kuhu seda simkaarti panna!");
 		return 0;
@@ -348,12 +355,19 @@ public ActivateSimCard(playerid, selectedCard, other)
 	return 1;
 }
 
+public Forward_Phone(playerid, selectedCard, other)
+{
+	cmd_telefon(playerid, "");
+	return 0;
+}
+
 public PlayerCallNumber(playerid, number)
 {
 	SetPlayerSpecialAction(playerid, SPECIAL_ACTION_USECELLPHONE);
 	gPlayerPhone[playerid][callPlayer] = findPlayerFromNumber(number);
 	gPlayerPhone[playerid][onCall] = CALL_PLAYER;
 	gPlayerPhone[playerid][ringTime] = 20;
+	gPlayerPhone[playerid][isCaller] = true;
 	
 	if(gPlayerPhone[playerid][callPlayer] != -1)
 	{
@@ -374,9 +388,15 @@ public PlayerCallNumber(playerid, number)
 
 public EndCall(playerid, reason)
 {	
+	if(gPlayerPhone[playerid][isCaller] && gPlayerPhone[playerid][callTime] > 0)
+	{
+		OnPlayerCallEnd(playerid, gPlayerPhone[playerid][callTime]);
+	}
+
 	gPlayerPhone[playerid][callPlayer] = -1;
 	gPlayerPhone[playerid][onCall] = CALL_NONE;
 	gPlayerPhone[playerid][ringTime] = 0;
+	gPlayerPhone[playerid][isCaller] = false;
 	
 	if(reason == CALL_END_WRONG_NR)
 	{
@@ -433,6 +453,7 @@ public PhoneTimer()
 		}
 		else if(gPlayerPhone[playerid][onCall] == CALL_CONNECTED)
 		{
+			gPlayerPhone[playerid][callTime]++;
 			new otherId = gPlayerPhone[playerid][callPlayer];			
 			if(otherId < 0 || otherId > MAX_PLAYERS || !IsPlayerConnected(otherId) || gPlayerPhone[otherId][onCall] == CALL_NONE)
 			{
@@ -522,7 +543,6 @@ public OnGameModeInit()
 
 public OnPlayerDisconnect(playerid)
 {
-	gPlayerPhone[playerid][hasPhone] = false;
 	gPlayerPhone[playerid][simCardIn] = false;
 	gPlayerPhone[playerid][speakerOn] = false;
 	gPlayerPhone[playerid][simCard] = -1;

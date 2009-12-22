@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"184"
+#define SCRIPT_REVISION 		"185"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -75,12 +75,13 @@
 #include <stuff> 	 		 // some Stuff Needed EveryWhere
 #include <playerlist> 		 // close Players List
 #include <smart_npc_samp> 	 // SmartNPC
-#include <streamer> 	 // SmartNPC
+#include <streamer> 	 	 // SmartNPC
 
 #include <phoenix_Core>
 #include <phoenix_RealcarData>
 #include <phoenix_Money>
 #include <phoenix_Status>
+#include <phoenix_Pockets>
 
 #include <phoenix_JobSystem>
 #include <phoenix_StreetCleaner>
@@ -94,7 +95,6 @@
 #include <phoenix_Anims>
 #include <phoenix_ProgressBar>
 #include <phoenix_Interiors>
-#include <phoenix_Pockets>
 #include <phoenix_HelpDraw>
 #include <phoenix_NewsPaper>
 #include <phoenix_AddSystem>
@@ -1681,6 +1681,20 @@ public OnPlayerLogout(playerid)
 	UpdatePlayer(playerid);
 	SaveSkills(playerid);
 	Itter_Remove(User, playerid);
+	return 1;
+}
+
+public OnPlayerCallEnd(playerid, cellTime)
+{
+	new cellMin, cellCost;
+	while(cellTime > 59)
+	{
+		cellMin++;
+		cellTime -= 60;
+	}
+	cellCost = (cellMin>1)?(PHONE_COST*cellMin):PHONE_COST;	
+	SendFormattedText(playerid, COLOR_PHONE, "Kõne kokkuvõte: Kestis: %d:%d, hind: %d", cellMin, cellTime, cellCost);
+	GivePlayerMoneyNew(playerid, -(cellCost));	
 	return 1;
 }
 
