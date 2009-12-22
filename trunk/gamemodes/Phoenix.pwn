@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"186"
+#define SCRIPT_REVISION 		"187"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -81,7 +81,6 @@
 #include <phoenix_RealcarData>
 #include <phoenix_Money>
 #include <phoenix_Status>
-#include <phoenix_Pockets>
 
 #include <phoenix_NewsPaper>
 #include <phoenix_NewCallbacks>
@@ -91,6 +90,7 @@
 
 #include <phoenix_Users>
 #include <phoenix_Skills>
+#include <phoenix_Pockets>
 #include <phoenix_Vehicles>
 
 #include <phoenix_Phone>
@@ -1700,6 +1700,7 @@ public OnPlayerLogout(playerid)
 {
 	UpdatePlayer(playerid);
 	SaveSkills(playerid);
+	SavePockets(playerid);
 	Itter_Remove(User, playerid);
 	return 1;
 }
@@ -1725,6 +1726,13 @@ public OnPlayerShootPlayer(playerid, weaponid, targetid)
 	else if(weaponid == 24 || weaponid >= 28 && weaponid <= 32) mod = -2;
 	else if(weaponid == 33 || weaponid == 34) mod = -4;
 	else if(weaponid == 26 || weaponid == 27) mod = -3;
+	
+	new item = getItemByWeapon(weaponid);
+	if(item != -1)
+	{
+		new slot = getSlotByItem(playerid, item);
+		Pockets[playerid][slot][pAmount]--;
+	}
 	
 	if(random(7+mod) == 1)
 	{

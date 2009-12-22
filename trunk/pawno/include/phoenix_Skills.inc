@@ -109,8 +109,7 @@ public LoadSkills(playerid)
 			mysql_free_result();	
 
 			SetSkills(playerid);
-		
-			OnPlayerLogin(playerid);
+			LoadPockets(playerid);
 			return 1;			
 		}
 		else
