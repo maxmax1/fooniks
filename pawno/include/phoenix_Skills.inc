@@ -177,6 +177,7 @@ public XpAdd(playerid, skillId, amount)
 	if(pSkill[playerid][skillId] >= pSkillXPNeeded[playerid][skillId])
 	{	
 		OnLevelUp(playerid, skillId, (pSkillLevel[playerid][skillId]+1), 1);
+		pSkillLevel[playerid][skillId]++;
 	}
 	
 	//UpdateSkillDraw(playerid, skillId, amount);
@@ -214,12 +215,16 @@ public GetLevel(skillId, xP, &xpNeeded)
 		return 1;
 	}
 	new temp = Skills[skillId][sLevel];
-	for(new i = 0; i < 99; i++)
+	
+	xpNeeded = floatround(temp);
+	for(new i = 2; i < 99; i++)
 	{
-		temp = floatround(temp*Skills[skillId][sRatio]);
-		xpNeeded = floatround(temp * i);
-		if(i == 0 && xP < xpNeeded) return i;
-		else if(xP < xpNeeded && xP > floatround(temp * i-1)) return i;
+		temp = floatround(temp*Skills[skillId][sRatio]);		
+		if(xP < floatround(temp * i) && xP > xpNeeded)
+		{
+			xpNeeded = floatround(temp * i);
+			return i;
+		}
 	}	
 	xpNeeded = 999;
 	return 99;
