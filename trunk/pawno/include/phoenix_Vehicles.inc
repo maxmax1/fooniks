@@ -402,6 +402,7 @@ public OnSpeedoUpdate(playerid)
 }
 public SetVehicleSpeed(vehicleid, Float:speed)
 {
+	if( speed < 0 || speed > 999999 ) return 1;
 	new Float:SpeedX, Float:SpeedY, Float:SpeedZ, Float:RatioX, Float:RatioY, Float:newX, Float: newY, NegativeX, NegativeY;
 
 	GetVehicleVelocity(vehicleid, SpeedX, SpeedY, SpeedZ);
@@ -434,6 +435,7 @@ public SetVehicleAcceleration(vehicleid)
 }
 public PredictSpeed(vehicleid, Float:currentspeed)
 {
+    if( currentspeed < 0 || currentspeed > 999999 ) return 1;
 	new vId = GetVehicleSqlId(vehicleid);
 	new Float: AccelBase = Vehicles[vId][AccelerationBase];
 
