@@ -365,7 +365,8 @@ public OnSpeedoUpdate(playerid)
 		GetVehicleVelocity(Vehicles[vId][vSampId], Vehicles[vId][vSpeedX], Vehicles[vId][vSpeedY], Vehicles[vId][vSpeedZ]);
 		new Float: distance = floatabs(Vehicles[vId][vSpeedX]) + floatabs(Vehicles[vId][vSpeedY]) + floatabs(Vehicles[vId][vSpeedZ]);
 		Vehicles[vId][vSpeed] = distance * UNITS_IN_KM;
-		new showspeed = floatround(Vehicles[vId][vSpeed]);
+		new showspeed;
+		if( showspeed > Vehicles[vId][Prediction] ) showspeed = floatround(Vehicles[vId][Prediction]); else showspeed = floatround(Vehicles[vId][vSpeed]);
 		format(string,sizeof(string),"   ~y~~h~~h~%s~n~   ~y~Kiirus: ~r~%03ikm/h  ~y~Korras: ~r~%i%%",CarData[Vehicles[vId][vModel]-400][CarName], showspeed, hProtsenti);
 		TextDrawSetString(InfoBar[playerid], string);
 
@@ -381,11 +382,15 @@ public OnSpeedoUpdate(playerid)
 ////////////SPEED MANAGEMENT
 		new keys, updown, leftright;
 		GetPlayerKeys(playerid, keys, updown, leftright);
-		if( keys == 8 && leftright == 0 )
+		if( keys == 8 && leftright == 0 &&  Vehicles[vId][vSpeed] < Vehicles[vId][Prediction] )
 		{
-			//SetVehicleSpeed(Vehicles[vId][vSampId],Vehicles[vId][Prediction]);
+			SetVehicleSpeed(Vehicles[vId][vSampId],Vehicles[vId][Prediction]);
 		}
-		//PredictSpeed(Vehicles[vId][vSampId], Vehicles[vId][vSpeed]);
+		else if ( Vehicles[vId][vSpeed] > Vehicles[vId][Prediction] )
+		{
+            SetVehicleSpeed(Vehicles[vId][vSampId],Vehicles[vId][Prediction]);
+		}
+		PredictSpeed(Vehicles[vId][vSampId], Vehicles[vId][vSpeed]);
 ///////////////////////////////
 	}
 	else
@@ -423,18 +428,22 @@ public SetVehicleAcceleration(vehicleid)
 {
     new vId = GetVehicleSqlId(vehicleid);
 	new Float:ZeroToHundred = CarData[GetVehicleModel(vehicleid)-400][Acceleration];
-    Vehicles[vId][AccelerationBase] = (27.78 / ZeroToHundred) * 2;
+	new Float:AccelBaseRaw = floatdiv( 27.78, ZeroToHundred );
+    Vehicles[vId][AccelerationBase] = AccelBaseRaw * 2;
     return 1;
 }
 public PredictSpeed(vehicleid, Float:currentspeed)
 {
-	if( currentspeed < 0.001 ) currentspeed = 0.001;
 	new vId = GetVehicleSqlId(vehicleid);
 	new Float: AccelBase = Vehicles[vId][AccelerationBase];
-	new Float: SpeedoUpdate = floatdiv( SPEEDO_UPDATE, 1000 );
-	new Float: SomeMath = ( AccelBase - ( AccelBase * ( currentspeed * 0.04 ))) * SpeedoUpdate;
-	new Float: AccelInSAMPUnits = SomeMath * 27.78;
-	Vehicles[vId][Prediction] = currentspeed + AccelInSAMPUnits;
+
+	new Float:AccelDivider = floatpower( 2, currentspeed / 50 );
+	if( AccelDivider < 0 || AccelDivider > 10000 ) return 1;
+	new Float:UF_acceleration = floatdiv( AccelBase, AccelDivider);
+	if( UF_acceleration < 0 || UF_acceleration > 10000 ) return 1;
+	new Float:acceleration = UF_acceleration;
+	if( acceleration < 0 || acceleration > 10000 ) return 1;
+	Vehicles[vId][Prediction] = currentspeed + acceleration;
 	return 1;
 }
 public AddCarToSQL(model, Float:posX, Float:posY, Float:posZ, Float:angle)

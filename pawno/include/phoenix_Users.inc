@@ -376,7 +376,7 @@ public ClearPlayerData(playerid)
 	GarbagePlayer[playerid][numGPoints] = 0;
 	#endif
 	
-	clearPockets(playerid)
+	clearPockets(playerid);
 }
 
 // EOF
