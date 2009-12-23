@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"189"
+#define SCRIPT_REVISION 		"190"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -937,57 +937,65 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
     {
 		if(!IsPlayerInAnyVehicle(playerid))
 		{
-			if(SkillDelay[playerid][SKILL_PISTOL] == 0 && GetPlayerWeapon(playerid) == 22)
+			new weaponid = GetPlayerWeapon(playerid);
+			new item = getItemByWeapon(weaponid);
+			if(item != -1)
+			{
+				new slot = getSlotByItem(playerid, item);
+				Pockets[playerid][slot][pAmount]--;
+			}
+		
+			if(SkillDelay[playerid][SKILL_PISTOL] == 0 && weaponid == 22)
 			{
 				XpAdd(playerid, SKILL_PISTOL, 25);
 				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_PISTOL, 25);
 			}
-			if(SkillDelay[playerid][SKILL_PISTOLS] == 0 && GetPlayerWeapon(playerid) == 23)
+			if(SkillDelay[playerid][SKILL_PISTOLS] == 0 && weaponid == 23)
 			{
 				XpAdd(playerid, SKILL_PISTOLS, 25);
 				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_PISTOLS, 25);
 			}
-			if(SkillDelay[playerid][SKILL_DEAGLE] == 0 && GetPlayerWeapon(playerid) == 24)
+			if(SkillDelay[playerid][SKILL_DEAGLE] == 0 && weaponid == 24)
 			{
 				XpAdd(playerid, SKILL_DEAGLE, 25);
 				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_DEAGLE, 25);
 			}
-			if(SkillDelay[playerid][SKILL_SHOTGUN] == 0 && GetPlayerWeapon(playerid) == 25)
+			if(SkillDelay[playerid][SKILL_SHOTGUN] == 0 && weaponid == 25)
 			{
 				XpAdd(playerid, SKILL_SHOTGUN, 25);
 				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_SHOTGUN, 25);
 			}
-			if(SkillDelay[playerid][SKILL_SAWNOFF_SHOTGUN] == 0 && GetPlayerWeapon(playerid) == 26)
+			if(SkillDelay[playerid][SKILL_SAWNOFF_SHOTGUN] == 0 && weaponid == 26)
 			{
 				XpAdd(playerid, SKILL_SAWNOFF_SHOTGUN, 25);
 				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_SAWNOFF_SHOTGUN, 25);
 			}
-			if(SkillDelay[playerid][SKILL_SPAS12_SHOTGUN] == 0 && GetPlayerWeapon(playerid) == 27)
+			if(SkillDelay[playerid][SKILL_SPAS12_SHOTGUN] == 0 && weaponid == 27)
 			{
 				XpAdd(playerid, SKILL_SPAS12_SHOTGUN, 25);
 				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_SPAS12_SHOTGUN, 25);
 			}
-			if(SkillDelay[playerid][SKILL_MICRO_UZI] == 0 && GetPlayerWeapon(playerid) == 28)
+			if(SkillDelay[playerid][SKILL_MICRO_UZI] == 0 && weaponid == 28)
 			{
 				XpAdd(playerid, SKILL_MICRO_UZI, 25);
 				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_MICRO_UZI, 25);
 			}
-			if(SkillDelay[playerid][SKILL_MP5] == 0 && GetPlayerWeapon(playerid) == 29)
+			if(SkillDelay[playerid][SKILL_MP5] == 0 && weaponid == 29)
 			{
 				XpAdd(playerid, SKILL_MP5, 25);
 				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_MP5, 25);
 			}
-			if(SkillDelay[playerid][SKILL_AK47] == 0 && GetPlayerWeapon(playerid) == 30)
+			if(SkillDelay[playerid][SKILL_AK47] == 0 && weaponid == 30)
 			{
 				XpAdd(playerid, SKILL_AK47, 25);
 				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_AK47, 25);
 			}
-			if(SkillDelay[playerid][SKILL_M4] == 0 && GetPlayerWeapon(playerid) == 31)
+			if(SkillDelay[playerid][SKILL_M4] == 0 && weaponid == 31)
 			{
 				XpAdd(playerid, SKILL_M4, 25);
 				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_M4, 25);
 			}
-			if(SkillDelay[playerid][SKILL_SNIPERRIFLE] == 0 && GetPlayerWeapon(playerid) == 34)
+			if(SkillDelay[playerid][SKILL_SNIPERRIFLE] == 0 && weaponid == 34)
 			{
 				XpAdd(playerid, SKILL_SNIPERRIFLE, 25);
 				if( pInfo[playerid][pSkillTimer] == 0 ) pInfo[playerid][pSkillTimer] = SetTimerEx("XpAdd", 300, true, "iii", playerid, SKILL_SNIPERRIFLE, 25);
@@ -1726,13 +1734,6 @@ public OnPlayerShootPlayer(playerid, weaponid, targetid)
 	else if(weaponid == 24 || weaponid >= 28 && weaponid <= 32) mod = -2;
 	else if(weaponid == 33 || weaponid == 34) mod = -4;
 	else if(weaponid == 26 || weaponid == 27) mod = -3;
-	
-	new item = getItemByWeapon(weaponid);
-	if(item != -1)
-	{
-		new slot = getSlotByItem(playerid, item);
-		Pockets[playerid][slot][pAmount]--;
-	}
 	
 	if(random(7+mod) == 1)
 	{
