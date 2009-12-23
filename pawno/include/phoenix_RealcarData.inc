@@ -29,7 +29,7 @@ enum cData
 new CarData[][cData] =
 {
 	///Name         				0-100   	TopSpeed    	Strenght
-	{"Jeep Cheorokee", 				10.5, 		150, 			1000},
+	{"Jeep Cheorokee", 				20.5, 		150, 			1000},
 	{"Mercury Cougar", 				10.5, 		150, 			1000},
 	{"Camaro Iroc", 				10.5, 		150, 			1000},
 	{"Big Rig", 					10.5, 		150, 			1000},
@@ -151,7 +151,7 @@ new CarData[][cData] =
 	{"Bombardier Learjet 55", 		10.5, 		150, 			1000},
 	{"AV-8 Harrier Jump-Jet", 		10.5, 		150, 			1000},
 	{"Honda CBR 900 RR", 			10.5, 		150, 			1000},
-	{"Honda NSR 500 '01", 			10.5, 		150, 			1000},
+	{"Honda NSR 500 '01", 			1.5, 		150, 			1000},
 	{"Kawasaki KZ1000-P21", 		10.5, 		150, 			1000},
 	{"Chevrolet Cement Truck", 		10.5, 		150, 			1000},
 	{"Tow Truck '91", 				10.5, 		150, 			1000},
@@ -231,7 +231,7 @@ new CarData[][cData] =
 	{"Chevy Blazer Desert", 		10.5, 		150, 			1000},
 	{"Chevrolet El Camino '68", 	10.5, 		150, 			1000},
 	{"S.W.A.T. Van", 				10.5, 		150, 			1000},
-	{"Dodge Stealth '91", 			10.5, 		150, 			1000},
+	{"Dodge Stealth '91", 			4.0, 		150, 			1000},
 	{"Pontiac Trans AM", 			10.5, 		150, 			1000},
 	{"Dodge Dart", 					10.5, 		150, 			1000},
 	{"Dodge 100 Series", 			10.5, 		150, 			1000},
