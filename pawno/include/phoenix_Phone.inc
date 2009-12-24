@@ -626,8 +626,8 @@ public LoadContacts(sCard)
 	if(sCard < 0 || sCard >= MAX_SIMCARDS) return 0;
 	if(gSimCards[sCard][sCardSqlID] == 0) return 0;
 	
-	new string[64];
-	format(string, 64, "SELECT * FROM %sContacts WHERE sCard = '%d' ORDER BY id ASC LIMIT %d", MYSQL_PREFIX, gSimCards[sCard][sCardSqlID], MAX_CONTACTS-1);
+	new string[128];
+	format(string, 128, "SELECT * FROM %sContacts WHERE sCard = '%d' ORDER BY id ASC LIMIT %d", MYSQL_PREFIX, gSimCards[sCard][sCardSqlID], MAX_CONTACTS-1);
 	
 	mysql_query(string);
 	mysql_store_result();
