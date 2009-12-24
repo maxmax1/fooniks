@@ -62,7 +62,10 @@ enum pInf
 	
 	bool: AFK,
 	
-	pControllable
+	pControllable,
+	
+	bool: simCardIn,
+	simCard
 };
 new pInfo[MAX_PLAYERS][pInf];
 
@@ -245,6 +248,11 @@ public FetchCharacterInformationFinish(playerid)
 			mysql_fetch_field_row(Field, "playerCTime");
 			gMyContract[playerid] = strval(Field);
 			
+			mysql_fetch_field_row(Field, "simCardIn");
+			pInfo[playerid][simCardIn] = ((strval(Field)==1)?(true):(false));
+			mysql_fetch_field_row(Field, "simCard");
+			pInfo[playerid][simCard] = strval(Field);
+			
 			mysql_free_result();
 			LoadSkills(playerid);
 			kick = false;
@@ -290,6 +298,9 @@ public UpdatePlayer(playerid)
 	MysqlUpdateInt(query, "adminLevel", pInfo[playerid][pAdminLevel]);
 	MysqlUpdateInt(query, "playerJob", gMyJob[playerid]);
 	MysqlUpdateInt(query, "playerCTime", gMyContract[playerid]);
+	
+	MysqlUpdateInt(query, "simCardIn", ((pInfo[playerid][simCardIn])?(1):(0)));
+	MysqlUpdateInt(query, "simCard", pInfo[playerid][simCard]);
 	
 	MysqlUpdateFinish(query, "id", sqlid);
 
@@ -360,6 +371,9 @@ public ClearPlayerData(playerid)
 	pInfo[playerid][pSeatbelt] = 0;
 	
 	pInfo[playerid][pControllable] = 1;
+	
+	pInfo[playerid][simCardIn] = false;
+	pInfo[playerid][simCard] = -1;	
 	
 	#if defined _phoenix_Money_included
 	ResetPlayerMoneyNew(playerid);
