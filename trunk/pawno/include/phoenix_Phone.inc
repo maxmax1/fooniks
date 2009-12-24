@@ -23,12 +23,13 @@
 */
 
 #define COLOR_PHONE 0xF0DC82AA
+#define COLOR_PHONE_1 COLOR_GREEN
 
 #define PHONE_COST 2
 
 #define MAX_CONTACTS 12
 
-#define MAX_SIMCARDS 300
+#define MAX_SIMCARDS 500
 
 #define CALL_NONE 			0
 #define CALL_PLAYER 		1
@@ -58,17 +59,13 @@
 
 enum phoneInf
 {	
-	// Other Inf
-	bool: simCardIn,
-	simCard,	
-
 	// Callin stuff.
 	onCall,
 	ringTime,
 	callTime,
 	callPlayer,
 	bool: speakerOn,
-	bool: isCaller,
+	bool: isCaller
 };
 new gPlayerPhone[MAX_PLAYERS][phoneInf];
 
@@ -78,16 +75,19 @@ new ringDoneTimer[MAX_PLAYERS];
 new 
 	gPlayerCMemoryAdding[MAX_PLAYERS],
 	gPlayerCMemorySlot[MAX_PLAYERS];	
-
+	
 enum simInf
 {
 	sNumber,
-	companyId
+	companyId,
+	bool: sCardUsed,
+	sCardSqlID
 };
 new gSimCards[MAX_SIMCARDS][simInf];
 Itter_Create(SimCard, MAX_SIMCARDS);
 
 new 
+	gContactSqlId[MAX_SIMCARDS][MAX_CONTACTS],
 	gContactMemoryNR[MAX_SIMCARDS][MAX_CONTACTS],
 	gContactMemoryName[MAX_SIMCARDS][MAX_CONTACTS][16], 
 	bool: gContactMemoryUsed[MAX_SIMCARDS][MAX_CONTACTS];
@@ -101,13 +101,21 @@ new
 *    FORWARDS
 */
 
-forward GiveSimCard(playerid, company);
+forward AddSimCard(company, forceId, forceNum);
 forward ActivateSimCard(playerid, selectedCard, other);
 forward Forward_Phone(playerid, selectedCard, other);
 forward PlayerCallNumber(playerid, number);
 forward EndCall(playerid, reason);
 forward PhoneTimer();
 forward PlayerPhoneRing(playerid, Float: x, Float: y, Float: z);
+
+forward LoadSimCards();
+forward SaveSimCard(sCard);
+forward LoadContacts(sCard);
+forward SaveContact(sCard, contact);
+forward RegisterSimCard(sCard);
+forward RegisterContact(sCard, contact);
+forward DropContact(sCard, contact);
 
 forward OnPlayerCallEnd(playerid, cellTime);
 
@@ -139,8 +147,31 @@ stock findPlayerFromNumber(number)
 {
 	foreach(User, i)
 	{
-		if(getSlotByItem(i, ITEM_PHONE) == -1 || !gPlayerPhone[i][simCardIn] || gPlayerPhone[i][simCard] < 0 || gPlayerPhone[i][simCard] > MAX_SIMCARDS) continue;
-		if(gSimCards[gPlayerPhone[i][simCard]][sNumber] == number) return i;
+		new sim = findSimFromSqlid(pInfo[i][simCard]);	
+		if(getSlotByItem(i, ITEM_PHONE) == -1 || !pInfo[i][simCardIn] || sim < 0 || sim > MAX_SIMCARDS) continue;
+		if(gSimCards[sim][sNumber] == number) return i;
+	}
+	return -1;
+}
+
+stock IsNumberInUse(number)
+{
+	new string[128];
+	
+	format(string, 64, "SELECT * FROM %sSimCard WHERE sNumber = '%d'", MYSQL_PREFIX, number);
+	
+	mysql_query(string);
+	mysql_store_result();
+	
+	return (mysql_num_rows() > 0);
+}
+
+
+stock findSimFromSqlid(sqlid)
+{
+	for(new i; i < MAX_SIMCARDS; i++)
+	{
+		if(gSimCards[i][sCardSqlID] == sqlid) return i;
 	}
 	return -1;
 }
@@ -152,7 +183,11 @@ stock findPlayerFromNumber(number)
 COMMAND:myphone(playerid, params[])
 {
 	giveItem(playerid, ITEM_PHONE, 1);
-	GiveSimCard(playerid, 3);
+	new sCard = AddSimCard(3, -1, -1);
+	if(sCard != -1)
+	{
+		giveItem(playerid, ITEM_SIMCARD, sCard);
+	}	
 	return 1;
 }
 
@@ -160,14 +195,24 @@ COMMAND:telefon(playerid, params[])
 {
 	if(getSlotByItem(playerid, ITEM_PHONE) == -1) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
 	
-	new nr, company;
-	if(gPlayerPhone[playerid][simCardIn])
-	{
-		nr = gSimCards[gPlayerPhone[playerid][simCard]][sNumber];
-		company = gSimCards[gPlayerPhone[playerid][simCard]][companyId];
-	}
 	new string[128];
-	format(string, 128, "~b~Telefon~n~~g~Number: ~w~%d~n~~g~Firma: ~w~%d~n~/helista /vasta /katkesta /kontaktid /valjuhääldi", nr, company);	
+	
+	if(pInfo[playerid][simCardIn])
+	{	
+		new simcard = findSimFromSqlid(pInfo[playerid][simCard]);
+		if(simcard != -1)
+		{
+			new nr, company;
+			nr = gSimCards[simcard][sNumber];
+			company = gSimCards[simcard][companyId];
+			format(string, 128, "~b~Telefon~n~~g~Number: ~w~%d~n~~g~Firma: ~w~%d~n~/helista /vasta /katkesta /kontaktid /valjuhääldi", nr, company);
+		}
+	}
+	else
+	{
+		format(string, 128, "Su telefonis pole sim kaarti.");
+	}
+		
 	SmallHelpDrawShow(playerid, string, 10000);	
 	return 1;
 }
@@ -175,9 +220,9 @@ COMMAND:telefon(playerid, params[])
 COMMAND:helista(playerid, params[])
 {
 	if(getSlotByItem(playerid, ITEM_PHONE) == -1) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
-	if(!gPlayerPhone[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
+	if(!pInfo[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
 	if(gPlayerPhone[playerid][onCall] != CALL_NONE) return SendClientMessage(playerid, COLOR_RED, "Sul on juba kõne pooleli.");
-
+	
 	new nr = -1, name[16], found;
 	
 	if(sscanf(params, "d", nr) == 0) found = true;
@@ -192,7 +237,10 @@ COMMAND:helista(playerid, params[])
 	}
 	else
 	{
-		nr = FindNumberFromContactname(gPlayerPhone[playerid][simCard], name);
+		new simcard = findSimFromSqlid(pInfo[playerid][simCard]);
+		if(simcard == -1) nr = -1;
+		else nr = FindNumberFromContactname(simcard, name);
+		
 		if(nr != -1)
 		{
 			SendFormattedText(playerid, COLOR_PHONE, "helistan %s - %d...", name, nr);
@@ -206,28 +254,34 @@ COMMAND:helista(playerid, params[])
 COMMAND:kontaktid(playerid, params[])
 {
 	if(getSlotByItem(playerid, ITEM_PHONE) == -1) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
-	if(!gPlayerPhone[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
+	if(!pInfo[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
+		
+	new id, action[32], bool: found, simcard = findSimFromSqlid(pInfo[playerid][simCard]);
 	
-	new id, action[32], bool: found, simcard = gPlayerPhone[playerid][simCardIn];
+	if(simcard == -1) return 1;
 	
 	if(sscanf(params, "ds", id, action) == 0) found = true;
 	else if(sscanf(params, "d", id) == 0) found = true;	
-	
-	if(!found || id < 0 || id > MAX_CONTACTS)
+	if(!found || id < 1 || id > MAX_CONTACTS)
 	{
-		SendClientMessage(playerid, COLOR_PHONE, "*** Kontaktid");
+		SendClientMessage(playerid, COLOR_PHONE_1, "*** Kontaktid");
+		new added;
 		for(new i; i < MAX_CONTACTS; i++)
 		{
 			if(!gContactMemoryUsed[simcard][i]) continue;
-			SendFormattedText(playerid, COLOR_PHONE, "%d) %s - %d.", i, gContactMemoryName[simcard][i], gContactMemoryNR[simcard][i]);
+			SendFormattedText(playerid, COLOR_PHONE, "      %d) %s - %d.", i, gContactMemoryName[simcard][i], gContactMemoryNR[simcard][i]);
+			added++;
 		}
-		SendClientMessage(playerid, COLOR_PHONE, "*** Vaata ka: /kontaktid id tegevus");
+		
+		if(added == 0) SendClientMessage(playerid, COLOR_PHONE, "      Kontakte pole...");
+		
+		SendClientMessage(playerid, COLOR_PHONE_1, "*** Vaata ka: /kontaktid id tegevus");
 		return 1;
 	}
 	else
 	{
-		SendClientMessage(playerid, COLOR_PHONE, "*** Kontakt");
-	
+		SendClientMessage(playerid, COLOR_PHONE_1, "*** Kontakt");
+		id--;
 		if(!strcmp(action, "salvesta"))
 		{
 			if(gContactMemoryUsed[simcard][id])
@@ -250,12 +304,13 @@ COMMAND:kontaktid(playerid, params[])
 			}
 			else 
 			{
-				SendFormattedText(playerid, COLOR_PHONE, "%d) %s - %d.", id, gContactMemoryName[simcard][id], gContactMemoryNR[simcard][id]);
+				SendFormattedText(playerid, COLOR_PHONE, "%d) %s - %d.", id+1, gContactMemoryName[simcard][id], gContactMemoryNR[simcard][id]);
 				SendClientMessage(playerid, COLOR_PHONE, "Kustutatud...");
 				
 				format(gContactMemoryName[simcard][id], 2, "_");
 				gContactMemoryNR[simcard][id] = 0;
 				gContactMemoryUsed[simcard][id] = false;
+				DropContact(simcard, id);
 			}
 		}
 		else
@@ -264,9 +319,9 @@ COMMAND:kontaktid(playerid, params[])
 			{
 				SendClientMessage(playerid, COLOR_PHONE, "See kirje ei sisalda kontakti. Saad siia nime salvestada kasutades /kontaktid id salvesta.");
 			}
-			else SendFormattedText(playerid, COLOR_PHONE, "%d) %s - %d.", id, gContactMemoryName[simcard][id], gContactMemoryNR[simcard][id]);
+			else SendFormattedText(playerid, COLOR_PHONE, "%d) %s - %d.", id+1, gContactMemoryName[simcard][id], gContactMemoryNR[simcard][id]);
 		}
-		SendClientMessage(playerid, COLOR_PHONE, "*** Veel tegevusi: uuri salvesta kustuta");
+		SendClientMessage(playerid, COLOR_PHONE_1, "*** Veel tegevusi: uuri salvesta kustuta");
 	}
 	return 1;
 }
@@ -274,9 +329,9 @@ COMMAND:kontaktid(playerid, params[])
 COMMAND:valjuh22ldi(playerid, params[])
 {
 	if(getSlotByItem(playerid, ITEM_PHONE) == -1) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
-	if(!gPlayerPhone[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
+	if(!pInfo[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
 	if(gPlayerPhone[playerid][onCall] != CALL_CONNECTED) return SendClientMessage(playerid, COLOR_RED, "Sul pole kõne pooleli.");
-
+	
 	gPlayerPhone[playerid][speakerOn] = ((gPlayerPhone[playerid][speakerOn])?(false):(true));
 	SendFormattedText(playerid, COLOR_PHONE, "Valjuhääldi %s.", ((gPlayerPhone[playerid][onCall])?("sees"):("väljas")));
 	return 1;
@@ -285,7 +340,7 @@ COMMAND:valjuh22ldi(playerid, params[])
 COMMAND:vasta(playerid, params[])
 {
 	if(getSlotByItem(playerid, ITEM_PHONE) == -1) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
-	if(!gPlayerPhone[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
+	if(!pInfo[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
 	if(gPlayerPhone[playerid][onCall] != CALL_RECIVE) return SendClientMessage(playerid, COLOR_RED, "Keegi ei helista sulle!");
 	
 	new otherId = gPlayerPhone[playerid][callPlayer];
@@ -301,7 +356,7 @@ COMMAND:vasta(playerid, params[])
 COMMAND:katkesta(playerid, params[])
 {
 	if(getSlotByItem(playerid, ITEM_PHONE) == -1) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
-	if(!gPlayerPhone[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
+	if(!pInfo[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
 	
 	if(gPlayerPhone[playerid][onCall] == CALL_RECIVE)
 	{
@@ -321,19 +376,23 @@ COMMAND:katkesta(playerid, params[])
 *    PUBLICS
 */
 
-public GiveSimCard(playerid, company)
+public AddSimCard(company, forceId, forceNum)
 {
 	new freeId = Itter_Free(SimCard);
 	if(freeId == -1) return 1;
 	
-	new nr = GenerateRandomNumber(company);
-	gSimCards[freeId][sNumber] = nr;
+	new nr = (forceNum > -1)?forceNum:GenerateRandomNumber(company);
+	while(forceNum == -1 && IsNumberInUse(nr))
+	{
+		nr = GenerateRandomNumber(company);
+	}	
 	
+	gSimCards[freeId][sNumber] = nr;	
 	gSimCards[freeId][companyId] = company;
+	gSimCards[freeId][sCardUsed] = true;
+	gSimCards[freeId][sCardSqlID] = (forceId > -1)?forceId:RegisterSimCard(freeId);
 	Itter_Add(SimCard, freeId);
-	
-	giveItem(playerid, ITEM_SIMCARD, freeId);
-	return 0;
+	return freeId;
 }
 
 public ActivateSimCard(playerid, selectedCard, other)
@@ -343,14 +402,22 @@ public ActivateSimCard(playerid, selectedCard, other)
 		SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni kuhu seda simkaarti panna!");
 		return 0;
 	}
-	if(gPlayerPhone[playerid][simCardIn] && gPlayerPhone[playerid][simCard] == selectedCard)
+
+	new simcard = findSimFromSqlid(pInfo[playerid][simCard]);
+	
+	if(pInfo[playerid][simCardIn] && simcard == selectedCard)
 	{
 		SendClientMessage(playerid, COLOR_YELLOW, "See simkaart on juba su telefonis.");
 		return 0;
 	}
+	else if(pInfo[playerid][simCardIn] && simcard != -1 && simcard != selectedCard)
+	{
+		giveItem(playerid, ITEM_SIMCARD, simcard);
+	}
 	
-	gPlayerPhone[playerid][simCard] = selectedCard;
-	gPlayerPhone[playerid][simCardIn] = true;
+	pInfo[playerid][simCard] = gSimCards[selectedCard][sCardSqlID];
+	pInfo[playerid][simCardIn] = true;
+	
 	SendClientMessage(playerid, COLOR_YELLOW, "Paigaldasid oma telefoni edukalt SIM-Kaardi.");
 	return 1;
 }
@@ -471,20 +538,25 @@ public PhoneTimer()
 			{
 				SendClientMessage(playerid, COLOR_PHONE, "Su telefon heliseb... Kasuta /vasta või /katkesta.");
 				
-				new foundName = -1, simcard = gPlayerPhone[playerid][simCard];
-				for(new i; i < MAX_CONTACTS; i++)
-				{
-					if(!gContactMemoryUsed[simcard][i]) continue;
-					if(gContactMemoryNR[simcard][i] == gSimCards[gPlayerPhone[otherId][simCard]][sNumber]) foundName = i;
-				}
+				new foundName = -1, simcard = findSimFromSqlid(pInfo[playerid][simCard]);
+				new s2 = findSimFromSqlid(pInfo[otherId][simCard]);
 				
-				if(foundName == -1)
+				if(simcard != -1 && s2 != -1) 
 				{
-					SendFormattedText(playerid, COLOR_PHONE, "Helistab: %d", gSimCards[gPlayerPhone[otherId][simCard]][sNumber]);
-				}
-				else
-				{
-					SendFormattedText(playerid, COLOR_PHONE, "Helistab: %d", gContactMemoryName[simcard][foundName], gContactMemoryNR[simcard][foundName]);
+					for(new i; i < MAX_CONTACTS; i++)
+					{
+						if(!gContactMemoryUsed[simcard][i]) continue;
+						if(gContactMemoryNR[simcard][i] == gSimCards[s2][sNumber]) foundName = i;
+					}
+					
+					if(foundName == -1)
+					{
+						SendFormattedText(playerid, COLOR_PHONE, "Helistab: %d", gSimCards[s2][sNumber]);
+					}
+					else
+					{
+						SendFormattedText(playerid, COLOR_PHONE, "Helistab: %d", gContactMemoryName[simcard][foundName], gContactMemoryNR[simcard][foundName]);
+					}
 				}
 			}
 			
@@ -522,12 +594,158 @@ public PlayerPhoneRing(playerid, Float: x, Float: y, Float: z)
 	}
 }
 
+public LoadSimCards()
+{
+	new string[64];
+	format(string, 64, "SELECT * FROM %sSimCard ORDER BY id ASC LIMIT %d", MYSQL_PREFIX, MAX_SIMCARDS-1);
+	
+	mysql_query(string);
+	mysql_store_result();
+	
+	new Field[64], Data[256], numRows = mysql_num_rows();
+	for(new nId = 0; nId < numRows; nId++)
+	{
+		if(!mysql_fetch_row_format(Data, " ")) continue;
+		
+		mysql_fetch_field_row(Field, "id");
+		new id = strval(Field);
+		
+		mysql_fetch_field_row(Field, "companyId");
+		new company = strval(Field);
+		
+		mysql_fetch_field_row(Field, "sNumber");
+		new nr = strval(Field);
+		
+		new freeId = AddSimCard(company, id, nr);
+		LoadContacts(freeId);
+	}
+}
+
+public LoadContacts(sCard)
+{
+	if(sCard < 0 || sCard >= MAX_SIMCARDS) return 0;
+	if(gSimCards[sCard][sCardSqlID] == 0) return 0;
+	
+	new string[64];
+	format(string, 64, "SELECT * FROM %sContacts WHERE sCard = '%d' ORDER BY id ASC LIMIT %d", MYSQL_PREFIX, gSimCards[sCard][sCardSqlID], MAX_CONTACTS-1);
+	
+	mysql_query(string);
+	mysql_store_result();
+	
+	new Field[64], Data[256], numRows = mysql_num_rows();
+	for(new nId = 0; nId < numRows; nId++)
+	{
+		if(!mysql_fetch_row_format(Data, " ")) continue;
+		
+		mysql_fetch_field_row(Field, "id");
+		gContactSqlId[sCard][nId] = strval(Field);
+		
+		mysql_fetch_field_row(Field, "cNumber");
+		gContactMemoryNR[sCard][nId] = strval(Field);
+		
+		mysql_fetch_field_row(Field, "cName");
+		format(gContactMemoryName[sCard][nId], 16, "%s", Field);
+		
+		gContactMemoryUsed[sCard][nId] = true;
+	}
+	return 1;
+}
+
+public SaveSimCard(sCard)
+{
+	if(sCard < 0 || sCard >= MAX_SIMCARDS) return 0;
+	if(!gSimCards[sCard][sCardUsed]) return 0;
+	if(gSimCards[sCard][sCardSqlID] == 0) return 0;
+
+	new sqlid = gSimCards[sCard][sCardSqlID];
+	new query[MAX_QUERY], table[32];
+	format(table, 32, "%sSimCard", MYSQL_PREFIX);
+	
+	MysqlUpdateBuild(query, table);
+	
+	MysqlUpdateInt(query, "sNumber", gSimCards[sCard][sNumber]);
+	MysqlUpdateInt(query, "companyId", gSimCards[sCard][companyId]);
+	
+	MysqlUpdateFinish(query, "id", sqlid);	
+	
+	for(new i = 0; i < MAX_CONTACTS; i++)
+	{
+		SaveContact(sCard, i);
+	}	
+	return 1;
+}
+
+public SaveContact(sCard, contact)
+{
+	if(sCard < 0 || sCard >= MAX_SIMCARDS) return 0;
+	if(!gSimCards[sCard][sCardUsed]) return 0;
+	if(gSimCards[sCard][sCardSqlID] == 0) return 0;
+	
+	if(contact < 0 || contact >= MAX_CONTACTS) return 0;
+	if(!gContactMemoryUsed[sCard][contact]) return 0;
+	if(gContactSqlId[sCard][contact] == 0) return 0;
+
+	new sqlid = gContactSqlId[sCard][contact];
+	new query[MAX_QUERY], table[32];
+	format(table, 32, "%sContacts", MYSQL_PREFIX);
+	
+	MysqlUpdateBuild(query, table);
+	
+	MysqlUpdateInt(query, "cNumber", gContactMemoryNR[sCard][contact]);
+	MysqlUpdateStr(query, "cName", gContactMemoryName[sCard][contact]);
+	
+	MysqlUpdateFinish(query, "id", sqlid);	
+	return 1;
+}
+
+public RegisterSimCard(sCard)
+{
+	if(sCard < 0 || sCard >= MAX_SIMCARDS) return 0;
+	if(!gSimCards[sCard][sCardUsed]) return 0;
+		
+	new string[128];
+	format(string, 128, "INSERT INTO %sSimCard(id, companyId, sNumber) VALUES(NULL, '%d', '%d')", MYSQL_PREFIX, gSimCards[sCard][companyId], gSimCards[sCard][sNumber]);
+	mysql_query(string);
+	return mysql_insert_id();	
+}
+
+public RegisterContact(sCard, contact)
+{
+	if(sCard < 0 || sCard >= MAX_SIMCARDS) return 0;
+	if(!gSimCards[sCard][sCardUsed]) return 0;
+	if(gSimCards[sCard][sCardSqlID] == 0) return 0;
+	
+	if(contact < 0 || contact >= MAX_CONTACTS) return 0;
+	if(!gContactMemoryUsed[sCard][contact]) return 0;
+		
+	new string[128];
+	format(string, 128, "INSERT INTO %sContacts(id, sCard, cName, cNumber) VALUES(NULL, '%d', '%s', '%d')", MYSQL_PREFIX, gSimCards[sCard][sCardSqlID], gContactMemoryName[sCard][contact], gContactMemoryNR[sCard][contact]);
+	mysql_query(string);
+	return mysql_insert_id();	
+}
+
+public DropContact(sCard, contact)
+{
+	if(sCard < 0 || sCard >= MAX_SIMCARDS) return 0;
+	if(!gSimCards[sCard][sCardUsed]) return 0;
+	
+	if(contact < 0 || contact >= MAX_CONTACTS) return 0;
+	if(!gContactMemoryUsed[sCard][contact]) return 0;
+	if(gContactSqlId[sCard][contact] == 0) return 0;
+	
+	new string[64];
+	format(string, 64, "DELETE FROM %sContacts WHERE id = '%d'", MYSQL_PREFIX, gContactSqlId[sCard][contact]);
+	mysql_query(string);
+	return 1;	
+}
+
 /*
 *    ALS
 */
 
 public OnGameModeInit()
 {
+	LoadSimCards();
 	SetTimer("PhoneTimer", 1013, 1);
 	
 	g_Phone_Has_OPT = funcidx("ph_Phone_OnPlayerText");
@@ -543,9 +761,20 @@ public OnGameModeInit()
 
 public OnPlayerDisconnect(playerid)
 {
-	gPlayerPhone[playerid][simCardIn] = false;
+	if(pInfo[playerid][simCardIn])
+	{
+		SaveSimCard(findSimFromSqlid(pInfo[playerid][simCard]));
+	}
+	
+	for(new i; i < MAX_POCKETS; i++)
+	{
+		if(Pockets[playerid][i][pType] == ITEM_SIMCARD)
+		{
+			SaveSimCard(Pockets[playerid][i][pAmount]);
+		}
+	}
+	
 	gPlayerPhone[playerid][speakerOn] = false;
-	gPlayerPhone[playerid][simCard] = -1;
 	gPlayerPhone[playerid][onCall] = CALL_NONE;
 	gPlayerPhone[playerid][callPlayer] = -1;
 	
@@ -597,20 +826,31 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
 	if(dialogid == DIALOG_PHONE_ADD)
 	{
-		if(response == 0) return 1;
+		if(response == 0)
+		{
+			gPlayerCMemoryAdding[playerid] = 0;
+			gPlayerCMemorySlot[playerid] = 0;
+			return 1;
+		}
 		else
 		{
+			new sim = findSimFromSqlid(pInfo[playerid][simCard]);		
+			if(sim == -1) return 0;
+			
 			if(gPlayerCMemoryAdding[playerid] == 1)
 			{
-				format(gContactMemoryName[gPlayerPhone[playerid][simCardIn]][gPlayerCMemorySlot[playerid]], 16, "%s", inputtext);
+				format(gContactMemoryName[sim][gPlayerCMemorySlot[playerid]], 16, "%s", inputtext);
 				gPlayerCMemoryAdding[playerid]++;				
 				ShowPlayerDialog(playerid, DIALOG_PHONE_ADD, DIALOG_STYLE_INPUT, "Lisa Kontakt", "Number mida soovid salvestada:\n", "Salvesta", "Katkesta");
 				return 1;
 			}
 			else if(gPlayerCMemoryAdding[playerid] == 2)
 			{
-				gContactMemoryNR[gPlayerPhone[playerid][simCardIn]][gPlayerCMemorySlot[playerid]] = strval(inputtext);
-				gContactMemoryUsed[gPlayerPhone[playerid][simCardIn]][gPlayerCMemorySlot[playerid]] = true;
+				gContactMemoryNR[sim][gPlayerCMemorySlot[playerid]] = strval(inputtext);
+				gContactMemoryUsed[sim][gPlayerCMemorySlot[playerid]] = true;
+				
+				gContactSqlId[sim][gPlayerCMemorySlot[playerid]] = RegisterContact(sim, gPlayerCMemorySlot[playerid]);
+				
 				gPlayerCMemoryAdding[playerid] = 0;
 				gPlayerCMemorySlot[playerid] = 0;
 				return 1;
