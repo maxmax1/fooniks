@@ -3,30 +3,36 @@
 					 foreach efficient looping
 					===========================
 Description:
-	Provides functionality to loop efficiently through all connected players.
-	Removes reliance on both modification of MAX_PLAYERS for more efficient
-	processing on small servers (although still recommended) and 
-	IsPlayerConnected.
+	Provides efficient looping through sparse data sets, such as connected
+	players.  Significantly improved from the original version to be a generic
+	loop system, rather then purely a player loop system.  When used for
+	players this has constant time O(n) for number of connected players (n),
+	unlike standard player loops which are O(MAX_PLAYERS), regardless of the
+	actual number of connected players.  Even when n is MAX_PLAYERS this is
+	still faster.
 Legal:
-	Copyright (C) 2007 Alex "Y_Less" Cole
-
-	This program is free software; you can redistribute it and/or
-	modify it under the terms of the GNU General Public License
-	as published by the Free Software Foundation; either version 2
-	of the License, or (at your option) any later version.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-	MA 02110-1301, USA.
+	Copyright (C) 2009 Alex "Y_Less" Cole
+	
+	The contents of this file are subject to the Mozilla Public License Version
+	1.1 (the "License"); you may not use this file except in compliance with
+	the License. You may obtain a copy of the License at
+	http://www.mozilla.org/MPL/
+	
+	Software distributed under the License is distributed on an "AS IS" basis,
+	WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+	for the specific language governing rights and limitations under the
+	License.
+	
+	The Original Code is the SA:MP foreach iterator code.
+	
+	The Initial Developer of the Original Code is Alex "Y_Less" Cole.
 Version:
 	0.1.5
 Changelog:
+	18/12/09:
+		Added Itter_Func2 functions for multi-dimensional iterators.
+		Renamed foreact et al as keywords in the documentation.
+		Changed licensing from GPL to MPL.
 	02/09/09:
 		Fixed (again) for 0.3.
 		Added free slot finding.
@@ -59,6 +65,7 @@ Functions:
 		Itter_RemoveInternal - Remove a value from an itterator.
 		Itter_RandomInternal - Get a random item from an itterator.
 		Itter_FreeInternal - Gets the first free slot in the itterator.
+		Itter_InitInternal - Initialises a multi-dimensional itterator.
 	Static:
 		-
 	Inline:
@@ -67,8 +74,15 @@ Functions:
 		Itter_Remove - Wraps Itter_RemoveInternal.
 		Itter_Random - Wraps Itter_RandomInternal.
 		Itter_Count - Gets the number of items in an itterator.
-		Itter_Debug - Wraps around Itter_ShowArray so you can use an itterator.
+		Itter_Debug - Wraps around Itter_ShowArray.
 		Itter_Free - Wraps around Itter_FreeInternal.
+		Itter_Create2 - Create a new itterator array value set.
+		Itter_Add2 - Wraps Itter_AddInternal for arrays.
+		Itter_Remove2 - Wraps Itter_RemoveInternal for arrays.
+		Itter_Random2 - Wraps Itter_RandomInternal for arrays.
+		Itter_Count2 - Gets the number of items in an itterator array.
+		Itter_Debug2 - Wraps around Itter_ShowArray for arrays.
+		Itter_Free2 - Wraps around Itter_FreeInternal for arrays.
 	API:
 		-
 Callbacks:
@@ -82,8 +96,12 @@ Definitions:
 Enums:
 	-
 Macros:
-	foreach - Command to loop through all connected players efficiently.
+	-
+Keywords:
+	foreach - Command to loop an iterator.
 	foreachex - Like foreach but without a new variable.
+	foreach2 - Command to loop through an iterator array.
+	foreachex - Like foreach2 but without a new variable.
 Tags:
 	-
 Variables:
@@ -91,12 +109,13 @@ Variables:
 		-
 	Static:
 		YSI_g_OPC - Records wether Itter_OnPlayerConnect exists for speed.
+		YSI_g_OPDC - Records wether Itter_OnPlayerDisconnect exists for speed.
 Commands:
 	-
 Compile options:
 	YSI_ITTER_NO_SORT - Removed.
 	FOREACH_NO_BOTS - Remove the bot iterators for smaller code.
-	FOREACH_NO_PLAYERS - Remove all code for player itteration.
+	FOREACH_NO_PLAYERS - Remove all default code for player itteration.
 Operators:
 	-
 Iterators:
@@ -132,6 +151,174 @@ Iterators:
 #if defined YSI_ITTER_NO_SORT
 	#error "YSI_ITTER_NO_SORT is no longer supported by foreach"
 #endif
+
+/*----------------------------------------------------------------------------*-
+Function:
+	Itter_Create2
+Params:
+	name - Itterator identifier.
+	size0 - Number of iterators.
+	size1 - Number of items per iterator.
+Return:
+	-
+Notes:
+	Creates a new array of itterator start/array pair.
+-*----------------------------------------------------------------------------*/
+
+#define Iter_Create2 Itter_Create2
+#define Itter_Create2(%1,%2,%3) \
+	new \
+		YSI_g%1S[%2] = {-1, ...}, \
+		YSI_g%1C[%2] = {0}, \
+		YSI_g%1A[%2][%3]
+
+/*----------------------------------------------------------------------------*-
+Function:
+	Itter_Init2
+Params:
+	itter - Name of the itterator array to initialise.
+Return:
+	-
+Notes:
+	Wrapper for Itter_InitInternal.
+-*----------------------------------------------------------------------------*/
+
+#define Iter_Init2 Itter_Init2
+#define Itter_Init2(%1) \
+	Itter_InitInternal(YSI_g%1A, sizeof (YSI_g%1A), sizeof (YSI_g%1A[]))
+
+/*----------------------------------------------------------------------------*-
+Function:
+	Itter_Add2
+Params:
+	itter - Name of the itterator array to add the data to.
+	index - Index of the iterator.
+	value - Value to add to the itterator.
+Return:
+	-
+Notes:
+	Wrapper for Itter_AddInternal.
+-*----------------------------------------------------------------------------*/
+
+#define Iter_Add2 Itter_Add2
+#define Itter_Add2(%1,%2,%3) \
+	Itter_AddInternal(YSI_g%1S[%2], YSI_g%1C[%2], YSI_g%1A[%2], %3)
+
+/*----------------------------------------------------------------------------*-
+Function:
+	Itter_Free2
+Params:
+	itter - Name of the itterator to get the first free slot in.
+	index - Index of the iterator.
+Return:
+	-
+Notes:
+	Wrapper for Itter_FreeInternal.
+-*----------------------------------------------------------------------------*/
+
+#define Iter_Free2 Itter_Free2
+#define Itter_Free2(%1,%2) \
+	Itter_FreeInternal(YSI_g%1S[%2], YSI_g%1C[%2], YSI_g%1A[%2], sizeof (YSI_g%1A[]))
+
+/*----------------------------------------------------------------------------*-
+Function:
+	Itter_Remove2
+Params:
+	itter - Name of the itterator to remove data from.
+	index - Index of the iterator.
+	value - Data to remove.
+Return:
+	-
+Notes:
+	Wrapper for Itter_RemoveInternal.
+-*----------------------------------------------------------------------------*/
+
+#define Iter_Remove2 Itter_Remove2
+#define Itter_Remove2(%1,%2,%3) \
+	Itter_RemoveInternal(YSI_g%1S[%2], YSI_g%1C[%2], YSI_g%1A[%2], %3)
+
+/*----------------------------------------------------------------------------*-
+Function:
+	Itter_Random2
+Params:
+	itter - Name of the itterator to get a random slot from.
+	index - Index of the iterator.
+Return:
+	-
+Notes:
+	Wrapper for Itter_RandomInternal.
+-*----------------------------------------------------------------------------*/
+
+#define Iter_Random2 Itter_Random2
+#define Itter_Random2(%1,%2) \
+	Itter_RandomInternal(YSI_g%1S[%2], YSI_g%1C[%2], YSI_g%1A[%2])
+
+/*----------------------------------------------------------------------------*-
+Function:
+	Itter_Debug2
+Params:
+	itter - Name of the itterator to output debug information from.
+	index - Index of the iterator.
+Return:
+	-
+Notes:
+	Wrapper for Itter_ShowArray.
+-*----------------------------------------------------------------------------*/
+
+#define Iter_Debug2 Itter_Debug2
+#define Itter_Debug2(%1,%2) \
+	Itter_ShowArray(YSI_g%1S[%2], YSI_g%1A[%2], YSI_g%1C[%2])
+
+/*----------------------------------------------------------------------------*-
+Function:
+	Itter_Count2
+Params:
+	itter - Name of the itterator to get a random slot from4.
+	index - Index of the iterator.
+Return:
+	-
+Notes:
+	Returns the number of items in this itterator.
+-*----------------------------------------------------------------------------*/
+
+#define Iter_Count2 Itter_Count2
+#define Itter_Count2(%1,%2) \
+	YSI_g%1C[%2]
+
+/*----------------------------------------------------------------------------*-
+Function:
+	foreach2
+Params:
+	data - Data to itterate through.
+	index - Index of the iterator.
+	as - Variable to set value to.
+Return:
+	-
+Notes:
+	Not exactly the same as PHP foreach, just itterates through a list and
+	returns the value of the current slot but uses that slot as the next index
+	too.  Variables must be in the form YSI_g<name>S for the start index and
+	YSI_g<name>A for the data array where <name> is what's entered in data.
+-*----------------------------------------------------------------------------*/
+
+#define foreach2(%1,%2,%3) \
+	for (new %3 = YSI_g%1S[%2]; %3 != -1; %3 = YSI_g%1A[%2][%3])
+
+/*----------------------------------------------------------------------------*-
+Function:
+	foreachex2
+Params:
+	data - Data to itterate through.
+	index - Index of the iterator.
+	as - Variable to set value to.
+Return:
+	-
+Notes:
+	Similar to foreach but doesn't declare a new variable for the itterator.
+-*----------------------------------------------------------------------------*/
+
+#define foreachex2(%1,%2,%3) \
+	for (%3 = YSI_g%1S[%2]; %3 != -1; %3 = YSI_g%1A[%2][%3])
 
 /*----------------------------------------------------------------------------*-
 Function:
@@ -182,21 +369,6 @@ Notes:
 #define Iter_Free Itter_Free
 #define Itter_Free(%1) \
 	Itter_FreeInternal(YSI_g%1S, YSI_g%1C, YSI_g%1A, sizeof (YSI_g%1A))
-	
-/*----------------------------------------------------------------------------*-
-Function:
-	Itter_RandFree
-Params:
-	itter - Name of the itterator to get the random free slot in.
-Return:
-	-
-Notes:
-	Wrapper for Itter_RandFreeInternal.
--*----------------------------------------------------------------------------*/
-
-#define Iter_RandFree Itter_RandFree
-#define Itter_RandFree(%1) \
-	Itter_RandFreeInternal(YSI_g%1S, YSI_g%1C, YSI_g%1A, sizeof (YSI_g%1A))
 
 /*----------------------------------------------------------------------------*-
 Function:
@@ -328,7 +500,8 @@ Notes:
 -*----------------------------------------------------------------------------*/
 
 #if !defined BOTSYNC_IS_BOT
-	public OnPlayerConnect(playerid)
+	public
+		OnPlayerConnect(playerid)
 	{
 		#if defined _FOREACH_BOT
 			if (!IsPlayerNPC(playerid))
@@ -360,7 +533,8 @@ Notes:
 	#endif
 	#define OnPlayerConnect Itter_OnPlayerConnect
 	
-	forward Itter_OnPlayerConnect(playerid);
+	forward
+		Itter_OnPlayerConnect(playerid);
 #endif
 
 /*----------------------------------------------------------------------------*-
@@ -377,7 +551,8 @@ Notes:
 
 #if !defined BOTSYNC_IS_BOT
 	#if defined FILTERSCRIPT
-		public OnFilterScriptInit()
+		public
+			OnFilterScriptInit()
 		{
 			if (YSI_gPlayerC)
 			{
@@ -405,7 +580,8 @@ Notes:
 		
 		forward Itter_OnFilterScriptInit();
 	#else
-		public OnGameModeInit()
+		public
+			OnGameModeInit()
 		{
 			if (YSI_gPlayerC)
 			{
@@ -431,7 +607,8 @@ Notes:
 		#endif
 		#define OnGameModeInit Itter_OnGameModeInit
 		
-		forward Itter_OnGameModeInit();
+		forward
+			Itter_OnGameModeInit();
 	#endif
 #endif
 
@@ -447,7 +624,8 @@ Notes:
 -*----------------------------------------------------------------------------*/
 
 #if !defined BOTSYNC_IS_BOT
-	public OnPlayerDisconnect(playerid, reason)
+	public
+		OnPlayerDisconnect(playerid, reason)
 	{
 		#if defined _FOREACH_BOT
 			if (!IsPlayerNPC(playerid))
@@ -479,7 +657,8 @@ Notes:
 	#endif
 	#define OnPlayerDisconnect Itter_OnPlayerDisconnect
 	
-	forward Itter_OnPlayerDisconnect(playerid, reason);
+	forward
+		Itter_OnPlayerDisconnect(playerid, reason);
 #endif
 
 /*----------------------------------------------------------------------------*-
@@ -496,7 +675,8 @@ Notes:
 	as it's only called when debug is on.
 -*----------------------------------------------------------------------------*/
 
-stock Itter_ShowArray(start, members[], size)
+stock
+	Itter_ShowArray(start, members[], size)
 {
 	static
 		sString[61];
@@ -531,7 +711,8 @@ Notes:
 	Returns a random value from an iterator.
 -*----------------------------------------------------------------------------*/
 
-stock Itter_RandomInternal(start, count, array[])
+stock
+	Itter_RandomInternal(start, count, array[])
 {
 	if (count == 0)
 	{
@@ -572,7 +753,8 @@ Notes:
 	the data.
 -*----------------------------------------------------------------------------*/
 
-stock Itter_FreeInternal(start, count, array[], size)
+stock
+	Itter_FreeInternal(start, count, array[], size)
 {
 	if (count == size)
 	{
@@ -599,61 +781,6 @@ stock Itter_FreeInternal(start, count, array[], size)
 	return -1;
 }
 
-
-/*----------------------------------------------------------------------------*-
-Function:
-	Itter_RandFreeInternal
-Params:
-	start - Array start index.
-	count - Number of items in the itterator.
-	array[] - Itterator data.
-	size - Size of the itterator.
-Return:
-	-
-Notes:
-	Finds a random free slot in the itterator.  Itterators now HAVE to be
-	sorted for this function to work correctly as it uses that fact to decide
-	wether a slot is unused or the last one.  If you want to use the slot
-	straight after finding it the itterator will need to re-find it to add in
-	the data.
--*----------------------------------------------------------------------------*/
-
-stock Itter_RandFreeInternal(start, count, array[], size)
-{
-	if (count == size)
-	{
-		return -1;
-	}
-	else if (count == 0)
-	{
-		return 0;
-	}
-	new
-		first = 0,
-		hits = 0,
-		temp[32];
-	while (first != -1)
-	{
-		if (first == start)
-		{
-			start = array[start];
-		}
-		else if (array[first] == -1)
-		{
-			temp[hits] = first;
-			hits++;
-			if(hits == 32) break;
-		}
-		++first;
-	}
-	
-	if(hits > 0)
-	{
-		return temp[random(hits)];
-	}
-	return -1;
-}
-
 /*----------------------------------------------------------------------------*-
 Function:
 	Itter_AddInternal
@@ -668,7 +795,8 @@ Notes:
 	Adds a value to a given itterator set.
 -*----------------------------------------------------------------------------*/
 
-stock Itter_AddInternal(&start, &count, array[], value)
+stock
+	Itter_AddInternal(&start, &count, array[], value)
 {
 	if (array[value] != -1)
 	{
@@ -720,7 +848,8 @@ Notes:
 	Removes a value from an itterator.
 -*----------------------------------------------------------------------------*/
 
-stock Itter_RemoveInternal(&start, &count, array[], value)
+stock
+	Itter_RemoveInternal(&start, &count, array[], value)
 {
 	if (start == -1)
 	{
@@ -747,4 +876,30 @@ stock Itter_RemoveInternal(&start, &count, array[], value)
 	array[value] = -1;
 	--count;
 	return 1;
+}
+
+/*----------------------------------------------------------------------------*-
+Function:
+	Itter_InitInternal
+Params:
+	array[][] - Itterator array to initialise.
+	s0 - Size of first dimension.
+	s1 - Size of second dimension.
+Return:
+	-
+Notes:
+	Multi-dimensional arrays can't be initialised at compile time, so need to be
+	done at run time, which is slightly annoying.
+-*----------------------------------------------------------------------------*/
+
+stock
+	Itter_InitInternal(arr[][], s0, s1)
+{
+	for (new i = 0; i != s0; ++i)
+	{
+		for (new j = 0; j != s1; ++j)
+		{
+			arr[i][j] = -1;
+		}
+	}
 }

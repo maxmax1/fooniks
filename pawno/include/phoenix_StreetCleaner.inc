@@ -35,14 +35,11 @@
 #define GARBAGE_JOB_ID 1
 #define GARBAGE_TRUCK 408
 
-// Private functions
-forward AddGarbagePoint(Float: x, Float: y, Float: z);
-forward StartPath(playerid, PathId);
-forward GarbagePath(playerid);
-forward PathEnd(playerid);
+#define PATH_SIZE 16
 
-// Syncing forwards.
-forward CJob_OnPlayerEnterCheckpoint(playerid);
+/*
+*    GLOBALS
+*/
 
 Itter_Create(GarbagePoints, MAX_GARBAGE_POINTS);
 
@@ -63,8 +60,39 @@ enum garbagePlayersInf
 };
 new GarbagePlayer[MAX_PLAYERS][garbagePlayersInf];
 
+Itter_Create2(PlayerDoneCP, MAX_PLAYERS, PATH_SIZE+1);
+
+/*
+*
+*/
+
+stock IsDoneCP(playerid, id)
+{
+	foreach2(PlayerDoneCP, playerid, i)
+	{
+		if(i == id) return true
+	}
+	return false;
+}
+
+/*
+*    FORWARDS
+*/
+
+// Private
+forward AddGarbagePoint(Float: x, Float: y, Float: z);
+forward StartPath(playerid, PathId);
+forward GarbagePath(playerid);
+forward PathEnd(playerid);
+
+// Syncing forwards.
+forward CJob_OnPlayerEnterCheckpoint(playerid);
+
+// Public
 JOBS_OnJobInit(GCollector)
 {
+	Itter_Init2(PlayerDoneCP);
+	
 	AddGarbagePoint(2497.7292, -1681.5367, 13.1551);
 	AddGarbagePoint(2403.9653, -1654.0575, 13.2224);	
 	AddGarbagePoint(2272.0327, -1653.7729, 15.0048);
@@ -118,6 +146,10 @@ JOBS_OnJobInit(GCollector)
 	AddJobCommand(GARBAGE_JOB_ID, "prügiring");
 }
 
+/*
+*    PUBLICS
+*/
+
 public AddGarbagePoint(Float: x, Float: y, Float: z)
 {
 	if(garbPointsUsed >= MAX_GARBAGE_POINTS) return -1;
@@ -141,19 +173,27 @@ public GarbagePath(playerid)
 {
 	GarbagePlayer[playerid][numGPoints]++;
 	
-	if(GarbagePlayer[playerid][numGPoints] == 16)
+	if(GarbagePlayer[playerid][numGPoints] == PATH_SIZE)
 	{
+		Itter_Free2(PlayerDoneCP, playerid);
 		GarbagePlayer[playerid][cpId] = SetPlayerCheckpoint(playerid, 2413.7822, -1425.1913, 23.9835, 3.0);
 		SmallHelpDrawShow(playerid, "Masin on täis, tühjenda see Taaskasutuskeskuses.", 5000);
 	}
-	else if(GarbagePlayer[playerid][numGPoints] > 16)
+	else if(GarbagePlayer[playerid][numGPoints] > PATH_SIZE)
 	{
 		PathEnd(playerid);
 	}
 	else
 	{
 		new PathId = Itter_Random(GarbagePoints);
-		StartPath(playerid, PathId);
+		
+		while(IsDoneCP(playerid, PathId))
+		{
+			PathId = Itter_Random(GarbagePoints);
+		}
+		
+		StartPath(playerid, PathId);		
+		Itter_Add2(PlayerDoneCP, playerid, PathId);
 		
 		new string[128];
 		format(string, 128, "~b~Masin: ~n~~n~~w~%d/16", GarbagePlayer[playerid][numGPoints]-1);
