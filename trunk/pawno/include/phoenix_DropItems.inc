@@ -300,9 +300,7 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 			else
 			{
 				SendClientMessage(playerid, COLOR_RED, "Sa ei saa seda asja hetkel üles võtta.");
-			}
-			
-			
+			}			
 		}
 	}
 

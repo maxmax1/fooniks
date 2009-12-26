@@ -29,6 +29,34 @@ stock TextDrawFix(text[])
 	}
 	return fixed;
 }
+
+stock IsNumeric(string[])
+{
+	new	stringPos, ch = string[stringPos];
+	
+	if (ch == '-')
+	{
+		ch = string[++stringPos];
+	}
+	
+	do
+	{
+		ch = string[stringPos];
+		stringPos++;
+		
+		if ('0' <= ch <= '9')
+		{
+			continue;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	while (stringPos < strlen(string));
+	return true;
+}
+
 			
 forward TextDrawSetStringEx(Text: textID, txt[]);
 public TextDrawSetStringEx(Text: textID, txt[])
@@ -36,3 +64,4 @@ public TextDrawSetStringEx(Text: textID, txt[])
 	TextDrawSetString(textID, TextDrawFix(txt));
 	return 1;
 }
+
