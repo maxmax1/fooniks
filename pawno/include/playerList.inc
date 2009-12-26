@@ -18,13 +18,14 @@
 #define PAGE_SIZE		32
 
 new pList[MAX_PLAYERS][PAGE_SIZE];
+new gMyPList[MAX_PLAYERS];
 new gMyConfirmBox[MAX_PLAYERS];
 
-forward OnPlayerSelectPlayer(playerid, otherId, btn);
+forward OnPlayerSelectPlayer(playerid, otherId, listId, btn);
 forward OnPlayerConfirm(playerid, response, boxId);
 forward pList_OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]);
 
-stock ShowPlayerList(playerid, Float: dist, showMe)
+stock ShowPlayerList(playerid, listid, Float: dist, showMe)
 {
 	new str[MAX_PLAYER_NAME*PAGE_SIZE];
 	
@@ -56,6 +57,7 @@ stock ShowPlayerList(playerid, Float: dist, showMe)
 		format(str, sizeof(str), "Pole...\n");
 		pList[playerid][0] = -1;
 	}
+	gMyPList[playerid] = listid;
 	ShowPlayerDialog(playerid, Dialog_pList, DIALOG_STYLE_LIST, "Vali mängija", str, "OK", "Katkesta");		
 }
 
@@ -72,7 +74,9 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		if (funcidx("OnPlayerSelectPlayer") != -1)
 		{
 			if(pList[playerid][listitem] == -1) response = 0;
-			return CallRemoteFunction("OnPlayerSelectPlayer", "iii", playerid, pList[playerid][listitem], response);
+			new oList = gMyPList[playerid];
+			gMyPList[playerid] = -1;
+			return CallRemoteFunction("OnPlayerSelectPlayer", "iiii", playerid, pList[playerid][listitem], oList, response);
 		}
 	}
 	if(dialogid == Dialog_pConfirm)

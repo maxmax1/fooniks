@@ -68,6 +68,9 @@ new Pockets[MAX_PLAYERS][MAX_POCKETS][pockInf];
 
 new gActivePocket[MAX_PLAYERS];
 
+new gTradeOffer[MAX_PLAYERS];
+new gTradePrice[MAX_PLAYERS];
+
 /*
 *    STOCKS
 */
@@ -111,6 +114,8 @@ stock clearPockets(playerid)
 		Pockets[playerid][i][pAmount] = 0;
 	}
 	gActivePocket[playerid] = -1;
+	gTradeOffer[playerid] = -1;
+	gTradePrice[playerid] = 0;
 	return 0;
 }
 
@@ -136,7 +141,7 @@ stock ShowActionMenu(playerid, pocketid)
 	else	
 	{
 		format(string, 32, LANG_DIALOG_POCKETSHEADA, Items[Type][itemName]);
-		ShowPlayerDialog(playerid, DIALOG_POCKETSA, DIALOG_STYLE_LIST, string, "Kasuta\n(Anna)\n(Müü)\nViska Maha\nHävita", LANG_DIALOG_OK, LANG_DIALOG_EXITBUTTON);
+		ShowPlayerDialog(playerid, DIALOG_POCKETSA, DIALOG_STYLE_LIST, string, "Kasuta\nAnna\nMüü\nViska Maha\nHävita", LANG_DIALOG_OK, LANG_DIALOG_EXITBUTTON);
 		gActivePocket[playerid] = pocketid;
 	}
 }

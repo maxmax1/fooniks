@@ -30,8 +30,6 @@
 #define MAX_JOBS 5
 #define MAX_JOBCOMMANDS 10
 
-#define JOB_CONFIRM_BOX 1
-
 /*
 *    Global Variables
 */

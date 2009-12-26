@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"195"
+#define SCRIPT_REVISION 		"196"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -63,6 +63,18 @@
 //#define DIALOG_POCKETSA 2018 // Reserved
 #define DIALOG_PHONE_ADD 2019
 #define DIALOG_PHONE_SMS 2020
+#define DIALOG_SELLPRICE 2021
+
+/*
+*    CONFIRM BOXES
+*/
+#define JOB_CONFIRM_BOX 	1
+#define CONFIRM_TRADE	 	2
+
+/*
+*    PLAYER LISTS
+*/
+#define PLIST_TRADE 		1
 
 /*
 *    INCLUDES
@@ -862,14 +874,63 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		if( response == 0 ) return 1;
 		ShowActionMenu(playerid, listitem);
 	}
+	else if( dialogid == DIALOG_SELLPRICE )
+	{
+		if( response == 0 )
+		{
+			gActivePocket[playerid] = -1;
+			return 1;
+		}
+		
+		new show = false, price;
+		
+		if(!IsNumeric(inputtext))
+		{
+			SendClientMessage(playerid, COLOR_RED, "Pead sisestama numbreid!");
+			show = true;			
+		}
+		else
+		{
+			price = strval(inputtext);
+			if(price < 1 || price > 999999)
+			{
+				SendClientMessage(playerid, COLOR_RED, "Hind peab jääma vahemikku 1 - 999999!");
+				show = true;			
+			}
+		}
+		
+		if(show)
+		{
+			ShowPlayerDialog(playerid, DIALOG_SELLPRICE, DIALOG_STYLE_INPUT, "Hind", "Sisesta soovitud hind", LANG_DIALOG_OK, LANG_DIALOG_EXITBUTTON);
+			return 1;
+		}
+		else
+		{
+			gTradePrice[playerid] = price;
+			ShowPlayerList(playerid, PLIST_TRADE, 10.0, false);
+		}
+	}	
 	else if( dialogid == DIALOG_POCKETSA )
 	{
-		if( response == 0 ) return 1;
+		if( response == 0 )
+		{
+			gActivePocket[playerid] = -1;
+			return 1;
+		}
 		
 		if(listitem == 0) // Use
 		{
 			UseItem(playerid, gActivePocket[playerid]);
 			gActivePocket[playerid] = -1;
+		}
+		else if(listitem == 1) // give
+		{
+			gTradePrice[playerid] = 0;
+			ShowPlayerList(playerid, PLIST_TRADE, 10.0, false);
+		}
+		else if(listitem == 2) // sell
+		{
+			ShowPlayerDialog(playerid, DIALOG_SELLPRICE, DIALOG_STYLE_INPUT, "Hind", "Sisesta soovitud hind", LANG_DIALOG_OK, LANG_DIALOG_EXITBUTTON);
 		}
 		else if(listitem == 3) // drop
 		{
@@ -1733,6 +1794,55 @@ public OnPlayerConfirm(playerid, response, boxId)
 		if(response != 0) SetPlayerJob(playerid, pJobRequest[playerid], pJobRequestT[playerid]);
 		else SendClientMessage(playerid, COLOR_YELLOW, LANG_REFUSE_JOB);
 	}
+	else if(boxId == CONFIRM_TRADE)
+	{
+		new otherId = gTradeOffer[playerid];
+		
+		if(gTradePrice[playerid] > 0 && PlayerMoney[playerid] < gTradePrice[playerid])
+		{
+			SendClientMessage(playerid, COLOR_RED, "Sul pole piisavalt raha.");
+			SendClientMessage(otherId, COLOR_RED, "Teisel mängijal pole piisavalt raha.");
+		}		
+		else if(response != 0)
+		{
+			new pocket = gActivePocket[otherId];
+			new given = giveItem(playerid, Pockets[otherId][pocket][pType], Pockets[otherId][pocket][pAmount]);
+			
+			if(given == 0)
+			{
+				SendEmote(otherId, "ulatab mingi asja.");
+				SendEmote(playerid, "võtab asja vastu.");
+				
+				ClearPocket(otherId, pocket);
+				
+				if(gTradePrice[playerid] > 0)
+				{
+					GivePlayerMoneyNew(playerid, -(gTradePrice[playerid]));
+					GivePlayerMoneyNew(otherId, -(gTradePrice[otherId]));
+				}
+			}
+			else
+			{
+				SendClientMessage(playerid, COLOR_RED, "Sa ei saa seda asja hetkel vastu võtta.");
+				SendClientMessage(otherId, COLOR_RED, "Ta ei saa seda asja hetkel vastu võtta.");
+			}
+		}
+		else
+		{
+			SendClientMessage(otherId, COLOR_RED, "Teine mängija keeldus...");
+		}
+		
+		TogglePlayerControllableEx(playerid, 1, -1);
+		TogglePlayerControllableEx(otherId, 1, -1);
+		
+		gTradeOffer[otherId] = -1;
+		gTradePrice[otherId] = 0;
+		
+		gTradeOffer[playerid] = -1;
+		gTradePrice[playerid] = -1;	
+
+		gActivePocket[otherId] = -1;
+	}
 	else SendClientMessage(playerid, COLOR_YELLOW, "VALE KAST!");
 }
 
@@ -1820,6 +1930,43 @@ public OnPlayerHitPlayer(playerid, weaponid, targetid)
 		}
 	}
 	return 0;
+}
+
+public OnPlayerSelectPlayer(playerid, otherId, listId, btn)
+{
+	if(listId == PLIST_TRADE)
+	{
+		if(btn != 0)
+		{
+			if(gActivePocket[otherId] != -1 || gTradeOffer[otherId] != -1)
+			{
+				gActivePocket[playerid] = -1;
+				return SendClientMessage(playerid, COLOR_RED, "See mängija on hetkel hõivatud.");
+			}
+		
+			TogglePlayerControllableEx(playerid, 0, -1);
+			TogglePlayerControllableEx(otherId, 0, -1);
+			SendClientMessage(playerid, COLOR_GREEN, "Palun oota kuni teine mängija asja vastu võtab/ei võta.");
+			
+			gTradeOffer[playerid] = otherId;
+			gTradeOffer[otherId] = playerid;
+			gTradePrice[otherId] = gTradePrice[playerid];
+			
+			new string[128];
+			format(string, 128, "Isik: %s \n Soovib sulle anda: \n %s - %d\nHind: %d\nSoovid vastu võtta?",
+				pInfo[playerid][pCharName],
+				Items[Pockets[playerid][gActivePocket[playerid]][pType]][itemName],
+				Pockets[playerid][gActivePocket[playerid]][pAmount],
+				gTradePrice[playerid]);
+				
+			ShowPlayerConfirmbox(otherId, CONFIRM_TRADE, string);
+		}
+		else
+		{
+			gActivePocket[playerid] = -1;
+		}
+	}
+	return 1;
 }
 
 /*
