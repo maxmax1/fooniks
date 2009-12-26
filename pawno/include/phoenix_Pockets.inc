@@ -26,7 +26,10 @@
 
 #define MAX_ITEMS 15
 #define MAX_POCKETS 16
+#define POCKETS_NUM_WEAPONS 12
+
 #define DIALOG_POCKETS 2017
+#define DIALOG_POCKETSA 2018
 
 enum itemInf
 {
@@ -62,6 +65,12 @@ enum pockInf
 	pAmount
 };
 new Pockets[MAX_PLAYERS][MAX_POCKETS][pockInf];
+
+new gActivePocket[MAX_PLAYERS];
+
+/*
+*    STOCKS
+*/
 
 stock showPockets(playerid)
 {
@@ -101,6 +110,7 @@ stock clearPockets(playerid)
 		Pockets[playerid][i][pType] = 0;
 		Pockets[playerid][i][pAmount] = 0;
 	}
+	gActivePocket[playerid] = -1;
 	return 0;
 }
 
@@ -113,6 +123,24 @@ stock getItemByWeapon(weaponid)
 	return -1;
 }
 
+stock ShowActionMenu(playerid, pocketid)
+{
+	new string[32];
+
+	new Type = Pockets[playerid][pocketid][pType];
+	if(Type < 1 || Type > MAX_ITEMS)
+	{
+		SendClientMessage(playerid, COLOR_RED, "Tühjust ei saa uurida.");
+		showPockets(playerid);
+	}
+	else	
+	{
+		format(string, 32, LANG_DIALOG_POCKETSHEADA, Items[Type][itemName]);
+		ShowPlayerDialog(playerid, DIALOG_POCKETSA, DIALOG_STYLE_LIST, string, "Kasuta\n(Anna)\n(Müü)\nViska Maha\nHävita", LANG_DIALOG_OK, LANG_DIALOG_EXITBUTTON);
+		gActivePocket[playerid] = pocketid;
+	}
+}
+
 // Forwards
 
 forward BuildPockets(playerid, string[], len);
@@ -120,6 +148,7 @@ forward UseItem(playerid, pocketid);
 forward giveItem(playerid, itemId, amount);
 forward RemAmount(playerid, itemId, amount);
 forward giveItemOtherStuff(playerid, itemid, amount);
+forward ClearPocket(playerid, slotId);
 forward LoadPockets(playerid);
 forward SavePockets(playerid);
 forward SavePocket(playerid, pocketId);
@@ -154,14 +183,13 @@ public UseItem(playerid, pocketid)
 	
 	if(ret > 0) // Remove item after usage.
 	{
-		Pockets[playerid][pocketid][pType] = 0;
-		Pockets[playerid][pocketid][pAmount] = 0;
+		ClearPocket(playerid, pocketid);
 	}
 	
 	return 0;
 }
 
-// returns given amount.
+// returns amount not given.
 public giveItem(playerid, itemId, amount)
 {
 	if(itemId < 0 || itemId > MAX_ITEMS) return 0;		
@@ -171,13 +199,16 @@ public giveItem(playerid, itemId, amount)
 	new par = (Items[itemId][itemParent] != -1)?Items[itemId][itemParent]:-1; // If itemMax is bigger than 1 find a slot that has free space.	
 	new freeSlot = findFreeSlot(playerid, type, maks, par);
 	
-	if(freeSlot == -1) return 0;
+	if(freeSlot == -1)
+	{
+		return amount;
+	}
 	if(maks == 0)
 	{
 		Pockets[playerid][freeSlot][pType] = itemId;
 		Pockets[playerid][freeSlot][pAmount] = amount;
-		giveItemOtherStuff(playerid, itemId, amount);		
-		return amount;
+		giveItemOtherStuff(playerid, itemId, amount);	
+		return 0;
 	}
 	else
 	{
@@ -191,7 +222,7 @@ public giveItem(playerid, itemId, amount)
 			giveItemOtherStuff(playerid, itemId, realGive);
 			return (amount-realGive);
 		}
-		return 0;
+		return amount;
 	}
 }
 
@@ -205,8 +236,31 @@ public RemAmount(playerid, itemId, amount)
 	Pockets[playerid][foundSlot][pAmount] -= amount;
 	if(Pockets[playerid][foundSlot][pAmount] < 1)
 	{
-		Pockets[playerid][foundSlot][pType] = 0;
+		ClearPocket(playerid, foundSlot);
 	}
+	return 1;
+}
+
+public ClearPocket(playerid, slotId)
+{
+	if(slotId < 0 || slotId > MAX_POCKETS) return 0;	
+	
+	new otype = Pockets[playerid][slotId][pType];
+	Pockets[playerid][slotId][pType] = 0;
+	Pockets[playerid][slotId][pAmount] = 0;
+	
+	if(otype < POCKETS_NUM_WEAPONS)
+	{
+		ResetPlayerWeapons(playerid);
+		for(new i; i < MAX_POCKETS; i++)
+		{
+			if(Pockets[playerid][i][pType] > 0 && Pockets[playerid][i][pType] < POCKETS_NUM_WEAPONS)
+			{
+				giveItemOtherStuff(playerid, Pockets[playerid][i][pType], Pockets[playerid][i][pAmount]);
+			}
+		}
+	}	
+	
 	return 1;
 }
 
@@ -295,7 +349,7 @@ public giveItemOtherStuff(playerid, itemid, amount)
 	{
 		return 1;
 	}
-	else if(itemid < 12)
+	else if(itemid < POCKETS_NUM_WEAPONS)
 	{
 		new oldWep = GetPlayerWeapon(playerid);
 		GivePlayerWeapon(playerid, Items[itemid][itemOtherId], amount);

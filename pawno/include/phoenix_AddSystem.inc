@@ -69,7 +69,7 @@ public CreateAddboard(Float: x, Float: y, Float: z)
 	new freeId = Itter_Free(AddBoards);
 	if(freeId == -1) return 0;	
 	
-	gAddBoards[freeId] = Create3DTextLabel("Sinu Reklaam siia!\n(( /reklaam ))", ADD_COLOR1, x, y, z+1.0, 30.0, 0, 1);
+	gAddBoards[freeId] = CreateDynamic3DTextLabel("Sinu Reklaam siia!\n(( /reklaam ))", ADD_COLOR1, x, y, z+1.0, 30.0);
 	Itter_Add(AddBoards, freeId);
 	
 	gAddBoardPos[freeId][0] = x;
@@ -107,7 +107,7 @@ public NewBoardAdd(freeId, col, number, text[], time)
 	else if(col == 2) color = ADD_COLOR3;
 	else if(col == 3) color = ADD_COLOR4;	
 	
-	Update3DTextLabelText(gAddBoards[freeId], color, text);
+	UpdateDynamic3DTextLabelText(gAddBoards[freeId], color, text);
 	
 	gAddBoardTime[freeId] = ((time > 0)?time:15*60*1000);
 	gAddBoardTimeS[freeId] = GetTickCount();	
@@ -123,7 +123,7 @@ public ClearAddBoard(addBoardId)
 	if(addBoardId < 0 || addBoardId >= MAX_ADDBOARDS) return 0;
 	if(gAddBoards[addBoardId] == Text3D: -1) return 0;
 	
-	Update3DTextLabelText(gAddBoards[addBoardId], ADD_COLOR1, "Sinu Reklaam siia!\n(( /reklaam ))");
+	UpdateDynamic3DTextLabelText(gAddBoards[addBoardId], ADD_COLOR1, "Sinu Reklaam siia!\n(( /reklaam ))");
 	gAddBoardText[addBoardId] = false;
 	gAddBoardCol[addBoardId] = 0;
 	gAddBoardNR[addBoardId] = 0;

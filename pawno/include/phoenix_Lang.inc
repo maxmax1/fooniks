@@ -69,6 +69,7 @@ stock GetLangSTR(langstr[])
 #define LANG_DIALOG_KICK_S		    "Kicki %s"
 #define LANG_DIALOG_ADMINCPHEAD "Administratsioon"
 #define LANG_DIALOG_POCKETSHEAD "Taskud"
+#define LANG_DIALOG_POCKETSHEADA "Taskud - %s"
 #define LANG_DIALOG_TELEHEAD "Telepordid"
 #define LANG_DIALOG_ADMINCP "Avalik Sınum\nM‰‰ra Kellaaeg\nM‰‰ra Ilm\nTelepordid"
 
