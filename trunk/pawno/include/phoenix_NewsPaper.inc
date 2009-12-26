@@ -78,11 +78,11 @@ enum newsInf
 	stat1,
 	stat2,
 	stat3,
-	stat4,
+	stat4,/*
 	add1[256],
 	add2[256],
 	add3[256],
-	add4[256],
+	add4[256],*/
 	bool: paperUsed,
 	sqlId
 };
@@ -97,13 +97,13 @@ enum writeInf
 	article1[256],
 	article2[256],
 	article3[256],
-	article4[256],	
+	article4[256],	/*
 	add1[256],
 	add2[256],
 	add3[256],
-	add4[256]	
+	add4[256]	*/
 };
-new PaperWriter[writeInf] = {false, -1, 0, "_", "_", "_", "_", "_", "_", "_", "_", "_"};
+new PaperWriter[writeInf] = {false, -1, 0, "_", "_", "_", "_", "_"};
 
 enum jAddInf
 {
@@ -186,7 +186,7 @@ public ShowNewsPaper(playerid, paperid)
 	if(i != -1)
 	{
 		if(currentPage[playerid] < 0) currentPage[playerid] = 0;
-		if(currentPage[playerid] > 3) currentPage[playerid] = 3;
+		if(currentPage[playerid] > 2) currentPage[playerid] = 2;
 		
 		if(currentPage[playerid] == 0)
 		{
@@ -226,7 +226,7 @@ public ShowNewsPaper(playerid, paperid)
 			TextDrawSetStringEx(NewsDraw[i][Text4], "~b~Vali töökoht:~n~~w~~k~~PED_SPRINT~");
 			TextDrawSetStringEx(NewsDraw[i][Text5], "~b~Liikumiseks kasuta:~n~~n~~n~~n~");
 			TextDrawSetStringEx(NewsDraw[i][Text6], "~g~Üles: ~w~~k~~GO_FORWARD~~n~~g~Alla: ~w~~k~~GO_BACK~~n~");
-		}
+		}/*
 		else if(currentPage[playerid] == 3)
 		{
 			TextDrawSetStringEx(NewsDraw[i][Text1], "Kuulutused");
@@ -236,7 +236,7 @@ public ShowNewsPaper(playerid, paperid)
 			TextDrawSetStringEx(NewsDraw[i][Text4], NewsPapers[paperid][add2]);
 			TextDrawSetStringEx(NewsDraw[i][Text5], NewsPapers[paperid][add3]);
 			TextDrawSetStringEx(NewsDraw[i][Text6], NewsPapers[paperid][add4]);
-		}
+		}*/
 		
 		TextDrawShowForPlayer(playerid, NewsDraw[i][Text0]); // Taust
 		TextDrawShowForPlayer(playerid, NewsDraw[i][Text1]); // Pealkiri
@@ -371,7 +371,7 @@ public LoadNewsPapers()
 		
 		mysql_fetch_field_row(Field, "Block4");
 		format(NewsPapers[nId][article4], 256, "%s", Field);
-		
+		/*
 		mysql_fetch_field_row(Field, "Add1");
 		format(NewsPapers[nId][add1], 256, "%s", Field);
 		
@@ -382,7 +382,7 @@ public LoadNewsPapers()
 		format(NewsPapers[nId][add3], 256, "%s", Field);
 		
 		mysql_fetch_field_row(Field, "Add4");
-		format(NewsPapers[nId][add4], 256, "%s", Field);
+		format(NewsPapers[nId][add4], 256, "%s", Field);*/
 		
 		mysql_fetch_field_row(Field, "stat1");
 		NewsPapers[nId][stat1] = strval(Field);
@@ -534,7 +534,7 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 		
 		if(got)
 		{
-			currentPage[playerid] = (currentPage[playerid] > 3)?0:currentPage[playerid];
+			currentPage[playerid] = (currentPage[playerid] > 2)?0:currentPage[playerid];
 			currentPage[playerid] = (currentPage[playerid] < 0)?3:currentPage[playerid];
 			ShowNewsPaper(playerid, currentPaper[playerid]);
 		}
