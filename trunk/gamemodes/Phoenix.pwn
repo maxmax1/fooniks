@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"194"
+#define SCRIPT_REVISION 		"195"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -60,7 +60,9 @@
 #define DIALOG_AACTION 2015
 #define DIALOG_TELEPORTS 2016
 //#define DIALOG_POCKETS 2017 // Reserved
-#define DIALOG_PHONE_ADD 2018
+//#define DIALOG_POCKETSA 2018 // Reserved
+#define DIALOG_PHONE_ADD 2019
+#define DIALOG_PHONE_SMS 2020
 
 /*
 *    INCLUDES
@@ -91,6 +93,7 @@
 #include <phoenix_Users>
 #include <phoenix_Skills>
 #include <phoenix_Pockets>
+#include <phoenix_DropItems>
 #include <phoenix_Vehicles>
 
 #include <phoenix_Phone>
@@ -857,7 +860,46 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	else if( dialogid == DIALOG_POCKETS )
 	{
 		if( response == 0 ) return 1;
-		UseItem(playerid, listitem);
+		ShowActionMenu(playerid, listitem);
+	}
+	else if( dialogid == DIALOG_POCKETSA )
+	{
+		if( response == 0 ) return 1;
+		
+		if(listitem == 0) // Use
+		{
+			UseItem(playerid, gActivePocket[playerid]);
+			gActivePocket[playerid] = -1;
+		}
+		else if(listitem == 3) // drop
+		{
+			if(Drop(playerid, Pockets[playerid][gActivePocket[playerid]][pType], Pockets[playerid][gActivePocket[playerid]][pAmount]))
+			{
+				new rand = random(2);			
+				if(rand == 0)	SendEmote(playerid, "viskab mingi asja maha.");
+				if(rand == 1)	SendEmote(playerid, "asetab pakikese maha.");
+				ClearPocket(playerid, gActivePocket[playerid]);
+			}
+			else
+			{
+				SendClientMessage(playerid, COLOR_RED, "VIGA #2: Teata administraatorile. (DropItem slots are full)");
+			}
+			gActivePocket[playerid] = -1;
+		}
+		else if(listitem == 4) // Destroy
+		{
+			ClearPocket(playerid, gActivePocket[playerid]);
+			gActivePocket[playerid] = -1;
+			
+			new rand = random(3);			
+			if(rand == 0)	SendEmote(playerid, "viskab mingi asja maha ja see puruneb.");
+			if(rand == 1)	SendEmote(playerid, "lõhub mingi asja ära.");
+			if(rand == 2)	SendEmote(playerid, "peksab pakikese puruks.");
+		}
+		else
+		{
+			SendClientMessage(playerid, COLOR_RED, "Sulgudes olevad asjad ei tööta veel.");
+		}
 	}
 	
 	return 1;
@@ -941,8 +983,7 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 			new item = getItemByWeapon(weaponid);
 			if(item != -1)
 			{
-				new slot = getSlotByItem(playerid, item);
-				Pockets[playerid][slot][pAmount]--;
+				RemAmount(playerid, item, 1);
 			}
 		
 			if(SkillDelay[playerid][SKILL_PISTOL] == 0 && weaponid == 22)

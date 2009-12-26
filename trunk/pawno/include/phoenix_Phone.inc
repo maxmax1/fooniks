@@ -22,10 +22,12 @@
 *    DEFINES
 */
 
-#define COLOR_PHONE 0xF0DC82AA
-#define COLOR_PHONE_1 COLOR_GREEN
+#define COLOR_PHONE 	0xF0DC82AA
+#define COLOR_PHONE_1 	COLOR_GREEN
+#define COLOR_SMS 		0xF0DC32AA
 
 #define PHONE_COST 2
+#define SMS_COST   1
 
 #define MAX_CONTACTS 12
 
@@ -76,6 +78,8 @@ new
 	gPlayerCMemoryAdding[MAX_PLAYERS],
 	gPlayerCMemorySlot[MAX_PLAYERS];	
 	
+new	gPlayerSMS[MAX_PLAYERS];
+	
 enum simInf
 {
 	sNumber,
@@ -116,6 +120,8 @@ forward SaveContact(sCard, contact);
 forward RegisterSimCard(sCard);
 forward RegisterContact(sCard, contact);
 forward DropContact(sCard, contact);
+
+forward SendSMS(toPlayer, fromPlayer, fromName[], text[]); 
 
 forward OnPlayerCallEnd(playerid, cellTime);
 
@@ -248,6 +254,38 @@ COMMAND:helista(playerid, params[])
 		}
 		else SendClientMessage(playerid, COLOR_PHONE, "Sellist nime pole sinu kontaktide hulgas.");
 	}	
+	return 1;
+}
+
+COMMAND:sms(playerid, params[])
+{
+	if(getSlotByItem(playerid, ITEM_PHONE) == -1) return SendClientMessage(playerid, COLOR_RED, "Sul pole telefoni!");
+	if(!pInfo[playerid][simCardIn]) return SendClientMessage(playerid, COLOR_RED, "Su telefonis pole SIM-kaarti!");
+	if(gPlayerPhone[playerid][onCall] != CALL_NONE) return SendClientMessage(playerid, COLOR_RED, "Sul on juba kõne pooleli.");
+	
+	new nr = -1, name[16], found;
+	
+	if(sscanf(params, "d", nr) == 0) found = 1;
+	else if(sscanf(params, "s", name) == 0) found = 2;
+	
+	if(found == 0) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /sms number/nimi");
+	if(nr == -1)
+	{
+		new simcard = findSimFromSqlid(pInfo[playerid][simCard]);
+		if(simcard == -1) nr = -1;
+		else nr = FindNumberFromContactname(simcard, name);	
+	}
+	
+	if(nr != -1)
+	{
+		gPlayerSMS[playerid] = findPlayerFromNumber(nr);
+		new string[128];		
+		if(found == 1) format(string, 128, "Saaja: %d\n Sisu:", nr);		
+		else if(found == 2) format(string, 128, "Saaja: %s - %d\n Sisu:", name, nr);		
+		
+		ShowPlayerDialog(playerid, DIALOG_PHONE_SMS, DIALOG_STYLE_INPUT, "SMS", string, "Saada", "Katkesta");
+	}
+	else SendClientMessage(playerid, COLOR_PHONE, "Sellist nime pole sinu kontaktide hulgas.");
 	return 1;
 }
 
@@ -555,7 +593,7 @@ public PhoneTimer()
 					}
 					else
 					{
-						SendFormattedText(playerid, COLOR_PHONE, "Helistab: %d", gContactMemoryName[simcard][foundName], gContactMemoryNR[simcard][foundName]);
+						SendFormattedText(playerid, COLOR_PHONE, "Helistab: %s - %d", gContactMemoryName[simcard][foundName], gContactMemoryNR[simcard][foundName]);
 					}
 				}
 			}
@@ -739,6 +777,45 @@ public DropContact(sCard, contact)
 	return 1;	
 }
 
+public SendSMS(toPlayer, fromPlayer, fromName[], text[])
+{
+	if(toPlayer == -1 && fromPlayer == -1) return 0;
+	else if(fromPlayer == -1)
+	{
+		new string[128];
+		format(string, 128, "SMS Saatja: %s.", fromName);
+		SendClientMessage(toPlayer, COLOR_SMS, string);
+		SendClientMessage(toPlayer, COLOR_SMS, text);
+	}
+	else
+	{
+		new foundName = -1, simcard = findSimFromSqlid(pInfo[fromPlayer][simCard]);
+		new s2 = findSimFromSqlid(pInfo[toPlayer][simCard]);
+
+		if(simcard != -1 && s2 != -1) 
+		{
+			for(new i; i < MAX_CONTACTS; i++)
+			{
+				if(!gContactMemoryUsed[simcard][i]) continue;
+				if(gContactMemoryNR[simcard][i] == gSimCards[s2][sNumber]) foundName = i;
+			}
+
+			if(foundName == -1)
+			{
+				SendFormattedText(toPlayer, COLOR_SMS, "SMS Saatja: %d.", gSimCards[s2][sNumber]);
+			}
+			else
+			{
+				SendFormattedText(toPlayer, COLOR_SMS, "SMS Saatja: %s - %d.", gContactMemoryName[simcard][foundName], gContactMemoryNR[simcard][foundName]);
+			}
+		}
+		SendClientMessage(toPlayer, COLOR_SMS, text);
+		
+		GivePlayerMoneyNew(fromPlayer, -(SMS_COST));
+	}
+	return 1;
+}
+
 /*
 *    ALS
 */
@@ -777,6 +854,7 @@ public OnPlayerDisconnect(playerid)
 	gPlayerPhone[playerid][speakerOn] = false;
 	gPlayerPhone[playerid][onCall] = CALL_NONE;
 	gPlayerPhone[playerid][callPlayer] = -1;
+	gPlayerSMS[playerid] = 0;
 	
     if (g_Phone_Has_OPD != -1)
     {
@@ -855,6 +933,19 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				gPlayerCMemorySlot[playerid] = 0;
 				return 1;
 			}
+		}
+	}
+	else if(dialogid == DIALOG_PHONE_SMS)
+	{
+		if(response == 0)
+		{
+			gPlayerSMS[playerid] = 0;
+			return 1;
+		}
+		else
+		{
+			SendSMS(gPlayerSMS[playerid], playerid, pInfo[playerid][pCharName], inputtext);
+			gPlayerSMS[playerid] = 0;
 		}
 	}
 
