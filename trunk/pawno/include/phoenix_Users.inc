@@ -393,6 +393,19 @@ public ClearPlayerData(playerid)
 	GarbagePlayer[playerid][numGPoints] = 0;
 	#endif
 	
+	#if defined NO_BJ
+	if(gOnBj[playerid] == GETTING_BJ)
+	{
+		EndBJ(playerid, gBjOffer[playerid]);
+	}
+	else if(gOnBj[playerid] == GIVING_BJ)
+	{
+		EndBJ(gBjOffer[playerid], playerid);
+	}
+	gOnBj[playerid] = NO_BJ;
+	gBjOffer[playerid] = -1;
+	#endif
+	
 	clearPockets(playerid);
 }
 
