@@ -31,6 +31,7 @@
 /*
 *    Defines
 */
+
 #define MAX_GARBAGE_POINTS 64
 #define GARBAGE_JOB_ID 1
 #define GARBAGE_TRUCK 408

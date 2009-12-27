@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"199"
+#define SCRIPT_REVISION 		"200"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -71,11 +71,13 @@
 #define JOB_CONFIRM_BOX 	1
 #define JOB_CONFIRM_BOX_C 	2
 #define CONFIRM_TRADE	 	3
+#define CONFIRM_BLOWJOB	 	4
 
 /*
 *    PLAYER LISTS
 */
 #define PLIST_TRADE 		1
+#define PLIST_BLOWJOB 		2
 
 /*
 *    INCLUDES
@@ -102,6 +104,7 @@
 
 #include <phoenix_JobSystem>
 #include <phoenix_StreetCleaner>
+#include <phoenix_Whore>
 
 #include <phoenix_Users>
 #include <phoenix_Skills>
@@ -123,15 +126,18 @@
 public AddAllJobs()
 {
 	JOBS_RegisterJob(GARBAGE_JOB_ID, "GCollector", "Prügivedaja", false, 50, 5);
+	JOBS_RegisterJob(WHORE_JOB_ID, "Whore", "Hoor", false, 0, 6);
 }
 
 public RegisterAllSmartNPC()
 {
-	new smartId;
+	new smartId, Pimp;
 		
-	smartId = RegisterSmartNpc("Jann", "Jann", 242, 2441.3633, -1422.0017, 24.0, 270.0); // Jann:)
+	smartId = RegisterSmartNpc("Jann", "Jann", 242, 2441.3633, -1422.0017, 24.0, 270.0, 0, 0); // Jann:)
+	Pimp = RegisterSmartNpc("Gabriel", "Jann", 249, 1203.3306, 12.6610, 1000.9219, 180.0, 2, 0); // Gabriel:)
 	
 	SmartNpc[smartId][myJobId] = GARBAGE_JOB_ID;
+	SmartNpc[Pimp][myJobId] = WHORE_JOB_ID;
 	
 	AddAutoMessage(smartId, 0, "Mis sa siit otsid?");
 	AddAutoMessage(smartId, 1, "Mis vahid siin, kao minema!");
@@ -139,6 +145,13 @@ public RegisterAllSmartNPC()
 	AddAutoMessage(smartId, 2, "Tööd tahad?");
 	AddAutoMessage(smartId, 3, "Hei sina, tööd tahad?");
 	AddAutoMessage(smartId, 3, "Hei, tööd soovid?");
+	
+	AddAutoMessage(Pimp, 0, "Kao välja siit!");
+	AddAutoMessage(Pimp, 1, "Ei vaata mu naisi!");
+	AddAutoMessage(Pimp, 2, "Noh kenake, sa vajad kindlasti kaitset?");	
+	AddAutoMessage(Pimp, 2, "Mul oleks sinusugusele iludusele tööd pakkuda.");
+	AddAutoMessage(Pimp, 3, "Hei kenake, tööd tahad?");
+	AddAutoMessage(Pimp, 3, "Hei, tööd soovid?");
 	
 	AddDefaultMessage(0, "Räägi ARUSAADAVALT!");	
 	AddDefaultMessage(0, "MIDA!??");	
@@ -171,6 +184,28 @@ public RegisterAllSmartNPC()
 	
 	AddSentence(tGroup1, 3, "Tere, tööd tahad?");
 	AddSentence(tGroup1, 3, "Tere jah, ma olen Jann.");	
+	
+	new tGroup6 = AddTriggerGroup(1);
+	AddTriggerWord(tGroup6, "tere");
+	AddTriggerWord(tGroup6, "jõu");
+	AddTriggerWord(tGroup6, "jou");
+	AddTriggerWord(tGroup6, "gabriel");
+	AddTriggerWord(tGroup6, "hey");
+	AddTriggerWord(tGroup6, "hei");
+	
+	AddSentence(tGroup6, 0, "Kasi minema!");
+	AddSentence(tGroup6, 0, "Kao ära!");
+	AddSentence(tGroup6, 0, "Kas ma pean sulle laksu andma?");
+	
+	AddSentence(tGroup6, 1, "Ole vait!");
+	AddSentence(tGroup6, 1, "Jäta mind rahule, niigi raske päev olnud.");
+	
+	AddSentence(tGroup6, 2, "Tere tere.");
+	AddSentence(tGroup6, 2, "Tervist kenake!");
+	AddSentence(tGroup6, 2, "Tere. Kena türduk oled.");
+	
+	AddSentence(tGroup1, 3, "Tere, tööd tahad?");
+	AddSentence(tGroup1, 3, "Tere jah, ma olen Gabriel.");	
 	
 	new tGroup2 = AddTriggerGroup(-1);
 	AddTriggerWord(tGroup2, "munn");
@@ -268,6 +303,12 @@ public RegisterAllSmartNPC()
 	RegisterTriggerGroup(tGroup3, smartId);
 	RegisterTriggerGroup(tGroup4, smartId);
 	RegisterTriggerGroup(tGroup5, smartId);
+	
+	RegisterTriggerGroup(tGroup6, Pimp);
+	RegisterTriggerGroup(tGroup2, Pimp);
+	RegisterTriggerGroup(tGroup3, Pimp);
+	RegisterTriggerGroup(tGroup4, Pimp);
+	RegisterTriggerGroup(tGroup5, Pimp);
 }
 
 /*
@@ -800,6 +841,7 @@ public OnPlayerSpawn(playerid)
 	PreloadAnimLib(playerid,"benchpress");
 	PreloadAnimLib(playerid,"Freeweights");
 	PreloadAnimLib(playerid,"GYMNASIUM");
+	PreloadAnimLib(playerid,"BLOWJOBZ");
 	
 	if(IsPlayerNPC(playerid))
 	{
@@ -1391,6 +1433,18 @@ COMMAND:mjuurde(playerid, params[])
 	new selectedplayer;
 	if ( sscanf(params, "u", selectedplayer) ) return SendClientMessage(playerid, COLOR_YELLOW, "KASUTUS: /mjuurde [ID/NIMI]");
     WarpPlayerToPlayer(playerid, selectedplayer);
+    return 1;
+}
+
+COMMAND:resetjob(playerid, params[])
+{
+	if( pInfo[playerid][pAdminLevel] == 0 ) return SendClientMessage(playerid,COLOR_YELLOW, LANG_NOT_ADMIN);
+	
+	gMyJob[playerid] = 0;
+	gMyContract[playerid] = 0;
+	
+	SendClientMessage(playerid, COLOR_GREEN, "Töö nullitud.");
+	
     return 1;
 }
 
@@ -2042,6 +2096,24 @@ public OnPlayerConfirm(playerid, response, boxId)
 
 		gActivePocket[otherId] = -1;
 	}
+	else if(boxId == CONFIRM_BLOWJOB)
+	{
+		new otherId = gBjOffer[playerid];
+		
+		if(PlayerMoney[playerid] < gMyBjPrice[otherId])
+		{
+			SendClientMessage(playerid, COLOR_RED, "Sul pole piisavalt raha.");
+			SendClientMessage(otherId, COLOR_RED, "Teisel mängijal pole piisavalt raha.");
+			
+			gMyBjPrice[otherId] = 0;			
+			gBjOffer[playerid] = -1;
+			gBjOffer[otherId] = -1;	
+		}
+		else
+		{
+			HaveBJ(playerid, otherId);
+		}		
+	}
 	else SendClientMessage(playerid, COLOR_YELLOW, "VALE KAST!");
 }
 
@@ -2164,6 +2236,21 @@ public OnPlayerSelectPlayer(playerid, otherId, listId, btn)
 		{
 			gActivePocket[playerid] = -1;
 		}
+	}
+	else if(listId == PLIST_BLOWJOB)
+	{
+		if(btn != 0)
+		{
+			new string[128];
+			format(string, 128, "Isik: %s \n\t Soovib sult suhu võtta. Hind: %d\nSoovid teenust?",
+				pInfo[playerid][pCharName],
+				gMyBjPrice[playerid]);				
+			ShowPlayerConfirmbox(otherId, CONFIRM_BLOWJOB, string);
+			
+			gBjOffer[playerid] = otherId;
+			gBjOffer[otherId] = playerid;
+		}
+		else gMyBjPrice[playerid] = 0;
 	}
 	return 1;
 }

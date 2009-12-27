@@ -43,7 +43,9 @@ enum smartInf
 	Float: myZ,
 	Float: myAng,
 	mySkin,
-	myJobId
+	myJobId,
+	myInt,
+	myVW
 };
 new SmartNpc[MAX_SMART_NPC][smartInf];
 
@@ -99,7 +101,7 @@ Itter_Create(AutoMessage, MAX_AUTOMESSAGES);
 
 forward RegisterAllSmartNPC();
 forward ConnectAllSmartNPC();
-forward RegisterSmartNpc(name[], script[], skin, Float: posX, Float: posY, Float: posZ, Float: posAng);
+forward RegisterSmartNpc(name[], script[], skin, Float: posX, Float: posY, Float: posZ, Float: posAng, int, vw);
 forward SmartChatWithMe(playerid, text[]);
 forward AutoMessageTimer(smartId);
 forward sendAuto(smartid, text);
@@ -287,7 +289,7 @@ public ConnectAllSmartNPC()
 	}	
 }
 
-public RegisterSmartNpc(name[], script[], skin, Float: posX, Float: posY, Float: posZ, Float: posAng)
+public RegisterSmartNpc(name[], script[], skin, Float: posX, Float: posY, Float: posZ, Float: posAng, int, vw)
 {
 	new freeId = Itter_Free(SmartNPC);
 	if(freeId == -1) return -1;
@@ -300,6 +302,8 @@ public RegisterSmartNpc(name[], script[], skin, Float: posX, Float: posY, Float:
 	SmartNpc[freeId][myZ] = posZ;
 	SmartNpc[freeId][myAng] = posAng;
 	SmartNpc[freeId][mySkin] = skin;
+	SmartNpc[freeId][myInt] = int;
+	SmartNpc[freeId][myVW] = vw;
 	
 	Itter_Add(SmartNPC, freeId);
 	return freeId;
@@ -329,6 +333,8 @@ public AutoMessageTimer(smartId)
 		SetPlayerPos(SmartNpc[smartId][mySelf], SmartNpc[smartId][myX], SmartNpc[smartId][myY], SmartNpc[smartId][myZ]);
 		SetPlayerFacingAngle(SmartNpc[smartId][mySelf], SmartNpc[smartId][myAng]);
 		SetPlayerSkin(SmartNpc[smartId][mySelf], SmartNpc[smartId][mySkin]);
+		SetPlayerInterior(SmartNpc[smartId][mySelf], SmartNpc[smartId][myInt]);
+		SetPlayerVirtualWorld(SmartNpc[smartId][mySelf], SmartNpc[smartId][myVW]);
 	}
 
 	new Float: x, Float: y, Float: z;
