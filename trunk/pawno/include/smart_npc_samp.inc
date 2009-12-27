@@ -479,6 +479,7 @@ public OnPlayerConnect(playerid)
 			new smID = getSmartIdFromName(tempStr);
 			if(smID == -1)
 			{
+				print("bad NPC name!");
 				Kick(playerid);
 			}
 			else

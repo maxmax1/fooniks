@@ -74,7 +74,8 @@ forward Rest(playerid);
 forward IsPlayerNearRestingPlace(playerid);
 forward RestingEnd(playerid);
 forward RestChange();
-forward RestUpdate();
+forward GivePlayerRestprecent(playerid, Float: amount);
+forward RestUpdateForPlayer(playerid);
 
 forward Rest_OnGameModeInit();
 forward Rest_OnPlayerDisconnect(playerid);
@@ -175,44 +176,42 @@ public ClearResting(playerid)
 
 public RestChange()
 {
-	foreach (Player, playerid)
+	foreach (User, playerid)
 	{
-	    if( pInfo[playerid][pLoggedIn] && !IsPlayerNPC(playerid) )
+		if( pResting[playerid] )
 		{
-			if( pResting[playerid] )
+			new Float: Rem = 1.0;
+			
+			if(pRestingAt[playerid] != -1)
 			{
-				new Float: Rem = 1.0;
-				
-				if(pRestingAt[playerid] != -1)
-				{
-					Rem = 2.5;
-					if(RestPositions[pRestingAt[playerid]][restType] == REST_LAY) Rem = 5.0;
-				}
-				
-				if(pSkillLevel[playerid][SKILL_ATHLETE] > 10) Rem = 1.0 + (pSkillLevel[playerid][SKILL_ATHLETE] / 25);
-				
-				pRest[playerid] += Rem;
-				XpAdd(playerid, SKILL_ATHLETE, 25);
+				Rem = 2.5;
+				if(RestPositions[pRestingAt[playerid]][restType] == REST_LAY) Rem = 5.0;
 			}
-			else
-			{
-				if(IsPlayerInAnyVehicle(playerid)) pRest[playerid] += 1.0;
-			}
-			if(pRest[playerid] < 0.0) pRest[playerid] = 0.0;
-			if(pRest[playerid] > 100.0) pRest[playerid] = 100.0;
+			
+			if(pSkillLevel[playerid][SKILL_ATHLETE] > 10) Rem = 1.0 + (pSkillLevel[playerid][SKILL_ATHLETE] / 25);
+			
+			GivePlayerRestprecent(playerid, Rem);
+			XpAdd(playerid, SKILL_ATHLETE, 25);
 		}
+		else
+		{
+			if(IsPlayerInAnyVehicle(playerid)) GivePlayerRestprecent(playerid, 1.0);
+		}
+		RestUpdateForPlayer(playerid);
 	}
 }
 
-public RestUpdate()
+public GivePlayerRestprecent(playerid, Float: amount)
 {
-	foreach (Player, playerid)
-	{
-	    if( pInfo[playerid][pLoggedIn] && !IsPlayerNPC(playerid) )
-		{
-			if(progressInf[restBar][innerPrecent][playerid] != pRest[playerid]) setProgressBar(restBar, playerid, pRest[playerid]);
-		}
-	}
+	pRest[playerid] += amount;
+	if(pRest[playerid] < 0.0) pRest[playerid] = 0.0;
+	if(pRest[playerid] > 100.0) pRest[playerid] = 100.0;
+	RestUpdateForPlayer(playerid);
+}
+
+public RestUpdateForPlayer(playerid)
+{
+	if(progressInf[restBar][innerPrecent][playerid] != pRest[playerid]) setProgressBar(restBar, playerid, pRest[playerid]);
 }
 
 COMMAND:puhka(playerid, params[])
@@ -236,8 +235,7 @@ COMMAND:puhkakiirelt(playerid, params[])
 public OnGameModeInit()
 {
 	restBar = CreateProgressbar(548.2, 61.5, 53.8, 0.1, 2.0, COLOR_BLACK, COLOR_YELLOW, COLOR_WHITE);
-	SetTimer("RestChange", 10000, true);	
-	SetTimer("RestUpdate", 5000, true);	
+	SetTimer("RestChange", 10000, true);
 	
 	if (funcidx("Rest_OnGameModeInit") != -1)
     {
