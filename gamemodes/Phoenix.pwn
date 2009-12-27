@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"197"
+#define SCRIPT_REVISION 		"198"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -69,7 +69,8 @@
 *    CONFIRM BOXES
 */
 #define JOB_CONFIRM_BOX 	1
-#define CONFIRM_TRADE	 	2
+#define JOB_CONFIRM_BOX_C 	2
+#define CONFIRM_TRADE	 	3
 
 /*
 *    PLAYER LISTS
@@ -88,10 +89,10 @@
 #include <zcmd> 			 // author: Zeex, External Credit #5
 #include <stuff> 	 		 // some Stuff Needed EveryWhere
 #include <playerlist> 		 // close Players List
-#include <smart_npc_samp> 	 // SmartNPC
-#include <streamer> 	 	 // SmartNPC
+#include <streamer> 	 	 //
 
 #include <phoenix_Core>
+#include <smart_npc_samp> 	 // SmartNPC
 #include <phoenix_RealcarData>
 #include <phoenix_Money>
 #include <phoenix_Status>
@@ -125,7 +126,147 @@ public AddAllJobs()
 
 public RegisterAllSmartNPC()
 {
-	RegisterSmartNpc("Jann", "Jann");
+	new smartId;
+		
+	smartId = RegisterSmartNpc("Jann", "Jann", 242, 2441.3633, -1422.0017, 24.0, 270.0); // Jann:)
+	
+	SmartNpc[smartId][myJobId] = GARBAGE_JOB_ID;
+	
+	AddAutoMessage(smartId, 0, "Mis sa siit otsid?");
+	AddAutoMessage(smartId, 1, "Mis vahid siin, kao minema!");
+	AddAutoMessage(smartId, 2, "Aega on? Mul oleks tööd pakkuda... Tahad?");	
+	AddAutoMessage(smartId, 2, "Tööd tahad?");
+	AddAutoMessage(smartId, 3, "Hei sina, tööd tahad?");
+	AddAutoMessage(smartId, 3, "Hei, tööd soovid?");
+	
+	AddDefaultMessage(0, "Räägi ARUSAADAVALT!");	
+	AddDefaultMessage(0, "MIDA!??");	
+	AddDefaultMessage(1, "Oota, Misasja?");	
+	AddDefaultMessage(1, "Ma ei mõista su keelt?");	
+	AddDefaultMessage(2, "Ma ei saa sust aru.");	
+	AddDefaultMessage(2, "Räägi arusaadavalt.");	
+	AddDefaultMessage(3, "Palun räägi selgemalt.");	
+	AddDefaultMessage(3, "Palun räägi arusaadavalt.");
+	
+	new tGroup1 = AddTriggerGroup(1);
+	AddTriggerWord(tGroup1, "tere");
+	AddTriggerWord(tGroup1, "jõu");
+	AddTriggerWord(tGroup1, "jou");
+	AddTriggerWord(tGroup1, "jann");
+	AddTriggerWord(tGroup1, "hey");
+	AddTriggerWord(tGroup1, "hei");
+	new tempSentenceId;
+	
+	AddSentence(tGroup1, 0, "Kasi minema!");
+	AddSentence(tGroup1, 0, "Kao ära!");
+	AddSentence(tGroup1, 0, "Ma lõpetan oma suitsu ära ja tulen õpetan sind väheke!");
+	
+	AddSentence(tGroup1, 1, "Ole vait!");
+	AddSentence(tGroup1, 1, "Jäta mind rahule, niigi raske päev olnud.");
+	
+	AddSentence(tGroup1, 2, "Tere tere.");
+	AddSentence(tGroup1, 2, "Tervist noorhärra!");
+	AddSentence(tGroup1, 2, "Tere. Ilus päev täna, või mis?");
+	
+	AddSentence(tGroup1, 3, "Tere, tööd tahad?");
+	AddSentence(tGroup1, 3, "Tere jah, ma olen Jann.");	
+	
+	new tGroup2 = AddTriggerGroup(-1);
+	AddTriggerWord(tGroup2, "munn");
+	AddTriggerWord(tGroup2, "pede");
+	AddTriggerWord(tGroup2, "homo");
+	AddTriggerWord(tGroup2, "gey");
+	AddTriggerWord(tGroup2, "lits");
+	AddTriggerWord(tGroup2, "hoor");
+	AddTriggerWord(tGroup2, "munn");
+	AddTriggerWord(tGroup2, "hoor");
+	
+	AddSentence(tGroup2, 0, "Ma tapan su ära!");
+	AddSentence(tGroup2, 0, "Kui ma su kätte saan, raisk!");
+	AddSentence(tGroup2, 0, "KÄI PERSE RAISK, NOLK SELLINE, KAO MINEMA!");
+	
+	AddSentence(tGroup2, 1, "Ole parem vait.");
+	AddSentence(tGroup2, 1, "Käi õige kuradile!");
+	AddSentence(tGroup2, 1, "Samad sõnad.");	
+	
+	AddSentence(tGroup2, 2, "Sama sullegi.");
+	AddSentence(tGroup2, 2, "Edu.");
+	AddSentence(tGroup2, 2, "Kuradi lohh, ole vait parem.");
+	
+	AddSentence(tGroup2, 3, "Lohh");
+	
+	new tGroup3 = AddTriggerGroup(0);
+	AddTriggerWord(tGroup3, "tööd");
+	AddTriggerWord(tGroup3, "tahan");
+	AddTriggerWord(tGroup3, "teha");	
+	AddTriggerWord(tGroup3, "küll");	
+	AddTriggerWord(tGroup3, "ikka");	
+	
+	AddSentence(tGroup3, 0, "Ei saa sa mingit tööd...");
+	AddSentence(tGroup3, 0, "Sina ja tööd, Ahh käi parem perse.");
+	AddSentence(tGroup3, 1, "Kui sa vähe korralikumalt käituda mõistaksid siis ehk saaksid tööle.");
+	AddSentence(tGroup3, 1, "Mul ei ole sulle küll tööd anda.");
+	
+	tempSentenceId = AddSentence(tGroup3, 0, "Ei annaks ka sulle.");
+	SetNegative(tempSentenceId);
+	tempSentenceId = AddSentence(tGroup3, 0, "Sulle ma ei annaks ka.");
+	SetNegative(tempSentenceId);
+	tempSentenceId = AddSentence(tGroup3, 1, "Mul ei oleks sulle anda ikka...");
+	SetNegative(tempSentenceId);
+	
+	tempSentenceId = AddSentence(tGroup3, 2, "säh, uuri lepingut.");
+	AddSentencePlayerFunction(tempSentenceId, "OnPlayerRequestJob");
+	tempSentenceId = AddSentence(tGroup3, 2, "näe uuri lepingut.");
+	AddSentencePlayerFunction(tempSentenceId, "OnPlayerRequestJob");
+	tempSentenceId = AddSentence(tGroup3, 3, "Palun, uuri lepingut.");
+	AddSentencePlayerFunction(tempSentenceId, "OnPlayerRequestJob");
+
+	tempSentenceId = AddSentence(tGroup3, 2, "Kui ei taha, siis ei saa ka.");
+	SetNegative(tempSentenceId);
+	tempSentenceId = AddSentence(tGroup3, 3, "Kui ei taha, siis ei taha.");
+	SetNegative(tempSentenceId);
+	
+	new tGroup4 = AddTriggerGroup(0);
+	AddTriggerWord(tGroup4, "leping");
+	AddTriggerWord(tGroup4, "pikendada");
+	AddTriggerWord(tGroup4, "tööleping");
+	
+	AddSentence(tGroup4, 0, "Kurat küll, mul niigi sitt päev olnud ja siis tuled sina siia oma paberimajandusega.");
+	AddSentence(tGroup4, 0, "Vot ei pikenda!");
+	
+	AddSentence(tGroup4, 1, "Vaatab seda asja hiljem.");
+	AddSentence(tGroup4, 1, "MUL POLE AEGA!");
+	
+	tempSentenceId = AddSentence(tGroup4, 2, "Täida need paberid ära siis.");
+	AddSentencePlayerFunction(tempSentenceId, "OnPlayerRenewContract");
+	
+	tempSentenceId = AddSentence(tGroup4, 2, "no täida paberid ära.");
+	AddSentencePlayerFunction(tempSentenceId, "OnPlayerRenewContract");
+	
+	tempSentenceId = AddSentence(tGroup4, 3, "No pikendame siis seda.");
+	AddSentencePlayerFunction(tempSentenceId, "OnPlayerRenewContract");	
+	
+	new tGroup5 = AddTriggerGroup(0);
+	AddTriggerWord(tGroup5, "ilm");
+	AddTriggerWord(tGroup5, "päev");
+	AddTriggerWord(tGroup5, "kena");	
+	
+	AddSentence(tGroup5, 0, "Mis mul sellest?");
+	AddSentence(tGroup5, 0, "EI HUVITA!");
+	
+	AddSentence(tGroup5, 1, "Kotib? Ei Koti!");
+	
+	AddSentence(tGroup5, 2, "Suht kena teine jah.");
+	AddSentence(tGroup5, 2, "Pole väga vigagi.");
+	
+	AddSentence(tGroup5, 3, "Paremat ei oskaks tahtagi.");
+	AddSentence(tGroup5, 3, "Minuarust on jube ilus!");
+	
+	RegisterTriggerGroup(tGroup1, smartId);
+	RegisterTriggerGroup(tGroup2, smartId);
+	RegisterTriggerGroup(tGroup3, smartId);
+	RegisterTriggerGroup(tGroup4, smartId);
+	RegisterTriggerGroup(tGroup5, smartId);
 }
 
 /*
@@ -637,6 +778,21 @@ public OnPlayerRequestClass(playerid)
 
 public OnPlayerSpawn(playerid)
 {
+	PreloadAnimLib(playerid,"BOMBER");
+	PreloadAnimLib(playerid,"RAPPING");
+	PreloadAnimLib(playerid,"SHOP");
+	PreloadAnimLib(playerid,"BEACH");
+	PreloadAnimLib(playerid,"SMOKING");
+	PreloadAnimLib(playerid,"FOOD");
+	PreloadAnimLib(playerid,"ON_LOOKERS");
+	PreloadAnimLib(playerid,"DEALER");
+	PreloadAnimLib(playerid,"CRACK");
+	PreloadAnimLib(playerid,"CARRY");
+	PreloadAnimLib(playerid,"COP_AMBIENT");
+	PreloadAnimLib(playerid,"PARK");
+	PreloadAnimLib(playerid,"INT_HOUSE");
+	PreloadAnimLib(playerid,"FOOD");
+	
 	if(IsPlayerNPC(playerid))
 	{
 		if(pInfo[playerid][npcId] == NPC_IGOR)
@@ -677,23 +833,7 @@ public OnPlayerSpawn(playerid)
 	ProccesBarShowForPlayer(foodBar, playerid);
 	TogglePlayerClock(playerid, 1);
 	
-	pInfo[playerid][pControllable] = 1;
-	
-	PreloadAnimLib(playerid,"BOMBER");
-	PreloadAnimLib(playerid,"RAPPING");
-	PreloadAnimLib(playerid,"SHOP");
-	PreloadAnimLib(playerid,"BEACH");
-	PreloadAnimLib(playerid,"SMOKING");
-	PreloadAnimLib(playerid,"FOOD");
-	PreloadAnimLib(playerid,"ON_LOOKERS");
-	PreloadAnimLib(playerid,"DEALER");
-	PreloadAnimLib(playerid,"CRACK");
-	PreloadAnimLib(playerid,"CARRY");
-	PreloadAnimLib(playerid,"COP_AMBIENT");
-	PreloadAnimLib(playerid,"PARK");
-	PreloadAnimLib(playerid,"INT_HOUSE");
-	PreloadAnimLib(playerid,"FOOD");
-	
+	pInfo[playerid][pControllable] = 1;	
 	return 1;
 }
 
@@ -1195,6 +1335,7 @@ COMMAND:c(playerid, params[])
 	format(str, sizeof(str),"%s:  %s", pInfo[playerid][pCharName], text);	
 	SetPlayerChatBubble(playerid, str, COLOR_CHAT_IC, CHAT_RADIUS, delay);
 	SCMTAInPlayerRadius(playerid, CHAT_RADIUS, COLOR_CHAT_IC, str);
+	SmartChatWithMe(playerid, text);
 	return 1;
 }
 
@@ -1219,6 +1360,8 @@ COMMAND:s(playerid, params[])
 	format(str, sizeof(str), "%s %s: %s", pInfo[playerid][pCharName], LANG_ACTION_SHOUT, text);
 	SetPlayerChatBubble(playerid, str, COLOR_CHAT_SHOUT, CHAT_RADIUS_SHOUT, delay);
 	SCMTAInPlayerRadius(playerid, CHAT_RADIUS_SHOUT, COLOR_CHAT_SHOUT, str);
+	
+	SmartChatWithMe(playerid, text);
 	return 1;
 }
 COMMAND:es(playerid, params[])
@@ -1745,7 +1888,7 @@ public TogglePlayerControllableEx(playerid, toggle, timer)
 
 public OnNewHour()
 {
-	SendFormattedTextToAll(COLOR_GREEN, "Kell on nüüd %d:0%d.", gHour, gMinute);
+	SendFormattedTextToAll(COLOR_GREEN, "Kell on nüüd %02d:%02d.", gHour, gMinute);
 	
 	foreach(User, playerid)
 	{
@@ -1756,12 +1899,41 @@ public OnNewHour()
 			{
 				SendFormattedText(playerid, COLOR_GREEN, LANG_JOB_CONTRACT_TIME, gMyContract[playerid]);
 			}
-			else
+			else if(gMyContract[playerid] == 0)
 			{
 				SendClientMessage(playerid, COLOR_GREEN, LANG_JOB_CONTRACT_END);
 			}			
+			else
+			{
+				gMyContract[playerid] = 0;
+				gMyJob[playerid] = 0;
+				SendClientMessage(playerid, COLOR_GREEN, LANG_JOB_CONTRACT_QUIT);
+			}
 		}
 	}
+}
+
+public OnPlayerRenewContract(playerid, fromWho)
+{
+	if(gMyJob[playerid] != fromWho)
+	{
+		SendClientMessage(playerid, COLOR_RED, "See ei ole sinu ülemus.");
+		return 1;
+	}
+	if(gMyContract[playerid] != 0)
+	{
+		SendClientMessage(playerid, COLOR_RED, "Sa ei saa veel oma lepingut uuendada.");
+		return 2;
+	}
+
+	new jobId = gMyJob[playerid];
+	new expTime = 6 - floatround(gMinute/10);
+
+	new string[128];
+	format(string, 128, "Kas nõustud töölepingu pikendusega?\n\tAmet: %s\n\tPalk: %d %s \n\tTööaeg: %d", gJobsNames[jobId], gJobsPay[jobId], (gJobsPayH[jobId]?(" tunnis"):("(tükitöö)")), gJobsTime[jobId]+expTime);
+	pJobRequestT[playerid] = gJobsTime[jobId]+expTime;
+	ShowPlayerConfirmbox(playerid, JOB_CONFIRM_BOX_C, string);	
+	return 0;
 }
 
 public OnPlayerJobChange(playerid, bool: success)
@@ -1779,12 +1951,19 @@ public OnPlayerJobChange(playerid, bool: success)
 
 public OnPlayerRequestJob(playerid, jobId)
 {
+	if(gMyJob[playerid] != 0)
+	{
+		SendClientMessage(playerid, COLOR_RED, "Sul on juba töö.");
+		return 3;
+	}
+
 	new string[64];
-	format(string, 64, "Kas nõustud töölepinguga?\n\tAmet: %s\n\tPalk: %d %s\n\tTööaeg: %d", gJobsNames[jobId], gJobsPay[jobId], (gJobsPayH[jobId]?(" tunnis"):("(tükitöö)")), gJobsTime[jobId]);
+	format(string, 64, "Kas nõustud töölepinguga?\n\tAmet: %s\n\tPalk: %d %s \n\tTööaeg: %d", gJobsNames[jobId], gJobsPay[jobId], (gJobsPayH[jobId]?(" tunnis"):("(tükitöö)")), gJobsTime[jobId]);
 	ShowPlayerConfirmbox(playerid, JOB_CONFIRM_BOX, string);
 	
 	pJobRequest[playerid] = jobId;
 	pJobRequestT[playerid] = gJobsTime[jobId];
+	return 0;
 }
 
 public OnPlayerConfirm(playerid, response, boxId)
@@ -1793,6 +1972,15 @@ public OnPlayerConfirm(playerid, response, boxId)
 	{
 		if(response != 0) SetPlayerJob(playerid, pJobRequest[playerid], pJobRequestT[playerid]);
 		else SendClientMessage(playerid, COLOR_YELLOW, LANG_REFUSE_JOB);
+	}
+	else if(boxId == JOB_CONFIRM_BOX_C)
+	{
+		if(response != 0) 
+		{
+			gMyContract[playerid] = pJobRequestT[playerid];
+			SendClientMessage(playerid, COLOR_YELLOW, LANG_ACCEPT_RENEW);
+		}
+		else SendFormattedText(playerid, COLOR_YELLOW, LANG_REFUSE_RENEW, 60 - gMinute);
 	}
 	else if(boxId == CONFIRM_TRADE)
 	{
