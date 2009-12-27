@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.2"
-#define SCRIPT_REVISION 		"198"
+#define SCRIPT_REVISION 		"199"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -105,18 +105,19 @@
 
 #include <phoenix_Users>
 #include <phoenix_Skills>
+#include <phoenix_Anims>
+#include <phoenix_ProgressBar>
+#include <phoenix_Resting>
+#include <phoenix_Gym>
 #include <phoenix_Pockets>
 #include <phoenix_DropItems>
 #include <phoenix_Vehicles>
 
 #include <phoenix_Phone>
 
-#include <phoenix_Anims>
-#include <phoenix_ProgressBar>
 #include <phoenix_Interiors>
 #include <phoenix_HelpDraw>
 #include <phoenix_AddSystem>
-#include <phoenix_Resting>
 //#include <AntiShiit>
 
 public AddAllJobs()
@@ -278,7 +279,7 @@ public RegisterAllSmartNPC()
 #define CHAT_RADIUS_SHOUT 40
 
 #define STRING_LENGHT 256
-#define MAX_TELEPORTS 10
+#define MAX_TELEPORTS 14
 
 #define NPC_IGOR 1
 
@@ -314,7 +315,11 @@ new telePositions[MAX_TELEPORTS][posInfo] =
 	{"Staadion", 2680.4749, -1672.8507, 9.4194, 2682.1299, -1672.1379, 9.1324},
 	{"PigPen", 2427.9739, -1242.3777, 24.2333, 2426.4302, -1243.2527, 23.8387},
 	{"pay'N'spray", 2074.6631, -1825.7513, 13.5469, 2076.2275, -1824.9553, 13.1682},
-	{"TenGreen", 2351.5228, -1673.0512, 13.5469, 2351.5228, -1673.0512, 13.1682}
+	{"TenGreen", 2351.5228, -1673.0512, 13.5469, 2351.5228, -1673.0512, 13.1682},
+	{"Grove Gym", 2225.9417, -1724.8311, 13.1400, 2225.9417, -1724.8311, 13.1400},
+	{"Rand", 666.8824, -1879.6266, 5.4600, 666.8824, -1879.6266, 5.4600},
+	{"Kalastuskai", 370.9332, -2044.7448, 7.2427, 370.9332, -2044.7448, 7.2427},
+	{"Majakas", 153.7466, -1941.4496, 3.7734, 153.7466, -1941.4496, 3.7734}
 };
 
 /*
@@ -483,8 +488,7 @@ MegaJump(playerid)
 		SetTimerEx("ClearDelay", 10000, 0, "ii", playerid, SKILL_ATHLETE);
 		XpAdd(playerid, SKILL_ATHLETE, 25);
 		
-		pRest[playerid] -= JumpEnergy;
-		setProgressBar(restBar, playerid, pRest[playerid]);
+		GivePlayerRestprecent(playerid, -(JumpEnergy));
 	}
 	return 1;
 }
@@ -714,13 +718,14 @@ public OnGameModeInit()
 	AddHelpDraw(1939.5618, -1773.0765, 12.9710, "TANKLA", "Kütuse ostmiseks vajuta ENTER.");
 	AddHelpDraw(1840.4050, -1857.0118, 12.9691, "AUTOTÖÖKODA", "Sisenemiseks vajuta ENTER.");
 	AddHelpDraw(1025.4198, -1881.5576, 12.3513, "TURG", "Leia omale vaba putka ning kasuta /turg käsku, et kaupu müüa.");
-	AddHelpDraw(654.1728, -1863.9569, 5.4609, "KANG", "Trenni tegemiseks vajuta ENTER.");
 	AddHelpDraw(774.0507, 1.5343, 1001.1402, "KANG", "Trenni tegemiseks vajuta ENTER.");
 	AddHelpDraw(770.0912, 13.4033, 1000.6996, "POKSIKOTID", "Trenni tegemiseks vajuta ENTER.");
 	AddHelpDraw(396.9932,-2087.8381,7.8359, "KALAPÜÜK", "Püügi alustamiseks vajuta ENTER.");
 	AddHelpDraw(387.3677,-2087.9058,7.8359, "KALAPÜÜK", "Püügi alustamiseks vajuta ENTER.");
 	AddHelpDraw(367.4025,-2087.6528,7.8359, "KALAPÜÜK", "Püügi alustamiseks vajuta ENTER.");
 	AddHelpDraw(358.8732,-2087.8032,7.8359, "KALAPÜÜK", "Püügi alustamiseks vajuta ENTER.");
+	
+	AddBench(772.9750, 1.4162, 1000.7209, 270.0);
 	
 	return 1;
 }
@@ -792,6 +797,9 @@ public OnPlayerSpawn(playerid)
 	PreloadAnimLib(playerid,"PARK");
 	PreloadAnimLib(playerid,"INT_HOUSE");
 	PreloadAnimLib(playerid,"FOOD");
+	PreloadAnimLib(playerid,"benchpress");
+	PreloadAnimLib(playerid,"Freeweights");
+	PreloadAnimLib(playerid,"GYMNASIUM");
 	
 	if(IsPlayerNPC(playerid))
 	{
@@ -831,6 +839,9 @@ public OnPlayerSpawn(playerid)
 	SetCameraBehindPlayer(playerid);
 	
 	ProccesBarShowForPlayer(foodBar, playerid);
+	pRest[playerid] = 100.0;
+	RestUpdateForPlayer(playerid);
+	
 	TogglePlayerClock(playerid, 1);
 	
 	pInfo[playerid][pControllable] = 1;	
@@ -1870,7 +1881,7 @@ public SyncAllPlayerTime()
 stock SetWorldTimeEx(hour, minute)
 {
 	new string[24];
-	format(string, 24, "worldtime %d:%d", hour, minute);
+	format(string, 24, "worldtime %02d:%02d", hour, minute);
 	SendRconCommand(string);
 }
 public TogglePlayerControllableEx(playerid, toggle, timer)
@@ -2114,7 +2125,7 @@ public OnPlayerHitPlayer(playerid, weaponid, targetid)
 			pH -= float(mod);
 			SetPlayerHealth(targetid, pH);
 			
-			pRest[playerid] -= (pRest[playerid] > 25)?25.0:pRest[playerid];
+			GivePlayerRestprecent(playerid, 25.0);
 		}
 	}
 	return 0;
@@ -2155,6 +2166,14 @@ public OnPlayerSelectPlayer(playerid, otherId, listId, btn)
 		}
 	}
 	return 1;
+}
+
+public OnWeightLifted(playerid)
+{
+	XpAdd(playerid, SKILL_ATHLETE, 50);
+	
+	new Float: amount = 20 - floatround(pSkillLevel[playerid][SKILL_ATHLETE] / 5);
+	GivePlayerRestprecent(playerid, -(amount));
 }
 
 /*

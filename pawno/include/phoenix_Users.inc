@@ -277,6 +277,9 @@ public UpdatePlayer(playerid)
 	GetPlayerPos(playerid, pInfo[playerid][pPosX], pInfo[playerid][pPosY], pInfo[playerid][pPosZ]);
 	GetPlayerFacingAngle(playerid, pInfo[playerid][pAngle]);
 	GetPlayerHealth(playerid, pInfo[playerid][pHealth]);
+
+	pInfo[playerid][pInterior] = GetPlayerInterior(playerid);
+	pInfo[playerid][pVW] = GetPlayerVirtualWorld(playerid);
 	
 	new sqlid = pInfo[playerid][pSqlId];
 	
