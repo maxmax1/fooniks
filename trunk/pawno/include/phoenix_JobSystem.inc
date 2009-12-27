@@ -89,6 +89,7 @@ forward AddAllJobs();
 forward OnPlayerRequestJob(playerid, jobId);
 forward OnPlayerJobChange(playerid, bool: success);
 forward AddJobCommand(jobId, myCommand[]);
+forward OnPlayerRenewContract(playerid, fromWho);
 	
 /*
 *    ALS NEXT ONES
@@ -141,7 +142,6 @@ public AddJobCommand(jobId, myCommand[])
 
 COMMAND:t88abi(playerid, params[])
 {
-	#pragma unused params
 	if(gMyJob[playerid] < 1 || gMyJob[playerid] > MAX_JOBS || !gJobsRegistred[gMyJob[playerid]])
 	{
 		return SendClientMessage(playerid, COLOR_RED, "Sul pole töökohta.");
@@ -156,6 +156,30 @@ COMMAND:t88abi(playerid, params[])
 		}
 	}	
 	SendClientMessage(playerid, COLOR_GREEN, "**************");
+	return 1;
+}
+
+COMMAND:t88(playerid, params[])
+{
+	if(gMyJob[playerid] < 1 || gMyJob[playerid] > MAX_JOBS || !gJobsRegistred[gMyJob[playerid]])
+	{
+		return SendClientMessage(playerid, COLOR_RED, "Sul pole töökohta.");
+	}
+	
+	SendClientMessage(playerid, COLOR_GREEN, "***** Töö *****");
+	
+	new string[128], jobId = gMyJob[playerid];
+	
+	format(string, 128, "        Amet: %s", gJobsNames[jobId]);	
+	SendClientMessage(playerid, COLOR_LIGHTGREEN, string);
+	
+	format(string, 128, "        Tasu: %d %s", gJobsPay[jobId], (gJobsPayH[jobId]?(" tunnis"):("(tükitöö)")));	
+	SendClientMessage(playerid, COLOR_LIGHTGREEN, string);
+	
+	format(string, 128, "        Leping Kestab veel: %d tundi", gMyContract[playerid]);	
+	SendClientMessage(playerid, COLOR_LIGHTGREEN, string);
+	
+	SendClientMessage(playerid, COLOR_GREEN, "***************");
 	return 1;
 }
 
