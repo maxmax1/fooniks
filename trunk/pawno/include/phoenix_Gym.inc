@@ -249,7 +249,6 @@ public EndBenchPress(playerid)
 	
 	Benches[gMyBench[playerid]][objTick] = 0;
 	Benches[gMyBench[playerid]][benchStatus] = BENCH_WDWN_E;
-	Benches[gMyBench[playerid]][bPlayer] = -1;
 		
 	ApplyAnimation(playerid, "benchpress", "gym_bp_getoff", 1.0, 0, 0, 0, 0, 0);	
 	

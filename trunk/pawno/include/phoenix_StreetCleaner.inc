@@ -61,7 +61,7 @@ enum garbagePlayersInf
 };
 new GarbagePlayer[MAX_PLAYERS][garbagePlayersInf];
 
-Itter_Create2(PlayerDoneCP, MAX_PLAYERS, PATH_SIZE+1);
+new DoneCP[MAX_PLAYERS][PATH_SIZE+1];
 
 /*
 *
@@ -69,11 +69,31 @@ Itter_Create2(PlayerDoneCP, MAX_PLAYERS, PATH_SIZE+1);
 
 stock IsDoneCP(playerid, id)
 {
-	foreach2(PlayerDoneCP, playerid, i)
+	for(new i; i < PATH_SIZE+1; i++)
 	{
-		if(i == id) return true
+		if(DoneCP[playerid][i]-1 == id) return true
 	}
 	return false;
+}
+
+stock addDoneCP(playerid, cpid)
+{
+	for(new i; i < PATH_SIZE+1; i++)
+	{
+		if(DoneCP[playerid][i]-1 == -1)
+		{
+			DoneCP[playerid][i] = cpid+1;
+			break;
+		}
+	}
+}
+
+stock clearDoneCP(playerid)
+{
+	for(new i; i < PATH_SIZE+1; i++)
+	{
+		DoneCP[playerid][i] = 0;
+	}
 }
 
 /*
@@ -92,8 +112,6 @@ forward CJob_OnPlayerEnterCheckpoint(playerid);
 // Public
 JOBS_OnJobInit(GCollector)
 {
-	Itter_Init2(PlayerDoneCP);
-	
 	AddGarbagePoint(2497.7292, -1681.5367, 13.1551);
 	AddGarbagePoint(2403.9653, -1654.0575, 13.2224);	
 	AddGarbagePoint(2272.0327, -1653.7729, 15.0048);
@@ -166,6 +184,7 @@ public AddGarbagePoint(Float: x, Float: y, Float: z)
 public StartPath(playerid, PathId)
 {
 	if(PathId == -1) return 0;
+	clearDoneCP(playerid);
 	GarbagePlayer[playerid][cpId] = SetPlayerCheckpoint(playerid, GarbageCheckPoints[PathId][garbX], GarbageCheckPoints[PathId][garbY], GarbageCheckPoints[PathId][garbZ], 3.0);
 	return 1;
 }
@@ -176,7 +195,7 @@ public GarbagePath(playerid)
 	
 	if(GarbagePlayer[playerid][numGPoints] == PATH_SIZE)
 	{
-		Itter_Free2(PlayerDoneCP, playerid);
+		clearDoneCP(playerid);
 		GarbagePlayer[playerid][cpId] = SetPlayerCheckpoint(playerid, 2413.7822, -1425.1913, 23.9835, 3.0);
 		SmallHelpDrawShow(playerid, "Masin on täis, tühjenda see Taaskasutuskeskuses.", 5000);
 	}
@@ -188,17 +207,19 @@ public GarbagePath(playerid)
 	{
 		new PathId = Itter_Random(GarbagePoints);
 		
+		new string[128];
+		format(string, 128, "~b~Masin: ~n~~n~~w~%d/16", GarbagePlayer[playerid][numGPoints]-1);
+		SmallHelpDrawShow(playerid, string, 5000);
+		
 		while(IsDoneCP(playerid, PathId))
 		{
 			PathId = Itter_Random(GarbagePoints);
 		}
 		
 		StartPath(playerid, PathId);		
-		Itter_Add2(PlayerDoneCP, playerid, PathId);
+		addDoneCP(playerid, PathId);
 		
-		new string[128];
-		format(string, 128, "~b~Masin: ~n~~n~~w~%d/16", GarbagePlayer[playerid][numGPoints]-1);
-		SmallHelpDrawShow(playerid, string, 5000);
+		TogglePlayerControllable(playerid, 1);
 	}
 }
 
@@ -247,7 +268,7 @@ public OnPlayerEnterCheckpoint(playerid)
 	if(GarbagePlayer[playerid][onGRound])
 	{
 		SendClientMessage(playerid, COLOR_YELLOW, "Oota kuni masinale prügi peale laetakse.");
-		TogglePlayerControllableEx(playerid, 0, 2990);
+		TogglePlayerControllable(playerid, 0);
 		SetTimerEx("GarbagePath", 3000, 0, "i", playerid);
 		return 1;
 	}

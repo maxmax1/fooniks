@@ -37,7 +37,6 @@ enum helpInf
 	Text: helpTextDraw2
 };
 new HelpDraws[MAX_HELPDRAWS][helpInf];
-new usedHelpDraws = 0;
 new isHelpActive[MAX_PLAYERS];
 
 enum smallInf
@@ -60,7 +59,8 @@ forward HelpDraw_OnPlayerDisconnect(playerid);
 
 public AddHelpDraw(Float: x, Float: y, Float: z, header[], text[])
 {
-	if(usedHelpDraws >= MAX_HELPDRAWS) return -1;
+	new usedHelpDraws = Itter_Free(HelpDraw);
+	if(usedHelpDraws == -1) return -1;
 	
 	HelpDraws[usedHelpDraws][helpX] = x;
 	HelpDraws[usedHelpDraws][helpY] = y;
@@ -95,9 +95,8 @@ public AddHelpDraw(Float: x, Float: y, Float: z, header[], text[])
 	TextDrawSetProportional(HelpDraws[usedHelpDraws][helpTextDraw2], true);
 	TextDrawTextSize(HelpDraws[usedHelpDraws][helpTextDraw2], 200.0, 50.0);
 	
-	Itter_Add(HelpDraw, usedHelpDraws);	
-	usedHelpDraws++;
-	return usedHelpDraws-1;
+	Itter_Add(HelpDraw, usedHelpDraws);
+	return usedHelpDraws;
 }
 
 public HelpDrawTimer()
@@ -111,6 +110,10 @@ public HelpDrawTimer()
 				if(isHelpActive[i] != drawId)
 				{
 					HelpDrawShow(i, drawId);
+				}
+				else 
+				{
+					HelpDrawHide(i, drawId);
 				}
 			}
 			else if(isHelpActive[i] == drawId)
