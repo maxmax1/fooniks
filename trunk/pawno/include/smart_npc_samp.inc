@@ -9,9 +9,9 @@
 
 #define MAX_SMART_NPC 10
 
-#define MAX_MOODS 			6
-#define MAX_AUTOMESSAGES 	6
-#define MAX_TRIGGERGROUPS 	10
+#define MAX_MOODS 			3
+#define MAX_AUTOMESSAGES 	16
+#define MAX_TRIGGERGROUPS 	16
 #define MAX_SENTENCES 		75
 #define MAX_TRIGGERWORDS 	64
 #define MAX_TEMPA			10
@@ -483,12 +483,7 @@ public OnPlayerConnect(playerid)
 			GetPlayerName(playerid, tempStr, sizeof(tempStr));
 			
 			new smID = getSmartIdFromName(tempStr);
-			if(smID == -1)
-			{
-				print("bad NPC name!");
-				Kick(playerid);
-			}
-			else
+			if(smID != -1)
 			{
 				if(!SmartNpc[smID][myConnected]) // Not Connected Yet
 				{

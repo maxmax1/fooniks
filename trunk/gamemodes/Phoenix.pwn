@@ -121,6 +121,7 @@
 #include <phoenix_Interiors>
 #include <phoenix_HelpDraw>
 #include <phoenix_AddSystem>
+#include <phoenix_Strip>
 //#include <AntiShiit>
 
 public AddAllJobs()
@@ -775,7 +776,18 @@ public OnGameModeInit()
 	AddHelpDraw(367.4025,-2087.6528,7.8359, "KALAPÜÜK", "Püügi alustamiseks vajuta ENTER.");
 	AddHelpDraw(358.8732,-2087.8032,7.8359, "KALAPÜÜK", "Püügi alustamiseks vajuta ENTER.");
 	
+	AddHelpDraw(1208.2710, -6.6922, 1001.3281, "STRIPTIIS", "Tipi andmiseks vajuta ENTER.");
+	AddHelpDraw(1223.1925, -11.990, 1001.3281, "STRIPTIIS", "Tipi andmiseks vajuta ENTER.");
+	AddHelpDraw(1223.4580, -3.2453, 1001.3281, "STRIPTIIS", "Tipi andmiseks vajuta ENTER.");
+	AddHelpDraw(1216.1250, -6.0529, 1001.3281, "STRIPTIIS", "Tipi andmiseks vajuta ENTER.");
+	
 	AddBench(772.9750, 1.4162, 1000.7209, 270.0);
+	
+	SetTimer("ConnectStripper", 2009, 0);
+	SetTimer("ConnectStripper", 2011, 0);
+	SetTimer("ConnectStripper", 2013, 0);
+	SetTimer("ConnectStripper", 2017, 0);
+	SetTimer("ConnectStripper", 2019, 0);
 	
 	return 1;
 }
@@ -852,9 +864,8 @@ public OnPlayerSpawn(playerid)
 	PreloadAnimLib(playerid,"GYMNASIUM");
 	PreloadAnimLib(playerid,"BLOWJOBZ");
 	PreloadAnimLib(playerid,"PED");
-	
-	gMyTimedAnim[playerid] = false;
-	
+	PreloadAnimLib(playerid,"STRIP");
+		
 	if(IsPlayerNPC(playerid))
 	{
 		if(pInfo[playerid][npcId] == NPC_IGOR)
@@ -1315,6 +1326,18 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 	    {
 	    	KillTimer(pInfo[playerid][pSkillTimer]);
 			pInfo[playerid][pSkillTimer] = 0;
+		}
+	}
+	if(PRESSED(KEY_SECONDARY_ATTACK))
+	{
+		new spot = getClosestStripSpot(playerid);
+		if(spot != -1)
+		{
+			if(PlayerMoney[playerid] > 0)
+			{
+				GivePlayerMoneyNew(playerid, -1);
+				ApplyAnimation(playerid, "STRIP", "PLY_CASH", 1.0, 0, 0, 0, 0, 0);
+			}
 		}
 	}
 	if(PRESSED(KEY_JUMP) && !IsPlayerInAnyVehicle(playerid)) MegaJump(playerid);
