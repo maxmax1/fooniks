@@ -80,7 +80,7 @@ forward MysqlUpdateBuild(query[], table[]);
 forward MysqlUpdateInt(query[], field[], value);
 forward MysqlUpdateFlo(query[], field[], Float: value);
 forward MysqlUpdateStr(query[], field[], value[]);
-forward MysqlUpdateFinish(query[], field[], value);
+forward MysqlUpdateFinish(query[], field[], value, threadid);
 
 // Next ones for ALS
 forward Phoenix_OnGameModeInit();
@@ -154,14 +154,15 @@ public MysqlUpdateStr(query[], field[], value[])
 	return 1;
 }
 
-public MysqlUpdateFinish(query[], field[], value)
+public MysqlUpdateFinish(query[], field[], value, threadid)
 {
 	new qLen = strlen(query);
 	strdel(query, qLen-2, qLen); // remove the extra comma 
 	
 	format(query, MAX_QUERY, "%s WHERE %s = '%d'", query, field, value);
 	print(query);
-	mysql_query(query);
+	if(threadid == -1) mysql_query(query);
+	else mysql_query(query, threadid);
 }
 
 /*

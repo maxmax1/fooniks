@@ -145,7 +145,7 @@ public SaveSkills(playerid)
 		MysqlUpdateInt(query, str, pSkill[playerid][i]);
 	}
 	
-	MysqlUpdateFinish(query, "cid", sqlid);	
+	MysqlUpdateFinish(query, "cid", sqlid, -1);	
 	return 1;
 }
 
