@@ -1139,32 +1139,57 @@ stock stopAnims(playerid)
 	return 1;
 }
 
-new
-	gMyTimedAnim[MAX_PLAYERS],
-	gMyTimedAnimL[MAX_PLAYERS][16],
-	gMyTimedAnimN[MAX_PLAYERS][16];
+enum timedInf
+{
+	libName[16],
+	animName[16],
+	Float: timedSpeed,
+	timedLoop,
+	timedLockX,
+	timedLockY,
+	timedFreeze,
+	timedATime,
+	timedPlayer
+};
+new gTimedAnims[100][timedInf];
+Itter_Create(TimedAnim, 100);
 
 forward TimedAnim(playerid, time, animlib[], animname[], Float: spd, loop, lockX, lockY, freeze, atime);
-forward DoTimedAnim(playerid, Float: spd, loop, lockX, lockY, freeze, time);
+forward DoTimedAnim(timedId);
 
 public TimedAnim(playerid, time, animlib[], animname[], Float: spd, loop, lockX, lockY, freeze, atime)
-{
-	if(gMyTimedAnim[playerid]) return false;
-
-	format(gMyTimedAnimL[playerid], 16, "%s", animlib);
-	format(gMyTimedAnimN[playerid], 16, "%s", animname);
-	gMyTimedAnim[playerid] = true;
+{	
+	new freeId = Itter_Free(TimedAnim);
+	if(freeId == -1) return false;
 	
+	format(gTimedAnims[freeId][libName], 16, "%s", animlib);
+	format(gTimedAnims[freeId][animName], 16, "%s", animname);
+	
+	gTimedAnims[freeId][timedSpeed] = spd;
+	gTimedAnims[freeId][timedLoop] = loop;
+	gTimedAnims[freeId][timedLockX] = lockX;
+	gTimedAnims[freeId][timedLockY] = lockY;
+	gTimedAnims[freeId][timedFreeze] = freeze;
+	gTimedAnims[freeId][timedATime] = atime;
+	gTimedAnims[freeId][timedPlayer] = playerid;
+
 	if(time < 50) time = 50;
-	SetTimerEx("DoTimedAnim", time, 0, "ifiiiii", playerid, spd, loop, lockX, lockY, freeze, atime);
+	SetTimerEx("DoTimedAnim", time, 0, "i", freeId);	
 	return true;
 }
 
-public DoTimedAnim(playerid, Float: spd, loop, lockX, lockY, freeze, time)
+public DoTimedAnim(timedId)
 {
-	if(!gMyTimedAnim[playerid]) return false;
-	ApplyAnimation(playerid, gMyTimedAnimL[playerid], gMyTimedAnimN[playerid], spd, loop, lockX, lockY, freeze, time);
-	gMyTimedAnim[playerid] = false;
+	ApplyAnimation(	gTimedAnims[timedId][timedPlayer],
+					gTimedAnims[timedId][libName], 
+					gTimedAnims[timedId][animName], 
+					gTimedAnims[timedId][timedSpeed], 
+					gTimedAnims[timedId][timedLoop], 
+					gTimedAnims[timedId][timedLockX],
+					gTimedAnims[timedId][timedLockY],
+					gTimedAnims[timedId][timedFreeze],
+					gTimedAnims[timedId][timedATime]);
+	Itter_Remove(TimedAnim, timedId);
 	return true;
 }
 

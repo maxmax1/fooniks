@@ -37,10 +37,9 @@ stock ShowPlayerList(playerid, listid, Float: dist, showMe)
 	}
 	
 	new i;
-	for(new otherId = 0; otherId < MAX_PLAYERS; otherId++)
+	foreach(Player, otherId)
 	{
 		if(!showMe && otherId == playerid) continue;
-		if(!IsPlayerConnected(otherId)) continue;
 		
 		if(dist == -1 || IsPlayerInRangeOfPoint(otherId, dist, pLx, pLy, pLz))
 		{
