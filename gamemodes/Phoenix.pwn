@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.3beta"
-#define SCRIPT_REVISION 		"203"
+#define SCRIPT_REVISION 		"205"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -98,6 +98,8 @@
 #include <phoenix_RealcarData>
 #include <phoenix_Money>
 #include <phoenix_Status>
+#include <phoenix_Interiors>
+#include <phoenix_InfoSpots>
 
 #include <phoenix_NewsPaper>
 #include <phoenix_NewCallbacks>
@@ -118,7 +120,6 @@
 
 #include <phoenix_Phone>
 
-#include <phoenix_Interiors>
 #include <phoenix_HelpDraw>
 #include <phoenix_AddSystem>
 #include <phoenix_Strip>
@@ -599,6 +600,7 @@ public OnGameModeInit()
 	ShowNameTags( 1 );
 	SetNameTagDrawDistance(7.5);
 	LimitGlobalChatRadius(CHAT_RADIUS);
+	DisableInteriorEnterExits();
 	
 	PistolPickup = CreatePickup(346 , 2, 2394.2112,-1206.5466,27.8595, 0); // Pistol
 	SawnoffPickup = CreatePickup(350 , 2, 2505.4795,-1117.3652,56.2031, 0); // sawnoff
@@ -1030,6 +1032,12 @@ public OnGameModeInit()
 	SetTimer("ConnectStripper", 2017, 0);
 	SetTimer("ConnectStripper", 2019, 0);
 	
+	AddInfoSpot("PIG PEN\n Vajuta ENTER, et siseneda.", 2421.3535, -1220.4412, 25.4849, 49, 0);
+	AddInfoSpot("Spordisaal\n Vajuta ENTER, et siseneda.", 2229.9192, -1721.2841, 13.5616, 51, 0);
+	AddInfoSpot("LSPD\n Vajuta ENTER, et siseneda.", 1554.7446, -1675.6805, 16.1953, 40, 0);
+	AddInfoSpot("Linnavalitsus\n Vajuta ENTER, et siseneda.", 1480.9208,-1771.6025,18.7958, 52, 0);
+	AddInfoSpot("Pank\n Vajuta ENTER, et siseneda.", 595.4461, -1249.9810, 18.2705, 53, 1);
+	
 	return 1;
 }
 
@@ -1135,8 +1143,14 @@ public OnPlayerSpawn(playerid)
 
 
     SetPlayerPos(playerid, pInfo[playerid][pPosX],pInfo[playerid][pPosY],pInfo[playerid][pPosZ]+1);
-	SetPlayerVirtualWorld(playerid, pInfo[playerid][pVW]);
-	SetPlayerInterior(playerid,pInfo[playerid][pInterior]);
+	
+	if(pInInfoInterior[playerid])
+	{
+		setToInt(playerid, InfoSpots[pInfoInterior[playerid]][infoInt]);
+		SetPlayerVirtualWorld(playerid, InfoSpots[pInfoInterior[playerid]][infoVW]);
+	}
+	
+	
 	SetPlayerFacingAngle(playerid, pInfo[playerid][pAngle]);
 	SetPlayerSkin(playerid, pInfo[playerid][pModel]);
 	SetPlayerHealth(playerid, pInfo[playerid][pHealth]);
@@ -1456,8 +1470,9 @@ public OnPlayerDeath(playerid, killerid, reason)
 	pInfo[playerid][pPosZ] = 24.7299;
 	pInfo[playerid][pAngle] = 180;
 	pInfo[playerid][pHealth] = 100;
-	pInfo[playerid][pVW] = 0;
-	pInfo[playerid][pInterior] = 0;
+	
+	pInInfoInterior[playerid] = false;
+	pInfoInterior[playerid] = -1;
 	
 	return 1;
 }
@@ -1995,6 +2010,8 @@ COMMAND:int(playerid, params[])
 	}
 	
 	setToInt(playerid, id);
+	
+	if(pInInfoInterior[playerid]) pInInfoInterior[playerid] = false;
 	return 1;
 }
 
@@ -2089,9 +2106,20 @@ public SCMTAInPlayerRadius(playerid, radius, color, message[])
 
 public WarpPlayerToPlayer(WarpWho, WarpTo)
 {
-	new Float:WarpToX, Float:WarpToY, Float:WarpToZ;
+	new Float:WarpToX, Float:WarpToY, Float:WarpToZ, WarpToInt, WarpToVW;
+	WarpToInt = GetPlayerInterior(WarpTo);
+	SetPlayerInterior(WarpWho, WarpToInt);
+	WarpToVW = GetPlayerVirtualWorld(WarpTo);
+	SetPlayerVirtualWorld(WarpWho, WarpToVW);
+	SetPlayerInterior(WarpWho, WarpToInt);	
 	GetPlayerPos(WarpTo, WarpToX, WarpToY, WarpToZ);
 	SetPlayerPos(WarpWho, WarpToX, WarpToY, WarpToZ);
+	
+	if(pInInfoInterior[WarpTo])
+	{
+		pInInfoInterior[WarpWho] = true;
+		pInfoInterior[WarpWho] = pInfoInterior[WarpTo];
+	}
 }
 
 public BanPlayer(playerid, banner, reason[])
