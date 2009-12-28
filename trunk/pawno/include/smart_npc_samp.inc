@@ -11,8 +11,8 @@
 
 #define MAX_MOODS 			6
 #define MAX_AUTOMESSAGES 	6
-#define MAX_TRIGGERGROUPS 	6
-#define MAX_SENTENCES 		64
+#define MAX_TRIGGERGROUPS 	10
+#define MAX_SENTENCES 		75
 #define MAX_TRIGGERWORDS 	64
 #define MAX_TEMPA			10
 
@@ -58,7 +58,7 @@ Itter_Create2(sNpcTGroup, MAX_SMART_NPC, MAX_TRIGGERGROUPS);
 *    CHAT
 */
 
-new gTriggerGroups[MAX_TRIGGERGROUPS];
+new Float: gTriggerGroups[MAX_TRIGGERGROUPS];
 Itter_Create(TriggerGroup, MAX_TRIGGERGROUPS);
 
 enum tWordInf
@@ -107,7 +107,7 @@ forward AutoMessageTimer(smartId);
 forward sendAuto(smartid, text);
 forward sendAnwser(smartid, text);
 
-forward AddTriggerGroup(moodMod);
+forward AddTriggerGroup(Float: moodMod);
 forward AddTriggerWord(tGroup, word[]);
 forward AddSentence(tGroup, moodLevel, sent[]);
 forward AddDefaultMessage(moodLevel, sent[]);
@@ -358,7 +358,7 @@ public AutoMessageTimer(smartId)
 	return 1;
 }
 
-public AddTriggerGroup(moodMod)
+public AddTriggerGroup(Float: moodMod)
 {
 	new freeId = Itter_Free(TriggerGroup);
 	if(freeId == -1) return -1;

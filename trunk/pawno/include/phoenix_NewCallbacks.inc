@@ -44,7 +44,7 @@ stock IsPlayerAiming(playerid, aimid, weaponType)
 	GetPlayerPos(aimid, X2, Y2, Z2);
 	new Float:Distance = floatsqroot(floatpower(floatabs(X1-X2), 2) + floatpower(floatabs(Y1-Y2), 2));
 	
-	if(Distance < 100 && weaponType == 2 || Distance < 5 && weaponType == 1)
+	if(Distance < 100 && Distance > 1.0 && weaponType == 2 || Distance < 1.0 && weaponType == 1)
 	{
 		new Float:A;
 		GetPlayerFacingAngle(playerid, A);
@@ -71,6 +71,7 @@ forward UnsetGBackTimer(playerid, target);
 // NEW CALLBACKS
 forward OnPlayerShootPlayer(playerid, weaponid, targetid);
 forward OnPlayerHitPlayer(playerid, weaponid, targetid);
+forward OnPlayerHitNPC(playerid, weaponid, npcid);
 
 public OnPlayerKeys(playerid, pressedkey)
 {
@@ -103,11 +104,11 @@ public UnsetGBackTimer(playerid, target)
 	
 public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 {
-	if(newkeys != 0 && ((oldkeys & KEY_FIRE) && !(newkeys & KEY_FIRE)) || newkeys != 0 && ((newkeys & KEY_FIRE) && !(oldkeys & KEY_FIRE)) || newkeys != 0 && (newkeys & KEY_FIRE))
+	if( PRESSED(KEY_FIRE) || PRESSED(KEY_FIRE | KEY_HANDBRAKE) || PRESSED(KEY_SECONDARY_ATTACK | KEY_HANDBRAKE))
 	{
 		if(gBackTimer[playerid] != true)
 		{
-			foreach(User, i)
+			foreach(Character, i)
 			{
 				if(playerid != i)
 				{
@@ -116,7 +117,13 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 					
 					if(IsPlayerAiming(playerid, i, weaponType) && GetPlayerState(i) == PLAYER_STATE_ONFOOT)
 					{
-						if(weaponType == 1)
+						if(weaponType == 1 && IsPlayerNPC(i))
+						{
+							gBackTimer[playerid] = true;
+							OnPlayerHitNPC(playerid, weaponid, i);
+							SetTimerEx("UnsetGBackTimer", 1000, 0, "ii", playerid, -1);
+						}
+						else if(weaponType == 1)
 						{
 							gBackTimer[playerid] = true;
 							OnPlayerHitPlayer(playerid, weaponid, i);

@@ -1138,3 +1138,34 @@ stock stopAnims(playerid)
 	TogglePlayerControllable(playerid, 1);
 	return 1;
 }
+
+new
+	gMyTimedAnim[MAX_PLAYERS],
+	gMyTimedAnimL[MAX_PLAYERS][16],
+	gMyTimedAnimN[MAX_PLAYERS][16];
+
+forward TimedAnim(playerid, time, animlib[], animname[], Float: spd, loop, lockX, lockY, freeze, atime);
+forward DoTimedAnim(playerid, Float: spd, loop, lockX, lockY, freeze, time);
+
+public TimedAnim(playerid, time, animlib[], animname[], Float: spd, loop, lockX, lockY, freeze, atime)
+{
+	if(gMyTimedAnim[playerid]) return false;
+
+	format(gMyTimedAnimL[playerid], 16, "%s", animlib);
+	format(gMyTimedAnimN[playerid], 16, "%s", animname);
+	gMyTimedAnim[playerid] = true;
+	
+	if(time < 50) time = 50;
+	SetTimerEx("DoTimedAnim", time, 0, "ifiiiii", playerid, spd, loop, lockX, lockY, freeze, atime);
+	return true;
+}
+
+public DoTimedAnim(playerid, Float: spd, loop, lockX, lockY, freeze, time)
+{
+	if(!gMyTimedAnim[playerid]) return false;
+	ApplyAnimation(playerid, gMyTimedAnimL[playerid], gMyTimedAnimN[playerid], spd, loop, lockX, lockY, freeze, time);
+	gMyTimedAnim[playerid] = false;
+	return true;
+}
+
+// EOF

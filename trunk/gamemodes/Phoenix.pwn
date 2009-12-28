@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.3beta"
-#define SCRIPT_REVISION 		"201"
+#define SCRIPT_REVISION 		"202"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -170,7 +170,7 @@ public RegisterAllSmartNPC()
 	AddTriggerWord(tGroup1, "hey");
 	AddTriggerWord(tGroup1, "hei");
 	new tempSentenceId;
-	
+		
 	AddSentence(tGroup1, 0, "Kasi minema!");
 	AddSentence(tGroup1, 0, "Kao ära!");
 	AddSentence(tGroup1, 0, "Ma lõpetan oma suitsu ära ja tulen õpetan sind väheke!");
@@ -207,7 +207,7 @@ public RegisterAllSmartNPC()
 	AddSentence(tGroup1, 3, "Tere, tööd tahad?");
 	AddSentence(tGroup1, 3, "Tere jah, ma olen Gabriel.");	
 	
-	new tGroup2 = AddTriggerGroup(-1);
+	new tGroup2 = AddTriggerGroup(-0.5);
 	AddTriggerWord(tGroup2, "munn");
 	AddTriggerWord(tGroup2, "pede");
 	AddTriggerWord(tGroup2, "homo");
@@ -298,17 +298,26 @@ public RegisterAllSmartNPC()
 	AddSentence(tGroup5, 3, "Paremat ei oskaks tahtagi.");
 	AddSentence(tGroup5, 3, "Minuarust on jube ilus!");
 	
+	new FightMessage = AddTriggerGroup(-1);
+	AddTriggerWord(FightMessage, "FightMessage");
+	AddSentence(FightMessage, 0, "Sina RAISK tuled mind lööma!");
+	AddSentence(FightMessage, 3, "Ma oskan ka lüüa.");
+	AddSentence(FightMessage, 2, "Ma pean sind ikkagi õpetama!");
+	AddSentence(FightMessage, 1, "Oi raisk!");
+	
 	RegisterTriggerGroup(tGroup1, smartId);
 	RegisterTriggerGroup(tGroup2, smartId);
 	RegisterTriggerGroup(tGroup3, smartId);
 	RegisterTriggerGroup(tGroup4, smartId);
 	RegisterTriggerGroup(tGroup5, smartId);
+	RegisterTriggerGroup(FightMessage, smartId);
 	
-	RegisterTriggerGroup(tGroup6, Pimp);
 	RegisterTriggerGroup(tGroup2, Pimp);
 	RegisterTriggerGroup(tGroup3, Pimp);
 	RegisterTriggerGroup(tGroup4, Pimp);
 	RegisterTriggerGroup(tGroup5, Pimp);
+	RegisterTriggerGroup(tGroup6, Pimp);
+	RegisterTriggerGroup(FightMessage, Pimp);
 }
 
 /*
@@ -747,10 +756,10 @@ public OnGameModeInit()
 	foodBar = CreateProgressbar(548.2, 54.5, 53.8, 0.1, 2.0, COLOR_BLACK, COLOR_GREEN, COLOR_WHITE);
 	
 	SetTimer("MysqlCheck", 1000*60*5, true);
-	SetTimer("UpdateAllPlayers", 1000*60*15, true);
+	SetTimer("UpdateAllPlayers", 1000*60*10, true);
 	SetTimer("CheckFalseDeadPlayers", 3000, true);
 	SetTimer("SyncAllPlayerTime", 950, true);
-	SetTimer("UpdateAllPlayerPos", 1000*15, true);
+	SetTimer("UpdateAllPlayerPos", 1000*45, true);
 	
 	//Add3DStream("http://streamer.sotovik.ee:8500/skyplus_hi.ogg", 1742.8539,-1861.9402, 14.0, 25.0);	
 	
@@ -842,6 +851,9 @@ public OnPlayerSpawn(playerid)
 	PreloadAnimLib(playerid,"Freeweights");
 	PreloadAnimLib(playerid,"GYMNASIUM");
 	PreloadAnimLib(playerid,"BLOWJOBZ");
+	PreloadAnimLib(playerid,"PED");
+	
+	gMyTimedAnim[playerid] = false;
 	
 	if(IsPlayerNPC(playerid))
 	{
@@ -2261,6 +2273,15 @@ public OnWeightLifted(playerid)
 	
 	new Float: amount = 20 - floatround(pSkillLevel[playerid][SKILL_ATHLETE] / 5);
 	GivePlayerRestprecent(playerid, -(amount));
+}
+
+public OnPlayerHitNPC(playerid, weaponid, npcid)
+{
+	SetPlayerToFacePlayer(npcid, playerid);
+	SetPlayerToFacePlayer(playerid, npcid);
+	SmartChatWithMe(playerid, "FightMessage");
+	TimedAnim(npcid, 300, "GYMNASIUM", "GYMshadowbox", 1.0, 0, 1, 1, 0, 0);
+	TimedAnim(playerid, 500, "PED", "KO_shot_face", 1.0, 0, 1, 1, 0, 0);
 }
 
 /*
