@@ -191,7 +191,7 @@ public SaveAddBoard(boardId, boardUsed, boardTime)
 	MysqlUpdateInt(query, "boardUsed", boardUsed);
 	MysqlUpdateInt(query, "boardNr", gAddBoardNR[boardId]);
 
-	MysqlUpdateFinish(query, "boardId", boardId+1);
+	MysqlUpdateFinish(query, "boardId", boardId+1, -1);
 }
 
 /*

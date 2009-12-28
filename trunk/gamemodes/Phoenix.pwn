@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.3beta"
-#define SCRIPT_REVISION 		"206"
+#define SCRIPT_REVISION 		"207"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -49,6 +49,11 @@
 */
 #define VEHICLE_LOAD_THREAD     1
 #define FETCH_UINFO_THREAD      2
+#define THREAD_ALL_USERS      	3
+#define THREAD_ALL_USER_POS     4
+
+new CURRENT_UPD_PLAYER = 0;
+new CURRENT_POS_PLAYER = 0;
 
 /* DialogIDs */
 #define DIALOG_LOGIN 2009
@@ -83,6 +88,10 @@
 *    INCLUDES
 */
 #include <a_samp>
+
+#undef MAX_PLAYERS
+#define MAX_PLAYERS 200
+
 #include <a_mysql>
 #include <md5_core> 		 // author: Alex "Y_Less" Cole, External Credit #2
 #include <Y_server> 		 // author: Alex "Y_Less" Cole, External Credit #3
@@ -380,7 +389,7 @@ new telePositions[MAX_TELEPORTS][posInfo] =
 
 forward SyncPlayerTime(playerid);
 forward SyncAllPlayerTime();
-forward UpdateAllPlayerPos();
+forward UpdateAllPlayerPos(build);
 forward SendTeata(playerid, text[]);
 forward SendAdminMessage(playerid, text[]);
 forward CheckFalseDeadPlayers(playerid);
@@ -1000,10 +1009,11 @@ public OnGameModeInit()
 	foodBar = CreateProgressbar(548.2, 54.5, 53.8, 0.1, 2.0, COLOR_BLACK, COLOR_GREEN, COLOR_WHITE);
 	
 	SetTimer("MysqlCheck", 1000*60*5, true);
-	SetTimer("UpdateAllPlayers", 1000*60*10, true);
 	SetTimer("CheckFalseDeadPlayers", 3000, true);
 	SetTimer("SyncAllPlayerTime", 950, true);
-	SetTimer("UpdateAllPlayerPos", 1000*45, true);
+	
+	SetTimerEx("UpdateAllPlayers", 1000*60*10, true, "ii", 1, 0);
+	SetTimerEx("UpdateAllPlayerPos", 1000*45, true, "i", 1);
 	
 	//Add3DStream("http://streamer.sotovik.ee:8500/skyplus_hi.ogg", 1742.8539,-1861.9402, 14.0, 25.0);	
 	
@@ -1043,7 +1053,7 @@ public OnGameModeInit()
 
 public OnGameModeExit()
 {
-	UpdateAllPlayers();
+	UpdateAllPlayers(0, 1);
 
 	printf(LANG_UNLOADED, SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION, SCRIPTER_NAME);
 	return 1;
@@ -1634,6 +1644,16 @@ public OnQueryFinish(query[], resultid)
 	else if( resultid == FETCH_UINFO_THREAD )
 	{
 		FetchCharacterInformationFinish(Fetch_UInfo_Thread);
+	}
+	else if(resultid == THREAD_ALL_USERS)
+	{
+		CURRENT_UPD_PLAYER++;
+		UpdateAllPlayers(0, 0);
+	}
+	else if(resultid == THREAD_ALL_USER_POS)
+	{
+		CURRENT_POS_PLAYER++;
+		UpdateAllPlayerPos(0);
 	}
 }
 
@@ -2444,7 +2464,7 @@ public OnPlayerLogin(playerid)
 
 public OnPlayerLogout(playerid)
 {
-	UpdatePlayer(playerid);
+	UpdatePlayer(playerid, -1);
 	SaveSkills(playerid);
 	SavePockets(playerid);
 	Itter_Remove(User, playerid);

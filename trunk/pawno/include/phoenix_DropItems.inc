@@ -210,7 +210,7 @@ public SaveDropItems()
 			MysqlUpdateInt(query, "dropInterior", gDropItems[i][dropInt]);
 			MysqlUpdateInt(query, "dropVW", gDropItems[i][dropVW]);
 			
-			MysqlUpdateFinish(query, "id", sqlid);	
+			MysqlUpdateFinish(query, "id", sqlid, -1);	
 		}
 		else
 		{

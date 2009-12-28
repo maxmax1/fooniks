@@ -340,7 +340,7 @@ public SavePocket(playerid, pocketId)
 	format(str, 12, "pData_%d", pocketId);
 	MysqlUpdateInt(query, str, Pockets[playerid][pocketId][pAmount]);
 	
-	MysqlUpdateFinish(query, "cid", sqlid);	
+	MysqlUpdateFinish(query, "cid", sqlid, -1);	
 	return 1;
 }
 

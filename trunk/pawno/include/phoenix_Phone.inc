@@ -704,7 +704,7 @@ public SaveSimCard(sCard)
 	MysqlUpdateInt(query, "sNumber", gSimCards[sCard][sNumber]);
 	MysqlUpdateInt(query, "companyId", gSimCards[sCard][companyId]);
 	
-	MysqlUpdateFinish(query, "id", sqlid);	
+	MysqlUpdateFinish(query, "id", sqlid, -1);	
 	
 	for(new i = 0; i < MAX_CONTACTS; i++)
 	{
@@ -732,7 +732,7 @@ public SaveContact(sCard, contact)
 	MysqlUpdateInt(query, "cNumber", gContactMemoryNR[sCard][contact]);
 	MysqlUpdateStr(query, "cName", gContactMemoryName[sCard][contact]);
 	
-	MysqlUpdateFinish(query, "id", sqlid);	
+	MysqlUpdateFinish(query, "id", sqlid, -1);	
 	return 1;
 }
 

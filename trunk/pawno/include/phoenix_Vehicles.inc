@@ -253,7 +253,7 @@ public SaveVehicle(vId)
 	MysqlUpdateFlo(query, "vPosZ", Vehicles[vId][vPosZ]);
 	MysqlUpdateFlo(query, "vAngZ", Vehicles[vId][vAngZ]);
 	
-	MysqlUpdateFinish(query, "vehicleId", Vehicles[vId][vSqlID]);
+	MysqlUpdateFinish(query, "vehicleId", Vehicles[vId][vSqlID], -1);
 	return 1;
 }
 

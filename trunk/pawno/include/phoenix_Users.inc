@@ -67,6 +67,9 @@ enum pInf
 };
 new pInfo[MAX_PLAYERS][pInf];
 
+new updatePlayers[MAX_PLAYERS];
+new updatePlayersPos[MAX_PLAYERS];
+
 /*
 *    FORWARDS
 */
@@ -78,8 +81,8 @@ forward GetUserInfoFinish(playerid);
 forward AuthenticateUser(playerid, givenPassword[]);
 forward FetchCharacterInformation(playerid);
 forward FetchCharacterInformationFinish(playerid);
-forward UpdatePlayer(playerid);
-forward UpdateAllPlayers();
+forward UpdatePlayer(playerid, threadid);
+forward UpdateAllPlayers(build, nonThreaded);
 forward ClearPlayerData(playerid);
 
 forward OnPlayerLogin(playerid);
@@ -269,7 +272,7 @@ public FetchCharacterInformationFinish(playerid)
 	return 1;
 }
 
-public UpdatePlayer(playerid)
+public UpdatePlayer(playerid, threadid)
 {
 	if(!pInfo[playerid][pLoggedIn]) return 1;
 	
@@ -300,37 +303,87 @@ public UpdatePlayer(playerid)
 	MysqlUpdateInt(query, "simCardIn", ((pInfo[playerid][simCardIn])?(1):(0)));
 	MysqlUpdateInt(query, "simCard", pInfo[playerid][simCard]);
 	
-	MysqlUpdateFinish(query, "id", sqlid);
+	MysqlUpdateFinish(query, "id", sqlid, threadid);
 
 	print("Player Updated!");
 	return 1;
 }
-public UpdateAllPlayerPos()
+
+public UpdateAllPlayerPos(build)
 {
-	foreach(User, playerid)
+	if(build == 0)
 	{
-		GetPlayerPos(playerid, pInfo[playerid][pPosX], pInfo[playerid][pPosY], pInfo[playerid][pPosZ]);
-		new sqlid = pInfo[playerid][pSqlId];
-		new query[MAX_QUERY], table[32];
-		format(table, 32, "%scharacters", MYSQL_PREFIX);
-		MysqlUpdateBuild(query, table);
-		MysqlUpdateFlo(query, "posX", pInfo[playerid][pPosX]);
-		MysqlUpdateFlo(query, "posY", pInfo[playerid][pPosY]);
-		MysqlUpdateFlo(query, "posZ", pInfo[playerid][pPosZ]);
-		MysqlUpdateFinish(query, "id", sqlid);
+		for(new i; i < MAX_PLAYERS; i++)
+		{
+			updatePlayersPos[i] = -1;
+		}
+		CURRENT_POS_PLAYER = 0;
+		
+		new i;
+		foreach(User, lol)
+		{
+			updatePlayersPos[i] = lol;
+			i++;
+		}
 	}
-	print("All Player Positsions Saved!");
+	
+	new playerid = updatePlayersPos[CURRENT_POS_PLAYER];
+	if(playerid == -1) 
+	{
+		print("All Player Positsions Saved!");
+		return 0;
+	}
+
+	GetPlayerPos(playerid, pInfo[playerid][pPosX], pInfo[playerid][pPosY], pInfo[playerid][pPosZ]);
+	new sqlid = pInfo[playerid][pSqlId];
+	new query[MAX_QUERY], table[32];
+	format(table, 32, "%scharacters", MYSQL_PREFIX);
+	MysqlUpdateBuild(query, table);
+	MysqlUpdateFlo(query, "posX", pInfo[playerid][pPosX]);
+	MysqlUpdateFlo(query, "posY", pInfo[playerid][pPosY]);
+	MysqlUpdateFlo(query, "posZ", pInfo[playerid][pPosZ]);
+	MysqlUpdateFinish(query, "id", sqlid, THREAD_ALL_USER_POS);
+
 	return 1;
 }
 
-public UpdateAllPlayers()
+public UpdateAllPlayers(build, nonThreaded)
 {
-	foreach(User, i)
+	if(nonThreaded == 1)
 	{
-	    UpdatePlayer(i);
-		SaveSkills(i);
-		SavePockets(i);
+		foreach(User, playerid)
+		{
+			UpdatePlayer(playerid, -1);
+		}
+		return 1;
 	}
+
+	if(build == 0)
+	{
+		for(new i; i < MAX_PLAYERS; i++)
+		{
+			updatePlayers[i] = -1;
+		}
+		CURRENT_UPD_PLAYER = 0;
+		
+		new i;
+		foreach(User, lol)
+		{
+			updatePlayers[i] = lol;
+			i++;
+		}
+	}
+	
+	new playerid = updatePlayersPos[CURRENT_UPD_PLAYER];
+	
+	if(playerid == -1) 
+	{
+		print("All Players Saved!");
+		return 0;
+	}	
+	
+	UpdatePlayer(playerid, THREAD_ALL_USERS);
+	return 1;
 }
 
 public ClearPlayerData(playerid)
