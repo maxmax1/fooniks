@@ -64,4 +64,30 @@ public TextDrawSetStringEx(Text: textID, txt[])
 	TextDrawSetString(textID, TextDrawFix(txt));
 	return 1;
 }
+stock SetPlayerToFacePlayer(playerid, targetid)
+{
+	new
+		Float:pX,
+		Float:pY,
+		Float:pZ,
+		Float:X,
+		Float:Y,
+		Float:Z,
+		Float:ang;
+
+	if(!IsPlayerConnected(playerid) || !IsPlayerConnected(targetid)) return 0;
+
+	GetPlayerPos(targetid, X, Y, Z);
+	GetPlayerPos(playerid, pX, pY, pZ);
+
+	if( Y > pY ) ang = (-acos((X - pX) / floatsqroot((X - pX)*(X - pX) + (Y - pY)*(Y - pY))) - 90.0);
+	else if( Y < pY && X < pX ) ang = (acos((X - pX) / floatsqroot((X - pX)*(X - pX) + (Y - pY)*(Y - pY))) - 450.0);
+	else if( Y < pY ) ang = (acos((X - pX) / floatsqroot((X - pX)*(X - pX) + (Y - pY)*(Y - pY))) - 90.0);
+
+	if(X > pX) ang = (floatabs(floatabs(ang) + 180.0));
+	else ang = (floatabs(ang) - 180.0);
+	
+	SetPlayerFacingAngle(playerid, ang);
+ 	return 1;
+}
 
