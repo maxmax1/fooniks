@@ -52,8 +52,6 @@ enum pInf
 	Float:pPosZ,
 	Float:pAngle,
 	Float:pHealth,
-	pVW,
-	pInterior,
 	
 	SelectedPlayer,
 	npcId,
@@ -235,10 +233,11 @@ public FetchCharacterInformationFinish(playerid)
 			pInfo[playerid][pPosZ] = floatstr(Field);
 			mysql_fetch_field_row(Field, "angle");
 			pInfo[playerid][pAngle] = floatstr(Field);
-			mysql_fetch_field_row(Field, "VirtualWorld");
-			pInfo[playerid][pVW] = strval(Field);
+			
 			mysql_fetch_field_row(Field, "interior");
-			pInfo[playerid][pInterior] = strval(Field);
+			pInfoInterior[playerid] = strval(Field) - 1;
+			pInInfoInterior[playerid] = (pInfoInterior[playerid] > 0);
+			
 			mysql_fetch_field_row(Field, "health");
 			pInfo[playerid][pHealth] = floatstr(Field);
 			mysql_fetch_field_row(Field, "adminLevel");
@@ -277,9 +276,6 @@ public UpdatePlayer(playerid)
 	GetPlayerPos(playerid, pInfo[playerid][pPosX], pInfo[playerid][pPosY], pInfo[playerid][pPosZ]);
 	GetPlayerFacingAngle(playerid, pInfo[playerid][pAngle]);
 	GetPlayerHealth(playerid, pInfo[playerid][pHealth]);
-
-	pInfo[playerid][pInterior] = GetPlayerInterior(playerid);
-	pInfo[playerid][pVW] = GetPlayerVirtualWorld(playerid);
 	
 	new sqlid = pInfo[playerid][pSqlId];
 	
@@ -295,8 +291,7 @@ public UpdatePlayer(playerid)
 	MysqlUpdateFlo(query, "posZ", pInfo[playerid][pPosZ]);
 	MysqlUpdateFlo(query, "angle", pInfo[playerid][pAngle]);
 
-	MysqlUpdateInt(query, "VirtualWorld", pInfo[playerid][pVW]);
-	MysqlUpdateInt(query, "interior", pInfo[playerid][pInterior]);
+	MysqlUpdateInt(query, "interior", pInfoInterior[playerid]+1);
 	MysqlUpdateFlo(query, "health", pInfo[playerid][pHealth]);
 	MysqlUpdateInt(query, "adminLevel", pInfo[playerid][pAdminLevel]);
 	MysqlUpdateInt(query, "playerJob", gMyJob[playerid]);
@@ -366,8 +361,8 @@ public ClearPlayerData(playerid)
 	pInfo[playerid][pAngle] = 0.0;
 	pInfo[playerid][pHealth] = 0.0;
 	
-	pInfo[playerid][pVW] = 0;
-	pInfo[playerid][pInterior] = 0;
+	pInInfoInterior[playerid] = false;
+	pInfoInterior[playerid] = -1;
 	
 	pInfo[playerid][SelectedPlayer] = 0;
 	pInfo[playerid][npcId] = 0;
