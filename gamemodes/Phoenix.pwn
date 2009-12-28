@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.3beta"
-#define SCRIPT_REVISION 		"205"
+#define SCRIPT_REVISION 		"206"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -1142,6 +1142,7 @@ public OnPlayerSpawn(playerid)
 	}
 
 
+	SetPlayerVirtualWorld(playerid, 0);
     SetPlayerPos(playerid, pInfo[playerid][pPosX],pInfo[playerid][pPosY],pInfo[playerid][pPosZ]+1);
 	
 	if(pInInfoInterior[playerid])
@@ -2403,21 +2404,31 @@ public OnPlayerConfirm(playerid, response, boxId)
 	}
 	else if(boxId == CONFIRM_BLOWJOB)
 	{
-		new otherId = gBjOffer[playerid];
-		
-		if(PlayerMoney[playerid] < gMyBjPrice[otherId])
+		if(response != 0)
 		{
-			SendClientMessage(playerid, COLOR_RED, "Sul pole piisavalt raha.");
-			SendClientMessage(otherId, COLOR_RED, "Teisel mängijal pole piisavalt raha.");
+			new otherId = gBjOffer[playerid];
 			
-			gMyBjPrice[otherId] = 0;			
-			gBjOffer[playerid] = -1;
-			gBjOffer[otherId] = -1;	
+			if(PlayerMoney[playerid] < gMyBjPrice[otherId])
+			{
+				SendClientMessage(playerid, COLOR_RED, "Sul pole piisavalt raha.");
+				SendClientMessage(otherId, COLOR_RED, "Teisel mängijal pole piisavalt raha.");
+				
+				gMyBjPrice[otherId] = 0;			
+				gBjOffer[playerid] = -1;
+				gBjOffer[otherId] = -1;	
+			}
+			else
+			{
+				HaveBJ(playerid, otherId);
+			}
 		}
 		else
 		{
-			HaveBJ(playerid, otherId);
-		}		
+			SendClientMessage(gBjOffer[playerid], COLOR_RED, "Teine mängja keeldus.");
+			gMyBjPrice[gBjOffer[playerid]] = 0;
+			gBjOffer[gBjOffer[playerid]] = -1;		
+			gBjOffer[playerid] = -1;
+		}
 	}
 	else SendClientMessage(playerid, COLOR_YELLOW, "VALE KAST!");
 }

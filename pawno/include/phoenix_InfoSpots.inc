@@ -91,7 +91,7 @@ public AddInfoSpot(text[], Float: x, Float: y, Float: z, interiorId, intoVW)
 	InfoSpots[freeId][infoVW] = intoVW;
 	
 	InfoSpots[freeId][infoPickup] = CreateDynamicPickup(INFO_PICKUP, 1, x, y, z);
-	InfoSpots[freeId][info3Dtext] = CreateDynamic3DTextLabel(text, INFO_COLOR, x, y, z+1.5, 30.0);
+	InfoSpots[freeId][info3Dtext] = CreateDynamic3DTextLabel(text, INFO_COLOR, x, y, z+1.0, 30.0);
 
 	Itter_Add(InfoSpot, freeId);
 	return freeId;
