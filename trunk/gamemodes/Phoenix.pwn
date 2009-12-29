@@ -33,7 +33,7 @@
 
 #define SCRIPT_NAME			"Phoenix"
 #define SCRIPT_VERSION  		"0.1.3beta"
-#define SCRIPT_REVISION 		"207"
+#define SCRIPT_REVISION 		"208"
 
 #define MYSQL_HOST			"localhost"
 #define MYSQL_USER			"estrpco_portal"
@@ -51,9 +51,13 @@
 #define FETCH_UINFO_THREAD      2
 #define THREAD_ALL_USERS      	3
 #define THREAD_ALL_USER_POS     4
+#define THREAD_ALL_POCKETS	    5
+#define THREAD_ALL_SKILLS	    6
 
 new CURRENT_UPD_PLAYER = 0;
 new CURRENT_POS_PLAYER = 0;
+new CURRENT_POCKET_PLAYER = 0;
+new CURRENT_SKILL_PLAYER = 0;
 
 /* DialogIDs */
 #define DIALOG_LOGIN 2009
@@ -389,7 +393,7 @@ new telePositions[MAX_TELEPORTS][posInfo] =
 
 forward SyncPlayerTime(playerid);
 forward SyncAllPlayerTime();
-forward UpdateAllPlayerPos(build);
+forward UpdateAllPlayerPos();
 forward SendTeata(playerid, text[]);
 forward SendAdminMessage(playerid, text[]);
 forward CheckFalseDeadPlayers(playerid);
@@ -1012,8 +1016,11 @@ public OnGameModeInit()
 	SetTimer("CheckFalseDeadPlayers", 3000, true);
 	SetTimer("SyncAllPlayerTime", 950, true);
 	
-	SetTimerEx("UpdateAllPlayers", 1000*60*10, true, "ii", 1, 0);
-	SetTimerEx("UpdateAllPlayerPos", 1000*45, true, "i", 1);
+	SetTimerEx("UpdateAllPlayers", 1000*60*10, true, "i", 0); // 10 min
+	SetTimerEx("UpdateAllPockets",  500*60*10, true, "i", 0); // 5 min
+	SetTimerEx("UpdateAllSkills",  750*60*10, true, "i", 0); // 7 min
+	
+	SetTimer("UpdateAllPlayerPos", 1000*45, true);
 	
 	//Add3DStream("http://streamer.sotovik.ee:8500/skyplus_hi.ogg", 1742.8539,-1861.9402, 14.0, 25.0);	
 	
@@ -1053,7 +1060,9 @@ public OnGameModeInit()
 
 public OnGameModeExit()
 {
-	UpdateAllPlayers(0, 1);
+	UpdateAllPlayers(1);
+	UpdateAllPockets(1);
+	UpdateAllSkills(1);
 
 	printf(LANG_UNLOADED, SCRIPT_NAME, SCRIPT_VERSION, SCRIPT_REVISION, SCRIPTER_NAME);
 	return 1;
@@ -1648,12 +1657,22 @@ public OnQueryFinish(query[], resultid)
 	else if(resultid == THREAD_ALL_USERS)
 	{
 		CURRENT_UPD_PLAYER++;
-		UpdateAllPlayers(0, 0);
+		UpdateAllPlayers(0);
 	}
 	else if(resultid == THREAD_ALL_USER_POS)
 	{
 		CURRENT_POS_PLAYER++;
-		UpdateAllPlayerPos(0);
+		UpdateAllPlayerPos();
+	}
+	else if(resultid == THREAD_ALL_POCKETS)
+	{
+		CURRENT_POCKET_PLAYER++;
+		UpdateAllPockets(0);
+	}
+	else if(resultid == THREAD_ALL_SKILLS)
+	{
+		CURRENT_SKILL_PLAYER++;
+		UpdateAllSkills(0);
 	}
 }
 
@@ -2456,6 +2475,8 @@ public OnPlayerConfirm(playerid, response, boxId)
 public OnPlayerLogin(playerid)
 {
 	Itter_Add(User, playerid);
+	User_Add(playerid);
+	
 	SendClientMessage(playerid, COLOR_GREEN, LANG_LOGGED_IN);
 	pInfo[playerid][pLoggedIn] = true;
 	SpawnPlayer(playerid);
@@ -2465,9 +2486,13 @@ public OnPlayerLogin(playerid)
 public OnPlayerLogout(playerid)
 {
 	UpdatePlayer(playerid, -1);
-	SaveSkills(playerid);
-	SavePockets(playerid);
+	SaveSkills(playerid, -1);
+	SavePockets(playerid, -1);
+	
 	Itter_Remove(User, playerid);
+	User_Remove(playerid);
+	
+	pInfo[playerid][pLoggedIn] = false;
 	return 1;
 }
 
@@ -2605,7 +2630,7 @@ public OnPlayerHitNPC(playerid, weaponid, npcid)
 	SetPlayerToFacePlayer(playerid, npcid);
 	SmartChatWithMe(playerid, "FightMessage");
 	TimedAnim(npcid, 300, "GYMNASIUM", "GYMshadowbox", 1.0, 0, 1, 1, 0, 0);
-	TimedAnim(playerid, 500, "PED", "KO_shot_face", 1.0, 0, 1, 1, 0, 0);
+	TimedAnim(playerid, 500, "PED", "KO_shot_face", 1.0, 0, 0, 0, 0, 0);
 }
 
 /*

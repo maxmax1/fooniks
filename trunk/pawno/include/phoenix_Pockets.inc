@@ -155,8 +155,7 @@ forward RemAmount(playerid, itemId, amount);
 forward giveItemOtherStuff(playerid, itemid, amount);
 forward ClearPocket(playerid, slotId);
 forward LoadPockets(playerid);
-forward SavePockets(playerid);
-forward SavePocket(playerid, pocketId);
+forward SavePockets(playerid, threadid);
 
 // Publics
 
@@ -315,32 +314,26 @@ public LoadPockets(playerid)
 	return 1;
 }
 
-public SavePockets(playerid)
+public SavePockets(playerid, threadid)
 {
-	for(new i = 0; i < MAX_POCKETS; i++)
-	{
-		SavePocket(playerid, i);
-	}
-}
-
-public SavePocket(playerid, pocketId)
-{	
 	if(!pInfo[playerid][pLoggedIn]) return 0;
 	if(pInfo[playerid][pSqlId] == 0) return 0;
-	if(pocketId < 0 || pocketId >= MAX_POCKETS) return 0;
-
+	
 	new sqlid = pInfo[playerid][pSqlId];
 	new query[MAX_QUERY], table[32], str[12];
 	format(table, 32, "%sPockets", MYSQL_PREFIX);
 	
 	MysqlUpdateBuild(query, table);
 	
-	format(str, 12, "pType_%d", pocketId);
-	MysqlUpdateInt(query, str, Pockets[playerid][pocketId][pType]);
-	format(str, 12, "pData_%d", pocketId);
-	MysqlUpdateInt(query, str, Pockets[playerid][pocketId][pAmount]);
+	for(new i = 0; i < MAX_POCKETS; i++)
+	{
+		format(str, 12, "pType_%d", i);
+		MysqlUpdateInt(query, str, Pockets[playerid][i][pType]);
+		format(str, 12, "pData_%d", i);
+		MysqlUpdateInt(query, str, Pockets[playerid][i][pAmount]);
+	}
+	MysqlUpdateFinish(query, "cid", sqlid, threadid);	
 	
-	MysqlUpdateFinish(query, "cid", sqlid, -1);	
 	return 1;
 }
 

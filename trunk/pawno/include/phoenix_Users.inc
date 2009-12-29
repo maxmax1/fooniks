@@ -67,8 +67,56 @@ enum pInf
 };
 new pInfo[MAX_PLAYERS][pInf];
 
-new updatePlayers[MAX_PLAYERS];
-new updatePlayersPos[MAX_PLAYERS];
+new UserListA[MAX_PLAYERS] = {-1, ...};
+new UserListL = 0; // Last Pos
+
+stock GetUserAtUserList(atPos)
+{
+	if(atPos < 0 || atPos >= MAX_PLAYERS) return -1;
+	return UserListA[atPos];
+}
+
+stock User_Add(playerid)
+{
+	UserListA[UserListL] = playerid;
+	UserListL++;
+}
+
+stock User_Remove(playerid)
+{
+	if(UserListL > 0 && UserListA[UserListL-1] == playerid)
+	{
+		UserListA[UserListL-1] = -1;
+		UserListL--;
+	}
+	else
+	{
+		for(new i; i < UserListL; i++)
+		{
+			if(UserListA[i] == playerid)
+			{
+				UserListA[i] = -1;
+				ReorderUserList(i);
+				break;
+			}
+		}
+	}
+}
+
+stock ReorderUserList(fromSlot)
+{
+	for(new i = fromSlot; i < MAX_PLAYERS; i++)
+	{
+		if(i+1 < MAX_PLAYERS)
+		{
+			UserListA[i] = UserListA[i+1];
+			if(UserListA[i] == -1)
+			{
+				UserListL = i+1;
+			}
+		}
+	}
+}
 
 /*
 *    FORWARDS
@@ -82,7 +130,9 @@ forward AuthenticateUser(playerid, givenPassword[]);
 forward FetchCharacterInformation(playerid);
 forward FetchCharacterInformationFinish(playerid);
 forward UpdatePlayer(playerid, threadid);
-forward UpdateAllPlayers(build, nonThreaded);
+forward UpdateAllPlayers(nonThreaded);
+forward UpdateAllPockets(nonThreaded);
+forward UpdateAllSkills(nonThreaded);
 forward ClearPlayerData(playerid);
 
 forward OnPlayerLogin(playerid);
@@ -309,27 +359,12 @@ public UpdatePlayer(playerid, threadid)
 	return 1;
 }
 
-public UpdateAllPlayerPos(build)
+public UpdateAllPlayerPos()
 {
-	if(build == 0)
-	{
-		for(new i; i < MAX_PLAYERS; i++)
-		{
-			updatePlayersPos[i] = -1;
-		}
-		CURRENT_POS_PLAYER = 0;
-		
-		new i;
-		foreach(User, lol)
-		{
-			updatePlayersPos[i] = lol;
-			i++;
-		}
-	}
-	
-	new playerid = updatePlayersPos[CURRENT_POS_PLAYER];
+	new playerid = GetUserAtUserList(CURRENT_POS_PLAYER);
 	if(playerid == -1) 
 	{
+		CURRENT_POS_PLAYER = 0;
 		print("All Player Positsions Saved!");
 		return 0;
 	}
@@ -347,7 +382,7 @@ public UpdateAllPlayerPos(build)
 	return 1;
 }
 
-public UpdateAllPlayers(build, nonThreaded)
+public UpdateAllPlayers(nonThreaded)
 {
 	if(nonThreaded == 1)
 	{
@@ -358,31 +393,61 @@ public UpdateAllPlayers(build, nonThreaded)
 		return 1;
 	}
 
-	if(build == 0)
-	{
-		for(new i; i < MAX_PLAYERS; i++)
-		{
-			updatePlayers[i] = -1;
-		}
-		CURRENT_UPD_PLAYER = 0;
-		
-		new i;
-		foreach(User, lol)
-		{
-			updatePlayers[i] = lol;
-			i++;
-		}
-	}
-	
-	new playerid = updatePlayersPos[CURRENT_UPD_PLAYER];
-	
+	new playerid = GetUserAtUserList(CURRENT_UPD_PLAYER);
 	if(playerid == -1) 
 	{
+		CURRENT_UPD_PLAYER = 0;
 		print("All Players Saved!");
 		return 0;
 	}	
 	
 	UpdatePlayer(playerid, THREAD_ALL_USERS);
+	return 1;
+}
+
+public UpdateAllPockets(nonThreaded)
+{
+	if(nonThreaded == 1)
+	{
+		foreach(User, playerid)
+		{
+			SavePockets(playerid, -1);
+		}
+		return 1;
+	}
+
+	new playerid = GetUserAtUserList(CURRENT_POCKET_PLAYER);
+	if(playerid == -1) 
+	{
+		CURRENT_POCKET_PLAYER = 0;
+		print("All Pockets Saved!");
+		return 0;
+	}	
+	
+	SavePockets(playerid, THREAD_ALL_POCKETS);
+	return 1;
+}
+
+public UpdateAllSkills(nonThreaded)
+{
+	if(nonThreaded == 1)
+	{
+		foreach(User, playerid)
+		{
+			SavePockets(playerid, -1);
+		}
+		return 1;
+	}
+
+	new playerid = GetUserAtUserList(CURRENT_SKILL_PLAYER);
+	if(playerid == -1) 
+	{
+		CURRENT_SKILL_PLAYER = 0;
+		print("All Skills Saved!");
+		return 0;
+	}	
+	
+	SaveSkills(playerid, THREAD_ALL_SKILLS);
 	return 1;
 }
 
