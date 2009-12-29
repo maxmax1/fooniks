@@ -354,7 +354,7 @@ Notes:
 #define Iter_Add Itter_Add
 #define Itter_Add(%1,%2) \
 	Itter_AddInternal(YSI_g%1S, YSI_g%1C, YSI_g%1A, %2)
-
+	
 /*----------------------------------------------------------------------------*-
 Function:
 	Itter_Free

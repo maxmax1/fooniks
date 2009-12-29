@@ -163,6 +163,7 @@ public MysqlUpdateFinish(query[], field[], value, threadid)
 	print(query);
 	if(threadid == -1) mysql_query(query);
 	else mysql_query(query, threadid);
+	print("queryDone");
 }
 
 /*

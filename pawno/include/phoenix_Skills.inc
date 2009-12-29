@@ -74,7 +74,7 @@ new pSkillXPNeeded[MAX_PLAYERS][MAX_SKILLS];
 */
 
 forward LoadSkills(playerid);
-forward SaveSkills(playerid);
+forward SaveSkills(playerid, threadid);
 forward XpAdd(playerid, skillId, amount);
 forward SetSkills(playerid);
 forward OnLevelUp(playerid, skillId, newLevel, showMsg);
@@ -127,7 +127,7 @@ public LoadSkills(playerid)
 	return 1;
 }
 
-public SaveSkills(playerid)
+public SaveSkills(playerid, threadid)
 {	
 	if(!pInfo[playerid][pLoggedIn]) return 0;
 	if(pInfo[playerid][pSqlId] == 0) return 0;
@@ -145,7 +145,7 @@ public SaveSkills(playerid)
 		MysqlUpdateInt(query, str, pSkill[playerid][i]);
 	}
 	
-	MysqlUpdateFinish(query, "cid", sqlid, -1);	
+	MysqlUpdateFinish(query, "cid", sqlid, threadid);	
 	return 1;
 }
 
