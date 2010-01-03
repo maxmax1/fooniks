@@ -1,0 +1,29 @@
+<meta>
+	<info author="eRP-Gaming" version="0.1" type="gamemode" name="Phoenix" description="Phoenix Base system." />
+	<settings>
+		<setting name="#MYSQL_HOST" value="localhost" />
+		<setting name="#MYSQL_PASS" value="_araNeb#" />
+		<setting name="#MYSQL_USER" value="estrpco" />
+		<setting name="#MYSQL_DB" value="estrpco_portal" />
+	</settings>
+
+	<script src="base-server.lua" type="server" />
+	<script src="base-client.lua" type="client" />
+
+	<export function="getConnection" type="server" retval="MySQLConnection" params="void" description="Returns current MYSQL connection handle." />
+	<export function="MysqlUpdatebuild" type="server" />
+	<export function="MysqlSetField" type="server" />
+	<export function="MysqlUpdatebuild" type="server" />
+	<export function="UpdateFinish" type="server" />
+
+	<include resource="phoenix-Vehicles" />
+	<include resource="phoenix-Characters" />
+	<include resource="phoenix-Chat" />
+	<include resource="phoenix-Skills" />
+	<include resource="phoenix-SpawnManager" />
+
+	<!-- Files -->
+
+	<file src="files/images/logo.png" />
+
+</meta>
