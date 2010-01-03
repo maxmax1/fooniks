@@ -135,6 +135,7 @@ function firstSpawnHandler( selectedChar )
 	  		setElementHealth( client, tonumber( playerStuff["health"] ) );
 	  		setPlayerMoney( client, tonumber( playerStuff["money"] ) );
 	  		setCameraTarget( client, client );
+	  		setPlayerNametagText( client, playerStuff["name"] );
 	  		
 	  		triggerEvent( "onSkillsRequired", client, client );
 	  		

@@ -21,6 +21,7 @@
 	<include resource="phoenix-Chat" />
 	<include resource="phoenix-Skills" />
 	<include resource="phoenix-SpawnManager" />
+	<include resource="phoenix-Infospots" />
 
 	<!-- Files -->
 
