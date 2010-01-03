@@ -29,37 +29,7 @@ function ShowCharacters( charTable, selected, isEnd )
 	
 	tabPanel = guiCreateTabPanel( 0.0, 0.1, 1, 1, true, charWindow );
 	
-	local level = math.floor( 100 / ( 255 / getBlurLevel() ) );
-	
-	charTab = guiCreateTab( "Karakterid", tabPanel );
-	setTab = guiCreateTab( "Seaded", tabPanel );
-	guiCreateLabel(0.15, 0.325, 0.5, 0.1, "MotionBlur Tase: ", true, setTab );
-	levelLabel = guiCreateLabel(0.15, 0.4, 0.1, 0.1, level, true, setTab );
-	blurScroll = guiCreateScrollBar ( 0.25, 0.4, 0.7, 0.05, true, true, setTab );
-	guiScrollBarSetScrollPosition( blurScroll, level );
-	
-	addEventHandler("onClientGUIScroll", blurScroll, 
-	
-		function ( Scrolled )
-		
-			guiSetText ( levelLabel, math.floor( guiScrollBarGetScrollPosition( blurScroll ) ) );
-		
-		end
-	
-	);
-	
-	local save = guiCreateButton( 0.1, 0.85, 0.8, 0.1, "Salvesta", true, setTab );	
-	addEventHandler("onClientGUIClick", save, 
-	
-		function ( )
-		
-			local level = 100 / guiScrollBarGetScrollPosition( blurScroll ) * 255;
-			setBlurLevel( level );
-		
-		end
-		
-	);
-	
+	charTab = guiCreateTab( "Karakterid", tabPanel );	
 	
 	charScrollPane = guiCreateScrollPane( 0.05, 0.05, 0.9, 0.8, true, charTab );
 	guiScrollPaneSetScrollBars( charScrollPane, false, true );
@@ -111,7 +81,17 @@ function ShowCharacters( charTable, selected, isEnd )
 				local thePlayer = getLocalPlayer( );
 				setElementAlpha( thePlayer, 255 );
 				setElementModel( thePlayer, charTable[i]["model"] );
-				setBlurLevel( thePlayer, tonumber( charTable[i]["blurLevel"] ) );
+				
+				charTable[i]["blurLevel"] = tonumber( charTable[i]["blurLevel"] );
+				
+				if( charTable[i]["blurLevel"] == nil or charTable[i]["blurLevel"] < 0 or charTable[i]["blurLevel"] > 255 ) then
+					
+					charTable[i]["blurLevel"] = 36;
+					
+				end
+				
+				
+				setBlurLevel( charTable[i]["blurLevel"] );
 				selectedChar = charTable[i]["id"];
 				guiSetEnabled( charSpawnButton, true );
 			
@@ -124,9 +104,38 @@ function ShowCharacters( charTable, selected, isEnd )
 		
 	else
 	
-		outputChatBox( "Sul pole karakterit." .. charTable["inf"]["numCharacters"] );
+		outputChatBox( "Sul pole karakterit. " .. #charTable );
 	
 	end
+	
+	local lvl = math.round( 100 / ( 255 / getBlurLevel() ) );
+	setTab = guiCreateTab( "Seaded", tabPanel );
+	guiCreateLabel(0.15, 0.325, 0.5, 0.1, "MotionBlur Tase: ", true, setTab );
+	levelLabel = guiCreateLabel(0.15, 0.4, 0.1, 0.1, tostring( lvl ), true, setTab );
+	blurScroll = guiCreateScrollBar ( 0.25, 0.4, 0.7, 0.05, true, true, setTab );
+	guiScrollBarSetScrollPosition( blurScroll, lvl );
+	
+	addEventHandler("onClientGUIScroll", blurScroll, 
+	
+		function ( Scrolled )
+		
+			guiSetText ( levelLabel, math.floor( guiScrollBarGetScrollPosition( blurScroll ) ) );
+		
+		end
+	
+	);
+	
+	local save = guiCreateButton( 0.1, 0.85, 0.8, 0.1, "Salvesta", true, setTab );	
+	addEventHandler("onClientGUIClick", save, 
+	
+		function ( )
+		
+			local level = 100 / guiScrollBarGetScrollPosition( blurScroll ) * 255;
+			setBlurLevel( level );
+		
+		end
+		
+	);	
 
 	guiSetVisible( charWindow, true );
 	showCursor( true );
