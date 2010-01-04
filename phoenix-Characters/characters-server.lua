@@ -1,6 +1,5 @@
 connection = nil;
 charFields = nil;
-playerTimer = { };
 
 function displayLoadedRes( res )	
 	
@@ -16,6 +15,7 @@ function displayLoadedRes( res )
 		else
 		
 			outputDebugString( "Phoenix-Characters: Mysql serveriga ühendatud." );
+			setTimer( savePlayers, 45000, 0 );
 		
 		end	
 		
@@ -139,8 +139,6 @@ function firstSpawnHandler( selectedChar )
 	  		
 	  		triggerEvent( "onSkillsRequired", client, client );
 	  		
-	  		playerTimer[client] = setTimer( savePlayer, 45000, 0, client, true );
-	  		
 		end
 		
 	end
@@ -184,26 +182,28 @@ function updatePlayer( thePlayer ) -- Updates player status for saving...
 
 end
 
+function savePlayers( )
+
+	local players = getElementsByType( "player" );
+	
+	for k,v in ipairs( players ) do
+	
+		savePlayer( v, true );
+	
+	end
+
+end
+
 function savePlayer( thePlayer, timed )
 
 	if( not thePlayer or not isElement ( thePlayer ) ) then
 	
-		if( timed ) then
-		
-			killTimer( playerTimer[thePlayer] );
-			
-		end
 		return false;
 		
 	end
 	local charId = getElementData( thePlayer, "Character.id" );
 	if( not charId ) then
-	
-		if( timed ) then
-		
-			killTimer( playerTimer[thePlayer] );
-			
-		end
+
 		return false;
 		
 	end
