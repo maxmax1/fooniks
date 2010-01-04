@@ -69,13 +69,6 @@ function ShowCharacters( charTable, selected, isEnd )
 			charList[i][1] = guiCreateStaticImage( 0.1, y, 0.9, 0.2, file, true, charScrollPane );
 			guiSetAlpha ( charList[i][1], 0.3 );
 			
-			local sex = "M";
-			if( charTable[i]["sex"] == 1 ) then sex = "N"; end
-			
-			charList[i][2] = guiCreateLabel(0.15, 0.1, 0.9, 0.3, "Nimi: " .. charTable[i]["name"], true, charList[i][1] );
-			charList[i][3] = guiCreateLabel(0.15, 0.4, 0.9, 0.3, "Sugu: " .. sex, true, charList[i][1] );
-			charList[i][4] = guiCreateLabel(0.15, 0.7, 0.9, 0.3, "Vanus: " .. charTable[i]["age"], true, charList[i][1] );
-			
 			if( i ~= selected ) then
 			
 				addEventHandler("onClientGUIClick", charList[i][1], 
@@ -89,6 +82,14 @@ function ShowCharacters( charTable, selected, isEnd )
 				);
 				
 			end
+			
+			local sex = "M";
+			if( charTable[i]["sex"] == 1 ) then sex = "N"; end
+			
+			charList[i][2] = guiCreateLabel(0.15, 0.1, 0.9, 0.3, "Nimi: " .. charTable[i]["name"], true, charList[i][1] );
+			charList[i][3] = guiCreateLabel(0.15, 0.4, 0.9, 0.3, "Sugu: " .. sex, true, charList[i][1] );
+			charList[i][4] = guiCreateLabel(0.15, 0.7, 0.9, 0.3, "Vanus: " .. charTable[i]["age"], true, charList[i][1] );
+			
 		
 			
 			if( i == selected ) then
