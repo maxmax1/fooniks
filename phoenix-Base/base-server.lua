@@ -14,6 +14,7 @@ function displayLoadedRes( res )
 		else
 		
 			outputDebugString( "Mysql serveriga ühendatud." );
+			call(getResourceFromName("scoreboard"), "addScoreboardColumn", "User.userid", getRootElement( ), 1);
 		
 		end	
 		

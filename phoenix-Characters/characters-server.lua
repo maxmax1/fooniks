@@ -15,6 +15,7 @@ function displayLoadedRes( res )
 		else
 		
 			outputDebugString( "Phoenix-Characters: Mysql serveriga ühendatud." );
+			setTimer( updatePlayers, 10000, 0 );
 			setTimer( savePlayers, 45000, 0 );
 		
 		end	
@@ -121,14 +122,19 @@ function firstSpawnHandler( selectedChar )
       			end
     				
 	  		end
+	  				
+			setElementAlpha( client, 255 );
 	  		
 	  		if( tonumber( playerStuff["health"] ) < 5 ) then playerStuff["health"] = 15; end
 	  		
-	  		setPedSkin( client, playerStuff["model"] );
+	  		if( call( getResourceFromName ( "phoenix-Infospots" ), "checkForIntSpawn", client ) ~= true ) then
 	  		
-			setElementInterior( client, 0 );
-			setElementAlpha( client, 255 );
-			setElementDimension( client, 0 );
+	  			setElementDimension( client, 0 );
+	  			setElementInterior( client, 0 );
+	  		
+	  		end	  		
+	  		
+	  		setPedSkin( client, playerStuff["model"] );	  
 			
 	  		setElementPosition( client, playerStuff["posX"], playerStuff["posY"], playerStuff["posZ"] );
 	  		setPedRotation( client, playerStuff["angle"] );
@@ -152,6 +158,7 @@ addEventHandler ( "onPlayerQuit", getRootElement(),
 
 	function ( qType )
 	
+		-- updatePlayer( thePlayer );
 		savePlayer( thePlayer, false );
 	
 	end
@@ -194,6 +201,18 @@ function savePlayers( )
 
 end
 
+function updatePlayers( )
+
+	local players = getElementsByType( "player" );
+	
+	for k,v in ipairs( players ) do
+	
+		updatePlayer( v );
+	
+	end
+
+end
+
 function savePlayer( thePlayer, timed )
 
 	if( not thePlayer or not isElement ( thePlayer ) ) then
@@ -207,8 +226,6 @@ function savePlayer( thePlayer, timed )
 		return false;
 		
 	end
-	
-	updatePlayer( thePlayer ); -- Update before we save...
 	
 	-- Start query building
 	local query = call( getResourceFromName ( "phoenix-Base" ), "MysqlUpdatebuild", "ph_characters");

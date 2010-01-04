@@ -71,7 +71,7 @@ function submitMTeata(mkirj, teataja)
 		
 			local adminlvl = getElementData( v, "User.AdminLevel" );
 			
-			if tonumber(adminlvl) >= 1 then
+			if adminlvl ~= false and adminlvl ~= nil and tonumber(adminlvl) >= 1 then
 			
 				outputChatBox("[TEATA] " ..teataja.. ": " ..table.concat(mkirj2), v, 173, 255, 47);
 				outputChatBox("#33FF00Teie teade on edkualt administraatoritele edastatud!", source, 255, 255, 255, true);

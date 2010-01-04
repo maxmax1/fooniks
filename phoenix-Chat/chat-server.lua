@@ -2,10 +2,10 @@ addEventHandler ( "onPlayerJoin", getRootElement(),
 
 	function ()
 	
-		bindKey(source, "o", "down", "chatbox", "o");
-		bindKey(source, "v", "down", "chatbox", "s");
-		bindKey(source, "b", "down", "chatbox", "b");
-		bindKey(source, "n", "down", "chatbox", "c");
+		unbindKey( source, "y" );
+		bindKey( source, "o", "down", "chatbox", "o" );
+		bindKey( source, "b", "down", "chatbox", "b" );
+		bindKey( source, "y", "down", "chatbox", "c" );
 	
 	end
 
@@ -17,7 +17,15 @@ addEventHandler ( "onPlayerChat", getRootElement(),
 	
 		if( msgType == 1 ) then
 		
-			if ( not setChatMessage( source, "", "* ", "", 35, message, 218, 146, 229 ) ) then
+			if ( not setChatMessage( source, true, "", "* ", "", 35, message, 218, 146, 229 ) ) then
+		
+				outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", source );
+		
+			end
+		
+		elseif( msgType == 2 ) then
+		
+			if ( not setChatMessage( source, true, " sosistab: ", "* ", "", 10, message, 242, 255, 172  ) ) then
 		
 				outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", source );
 		
@@ -25,17 +33,15 @@ addEventHandler ( "onPlayerChat", getRootElement(),
 		
 		else
 		
-			
-		
 			if( string.sub( message, -1 ) == "!" ) then
 			
-				if( not setChatMessage( source, " hüüab: ", "* ", "", 35, arg, 215, 255, 0 ) ) then
+				if( not setChatMessage( source, true, " hüüab: ", "* ", "", 35, message, 215, 255, 0 ) ) then
 				
 					outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", source );
 				
 				end
 		
-			elseif ( not setChatMessage( source, ": ", "", "", 35, message, 242, 255, 172 ) ) then
+			elseif ( not setChatMessage( source, true, ": ", "", "", 35, message, 242, 255, 172 ) ) then
 		
 				outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", source );
 		
@@ -56,7 +62,7 @@ addCommandHandler ( "ooc",
 	
 		local arg = table.concat( {...}, " " );	
 	
-		if ( not setChatMessage( playerSource, " OOC: ", "(( ", " ))", -1, arg, 140, 248, 255 ) ) then
+		if ( not setChatMessage( playerSource, false, " OOC: ", "(( ", " ))", -1, arg, 140, 248, 255 ) ) then
 		
 			outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", playerSource );
 		
@@ -72,7 +78,7 @@ addCommandHandler ( "o",
 	
 		local arg = table.concat( {...}, " " );		
 	
-		if ( not setChatMessage( playerSource, " OOC: ", "(( ", " ))", -1, arg, 140, 248, 255 ) ) then
+		if ( not setChatMessage( playerSource, false, " OOC: ", "(( ", " ))", -1, arg, 140, 248, 255 ) ) then
 		
 			outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", playerSource );
 		
@@ -88,7 +94,7 @@ addCommandHandler ( "b",
 
 		local arg = table.concat( {...}, " " );
 	
-		if ( not setChatMessage( playerSource, " OOC: ", "(( ", " ))", 25, arg, 242, 255, 172 ) ) then
+		if ( not setChatMessage( playerSource, false, " OOC: ", "(( ", " ))", 25, arg, 242, 255, 172 ) ) then
 		
 			outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", playerSource );
 		
@@ -104,7 +110,7 @@ addCommandHandler ( "c",
 	
 		local arg = table.concat( {...}, " " );	
 	
-		if ( not setChatMessage( playerSource, " sosistab: ", "* ", "", 10, arg, 242, 255, 172  ) ) then
+		if ( not setChatMessage( playerSource, true, " sosistab: ", "* ", "", 10, arg, 242, 255, 172  ) ) then
 		
 			outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", playerSource );
 		
@@ -120,7 +126,7 @@ addCommandHandler ( "s",
 	
 		local arg = table.concat( {...}, " " );			
 	
-		if ( not setChatMessage( playerSource, " hüüab: ", "* ", "", 35, arg, 215, 255, 0 ) ) then
+		if ( not setChatMessage( playerSource, true, " hüüab: ", "* ", "", 35, arg, 215, 255, 0 ) ) then
 		
 			outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", playerSource );
 		
@@ -136,7 +142,7 @@ addCommandHandler ( "me",
 	
 		local arg = table.concat( {...}, " " );		
 	
-		if ( not setChatMessage( playerSource, " ", "* ", " ", 35, arg, 218, 146, 229 ) ) then
+		if ( not setChatMessage( playerSource, true, " ", "* ", " ", 35, arg, 218, 146, 229 ) ) then
 		
 			outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", playerSource );
 		
@@ -150,45 +156,51 @@ addCommandHandler ( "es",
 	
 	function ( playerSource, commandName, oName, ... )
 
-		if ( oName == nil ) then
+		if ( oName == nil or ... == nil ) then
 		
-			outputChatBox( "KASUTUS: /es !osanimest tekst.", playerSource );
-			return false;
-			
-		end
-		
-		if ( ... == nil ) then
-		
-			outputChatBox( "KASUTUS: /es osanimest !tekst.", playerSource );
+			outputChatBox( "KASUTUS: /es id/osanimest tekst.", playerSource );
 			return false;
 			
 		end
 	
 		local targets = { };
 		
-		-- if ( numbe
-		
 		local players = getElementsByType ( "player" );
 		
 		for k, v in ipairs( players ) do
 		
-			local name = getPlayerName( v );
+			if( type( oName ) == "number" ) then
 			
-			if( name ~= false and name ~= nil ) then
+				local id = getElementData( v, "User.userid" );
+				if( id ~= false and tonumber( id ) ==  oName ) then
+				
+					local tbl = {};
+					tbl[1] = v;
+					tbl[2] = getPlayerName( v );
+				
+				end
 			
-				local targetmatch = string.match( string.lower( name ), string.lower( oName ) );
+			else
+		
+				local name = getPlayerName( v );
+			
+				if( name ~= false and name ~= nil ) then
+			
+					local targetmatch = string.match( string.lower( name ), string.lower( oName ) );
 				
-				if( targetmatch ~= nil ) then
+					if( targetmatch ~= nil ) then
 				
-					if( getElementData( v, "Character.id" ) ~= false ) then
+						if( getElementData( v, "Character.id" ) ~= false ) then
 					
-						local tbl = {};
-						tbl[1] = v;
-						tbl[2] = name;
-						table.insert( targets, tbl );
+							local tbl = {};
+							tbl[1] = v;
+							tbl[2] = name;
+							table.insert( targets, tbl );
 						
-					end
+						end
 					
+					end
+				
 				end
 				
 			end
@@ -217,11 +229,23 @@ addCommandHandler ( "es",
 	
 , false, true);
 
-function setChatMessage( fromPlayer, action, prepend, endadd, range, str, r, g, b )
+function setChatMessage( fromPlayer, isIC, action, prepend, endadd, range, str, r, g, b )
 
 	if( getElementData( fromPlayer, "Character.id" ) == false ) then return false; end
 
-	local sendstr = prepend .. getPlayerName( fromPlayer ) .. action .. str .. endadd;
+	local myName = "";
+	
+	if( not isIC ) then 
+
+		myName = getPlayerName( fromPlayer );
+		
+	else
+	
+		myName = getPlayerNametagText( fromPlayer );
+	
+	end
+
+	local sendstr = prepend .. myName .. action .. str .. endadd;
 	local players;
 
 	

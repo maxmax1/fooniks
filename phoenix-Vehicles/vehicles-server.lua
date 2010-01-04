@@ -365,7 +365,8 @@ function toggleVehicleEngine ( player, key, keyState )
 	--if( keyState ~= "up" ) then return 1; end
 
 	local theVehicle = getPedOccupiedVehicle( player );
-	if( not theVehicle ) then
+	local theSeat = getPedOccupiedVehicleSeat ( player );
+	if( not theVehicle or theSeat ~= 0 ) then
 	
 		outputChatBox( "Sa pead olema masinas", player );
 		return 2;
@@ -420,7 +421,13 @@ end
 function toggleVehicleLights ( player, key, keyState )
 
 	local theVehicle = getPedOccupiedVehicle( player );
-	if( not theVehicle or not isElement ( theVehicle )  ) then return 1; end
+	local theSeat = getPedOccupiedVehicleSeat ( player );
+	if( not theVehicle or theSeat ~= 0 ) then
+	
+		outputChatBox( "Sa pead olema masinas", player );
+		return 2;
+		
+	end
 	
 	local newState = getVehicleOverrideLights( theVehicle );
 	
@@ -442,7 +449,13 @@ addCommandHandler ( "tuled", toggleVehicleLights, false, true ) --temporary
 function toggleVehicleSeatBelt ( player, key, keyState )
 
 	local theVehicle = getPedOccupiedVehicle( player );
-	if( not theVehicle or not isElement ( theVehicle )  ) then return 1; end
+	
+	if( not theVehicle or not isElement ( theVehicle )  ) then
+	
+		outputChatBox( "Sa pead olema masinas", player );
+		return 2;
+		
+	end
 	
 	pSeatbelt[player] = not pSeatbelt[player];
 	
