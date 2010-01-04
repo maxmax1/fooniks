@@ -19,15 +19,25 @@ addEventHandler ( "onPlayerChat", getRootElement(),
 		
 			if ( not setChatMessage( source, "", "* ", "", 35, message, 218, 146, 229 ) ) then
 		
-				outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", playerSource );
+				outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", source );
 		
 			end
 		
 		else
 		
-			if ( not setChatMessage( source, ": ", "", "", 35, message, 242, 255, 172 ) ) then
+			
 		
-				outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", playerSource );
+			if( string.sub( message, -1 ) == "!" ) then
+			
+				if( not setChatMessage( source, " hüüab: ", "* ", "", 35, arg, 215, 255, 0 ) ) then
+				
+					outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", source );
+				
+				end
+		
+			elseif ( not setChatMessage( source, ": ", "", "", 35, message, 242, 255, 172 ) ) then
+		
+				outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", source );
 		
 			end
 		
@@ -140,7 +150,7 @@ addCommandHandler ( "es",
 	
 	function ( playerSource, commandName, arg, ... )
 
-		if ( not arg ) then
+		if ( not arg or arg == nil ) then
 		
 			outputChatBox( "KASUTUS: /es osanimest tekst", playerSource );
 			
@@ -150,7 +160,9 @@ addCommandHandler ( "es",
 		
 		-- if ( numbe
 		
-		for k, v in ipairs( getElementsByType( "player" ) ) do
+		local players = getElementsByType ( "player" );
+		
+		for k, v in ipairs( players ) do
 		
 			local name = getPlayerName( v );
 			

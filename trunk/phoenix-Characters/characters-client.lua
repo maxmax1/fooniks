@@ -64,7 +64,7 @@ function ShowCharacters( charTable, selected, isEnd )
 			charList[i] = { };
 			
 			local file = ":phoenix-Characters/files/images/gui-Black.png";
-			if( i == 1 ) then file = "files/images/gui-White.png"; end
+			if( i == selected ) then file = "files/images/gui-White.png"; end
 			
 			charList[i][1] = guiCreateStaticImage( 0.1, y, 0.9, 0.2, file, true, charScrollPane );
 			guiSetAlpha ( charList[i][1], 0.3 );
@@ -72,9 +72,24 @@ function ShowCharacters( charTable, selected, isEnd )
 			local sex = "M";
 			if( charTable[i]["sex"] == 1 ) then sex = "N"; end
 			
-			charList[i][2] = guiCreateLabel(0.15, y+0.025, 0.8, 0.1, "Nimi: " .. charTable[i]["name"], true, charScrollPane );
-			charList[i][3] = guiCreateLabel(0.15, y+0.075, 0.8, 0.1, "Sugu: " .. sex, true, charScrollPane );
-			charList[i][4] = guiCreateLabel(0.15, y+0.125, 0.8, 0.1, "Vanus: " .. charTable[i]["age"], true, charScrollPane );
+			charList[i][2] = guiCreateLabel(0.15, 0.1, 0.9, 0.3, "Nimi: " .. charTable[i]["name"], true, charList[i][1] );
+			charList[i][3] = guiCreateLabel(0.15, 0.4, 0.9, 0.3, "Sugu: " .. sex, true, charList[i][1] );
+			charList[i][4] = guiCreateLabel(0.15, 0.7, 0.9, 0.3, "Vanus: " .. charTable[i]["age"], true, charList[i][1] );
+			
+			if( i ~= selected ) then
+			
+				addEventHandler("onClientGUIClick", charList[i][1], 
+			
+					function ( )
+				
+						ShowCharacters( charTable, i, false );
+				
+					end
+				
+				);
+				
+			end
+		
 			
 			if( i == selected ) then
 			
@@ -108,7 +123,7 @@ function ShowCharacters( charTable, selected, isEnd )
 	
 	end
 	
-	local lvl = math.round( 100 / ( 255 / getBlurLevel() ) );
+	local lvl = math.ceil( 100 / ( 255 / getBlurLevel() ) );
 	setTab = guiCreateTab( "Seaded", tabPanel );
 	guiCreateLabel(0.15, 0.325, 0.5, 0.1, "MotionBlur Tase: ", true, setTab );
 	levelLabel = guiCreateLabel(0.15, 0.4, 0.1, 0.1, tostring( lvl ), true, setTab );

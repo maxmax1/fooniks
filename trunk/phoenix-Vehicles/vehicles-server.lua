@@ -59,7 +59,10 @@ function LoadVehicles()
 	  						vehicleStuff["vAngXd"], 
 	  						vehicleStuff["vAngYd"],
 	  						vehicleStuff["vAngZd"],
-	  						vehicleStuff["vVehNumber"]);
+	  						vehicleStuff["vVehNumber"]); 
+							
+
+							
 	  						
 	  		if( newveh ~= false ) then
 	  		
@@ -68,9 +71,51 @@ function LoadVehicles()
 	  			setElementData( newveh, "vOwner", vehicleStuff["vOwner"]);
 	  			setElementData( newveh, "vValue", vehicleStuff["vValue"]);
 	  			setElementData( newveh, "vDeaths", vehicleStuff["vDeaths"]);
+				
+				setElementHealth( newveh, vehicleStuff["vHealth"] );
+				
+				if vehicleStuff["vLocked"] == 1 then
+					setVehicleLocked( newveh, true)
+				else
+					setVehicleLocked( newveh, false)
+				end
+				
+				if vehicleStuff["vEngine"] == 1 then
+					setVehicleEngineState( newveh, true)
+				else
+					setVehicleEngineState( newveh, false)
+				end
 	  			
+				setVehicleDoorState( newveh, 0, vehicleStuff["vDoor0State"])
+				setVehicleDoorState( newveh, 1, vehicleStuff["vDoor1State"]) 
+				setVehicleDoorState( newveh, 2, vehicleStuff["vDoor2State"])   
+				setVehicleDoorState( newveh, 3, vehicleStuff["vDoor3State"])
+				setVehicleDoorState( newveh, 4, vehicleStuff["vDoor4State"])
+				setVehicleDoorState( newveh, 5, vehicleStuff["vDoor5State"])
+				
+				setVehicleLightState( newveh, 0, vehicleStuff["vLight0State"])
+				setVehicleLightState( newveh, 1, vehicleStuff["vLight1State"])
+				setVehicleLightState( newveh, 2, vehicleStuff["vLight2State"])
+				setVehicleLightState( newveh, 3, vehicleStuff["vLight3State"])
+				
+				setVehicleOverrideLights( newveh, vehicleStuff["vOverrideLights"])
+				
+				setVehiclePanelState( newveh, 0, vehicleStuff["vPanel0State"])
+				setVehiclePanelState( newveh, 1, vehicleStuff["vPanel1State"])
+				setVehiclePanelState( newveh, 2, vehicleStuff["vPanel2State"])
+				setVehiclePanelState( newveh, 3, vehicleStuff["vPanel3State"])
+				setVehiclePanelState( newveh, 4, vehicleStuff["vPanel4State"])
+				setVehiclePanelState( newveh, 5, vehicleStuff["vPanel5State"])
+				setVehiclePanelState( newveh, 6, vehicleStuff["vPanel6State"])
+				
+				setVehicleWheelStates( newveh, vehicleStuff["vWheel1State"], vehicleStuff["vWheel2State"], vehicleStuff["vWheel3State"], vehicleStuff["vWheel4State"])
+				
+				
 	  			setVehicleColor( newveh, vehicleStuff["vColor1"], vehicleStuff["vColor2"], vehicleStuff["vColor3"], vehicleStuff["vColor4"] );
-	  			setElementHealth( newveh, vehicleStuff["vHealth"] );
+				
+				setVehiclePaintjob( newveh, vehicleStuff["vPaintjob"])
+				
+	  			
 	  			added = added + 1;
 	  		
 	  		end
@@ -132,6 +177,41 @@ function UpdateVehicle( v )
 	query = call( getResourceFromName ( "phoenix-Base" ), "MysqlSetField", query, "vValue", getElementData( v, "vValue" ) );
 	query = call( getResourceFromName ( "phoenix-Base" ), "MysqlSetField", query, "vDeaths", getElementData( v, "vDeaths" ) );
 	
+	query = call( getResourceFromName ( "phoenix-Base" ), "MysqlSetField", query, "vOverrideLights", getVehicleOverrideLights( v ) );
+	
+	if isVehicleLocked( v ) then
+		query = call( getResourceFromName ( "phoenix-Base" ), "MysqlSetField", query, "vLocked", 1 );
+	else
+		query = call( getResourceFromName ( "phoenix-Base" ), "MysqlSetField", query, "vLocked", 0 );
+	end
+	
+	if getVehicleEngineState( v ) then
+		query = call( getResourceFromName ( "phoenix-Base" ), "MysqlSetField", query, "vEngine", 1 );
+	else
+		query = call( getResourceFromName ( "phoenix-Base" ), "MysqlSetField", query, "vEngine", 0 );
+	end
+
+	for i = 0, 5 do
+		query = call( getResourceFromName ( "phoenix-Base" ), "MysqlSetField", query, "vDoor"..i.."State", getVehicleDoorState( v, i ) );
+	end	
+	
+	for i = 0, 3 do
+		query = call( getResourceFromName ( "phoenix-Base" ), "MysqlSetField", query, "vLight"..i.."State", getVehicleLightState( v, i ) );
+	end	
+	
+	for i = 0, 6 do
+		query = call( getResourceFromName ( "phoenix-Base" ), "MysqlSetField", query, "vPanel"..i.."State", getVehiclePanelState( v, i ) );
+	end	
+	
+	local wheelState1, wheelState2, wheelState3, wheelState4 = getVehicleWheelStates ( v )
+	query = call( getResourceFromName ( "phoenix-Base" ), "MysqlSetField", query, "vWheel1State", wheelState1 );
+	query = call( getResourceFromName ( "phoenix-Base" ), "MysqlSetField", query, "vWheel2State", wheelState2 );
+	query = call( getResourceFromName ( "phoenix-Base" ), "MysqlSetField", query, "vWheel3State", wheelState3 );
+	query = call( getResourceFromName ( "phoenix-Base" ), "MysqlSetField", query, "vWheel4State", wheelState4 );
+	
+	query = call( getResourceFromName ( "phoenix-Base" ), "MysqlSetField", query, "vPaintjob", getVehiclePaintjob( v ) );
+
+	
 	-- Finish query.
 	query = call( getResourceFromName ( "phoenix-Base" ), "UpdateFinish", query, "vehicleId", sqlId);
 	
@@ -169,7 +249,7 @@ function displayVehicleLoss(loss)
 	
 	if( thePlayer ~= false ) then 
 	
-    	setVehicleTurnVelocity( source, 0, 0, 0.001 );
+    	setVehicleTurnVelocity( source, 0, 0, 0.005 );
     	
     end   
 	
@@ -256,7 +336,7 @@ function canPlayerStartVehicle( thePlayer, theVehicle )
     
     	if( vOwner == 0 ) then -- OnSale
     	
-    		outputChatBox( thePlayer, "See auto on müügis." );
+    		outputChatBox( thePlayer, "See sõiduk on müügis." );
     		return false;
     		
     	elseif( vOwner > 0 and vOwner ~= pId) then
@@ -282,7 +362,7 @@ end
 
 function toggleVehicleEngine ( player, key, keyState )
 
-	if( keyState ~= "up" ) then return 1; end
+	--if( keyState ~= "up" ) then return 1; end
 
 	local theVehicle = getPedOccupiedVehicle( player );
 	if( not theVehicle ) then return 2; end
@@ -301,29 +381,11 @@ function toggleVehicleEngine ( player, key, keyState )
     
     else
 	
-		if( engineStarting[theVehicle] == true ) then
-		
-			return false;
-		
-		end
-	
 		local oldState = getVehicleEngineState ( theVehicle );
-		-- 
+
 		if( oldState == false ) then
-	
-			local x, y, z = getElementPosition( theVehicle );
-			local colShape = createColSphere( x, y, z, 25.0 );
-	
-			for k,v in ipairs( getElementsWithinColShape( colShape, "player" ) ) do
-	
-				triggerClientEvent( v, "onVehicleStart", getRootElement( ), theVehicle );
-				
-			end
-			
-			destroyElement( colShape );
-			setTimer( engineStartEnd, 3000, 1, player, theVehicle );
-			setPedFrozen( player, true );
-			engineStarting[theVehicle] = true;
+		
+			setTimer( setVehicleEngineState, 1000, 1, theVehicle );
 		
 		else
 		
@@ -336,6 +398,7 @@ function toggleVehicleEngine ( player, key, keyState )
 	end
     
 end
+addCommandHandler ( "mootor", toggleVehicleEngine ) --temporary
 
 function engineStartEnd( thePlayer, theVehicle )
 
@@ -366,7 +429,7 @@ function toggleVehicleLights ( player, key, keyState )
 	setVehicleOverrideLights( theVehicle, newState );
     
 end
-
+addCommandHandler ( "tuled", toggleVehicleLights ) --temporary
 
 function toggleVehicleSeatBelt ( player, key, keyState )
 
@@ -375,56 +438,57 @@ function toggleVehicleSeatBelt ( player, key, keyState )
 	
 	pSeatbelt[player] = not pSeatbelt[player];
 	
-	local action = "v6tab turvav88 2ra.";
+	local action = "avab turvavöö.";
 	if( pSeatbelt[player] == true ) then
 	
-		action = "paneb turvav88 peale.";
+		action = "paneb turvavöö peale.";
 		
 	end	
 	executeCommandHandler ( "me", player, action );
     
 end
+addCommandHandler ( "turvavöö", toggleVehicleSeatBelt ) --temporary
 
-function onDriverExit( thePlayer )
+--[[function onDriverExit( thePlayer )
 
 	if(not thePlayer or not isElement ( thePlayer ) ) then return false end
 	unbindKey( thePlayer, "g", "up", toggleVehicleEngine );
 	unbindKey( thePlayer, "l", "up", toggleVehicleLights );
 
-end
+end]]
 
 addEventHandler ( "onVehicleEnter", getRootElement(),
 
 	function ( thePlayer, seat, jacked )
-	
+		outputChatBox( "(( Käsklused: /turvavöö, /mootor, /tuled))", thePlayer );
 		if( seat == 0) then
 				
 			
-			setVehicleEngineState( source, false ); -- Someday remove this.
-			setVehicleOverrideLights( source, 1 ); -- Someday remove this.
+		--	setVehicleEngineState( source, false ); -- Someday remove this.
+		--	setVehicleOverrideLights( source, 1 ); -- Someday remove this.
 			
-			bindKey( thePlayer, "g", "up", toggleVehicleEngine );
-			bindKey( thePlayer, "l", "up", toggleVehicleLights );
+		--	bindKey( thePlayer, "g", "up", toggleVehicleEngine );
+		--	bindKey( thePlayer, "l", "up", toggleVehicleLights );
 			
 		end
 		
 		pSeatbelt[thePlayer] = false;
-		bindKey( thePlayer, "h", "up", toggleVehicleSeatBelt );
+--		bindKey( thePlayer, "h", "up", toggleVehicleSeatBelt );
 	
 	end
 
 );
 
-addEventHandler ( "onVehicleExit", getRootElement(),
+--[[addEventHandler ( "onVehicleExit", getRootElement(),
 
-	function ( hePlayer, seat, jacked )
+	function ( thePlayer, seat, jacked )
 	
 		unbindKey( thePlayer, "h", "up", toggleVehicleSeatBelt );
 	
 	end
 
 );
-
+]]
 
 	
 
