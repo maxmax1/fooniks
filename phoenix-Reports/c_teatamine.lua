@@ -57,25 +57,25 @@ bindKey("F2", "down",
 
 function vteata( )
 
-	head = guiGetText( vEditPealkiri );
-	kirj = guiGetText( vMemoKirjeldus );
+	local head = guiGetText( vEditPealkiri );
+	local kirj = guiGetText( vMemoKirjeldus );
 	
-	if #head < 1 or #kirj < 1 then
+	guiSetText ( vEditPealkiri, "" );
+	guiSetText ( vMemoKirjeldus, "" );
 	
-		guiSetVisible(TabPanel, false);
-		guiSetInputEnabled( false );
-		showCursor( false );
-		
-	elseif #head > 1 or #kirj > 1 then
+	if #head >= 5 and #kirj >= 15 then
 	
-		guiSetText ( vEditPealkiri, "" );
-		guiSetText ( vMemoKirjeldus, "" );
 		triggerServerEvent("submitVTeata", getRootElement(), head, kirj);
-		guiSetVisible(TabPanel, false);
-		guiSetInputEnabled( false );
-		showCursor( false );
+		
+	else
+	
+		outputChatBox( "Pealkiri peab olema vähemalt 5 ja sisu 15 tähemärki." );
 		
 	end
+	
+	guiSetVisible(TabPanel, false);
+	guiSetInputEnabled( false );
+	showCursor( false );	
 	
 end
 
@@ -90,15 +90,22 @@ end
 
 function mteata()
 	
-	mkirj = guiGetText( mMemoKirjeldus )
-	teataja = getPlayerName(getLocalPlayer())
+	local mkirj = guiGetText( mMemoKirjeldus )
+	local teataja = getPlayerName(getLocalPlayer())
 	
-	if #mkirj > 5 then
-		guiSetText ( mMemoKirjeldus, "" )
-		triggerServerEvent("submitMTeata", getRootElement(), mkirj, teataja)
-		guiSetVisible(TabPanel, false)
-		guiSetInputEnabled( false )
-		showCursor( false )
+	guiSetText ( mMemoKirjeldus, "" )
+	guiSetVisible(TabPanel, false)
+	guiSetInputEnabled( false )
+	showCursor( false )	
+	
+	if #mkirj >= 5 then
+	
+		triggerServerEvent("submitMTeata", getRootElement(), mkirj, teataja) 
+		
+	else
+	
+		outputChatBox( "Teade peab olema vähemalt 5 tähemärki." );
+		
 	end
 	
 end

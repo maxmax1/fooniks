@@ -34,8 +34,8 @@ addEventHandler ( "onPlayerChat", getRootElement(),
 		else
 		
 			if( string.sub( message, -1 ) == "!" ) then
-			
-				if( not setChatMessage( source, true, " hüüab: ", "* ", "", 35, message, 215, 255, 0 ) ) then
+						
+				if( not setChatMessage( source, true, " karjub: ", "* ", "", 35, message, 215, 255, 0 ) ) then
 				
 					outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", source );
 				
@@ -126,7 +126,7 @@ addCommandHandler ( "s",
 	
 		local arg = table.concat( {...}, " " );			
 	
-		if ( not setChatMessage( playerSource, true, " hüüab: ", "* ", "", 35, arg, 215, 255, 0 ) ) then
+		if ( not setChatMessage( playerSource, true, " karjub: ", "* ", "", 35, arg, 215, 255, 0 ) ) then
 		
 			outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", playerSource );
 		
@@ -177,6 +177,7 @@ addCommandHandler ( "es",
 					local tbl = {};
 					tbl[1] = v;
 					tbl[2] = getPlayerName( v );
+					table.insert( targets, tbl );
 				
 				end
 			
@@ -190,7 +191,7 @@ addCommandHandler ( "es",
 				
 					if( targetmatch ~= nil ) then
 				
-						if( getElementData( v, "Character.id" ) ~= false ) then
+						if( getElementData( v, "User.userid" ) ~= false ) then
 					
 							local tbl = {};
 							tbl[1] = v;

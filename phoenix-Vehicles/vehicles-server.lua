@@ -417,14 +417,13 @@ function engineStartEnd( thePlayer, theVehicle )
 end
 ]]--
 
-
 function toggleVehicleLights ( player, key, keyState )
 
 	local theVehicle = getPedOccupiedVehicle( player );
 	local theSeat = getPedOccupiedVehicleSeat ( player );
-	if( not theVehicle or theSeat ~= 0 ) then
+	if( not theVehicle or theSeat > 1 ) then
 	
-		outputChatBox( "Sa pead olema masinas", player );
+		outputChatBox( "Sa pead olema masinas / masina esiistmel.", player );
 		return 2;
 		
 	end

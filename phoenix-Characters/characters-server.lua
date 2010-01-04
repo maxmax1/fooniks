@@ -227,6 +227,8 @@ function savePlayer( thePlayer, timed )
 		
 	end
 	
+	if( timed ) then updatePlayer( thePlayer ); end
+	
 	-- Start query building
 	local query = call( getResourceFromName ( "phoenix-Base" ), "MysqlUpdatebuild", "ph_characters");
 	local added = false;
