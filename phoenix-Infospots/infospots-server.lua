@@ -1,4 +1,3 @@
-interiors = { };
 infoSpots = { };
 
 function displayLoadedRes( res )	
@@ -6,8 +5,7 @@ function displayLoadedRes( res )
 	RegisterInteriors( );
 	
 	-- Add some default infospots.
-	addInfoSpot( "PIGPEN", "PIG PEN", 2421.3535, -1220.4412, 26.4849, 0, 10, 0 );
-	addInfoSpot( "PIGPE2N", "PIG PEN", 2425.3535, -1220.4412, 26.4849, 0, 2, 0 );
+	addInfoSpot( "PIGPEN", "PIG PEN", 2421.3535, -1220.4412, 26.4849, 0, 50, 0 );
 
 end
 
@@ -27,19 +25,19 @@ function RegisterInteriors( )
 			for i, node in ipairs(allInts) do
 		
            		-- node
-            	local id = tonumber( xmlNodeGetAttribute( node, "id" ) );
+            	local id = xmlNodeGetAttribute( node, "id" );
             	
             	if( id ~= false and id ~= nil ) then
             	
             		
-            		interiors[id] = { };
+            		local element = createElement( "sInterior", id );
             	
-            		interiors[id]["name"] = xmlNodeGetAttribute( node, "name" );
-            		interiors[id]["sampInt"] = tonumber( xmlNodeGetAttribute( node, "sampInt" ) );
-            		interiors[id]["posX"] = tonumber( xmlNodeGetAttribute( node, "posX" ) );
-            		interiors[id]["posY"] = tonumber( xmlNodeGetAttribute( node, "posY" ) );
-            		interiors[id]["posZ"] = tonumber( xmlNodeGetAttribute( node, "posZ" ) );
-            		interiors[id]["rot"] = tonumber( xmlNodeGetAttribute( node, "rot" ) );
+            		setElementData( element, "name", xmlNodeGetAttribute( node, "name" ) );
+            		setElementData( element, "sampInt", xmlNodeGetAttribute( node, "sampInt" ) );
+            		setElementData( element, "posX", xmlNodeGetAttribute( node, "posX" ) );
+            		setElementData( element, "posY", xmlNodeGetAttribute( node, "posY" ) );
+            		setElementData( element, "posZ", xmlNodeGetAttribute( node, "posZ" ) );
+            		setElementData( element, "rot", xmlNodeGetAttribute( node, "rot" ) );
             		
             		outputDebugString( "Registred Interior: " .. id .. type(id) );
             	
@@ -63,21 +61,56 @@ function RegisterInteriors( )
 
 end
 
+function getIntByID( id )
+
+	if( type( id ) == "number" ) then
+	
+		id = tostring( id);
+	
+	end
+	
+	if( type( id ) ~= "string" ) then
+	
+		return false;
+	
+	end
+
+	local ints = getElementsByType( "sInterior" );
+	
+	for k, v in ipairs( ints ) do
+	
+    	local myId = getElementData( v, "id" );
+    	
+    	if( id == myId ) then
+    	
+    		return v;
+    	
+    	end
+    	
+    end
+    
+end
+
 function warpToInterior( thePlayer, theInt )
 
-	if( type( interiors[theInt] ) ~= "table" ) then
+	if( not thePlayer or not isElement ( thePlayer )  ) then return -1; end
 	
-		outputChatBox( type( theInt ) );
-		outputChatBox( #interiors );	
+	local foundInt = getIntByID( theInt );
+	if( not foundInt ) then
+	
 		return 0;
 	
 	end
 	
-	if( not thePlayer or not isElement ( thePlayer )  ) then return -1; end
+	local sampInt = getElementData( foundInt, "sampInt" );
+	local x = getElementData( foundInt, "posX" );
+	local y = getElementData( foundInt, "posY" );
+	local z = getElementData( foundInt, "posZ" );
+	local rot = getElementData( foundInt, "rot" );
 	
-	setElementInterior( thePlayer, interiors[theInt]["sampInt"] );
-	setElementPosition( thePlayer, interiors[theInt]["posX"], interiors[theInt]["posY"], interiors[theInt]["posZ"] );
-	setPedRotation( thePlayer, interiors[theInt]["rot"] );	
+	setElementInterior( thePlayer, sampInt );
+	setElementPosition( thePlayer, x, y, z );
+	setPedRotation( thePlayer, rot );	
 	
 	return theInt;
 

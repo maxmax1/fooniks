@@ -148,11 +148,19 @@ addCommandHandler ( "me",
 
 addCommandHandler ( "es",
 	
-	function ( playerSource, commandName, arg, ... )
+	function ( playerSource, commandName, oName, ... )
 
-		if ( not arg or arg == nil ) then
+		if ( oName == nil ) then
 		
-			outputChatBox( "KASUTUS: /es osanimest tekst", playerSource );
+			outputChatBox( "KASUTUS: /es !osanimest tekst.", playerSource );
+			return false;
+			
+		end
+		
+		if ( ... == nil ) then
+		
+			outputChatBox( "KASUTUS: /es osanimest !tekst.", playerSource );
+			return false;
 			
 		end
 	
@@ -168,7 +176,7 @@ addCommandHandler ( "es",
 			
 			if( name ~= false and name ~= nil ) then
 			
-				local targetmatch = string.match( string.lower( name ), string.lower( arg ) );
+				local targetmatch = string.match( string.lower( name ), string.lower( oName ) );
 				
 				if( targetmatch ~= nil ) then
 				
@@ -189,13 +197,13 @@ addCommandHandler ( "es",
 		
 		if( #targets == 0 ) then
 		
-			outputChatBox( "KASUTUS: /es osanimest text", playerSource );
-			return 1;
+			outputChatBox( "Ei leidnud ühtki sellist sõna sisaldavat nime." );
+			return false;
 			
-		elseif( #targets > 1) then
+		elseif( #targets > 1 ) then
 		
 			outputChatBox( "Palun täpsustage nime.", playerSource );
-			return 1;
+			return false;
 		
 		end
 		

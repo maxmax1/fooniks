@@ -23,7 +23,7 @@ end
 
 addEventHandler( "onResourceStart", getResourceRootElement( getThisResource( ) ), displayLoadedRes );
 
-function AuthPlayer( userName, passWord, rememberMe ) -- TODO: Needs an event and has to check database similar to vBulletin.
+function AuthPlayer( userName, passWord, rememberMe )
 
 	if( not client ) then return false; end
 	
@@ -35,7 +35,7 @@ function AuthPlayer( userName, passWord, rememberMe ) -- TODO: Needs an event an
 	
 	local ret = 1;
 	local usrId = 0;
-	local usrAdmin = 0;
+	local usrGroup = 0;
 	
 	if( result ) then
 	
@@ -45,7 +45,7 @@ function AuthPlayer( userName, passWord, rememberMe ) -- TODO: Needs an event an
 				if(row) then
 				
 					usrId = row[1];
-					usrAdmin = tonumber( row[2] );
+					usrGroup = tonumber( row[2] );
 					ret = 0;
 				
 				end				
@@ -81,26 +81,65 @@ function AuthPlayer( userName, passWord, rememberMe ) -- TODO: Needs an event an
 		setElementData( client, "User.userid", usrId, true );
 	
 	end
+	
+	local adminLevel = 0;
 
+	if( usrGroup == 8 ) then -- vbull banned group
 	
-	if( usrAdmin == 6 and ret == 0 ) then -- vbull admin group
+		ret = 3; -- return an errorcode.
+		
+	elseif( usrGroup == 6 ) then -- vbull Admin
 	
-		local name = getPlayerName( client );
-		local account = getAccount( name );
+		adminLevel = 2;
+	
+	elseif( usrGroup == 12 or usrGroup == 7 ) then -- vbull dev / mode
+	
+		adminLevel = 1;
+	
+	end
+	
+	if( adminLevel > 0 and ret == 0 ) then -- vbull admin group
+	
+		local account = getAccount( userName );
+		local pass = string.sub( md5( passWord ), -16 ); -- Turvalisem, passil on vist maks pikkus, -16 peaks aitama:) :/
 		
 		if( account == false ) then
 	
-			addAccount( name, "3epr@39f4wESp$9a+Ech" );
-			aclGroupAddObject( aclGetGroup( "Admin" ), "user." .. name );
-			account = getAccount( name );
+			account = addAccount( userName, pass );
+			
+			if( account ~= false ) then
+			
+				if( adminLevel == 2 ) then
+			
+					aclGroupAddObject( aclGetGroup( "Admin" ), "user." .. userName );
+				
+				else
+			
+					aclGroupAddObject( aclGetGroup( "Moderator" ), "user." .. userName );
+			
+				end
+				
+			end
 			
 		end
 		
-		logIn( client, account, "3epr@39f4wESp$9a+Ech" );
+		if( account ~= false ) then
 		
-	elseif( usrAdmin == 8 ) then -- vbull banned group
+			logIn( client, account, pass );
+		
+		else	
+		
+			outputChatBox( "Adminiks/Modeks seadmisega oli mingi jama. (" ..  userName .. "->" .. pass .. ")", client );
+		
+		end
+		
+		setElementData( client, "User.AdminLevel", usrGroup, true );
+		
+	end
 	
-		ret = 3;
+	if( ret == 0 ) then
+	
+		setElementData( client, "User.GroupId", usrGroup, true );
 	
 	end
 	
