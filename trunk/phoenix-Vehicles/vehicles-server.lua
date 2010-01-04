@@ -365,7 +365,12 @@ function toggleVehicleEngine ( player, key, keyState )
 	--if( keyState ~= "up" ) then return 1; end
 
 	local theVehicle = getPedOccupiedVehicle( player );
-	if( not theVehicle ) then return 2; end
+	if( not theVehicle ) then
+	
+		outputChatBox( "Sa pead olema masinas", player );
+		return 2;
+		
+	end
 	
 	local vType = getElementData( theVehicle, "vType" );
     if( not vType ) then
@@ -385,7 +390,8 @@ function toggleVehicleEngine ( player, key, keyState )
 
 		if( oldState == false ) then
 		
-			setTimer( setVehicleEngineState, 1000, 1, theVehicle );
+			-- setTimer( setVehicleEngineState, 1000, 1, theVehicle );
+			setVehicleEngineState( theVehicle, true ); -- Ajutine, hiljem võtaks mootori käivitamine aega.
 		
 		else
 		
@@ -398,8 +404,9 @@ function toggleVehicleEngine ( player, key, keyState )
 	end
     
 end
-addCommandHandler ( "mootor", toggleVehicleEngine ) --temporary
+addCommandHandler ( "mootor", toggleVehicleEngine, false, true ) --temporary
 
+--[[
 function engineStartEnd( thePlayer, theVehicle )
 
 	engineStarting[theVehicle] = false;
@@ -407,6 +414,7 @@ function engineStartEnd( thePlayer, theVehicle )
 	setVehicleEngineState( theVehicle, true );
 
 end
+]]--
 
 
 function toggleVehicleLights ( player, key, keyState )
@@ -429,7 +437,7 @@ function toggleVehicleLights ( player, key, keyState )
 	setVehicleOverrideLights( theVehicle, newState );
     
 end
-addCommandHandler ( "tuled", toggleVehicleLights ) --temporary
+addCommandHandler ( "tuled", toggleVehicleLights, false, true ) --temporary
 
 function toggleVehicleSeatBelt ( player, key, keyState )
 
@@ -447,7 +455,7 @@ function toggleVehicleSeatBelt ( player, key, keyState )
 	executeCommandHandler ( "me", player, action );
     
 end
-addCommandHandler ( "turvavöö", toggleVehicleSeatBelt ) --temporary
+addCommandHandler ( "turvavöö", toggleVehicleSeatBelt, false, true ) --temporary
 
 --[[function onDriverExit( thePlayer )
 
