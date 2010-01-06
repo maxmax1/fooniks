@@ -1,0 +1,6 @@
+<meta>
+	
+	<script src="s_teatamine.lua" type="server" />
+	<script src="c_teatamine.lua" type="client" />
+
+</meta>

@@ -1,0 +1,19 @@
+<items>
+
+	<item id="1" type="WEAPON" weaponId="22" parent="-1" name="USP" canDrop="1" />
+	<item id="2" type="WEAPON" weaponId="23" parent="1" name="Summutatud USP" canDrop="1" />
+	<item id="3" type="WEAPON" weaponId="24" parent="1" name="Deagle" canDrop="1" />
+	<item id="4" type="WEAPON" weaponId="25" parent="-1" name="Pump" canDrop="1" />
+	<item id="5" type="WEAPON" weaponId="26" parent="4" name="Kaheraudne" canDrop="1" />
+	<item id="6" type="WEAPON" weaponId="27" parent="4" name="M3" canDrop="1" />
+	<item id="7" type="WEAPON" weaponId="28" parent="-1" name="UZI" canDrop="1" />
+	<item id="8" type="WEAPON" weaponId="29" parent="7" name="MP5" canDrop="1" />
+	<item id="9" type="WEAPON" weaponId="30" parent="-1" name="AK47" canDrop="1" />
+	<item id="10" type="WEAPON" weaponId="31" parent="9" name="M4" canDrop="1" />
+	<item id="11" type="WEAPON" weaponId="33" parent="-1" name="Jahipyss" canDrop="1" />
+	<item id="12" type="WEAPON" weaponId="34" parent="11" name="Snaiper" canDrop="1" />
+	<item id="13" type="DATA" useEvent="onUseSimcard" parent="-1" name="SIM-Kaart" canDrop="1" />
+	<item id="14" type="DATA" useEvent="onUseTelephone" parent="-1" name="Telefon" canDrop="0" />
+	<item id="15" type="DATA" useEvent="onUseBankcard" parent="-1" name="PangaKaart" canDrop="0" />		
+
+</items>
