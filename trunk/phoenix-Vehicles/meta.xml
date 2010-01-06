@@ -1,8 +1,0 @@
-<meta>
-	<info author="eRP-Gaming" version="0.2" type="script" name="Phoenix-Vehicles" description="Phoenix Vehicles system." />
-	<script src="vehicles-server.lua" type="server" />
-	<!--<script src="vehicles-client.lua" type="client" /> 
-
-	<file src="files/sounds/engine.wav" />-->
-
-</meta>

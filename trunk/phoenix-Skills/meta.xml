@@ -1,8 +1,0 @@
-<meta>
-	
-	<script src="skills-server.lua" type="server" />
-	<script src="skills-client.lua" type="client" />
-
-	<config src="skills.xml" type="server" />
-
-</meta>
