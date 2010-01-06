@@ -1,0 +1,13 @@
+<meta>
+	<info author="eRP-Gaming" version="0.2" type="script" name="Phoenix_Vehicles" description="Phoenix Vehicles system." />
+	<script src="vehicles-server.lua" type="server" />
+	<script src="vehmenu-server.lua" type="server" />
+	<script src="vehmenu-client.lua" type="client" />
+	<!--<script src="vehicles-client.lua" type="client" /> 
+
+	<file src="files/sounds/engine.wav" />-->
+	<file src="files/sounds/alarmkinni.wav" />
+	<file src="files/sounds/alarmon.wav" />
+	<file src="files/sounds/alarmlahti.wav" />
+	
+</meta>
