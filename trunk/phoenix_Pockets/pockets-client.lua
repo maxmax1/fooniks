@@ -1,0 +1,2 @@
+-- TODO: Pockets menu, actions(kasuta, viska maha, hävita).
+-- Trademenüü on eraldi asij tuleb onPlayerClickPlayer abiga. :)
