@@ -6,6 +6,7 @@ levelLabel = nil;
 charScrollPane = nil;
 charList = {};
 selectedChar = nil;
+sx, sy = guiGetScreenSize( );
 
 function ShowCharacters( charTable, selected, isEnd )
 
@@ -23,7 +24,7 @@ function ShowCharacters( charTable, selected, isEnd )
 	
 	end
 	
-	charWindow = guiCreateWindow( 0.1, 0.3, 0.2, 0.4, "Karakterid", true );
+	charWindow = guiCreateWindow( sx*0.1, sy*0.3, 256, 410, "Karakterid", false );
 	guiWindowSetMovable( charWindow, false );
 	guiWindowSetSizable( charWindow, false );
 	

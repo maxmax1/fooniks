@@ -261,6 +261,7 @@ function savePlayer( thePlayer, timed )
 	end
 	
 	triggerEvent( "onSkillsSave", thePlayer, thePlayer ); -- Save Skills to. :)	
+	triggerEvent( "onPocketsSave", thePlayer, thePlayer ); -- Save Skills to. :)	
 	return true;
 
 end

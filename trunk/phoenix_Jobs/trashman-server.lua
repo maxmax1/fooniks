@@ -1,0 +1,1 @@
+addEventHandler("onResourceStart", getRootElement(), --ajutine	function()					end)addCommandHandler("prügitöö", --ajutine	function(player)			setElementData(player, "Character.playerJob", "1")		outputChatBox("((Prügivedaja töö seatud, kasuta /prügi))", player)		end	)

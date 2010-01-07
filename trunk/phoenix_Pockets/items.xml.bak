@@ -13,7 +13,7 @@
 	<item id="11" type="WEAPON" weaponId="33" parent="-1" name="Jahipyss" canDrop="1" />
 	<item id="12" type="WEAPON" weaponId="34" parent="11" name="Snaiper" canDrop="1" />
 	<item id="13" type="DATA" useEvent="onUseSimcard" parent="-1" name="SIM-Kaart" canDrop="1" />
-	<item id="14" type="DATA1" useEvent="onUseTelephone" parent="-1" name="Telefon" canDrop="0" />
-	<item id="15" type="DATA1" useEvent="onUseBankcard" parent="-1" name="PangaKaart" canDrop="0" />		
+	<item id="14" type="DATA" useEvent="onUseTelephone" parent="-1" name="Telefon" canDrop="0" />
+	<item id="15" type="DATA" useEvent="onUseBankcard" parent="-1" name="PangaKaart" canDrop="0" />		
 
 </items>

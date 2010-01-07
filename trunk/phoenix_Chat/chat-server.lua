@@ -17,7 +17,7 @@ addEventHandler ( "onPlayerChat", getRootElement(),
 	
 		if( msgType == 1 ) then
 		
-			if ( not setChatMessage( source, true, "", "* ", "", 35, message, 218, 146, 229 ) ) then
+			if ( not setChatMessage( source, true, " ", "* ", "", 35, message, 218, 146, 229 ) ) then
 		
 				outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", source );
 		
@@ -141,7 +141,7 @@ addCommandHandler ( "me",
 	function ( playerSource, commandName, ... )
 	
 		local arg = table.concat( {...}, " " );		
-	
+		
 		if ( not setChatMessage( playerSource, true, " ", "* ", " ", 35, arg, 218, 146, 229 ) ) then
 		
 			outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", playerSource );
@@ -209,13 +209,21 @@ addCommandHandler ( "es",
 		end
 		
 		if( #targets == 0 ) then
+			
+			if( type( oName ) == "number" ) then
+			
+				outputChatBox( "Ei leidnud sellise ID ga kasutajat." );
+			
+			else
 		
-			outputChatBox( "Ei leidnud √ºhtki sellist s√µna sisaldavat nime." );
+				outputChatBox( "Ei leidnud ¸htki sellist sına sisaldavat nime." );
+				
+			end
 			return false;
 			
 		elseif( #targets > 1 ) then
 		
-			outputChatBox( "Palun t√§psustage nime.", playerSource );
+			outputChatBox( "Palun t‰psustage nime.", playerSource );
 			return false;
 		
 		end
@@ -237,6 +245,8 @@ function setChatMessage( fromPlayer, isIC, action, prepend, endadd, range, str, 
 		return false;
 	
 	end
+	
+	if( action == nil or action == "" ) then action = " "; end
 
 	local myName = "";
 	
@@ -251,6 +261,20 @@ function setChatMessage( fromPlayer, isIC, action, prepend, endadd, range, str, 
 		myName = getPlayerNametagText( fromPlayer );
 	
 	end
+	
+	local myVeh = getPedOccupiedVehicle( fromPlayer );
+	if( isIC == true and myVeh ~= false ) then
+	
+		local wind = getElementData( myVeh, "vWindow" );
+	
+		if( wind ~= false and tonumber( wind ) == 1 ) then -- windows closed. :)
+		
+			range = -2;
+		
+		end
+	
+	end
+	
 
 	local sendstr = prepend .. myName .. action .. str .. endadd;
 	local players;
@@ -262,6 +286,15 @@ function setChatMessage( fromPlayer, isIC, action, prepend, endadd, range, str, 
 		local chatSphere = createColSphere( x, y, z, range );
 		players = getElementsWithinColShape( chatSphere, "player" );
 		destroyElement( chatSphere );
+	
+	elseif( range == -2 ) then -- if in vehicle with closed windows...
+	
+		for i = 0, getVehicleMaxPassengers( myVeh ), 1 do
+		
+			local player = getVehicleOccupant( myVeh, i );
+			if( player ~= false ) then table.insert( players, player ); end
+		
+		end
 	
 	else
 	

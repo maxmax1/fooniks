@@ -3,10 +3,10 @@
 	<script src="pockets-server.lua" type="server" />
 	<script src="pockets-client.lua" type="client" />
 
-	<config src="items.xml" type="server" />
+	<config src="items.xml" />
 
 	<settings>
-		<setting name="#NUM_POCKETS" value="5" />
+		<setting name="#NUM_POCKETS" value="6" />
 	</settings>
 
 </meta>

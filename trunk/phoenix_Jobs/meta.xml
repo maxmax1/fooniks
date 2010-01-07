@@ -1,0 +1,14 @@
+<meta>
+	<info author="eRP-Gaming" version="0.1" type="script" name="Phoenix-Jobs" description="Phoenix Job system." />
+	
+	<script src="trashman-server.lua" />
+	<script src="trashman-client.lua" type="client" />
+
+	<map src="trashcans.map" />
+	
+	<settings>
+         <setting name="trashmanPay" value="[1000]" /> 
+	</settings>	 
+
+
+</meta>

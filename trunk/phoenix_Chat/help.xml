@@ -1,0 +1,18 @@
+<help popup="yes">
+Serveris on mitmeid r22kimiskanaleid:
+
+Nupud:
+
+O - OOC Kanal.
+B - L2hedal olevatega OOC kanal.
+Y - L2hedal olevatega IC kanal.
+
+K2sklused:
+
+/o , /ooc - OOC Kanal
+/b - L2hedal olevatega OOC kanal.
+/c - L2hedal olevatega IC kanal.
+/s - IC Hyydmine, sama effekti annab ka IC teksti lõppu ! lisamine.
+/me - IC tegevus, /me jookseb. kuvatakse Sinunimi jookseb.
+/es - OOC s6num, naiteks su s6brale.
+</help>
