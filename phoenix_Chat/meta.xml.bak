@@ -1,6 +1,0 @@
-<meta>
-	
-	<script src="chat-server.lua" type="server" />
-	<export function="setChatMessage" type="server" />
-
-</meta>

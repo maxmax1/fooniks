@@ -127,7 +127,7 @@ function firstSpawnHandler( selectedChar )
 	  		
 	  		if( tonumber( playerStuff["health"] ) < 5 ) then playerStuff["health"] = 15; end
 	  		
-	  		if( exports.phoenix_Infospot:checkForIntSpawn( client ) ~= true ) then
+	  		if( exports.phoenix_Infospots:checkForIntSpawn( client ) ~= true ) then
 	  		
 	  			setElementDimension( client, 0 );
 	  			setElementInterior( client, 0 );

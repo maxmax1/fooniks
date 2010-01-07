@@ -49,8 +49,9 @@ bindKey("F2", "down",
         
                 showCursor( not isCursorShowing() );
 				guiSetVisible(TabPanel, not guiGetVisible(TabPanel));
-				guiSetInputEnabled( not guiGetInputEnabled() );
-				
+				guiSetText( mMemoKirjeldus, "" );
+				guiSetText ( vEditPealkiri, "" );
+				guiSetText ( vMemoKirjeldus, "" );
         end
         
 );
@@ -109,3 +110,14 @@ function mteata()
 	end
 	
 end
+
+function inputChange()
+	if guiGetVisible(TabPanel) then
+		if source == vMemoKirjeldus or source == vEditPealkiri or  source == mMemoKirjeldus then
+			guiSetInputEnabled( true )
+		else
+			guiSetInputEnabled( false )
+		end
+	end
+end
+addEventHandler( "onClientGUIMouseUp", getRootElement( ), inputChange)

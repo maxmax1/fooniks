@@ -4,6 +4,8 @@
 	<script src="pockets-client.lua" type="client" />
 
 	<config src="items.xml" type="server" />
+	
+	<export function="giveItem" type="server" />
 
 	<settings>
 		<setting name="#NUM_POCKETS" value="6" />

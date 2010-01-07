@@ -17,7 +17,7 @@ addEventHandler ( "onPlayerChat", getRootElement(),
 	
 		if( msgType == 1 ) then
 		
-			if ( not setChatMessage( source, true, "", "* ", "", 35, message, 218, 146, 229 ) ) then
+			if ( not setChatMessage( source, true, " ", "* ", "", 35, message, 218, 146, 229 ) ) then
 		
 				outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", source );
 		
@@ -141,7 +141,7 @@ addCommandHandler ( "me",
 	function ( playerSource, commandName, ... )
 	
 		local arg = table.concat( {...}, " " );		
-	
+		
 		if ( not setChatMessage( playerSource, true, " ", "* ", " ", 35, arg, 218, 146, 229 ) ) then
 		
 			outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", playerSource );
@@ -210,12 +210,12 @@ addCommandHandler ( "es",
 		
 		if( #targets == 0 ) then
 		
-			outputChatBox( "Ei leidnud √ºhtki sellist s√µna sisaldavat nime." );
+			outputChatBox( "Ei leidnud ¸htki sellist sına sisaldavat nime." );
 			return false;
 			
 		elseif( #targets > 1 ) then
 		
-			outputChatBox( "Palun t√§psustage nime.", playerSource );
+			outputChatBox( "Palun t‰psustage nime.", playerSource );
 			return false;
 		
 		end
@@ -232,10 +232,16 @@ addCommandHandler ( "es",
 
 function setChatMessage( fromPlayer, isIC, action, prepend, endadd, range, str, r, g, b )
 
-	if( getElementData( fromPlayer, "Character.id" ) == false ) then return false; end
+	if( not fromPlayer or isElement( fromPlayer ) == false ) then
+	
+		return false;
+	
+	end
 
 	local myName = "";
 	
+	if( getElementData( fromPlayer, "Character.id" ) == false ) then return false; end
+
 	if( not isIC ) then 
 
 		myName = getPlayerName( fromPlayer );

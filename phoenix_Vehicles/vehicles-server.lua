@@ -71,7 +71,8 @@ function LoadVehicles()
 	  			setElementData( newveh, "vOwner", vehicleStuff["vOwner"]);
 	  			setElementData( newveh, "vValue", vehicleStuff["vValue"]);
 	  			setElementData( newveh, "vDeaths", vehicleStuff["vDeaths"]);
-				setElementData(newveh, "vAlarm", vehicleStuff["vAlarm"])
+				setElementData(newveh, "vAlarm", vehicleStuff["vAlarm"]);
+				setElementData(newveh, "vWindow", vehicleStuff["vWindow"]);
 				setElementHealth( newveh, vehicleStuff["vHealth"] );
 				
 				if vehicleStuff["vLocked"] == 1 then
@@ -208,6 +209,8 @@ function UpdateVehicle( v )
 	query = exports.phoenix_Base:MysqlSetField( query, "vWheel2State", wheelState2 );
 	query = exports.phoenix_Base:MysqlSetField( query, "vWheel3State", wheelState3 );
 	query = exports.phoenix_Base:MysqlSetField( query, "vWheel4State", wheelState4 );
+	
+	query = exports.phoenix_Base:MysqlSetField( query, "vWindow", getElementData( v, "vWindow" ) );
 	
 	query = exports.phoenix_Base:MysqlSetField( query, "vPaintjob", getVehiclePaintjob( v ) );
 

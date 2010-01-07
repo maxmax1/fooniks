@@ -116,8 +116,6 @@ addEventHandler("SyncItem", getResourceRootElement( getThisResource( ) ),
 			items[k]['id'] = v['id'];
 		
 		end
-		
-		BuildPockets( );
 	
 	end
 	

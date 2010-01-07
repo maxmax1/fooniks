@@ -11,13 +11,15 @@ nameVal = "";
 passVal = "";
 isChecked = false;
 
+sx, sy = guiGetScreenSize( );
+
 function showLogin( )
 
 	if( not loginWindow) then
 	
 		checkForRemember( );
 	
-		loginWindow = guiCreateWindow( 0.3, 0.3, 0.4, 0.4, "Tere Tulemast", true );
+		loginWindow = guiCreateWindow( sx*0.3, sy*0.3, 512, 410, "Tere Tulemast", false );
 		
 		local tempLabel;
 		
@@ -138,7 +140,11 @@ function resourceHandler( )
 	addEventHandler( "onClientGUIChanged", usrName, editChange );
 	addEventHandler( "onClientGUIChanged", passWord, editChange );
 	
-	local img = guiCreateStaticImage( 0.044, 0.88, 0.18, 0.1, "files/images/logo.png", true )
+	local img = guiCreateStaticImage( 0.044, 0.88, 0.18, 0.1, "files/images/logo.png", true );
+	
+	local realtime = getRealTime( );
+	setTime( realtime.hour, realtime.minute )
+    setMinuteDuration( 60000 );
 
 end
 

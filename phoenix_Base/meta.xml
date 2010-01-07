@@ -24,6 +24,9 @@
 	<include resource="phoenix_Infospots" />
 	<include resource="phoenix_Reports" />
 	<include resource="phoenix_Pockets" />
+	<include resource="phoenix_DropItems" />
+
+	<config src="help.xml" type="client"/>
 
 	<!-- Files -->
 
