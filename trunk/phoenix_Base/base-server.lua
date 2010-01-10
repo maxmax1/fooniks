@@ -1,4 +1,8 @@
 connection = nil;
+inHourJump = false;
+
+tax = { };
+income = { };
 
 function displayLoadedRes( res )	
 
@@ -8,14 +12,22 @@ function displayLoadedRes( res )
 		
 		if( not connection ) then
 		
-			outputDebugString( "Ei Ãµnnestunud mysql serveriga Ã¼hendada." );
+			outputDebugString( "Ei õnnestunud mysql serveriga ühendada." );
 			stopResource( res );
 		
 		else
 		
-			outputDebugString( "Mysql serveriga Ã¼hendatud." );
+			outputDebugString( "Mysql serveriga ühendatud." );
 			call(getResourceFromName("scoreboard"), "addScoreboardColumn", "User.userid", getRootElement( ), 1);
-		
+			
+			createObject(3059, 2522.0554199219, -1272.9189453125, 35.640998840332, 0.000000, 0.000000, 0.000000) 
+			
+			setTimer( checkMySQLConnection, 60000, 0 );
+			setTimer( timeSync, 1000, 0 );
+			
+			setGameType( "Roleplay" );
+			setMapName( "Los Santos" );
+			
 		end	
 		
 	end
@@ -24,19 +36,36 @@ end
 
 addEventHandler( "onResourceStart", getResourceRootElement( getThisResource( ) ), displayLoadedRes );
 
-function AuthPlayer( userName, passWord, rememberMe )
+function checkMySQLConnection ( )
+
+	if( mysql_ping( connection ) == false ) then
+	
+		outputDebugString( "Lost connection to the MySQL server, reconnecting ..." );
+		mysql_close( connection );
+		
+		connection = mysql_connect( get( "#MYSQL_HOST" ), get( "#MYSQL_USER" ), get( "#MYSQL_PASS" ), get( "#MYSQL_DB" ) );
+		
+	end
+  
+end
+
+function AuthPlayer( userName, passWord, rememberMe, preAuth )
+
+	checkMySQLConnection( );
 
 	if( not client ) then return false; end
 	
 	local eName = mysql_escape_string( connection, userName );
 	local eWord = mysql_escape_string( connection, passWord );
 	
-	local query = "SELECT userid, usergroupid FROM `user` WHERE username = '" .. eName .. "'";
+	local query = "SELECT userid, usergroupid, salt FROM `user` WHERE username = '" .. eName .. "'";
 	local result = mysql_query( connection, query );
 	
 	local ret = 1;
+	local other = nil;
 	local usrId = 0;
 	local usrGroup = 0;
+	local salt = "nil";
 	
 	if( result ) then
 	
@@ -47,6 +76,7 @@ function AuthPlayer( userName, passWord, rememberMe )
 				
 					usrId = row[1];
 					usrGroup = tonumber( row[2] );
+					salt = row[3];
 					ret = 0;
 				
 				end				
@@ -55,10 +85,28 @@ function AuthPlayer( userName, passWord, rememberMe )
 		mysql_free_result( result );
 		
 	end
-	
+		
+	local rPass;		
+		
 	if( ret == 0) then
 	
-		query = "SELECT userid FROM `user` WHERE userid = '" .. usrId .. "' AND MD5(CONCAT(MD5('" .. eWord .. "'), salt)) = password";
+		if( preAuth == true ) then
+		
+			rPass = eWord;
+		
+		else
+		
+			rPass = string.lower( md5( string.lower( md5( eWord ) ) .. salt ) );
+		
+		end
+		
+		if( rememberMe == true ) then
+			
+			other = rPass;
+				
+		end
+			
+		query = "SELECT userid FROM `user` WHERE userid = '" .. usrId .. "' AND '" .. rPass .. "' = password";
 		result = mysql_query( connection, query );
 		 
 		if( result ) then
@@ -102,7 +150,7 @@ function AuthPlayer( userName, passWord, rememberMe )
 	if( adminLevel > 0 and ret == 0 ) then -- vbull admin group
 	
 		local account = getAccount( userName );
-		local pass = string.sub( md5( passWord ), -16 ); -- Turvalisem, passil on vist maks pikkus, -16 peaks aitama:) :/
+		local pass = string.sub( rPass, -16 ); -- Turvalisem, passil on vist maks pikkus, -16 peaks aitama:) :/
 		
 		if( account == false ) then
 	
@@ -144,7 +192,7 @@ function AuthPlayer( userName, passWord, rememberMe )
 	
 	end
 	
-	triggerClientEvent( client, "OnPlayerLogin", getRootElement( ), ret );
+	triggerClientEvent( client, "OnPlayerLogin", client, ret, other );
 
 end
 
@@ -175,14 +223,111 @@ function UpdateFinish( query, idfield, idval )
 
 end
 
-function changeBlurLevel ( playerSource, command, blur )
-    blur = tonumber(blur)
-    if not blur or blur > 255 or blur < 0 then
-        outputChatBox ( "Enter a value between 0 - 255.", playerSource )
-    else
-        setPlayerBlurLevel ( playerSource, blur )
-        outputChatBox ( "Blur level set to: " .. blur, playerSource )
-    end
+function timeSync( )
+
+	local rTime = getRealTime( );
+	
+	if( rTime.minute == 0 and not inHourJump ) then
+	
+		inHourJump = true;
+		
+		triggerEvent( "onPrePayDay", getRootElement() );
+		
+	elseif( rTime.minute ~= 0 and inHourJump ) then
+	
+		inHourJump = false;
+		
+		payDay();
+	
+	end
+
 end
- 
-addCommandHandler("blur", changeBlurLevel)
+
+function payDay( )
+
+	local players = getElementsByType( "player" );
+
+	for k, v in ipairs( players ) do
+	
+		local charId = getElementData( v, "Character.id" );
+		
+		if( charId ~= false ) then
+		
+			-- TODO: Replace with GUI..
+		
+			outputChatBox( "Palgapäev", v );
+			
+			local come = 0;
+			local cost = 0;
+			
+			outputChatBox( "Tulud: ", v );
+			
+			if( type( income[v] ) == "table" ) then
+			
+				for k2,v2 in ipairs( income[v] ) do
+				
+					outputChatBox( "    * " .. v2["desc"] .. " +" .. v2["amount"], v );
+					come = come + v2["amount"];
+				
+				end
+				
+			end
+			
+			outputChatBox( "Kulud: ", v );
+			
+			if( type( tax[v] ) == "table" ) then
+			
+				for k2,v2 in ipairs( tax[v] ) do
+				
+					outputChatBox( "    * " .. v2["desc"] .. " +" .. v2["cost"], v );
+					cost = cost + v2["cost"];
+				
+				end
+				
+			end
+			
+			outputChatBox( "kokku: " .. come-cost, v );
+		
+		end
+	
+	end
+
+end
+
+function PayDayIncome( player, desc, amount )
+
+	if( type( player ) == "number" ) then
+	
+		player = getPlayerBySqlID( player );
+		
+	end
+	
+	if( getElementType( player ) ~= "player" ) then return false; end
+	
+	if( type( income[player] ) ~= "table" ) then income[player] = { }; end
+	
+	local tbl = { };
+	tbl["desc"] = desc;
+	tbl["amount"] = amount;
+	table.insert( income[player], tbl );
+
+end
+
+function PayDayTax( player, desc, cost )
+
+	if( type( player ) == "number" ) then
+	
+		player = getPlayerBySqlID( player );
+		
+	end
+	
+	if( getElementType( player ) ~= "player" ) then return false; end
+	
+	if( type( tax[player] ) ~= "table" ) then tax[player] = { }; end
+	
+	local tbl = { };
+	tbl["desc"] = desc;
+	tbl["cost"] = cost;
+	table.insert( tax[player], tbl );
+
+end

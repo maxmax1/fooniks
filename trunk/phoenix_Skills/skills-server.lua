@@ -28,6 +28,19 @@ end
 
 addEventHandler( "onResourceStart", getResourceRootElement( getThisResource( ) ), displayLoadedRes );
 
+function checkMySQLConnection ( )
+
+	if( mysql_ping( connection ) == false ) then
+	
+		outputDebugString( "Lost connection to the MySQL server, reconnecting ..." );
+		mysql_close( connection );
+		
+		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
+		
+	end
+  
+end
+
 function RegisterSkills( )
 
 	local xmlFile =  xmlLoadFile ( "skills.xml" );
@@ -118,6 +131,8 @@ end
 
 function LoadSkillsForPlayer( thePlayer )
 
+	checkMySQLConnection( );
+
 	if( not thePlayer or not isElement ( thePlayer )  ) then return false; end
 	local charId = getElementData( thePlayer, "Character.id" );
 	if( not charId ) then return false; end	
@@ -171,6 +186,8 @@ addEvent( "onSkillsRequired", true );
 addEventHandler( "onSkillsRequired", getRootElement(), LoadSkillsForPlayer );
 
 function SaveSkillsForPlayer( thePlayer )
+
+	checkMySQLConnection( );
 
 	if( not thePlayer or not isElement ( thePlayer )  ) then return false; end
 	local charId = getElementData( thePlayer, "Character.id" );

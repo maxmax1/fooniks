@@ -23,7 +23,22 @@ end
 
 addEventHandler( "onResourceStart", getResourceRootElement( getThisResource( ) ), displayLoadedRes );
 
+function checkMySQLConnection ( )
+
+	if( mysql_ping( connection ) == false ) then
+	
+		outputDebugString( "Lost connection to the MySQL server, reconnecting ..." );
+		mysql_close( connection );
+		
+		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
+		
+	end
+  
+end
+
 function submitVTeata(head, kirj)
+
+	checkMySQLConnection( );
 
 	if( client ) then
 	

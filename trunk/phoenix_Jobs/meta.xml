@@ -4,7 +4,13 @@
 	<script src="trashman-server.lua" />
 	<script src="trashman-client.lua" type="client" />
 
-	<map src="trashcans.map" />
+	<script src="kodutu-server.lua" />
+	<script src="kodutu-client.lua" type="client" />
+
+	<map src="kast.map" />
+	
+	<export function="AddTrashCan" type="server"/>
+	<export function="AddTrashCan" type="client"/>
 	
 	<settings>
          <setting name="trashmanPay" value="[1000]" /> 

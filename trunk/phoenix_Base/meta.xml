@@ -15,7 +15,9 @@
 	<export function="MysqlSetField" type="server" />
 	<export function="MysqlUpdatebuild" type="server" />
 	<export function="UpdateFinish" type="server" />
-
+	<export function="PayDayIncome" type="server" />
+	<export function="PayDayTax" type="server" />
+ 
 	<include resource="phoenix_Vehicles" />
 	<include resource="phoenix_Characters" />
 	<include resource="phoenix_Chat" />
@@ -25,6 +27,8 @@
 	<include resource="phoenix_Reports" />
 	<include resource="phoenix_Pockets" />
 	<include resource="phoenix_DropItems" />
+	<include resource="phoenix_Jobs" />
+	<include resource="phoenix_Housing" />
 
 	<config src="help.xml" type="client"/>
 

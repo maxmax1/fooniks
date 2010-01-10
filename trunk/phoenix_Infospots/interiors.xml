@@ -1,6 +1,6 @@
 <interiors>
 
-	<interior id="1" name="24/7 1" sampInt="17" posX="-25.884499" posY="-185.868988" posZ="1003.549988" rot="0.0" />
+	<interior id="1" name="24/7 1" sampInt="17" posX="-25.884499" posY="-185.868988" posZ="1004.549988" rot="0.0" />
 	<interior id="2" name="24/7 2" sampInt="10" posX="6.091180" posY="-29.271898" posZ="1003.549988" rot="0.0" />
 	<interior id="3" name="24/7 3" sampInt="18" posX="-30.946699" posY="-89.609596" posZ="1003.549988" rot="0.0" />
 	<interior id="4" name="24/7 4" sampInt="16" posX="-25.132599" posY="-139.066986" posZ="1003.549988" rot="0.0" />

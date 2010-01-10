@@ -8,6 +8,8 @@ charList = {};
 selectedChar = nil;
 sx, sy = guiGetScreenSize( );
 
+allCharacters = { };
+
 function ShowCharacters( charTable, selected, isEnd )
 
 	if( charWindow ~= nil ) then
@@ -163,3 +165,35 @@ end
 
 addEvent( "onShowCharacters", true );
 addEventHandler( "onShowCharacters", getRootElement( ), ShowCharacters );
+
+addEvent( "onCharNamesSync", true );
+addEventHandler( "onCharNamesSync", getRootElement( ), 
+
+	function ( myTable )
+	
+		allCharacters = { };
+		
+		for key,val in pairs( myTable ) do
+			
+			allCharacters[key] = val;
+		
+		end
+		
+	end
+);
+
+addEventHandler( "onClientResourceStart", getResourceRootElement( getThisResource( ) ),
+
+	function ( )
+
+		triggerServerEvent( "onCharSyncRequest", getLocalPlayer( ) );
+		
+	end
+
+);
+
+function getCharacterName( sqlId )
+
+	return allCharacters[tonumber(sqlId)];
+
+end

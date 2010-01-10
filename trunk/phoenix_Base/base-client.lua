@@ -10,6 +10,7 @@ passRight = false;
 nameVal = "";
 passVal = "";
 isChecked = false;
+preAuth = nil;
 
 sx, sy = guiGetScreenSize( );
 
@@ -19,7 +20,7 @@ function showLogin( )
 	
 		checkForRemember( );
 	
-		loginWindow = guiCreateWindow( sx*0.3, sy*0.3, 512, 410, "Tere Tulemast", false );
+		loginWindow = guiCreateWindow( (sx-512)/2, (sy-410)/2, 512, 410, "Tere Tulemast", false );
 		
 		local tempLabel;
 		
@@ -55,7 +56,7 @@ addEventHandler( "OnPlayerRequestLogin", getRootElement( ), showLogin );
 addEvent( "OnPlayerLogin", true );
 addEventHandler( "OnPlayerLogin", getRootElement( ),
 	
-	function (ret)
+	function ( ret, other )
 	
 		if( ret == 1 ) then
 		
@@ -78,9 +79,9 @@ addEventHandler( "OnPlayerLogin", getRootElement( ),
 		
 		else
 		
-			if( guiCheckBoxGetSelected(remember) ) then
+			if( other ~= nil ) then
 			
-				saveForRemember( guiGetText(usrName), guiGetText(passWord) );
+				saveForRemember( guiGetText(usrName), other );
 				
 			else
 			
@@ -122,6 +123,8 @@ function editChange( element )
 	
 	end
 	
+	preAuth = false;
+	
 	guiSetEnabled( loginBtn, ( userRight and passRight ) );
 	   
 end
@@ -133,7 +136,7 @@ function resourceHandler( )
 		function ( )
 		
 			guiSetEnabled( loginBtn, false );
-			triggerServerEvent( "OnAuthPlayer", getLocalPlayer( ), guiGetText(usrName), guiGetText(passWord), guiCheckBoxGetSelected(remember) );
+			triggerServerEvent( "OnAuthPlayer", getLocalPlayer( ), guiGetText(usrName), guiGetText(passWord), guiCheckBoxGetSelected(remember), preAuth );
 		
 		end
 	, false);
@@ -182,12 +185,13 @@ function checkForRemember( )
 			
 		end
 		
-		child = xmlFindChild (xml, "pass", 0 );
+		child = xmlFindChild( xml, "pass", 0 );
 		if( child ~= false ) then
 		
 			passVal = xmlNodeGetAttribute( child, "rem" );
 			passRight = true;
 			isChecked = true;
+			preAuth = true;
 			
 		end
 	

@@ -130,28 +130,15 @@ function warpToInterior( thePlayer, theInt, noTele )
 
 end
 
+addCommandHandler( "inti" ,
 
-function checkForIntSpawn( thePlayer )
-		
-	if( not thePlayer or not isElement ( thePlayer )  ) then return false; end
-	local theInfo = getElementData( thePlayer, "Character.interior" );	
-	if( type( infoSpots[theInfo] ) ~= "table" ) then return false; end
-		
-	enterExitDisabled[thePlayer] = true;
-		
-	local ret = warpToInterior( thePlayer, infoSpots[theInfo]["toScriptinterior"], true );
-		
-	if( ret > 0 ) then
-			
-		setElementDimension( thePlayer, infoSpots[theInfo]["toDimension"] );
-		setTimer( enableEnterExit, 2000, 1, thePlayer );
-		return true;
+	function ( player, cmd, theInt )
 	
-	end		
+		warpToInterior( player, theInt );
 	
-	return false;		
+	end
 	
-end
+);
 
 function addInfoSpot( id, x, y, z, rot, fromInt, fromDimension, toDimension, toScriptinterior, ex, ey, ez, eint )
 
@@ -177,6 +164,7 @@ function addInfoSpot( id, x, y, z, rot, fromInt, fromDimension, toDimension, toS
 	infoSpots[id]["fromInt"] = fromInt;
 	infoSpots[id]["toScriptinterior"] = toScriptinterior;
 	infoSpots[id]["toDimension"] = toDimension;
+	infoSpots[id]["locked"] = false;
 	
 	if( toScriptinterior ~= nil ) then
 	
@@ -213,6 +201,83 @@ function enableEnterExit( thePlayer )
 
 end
 
+function InfoSpotSetLocked( id, status )
+
+	if( string.find( id, ".Exit" ) ~= nil ) then
+	
+		local realId = string.sub( id, -5 );
+		
+		infoSpots[realId]["locked"] = status;
+		infoSpots[id]["locked"] = status;
+		
+		if( status == true ) then
+		
+			setMarkerColor( infoSpots[realId]["marker"], 255, 0, 0, 255 );
+			setMarkerColor( infoSpots[id]["marker"], 255, 0, 0, 255 );
+			
+		else
+		
+			setMarkerColor( infoSpots[realId]["marker"], 0, 255, 0, 255 );
+			setMarkerColor( infoSpots[id]["marker"], 0, 255, 0, 255 );
+		
+		end			
+	
+	else
+	
+		infoSpots[id]["locked"] = status;
+		infoSpots[id .. ".Exit"]["locked"] = status;
+		
+		if( status == true ) then
+		
+			setMarkerColor( infoSpots[id .. ".Exit"]["marker"], 255, 0, 0, 255 );
+			setMarkerColor( infoSpots[id]["marker"], 255, 0, 0, 255 );
+			
+		else
+		
+			setMarkerColor( infoSpots[id .. ".Exit"]["marker"], 0, 255, 0, 255 );
+			setMarkerColor( infoSpots[id]["marker"], 0, 255, 0, 255 );
+		
+		end			
+		
+	end
+
+end
+
+function InfoSpotGetLocked( id )
+
+	if( string.find( id, ".Exit" ) ~= nil ) then
+	
+		local realId = string.sub( id, -5 );
+		return infoSpots[realId]["locked"];
+	
+	else
+	
+		return infoSpots[id]["locked"];
+		
+	end
+
+end
+
+function InfoSpotSetMarkerChild( id, parent )
+
+	local realId;
+
+	if( string.find( id, ".Exit" ) ~= nil ) then
+	
+		realId = string.sub( id, -5 );
+		
+		setElementParent( parent, infoSpots[realId]["marker"] );
+		setElementParent( parent, infoSpots[id]["marker"] );
+		
+	else
+	
+		setElementParent( parent, infoSpots[id]["marker"] );
+		setElementParent( parent, infoSpots[id .. ".Exit"]["marker"] );
+		
+	end
+
+end
+
 addEventHandler( "onPlayerMarkerHit", getRootElement( ),
 
 	function ( markerHit, matchingDimension )
@@ -222,6 +287,26 @@ addEventHandler( "onPlayerMarkerHit", getRootElement( ),
 			local id = getElementData( markerHit, "infoId" );
 		
 			if( id ~= false ) then
+			
+				if( infoSpots[id]["locked"] == true ) then
+				
+					outputChatBox( "See uks on lukus. Kui sul on võti siis vajuta f. ", source );
+					return false;
+				
+				end
+			
+				local veh = getPedOccupiedVehicle( source );
+			
+				if( veh ~= false ) then
+					
+					local vType = getVehicleType( veh ) ;
+					if( vType ~= "Bike" or vType ~= "BMX" ) then
+					
+						return false;
+						
+					end
+				
+				end
 				
 				enterExitDisabled[source] = true;
 				
