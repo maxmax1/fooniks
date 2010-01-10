@@ -15,7 +15,7 @@ function displayLoadedRes( res )
 		
 			outputDebugString( "Mysql serveriga ühendatud." );
 			LoadDropitems();
-			setTimer( SaveDropItems, 10000, 0 );--120000, 0 );
+			setTimer( SaveDropItems, 120000, 0 );--120000, 0 );
 		
 		end	
 		
@@ -24,6 +24,19 @@ function displayLoadedRes( res )
 end
 
 addEventHandler( "onResourceStart", getResourceRootElement( getThisResource( ) ), displayLoadedRes );
+
+function checkMySQLConnection ( )
+
+	if( mysql_ping( connection ) == false ) then
+	
+		outputDebugString( "Lost connection to the MySQL server, reconnecting ..." );
+		mysql_close( connection );
+		
+		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
+		
+	end
+  
+end
 
 
 function LoadDropitems( )
@@ -47,6 +60,8 @@ end
 
 function SaveDropItems( )
 
+	checkMySQLConnection( );
+
 	local alldrops = getElementsByType( "DropItems" );
 	
 	for k, v in ipairs( alldrops ) do 
@@ -55,33 +70,37 @@ function SaveDropItems( )
 		local name = getElementData( v, "dropName" );
 		local myType = getElementData( v, "dropType" );
 		local myData = getElementData( v, "dropAmount" );
-		local x = getElementData( v, "dropX" );
-		local y = getElementData( v, "dropY" );
-		local z = getElementData( v, "dropZ" );
+		local dropX = getElementData( v, "dropX" );
+		local dropY = getElementData( v, "dropY" );
+		local dropZ = getElementData( v, "dropZ" );
 		local ang = getElementData( v, "dropAng" );	
 		local int = getElementData( v, "dropInt" );	
 		local dim = getElementData( v, "dropDim" );	
 		
-		if( myId ~= false ) then				
+		if( myId ~= nil and myId ~= false ) then				
 			
-			if( name ~= false and myType ~= false and myData ~= false and x ~= false and y ~= false and z ~= false and ang ~= false ) then 
+			if( name ~= false and myType ~= false and myData ~= false and dropX ~= false and dropY ~= false and dropZ ~= false and ang ~= false ) then 
 			
 				local query = exports.phoenix_Base:MysqlUpdatebuild("ph_dropitems");
 				
 				query = exports.phoenix_Base:MysqlSetField( query, "dropName", name );
 				query = exports.phoenix_Base:MysqlSetField( query, "dropType", myType );
 				query = exports.phoenix_Base:MysqlSetField( query, "dropAmount", myData );
-				query = exports.phoenix_Base:MysqlSetField( query, "dropX", x );
-				query = exports.phoenix_Base:MysqlSetField( query, "dropY", y );
-				query = exports.phoenix_Base:MysqlSetField( query, "dropZ", z );
+				query = exports.phoenix_Base:MysqlSetField( query, "dropX", dropX );
+				query = exports.phoenix_Base:MysqlSetField( query, "dropY", dropY );
+				query = exports.phoenix_Base:MysqlSetField( query, "dropZ", dropZ );
 				query = exports.phoenix_Base:MysqlSetField( query, "dropAng", ang );
 				query = exports.phoenix_Base:MysqlSetField( query, "dropInt", int );
 				query = exports.phoenix_Base:MysqlSetField( query, "dropDim", dim );
 				
 				query = exports.phoenix_Base:UpdateFinish( query, "id", myId );
 		
-				local result = mysql_query( connection, query );
-				if( result ~= false and result ~= nil ) then mysql_free_result( result ); end
+				if( query ~= false) then
+				
+					local result = mysql_query( connection, query );
+					if( result ~= false and result ~= nil ) then mysql_free_result( result ); end
+					
+				end
 				
 			end
 			

@@ -5,6 +5,9 @@
 
 	<config src="interiors.xml" type="server" />
 
-	<export function="checkForIntSpawn" type="server"/>
+	<export function="addInfoSpot" type="server"/>
+	<export function="InfoSpotSetLocked" type="server"/>
+	<export function="InfoSpotGetLocked" type="server"/>
+	<export function="InfoSpotSetMarkerChild" type="server"/>
 
 </meta>

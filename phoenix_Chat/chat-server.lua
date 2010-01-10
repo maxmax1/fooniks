@@ -167,6 +167,12 @@ addCommandHandler ( "es",
 		
 		local players = getElementsByType ( "player" );
 		
+		if( tonumber( oName ) ~= nil ) then
+		
+			oName = tonumber( oName );
+		
+		end
+		
 		for k, v in ipairs( players ) do
 		
 			if( type( oName ) == "number" ) then
@@ -267,8 +273,9 @@ function setChatMessage( fromPlayer, isIC, action, prepend, endadd, range, str, 
 	
 		local wind = getElementData( myVeh, "vWindow" );
 	
-		if( wind ~= false and tonumber( wind ) == 1 ) then -- windows closed. :)
+		if( wind ~= false and tonumber( wind ) == 0 ) then -- windows closed. :)
 		
+			prepend = prepend .. "(Aken Kinni) ";
 			range = -2;
 		
 		end
@@ -277,7 +284,7 @@ function setChatMessage( fromPlayer, isIC, action, prepend, endadd, range, str, 
 	
 
 	local sendstr = prepend .. myName .. action .. str .. endadd;
-	local players;
+	local players = { };
 
 	
 	if( range ~= nil and range ~= false and range > 0 ) then

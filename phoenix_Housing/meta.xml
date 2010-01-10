@@ -1,0 +1,41 @@
+<meta>
+	
+	<script src="housing-server.lua" type="server" />
+	<script src="housing-client.lua" type="client" />
+
+	<settings>
+		<setting name="#House.Santa_Maria_Beach" value="50000" />
+		<setting name="#House.Verona_Beach" value="40000" />
+		<setting name="#House.Verdant_Bluffs" value="45000" />
+		<setting name="#House.Los_Santos_International" value="20000" />
+		<setting name="#House.Ocean_Docks" value="15000" />
+		<setting name="#House.Playa_del_Seville" value="60000" />
+		<setting name="#House.Willowfield" value="35000" />
+		<setting name="#House.El_Corona" value="25000" />
+		<setting name="#House.Unity_Station" value="75000" />
+		<setting name="#House.Rodeo" value="60000" />
+		<setting name="#House.Market" value="75000" />
+		<setting name="#House.Market_Station" value="15000" />
+		<setting name="#House.Conference_Center" value="30000" />
+		<setting name="#House.Commerce" value="90000" />
+		<setting name="#House.Pershing_Square" value="35000" />
+		<setting name="#House.Little_Mexico" value="25000" />
+		<setting name="#House.Idlewood" value="40000" />
+		<setting name="#House.Ganton" value="30000" />
+		<setting name="#House.East_Beach" value="74000" />
+		<setting name="#House.Los_Flores" value="59000" />
+		<setting name="#House.East_Los_Santos" value="40000" />
+		<setting name="#House.Jefferson" value="35000" />
+		<setting name="#House.Glen_Park" value="70000" />
+		<setting name="#House.Downtown_Los_Santos" value="60000" />
+		<setting name="#House.Vinewood" value="35000" />
+		<setting name="#House.Richman" value="130000" />
+		<setting name="#House.Mulholland" value="100000" />
+		<setting name="#House.Tempre" value="64000" />
+		<setting name="#House.Mulholland_Intersection" value="20000" />
+		<setting name="#House.Las_Colinas" value="19000" />
+		<setting name="#House.Default" value="25000" />
+		<setting name="#priceMod" value="5000" />
+	</settings>	
+	
+</meta>

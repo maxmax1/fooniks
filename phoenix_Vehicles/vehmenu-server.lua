@@ -142,25 +142,15 @@ function vehWindows(veh)
 	if client then
 		if tonumber(getElementData(veh, "vWindow")) == 1 then
 			setElementData(veh, "vWindow", 0)
-			text = "kerib akna alla"
+			text = "kerib akna üles"
 		else
 			setElementData(veh, "vWindow", 1)
-			text = "kerib akna üles"
+			text = "kerib akna alla"
 		end
 	
-		exports.phoenix_Chat:setChatMessage( client, true, " ", "*", "*", 10, text, 219, 219, 112 )
+		exports.phoenix_Chat:setChatMessage( client, true, " ", "* ", " *", 10, text, 219, 219, 112 )
 	end
 end
 addEvent("vehWindows",true)
 addEventHandler("vehWindows",getRootElement(),vehWindows)
-
-function cwhisper(message, messageType)
-	if messageType == 0 and isPedInVehicle(source) then
-	local masin = getPedOccupiedVehicle(source)
-		if getElementData(masin, "vWindow") == 0 then
-			outputChatBox("(Aken kinni) " ..getPlayerName(source).. ": " ..message, getVehicleOccupant(masin), 219, 219, 112)
-		end
-	end
-end
-addEventHandler( "onPlayerChat", getRootElement(), cwhisper )
 
