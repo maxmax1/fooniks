@@ -118,6 +118,7 @@ function RegisterItems( )
             		else
             		
             			items[id]["useEvent"] = xmlNodeGetAttribute( node, "useEvent" );
+            			items[id]["eventType"] = xmlNodeGetAttribute( node, "eventType" );
             		
             		end
             		
@@ -282,7 +283,7 @@ function getSlotByItem( playerid, item )
 
 	for i = 1, max_items, 1 do
 	
-		if( pockets[playerid][i]["pType"] == item ) then
+		if( tonumber( pockets[playerid][i]["pType"] ) == item ) then
 			return i;
 		end
 		
@@ -315,6 +316,14 @@ function clearPockets( playerid )
 	
 	sync( playerid );
 	
+end
+
+function clearPocket( playerid, pocketId )
+
+	pockets[playerid][pocketId]["pType"] = 0;
+	pockets[playerid][pocketId]["pData"] = 0;
+	sync( playerid );
+
 end
 
 function sync( thePlayer )
@@ -374,7 +383,7 @@ function giveItem( playerid, itemId, amount )
 	if( itemId == nil or itemId == 0 ) then return amount; end
 	if( type( items[itemId] ) ~= "table" ) then
 	
-		return amount;
+		return false;
 	
 	end
 
@@ -382,7 +391,7 @@ function giveItem( playerid, itemId, amount )
 	
 	if(freeSlot == false) then
 
-		return amount;
+		return false;
 		
 	end
 	
@@ -390,7 +399,7 @@ function giveItem( playerid, itemId, amount )
 	pockets[playerid][freeSlot]["pData"] = pockets[playerid][freeSlot]["pData"] + amount;	
 	giveItemOtherStuff( playerid, itemId, amount );		
 	sync( playerid );	
-	return 0;
+	return true;
 	
 end
 
@@ -427,8 +436,8 @@ addEventHandler( "onUseItem", getRootElement(),
 			
 			else
 			
-				triggerEvent( items[id]["useEvent"], client, pockets[client][pocketid]["pType"], pockets[client][pocketid]["pData"] );
-			
+				local ret = triggerEvent( items[myItem]["useEvent"], client, pocketid, pockets[client][pocketid]["pType"], pockets[client][pocketid]["pData"] );
+				
 			end
 		
 		end

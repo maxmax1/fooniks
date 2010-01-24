@@ -262,6 +262,12 @@ function xpAdd( thePlayer, skillId, howMuch )
 
 end
 
+function getPlayerLevel( thePlayer, skillId )
+
+	return getLevel( skillId, pXp[skillId][thePlayer] );
+
+end
+
 function getLevel( skillId, numXp )
 
 	local xpNeeded = 0;

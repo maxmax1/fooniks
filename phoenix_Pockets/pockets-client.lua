@@ -13,8 +13,8 @@ function createPocketsGUI( )
 	pockGridList = guiCreateGridList( 0.3, 0.3, 0.4, 0.4, true );
 	guiGridListSetSelectionMode( pockGridList, 0 );
 	
-	gridColumn[1] = guiGridListAddColumn( pockGridList, "#", 0.05 );
-	gridColumn[2] = guiGridListAddColumn( pockGridList, "Ese", 0.6 );
+	gridColumn[1] = guiGridListAddColumn( pockGridList, "#", 0.1 );
+	gridColumn[2] = guiGridListAddColumn( pockGridList, "Ese", 0.5 );
 	gridColumn[3] = guiGridListAddColumn( pockGridList, "Data", 0.3 );
 	
 	useBtn = guiCreateButton( 0.3, 0.725, 0.125, 0.05, "Kasuta", true ); -- 0.3 - 0.425

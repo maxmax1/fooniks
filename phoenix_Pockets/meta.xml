@@ -6,6 +6,9 @@
 	<config src="items.xml" type="server" />
 	
 	<export function="giveItem" type="server" />
+	<export function="getSlotByItem" type="server" />
+	<export function="clearPocket" type="server" />
+	<export function="clearPockets" type="server" />
 
 	<settings>
 		<setting name="#NUM_POCKETS" value="6" />
