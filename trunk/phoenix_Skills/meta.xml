@@ -3,6 +3,10 @@
 	<script src="skills-server.lua" type="server" />
 	<script src="skills-client.lua" type="client" />
 
+	<export function="getPlayerLevel" />
+	<export function="getLevel" />
+	<export function="xpAdd" />
+	
 	<config src="skills.xml" type="server" />
 
 </meta>

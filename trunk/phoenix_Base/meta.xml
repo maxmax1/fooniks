@@ -1,9 +1,9 @@
 <meta>
 	<info author="eRP-Gaming" version="0.1" type="gamemode" name="Phoenix" description="Phoenix Base system." />
 	<settings>
-		<setting name="#MYSQL_HOST" value="localhost" />
-		<setting name="#MYSQL_PASS" value="_araNeb#" />
-		<setting name="#MYSQL_USER" value="estrpco" />
+		<setting name="#MYSQL_HOST" value="80.79.119.221" />
+		<setting name="#MYSQL_PASS" value="XR62dnrcthj9FBwf" />
+		<setting name="#MYSQL_USER" value="estrp_mtaServer" />
 		<setting name="#MYSQL_DB" value="estrpco_portal" />
 	</settings>
 
@@ -25,6 +25,7 @@
 	<include resource="phoenix_SpawnManager" />
 	<include resource="phoenix_Infospots" />
 	<include resource="phoenix_Reports" />
+	<include resource="phoenix_Phone" />
 	<include resource="phoenix_Pockets" />
 	<include resource="phoenix_DropItems" />
 	<include resource="phoenix_Jobs" />

@@ -180,7 +180,7 @@ addEventHandler( "pickupDropItem", getRootElement(),
 			local myType = getElementData( element, "dropType" );
 			local myData = getElementData( element, "dropAmount" );
 			
-			if( exports.Phoenix_Pockets:giveItem( client, myType, myData ) == 0 ) then
+			if( myType and myData and exports.Phoenix_Pockets:giveItem( client, myType, myData ) == 0 ) then
 			
 				removeDropFromSql( element );
 				destroyElement( element );

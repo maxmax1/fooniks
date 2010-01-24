@@ -535,7 +535,6 @@ addCommandHandler( "kastike",
 	function ( commandName )
 	
 		trashX, trashY, trashZ = getElementPosition( player );
-		trashZ = trashZ+1;
 	
 	end
 );

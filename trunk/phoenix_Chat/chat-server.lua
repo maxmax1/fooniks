@@ -3,9 +3,6 @@ addEventHandler ( "onPlayerJoin", getRootElement(),
 	function ()
 	
 		unbindKey( source, "y" );
-		bindKey( source, "o", "down", "chatbox", "o" );
-		bindKey( source, "b", "down", "chatbox", "b" );
-		bindKey( source, "y", "down", "chatbox", "c" );
 	
 	end
 

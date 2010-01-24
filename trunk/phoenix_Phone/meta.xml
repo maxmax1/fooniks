@@ -1,0 +1,16 @@
+<meta>
+	
+	<script src="phone_Gui.lua" type="client" />
+	<script src="phone_Server.lua" type="server" />
+	<script src="phone_Calling.lua" type="server" />
+	<script src="ringTone_Client.lua" type="client" />
+	<script src="phone_Action.lua" type="client" />
+	<script src="ringTone_Server.lua" type="server" />
+	
+	<file src="images/mobla.png" />
+	<file src="images/sms.png" />
+	<file src="images/screenpic_1.png" />
+	<file src="ringtones/plain.mp3" />
+	<file src="ringtones/sms.mp3" />
+	
+</meta>
