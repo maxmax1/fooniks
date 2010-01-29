@@ -1,10 +1,17 @@
-rootElement = getRootElement( );
-x,y = guiGetScreenSize( );
+-- Some stuff...
 
-drawpos = 0;
-drawshowing = false;
-drawmoving = 0;
+local showing = false;
+local ticks = false;
+local moveX = 0;
 drawText = "......";
+
+-- Some values needed everywhere...
+local rootElement = getRootElement( );
+local sx, sy = guiGetScreenSize( );
+
+local posY = sy*0.3;
+local posX = sx;
+
 drawWidth = 200;
 ticksShown = 0;
 
@@ -13,12 +20,12 @@ textOffy = 10;
 
 function showSkillDraw( text )
 
-	if( drawshowing ~= false ) then return false; end
+	if( showing ~= false ) then return false; end
 	
-	drawshowing = true;
-	drawmoving = -1; -- make it appear
+	showing = true;
+	moveX = -15; -- make it appear
 	drawText = text;
-	drawpos = y + drawmoving;
+	posX = sx;
 	
 	return true;
 
@@ -27,6 +34,7 @@ end
 addEvent( "onShowSkillDraw", true );
 addEventHandler( "onShowSkillDraw", getRootElement( ), showSkillDraw );
 
+addCommandHandler( "test", showSkillDraw );
 
 addEventHandler( "onClientResourceStart", rootElement,  
 
@@ -36,55 +44,52 @@ addEventHandler( "onClientResourceStart", rootElement,
 		
 			function ()
 			
-				if( drawshowing ) then
+				if( showing ) then	
 				
-					dxDrawRectangle( x - drawWidth, drawpos, drawWidth, y - drawpos, tocolor ( 0, 0, 0, 150 ) );
-					dxDrawText ( drawText,  x - drawWidth + textOffx, drawpos + textOffy, drawWidth - textOffx, y - drawpos - textOffy );
+					posX = posX + moveX;
 				
-					if( drawmoving ~= 0 ) then
+					dxDrawRectangle( posX, posY, sx-posX, 75, tocolor( 0, 0, 0, 200 ) );
+					dxDrawImage( posX+10, posY+9, 50, 50, ":phoenix_Skills/images/levelup.png" );
 					
-						drawpos = drawpos + drawmoving;
+					dxDrawText( drawText, posX+65, posY+9 );
+					
+					if( moveX ~= 0 ) then
 						
-						if( drawmoving < 0 ) then
+						if( posX < sx - 125 ) then
 						
-							if( drawpos <= y - 50 ) then
+							moveX = 0;
+							ticks = 0;
 							
-								drawmoving = 0;
-							
-							end
+						elseif( posX >= sx ) then
 						
-						else
-						
-							if( drawpos >= y ) then 
-							
-								drawmoving = 0;
-								drawshowing = false;
-								
-							end
+							moveX = 0;
+							showing = false;
 						
 						end
-						
-					else
 					
-						ticksShown = ticksShown+1;
+					end
+					
+					if( ticks ~= false ) then
 						
-						if( ticksShown > 500 ) then
+						ticks = ticks + 1;
 						
-							drawmoving = 1;
-							ticksShown = 0;
+						if( ticks > 250 ) then
+						
+							moveX = 15;
+							ticks = false;
 						
 						end
-						
+					
 					end
 				
 				end
 			
 			end
-		
+			
 		);
-	
+		
 	end
-
+	
 );
 
 addEventHandler ( "onClientPlayerWeaponFire", getLocalPlayer( ), 

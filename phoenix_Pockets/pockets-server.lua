@@ -326,6 +326,9 @@ function clearPocket( playerid, pocketId )
 
 end
 
+addEvent( "onPocketClear", true );
+addEventHandler( "onPocketClear", getRootElement(), clearPocket );
+
 function sync( thePlayer )
 
 	local tbl = {};

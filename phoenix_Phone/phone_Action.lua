@@ -68,27 +68,6 @@ end
 addEvent( "givePlayerPhone", true );
 addEventHandler( "givePlayerPhone", getRootElement( ), SetPlayerUsingPhone );
 
-addCommandHandler( "spec", 
-
-	function ( temp, new )
-	
-		if( not new or new == "0" ) then
-		
-			new = false;
-		
-		else
-		
-			new = true;
-		
-		end
-	
-		SetPlayerUsingPhone( getLocalPlayer( ), new );
-	
-	end
-	
-);
-
-
 addEventHandler( "onClientResourceStart", rootElement,  
 
 	function ()

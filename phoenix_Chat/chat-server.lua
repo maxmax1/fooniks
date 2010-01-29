@@ -319,3 +319,9 @@ function setChatMessage( fromPlayer, isIC, action, prepend, endadd, range, str, 
 	return true;
 
 end
+
+function OocInfo( thePlayer, theMessage )
+
+	triggerClientEvent( thePlayer, "onOOCInfo", thePlayer, theMessage );	
+
+end
