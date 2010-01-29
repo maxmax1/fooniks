@@ -7,6 +7,7 @@
 	
 	<export function="giveItem" type="server" />
 	<export function="getSlotByItem" type="server" />
+	<export function="getSlotByItem" type="client" />
 	<export function="clearPocket" type="server" />
 	<export function="clearPockets" type="server" />
 

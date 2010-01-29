@@ -123,6 +123,22 @@ addEventHandler("SyncItem", getResourceRootElement( getThisResource( ) ),
 	
 );
 
+function getSlotByItem( item )
+
+	for k, v in ipairs( items ) do
+	
+		if( tonumber( items[k]['type'] ) == item ) then
+		
+			return i;
+		
+		end
+		
+	end
+	
+	return false;
+	
+end
+
 function BuildPockets( )
 
 	guiGridListClear( pockGridList );

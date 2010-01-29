@@ -228,7 +228,7 @@ function OnLevelUp( thePlayer, skillId, showMsg )
 	
 	if( showMsg == true ) then
 	
-		triggerClientEvent( thePlayer, "onShowSkillDraw", getRootElement( ), "Sinu " .. skills[skillId]["name"] .. " kerkis. (" .. pSkillLevel[skillId][thePlayer] .. ")" );
+		triggerClientEvent( thePlayer, "onShowSkillDraw", getRootElement( ), skills[skillId]["name"] .. "\n \n " .. pSkillLevel[skillId][thePlayer] );
 	
 	end
 	

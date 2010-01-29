@@ -7,6 +7,8 @@
 	<export function="getLevel" />
 	<export function="xpAdd" />
 	
+	<file src="images/levelup.png" />
+	
 	<config src="skills.xml" type="server" />
 
 </meta>

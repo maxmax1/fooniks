@@ -354,7 +354,7 @@ function canPlayerStartVehicle( thePlayer, theVehicle )
     
     	if( vOwner == 0 ) then -- OnSale
     	
-    		outputChatBox( thePlayer, "See sõiduk on müügis." );
+			exports.phoenix_Chat:OocInfo( thePlayer, "See sõiduk on müügis." );	
     		return false;
     		
     	elseif( vOwner > 0 and vOwner ~= pId) then
@@ -386,7 +386,7 @@ function toggleVehicleEngine ( player, key, keyState )
 	local theSeat = getPedOccupiedVehicleSeat ( player );
 	if( not theVehicle or theSeat ~= 0 ) then
 	
-		outputChatBox( "Sa pead olema masinas", player );
+		exports.phoenix_Chat:OocInfo( player, "Sa pead olema masinas" );
 		return 2;
 		
 	end
@@ -401,7 +401,7 @@ function toggleVehicleEngine ( player, key, keyState )
     
     if( canPlayerStartVehicle( player, theVehicle ) == false ) then
     
-    	outputChatBox( "Sul pole selle masina võtmeid", player );
+    	exports.phoenix_Chat:OocInfo( player, "Sul pole selle masina võtmeid" );
     
     else
 	
@@ -441,7 +441,7 @@ function toggleVehicleLights ( player, key, keyState )
 	local theSeat = getPedOccupiedVehicleSeat ( player );
 	if( not theVehicle or theSeat > 1 ) then
 	
-		outputChatBox( "Sa pead olema masinas / masina esiistmel.", player );
+		exports.phoenix_Chat:OocInfo( player, "Sa pead olema masinas / masina esiistmel." );
 		return 2;
 		
 	end
@@ -469,7 +469,7 @@ function toggleVehicleSeatBelt ( player, key, keyState )
 	
 	if( not theVehicle or not isElement ( theVehicle )  ) then
 	
-		outputChatBox( "Sa pead olema masinas", player );
+		exports.phoenix_Chat:OocInfo( player, "Sa pead olema masinas" );
 		return 2;
 		
 	end
@@ -498,7 +498,7 @@ end]]
 addEventHandler ( "onVehicleEnter", getRootElement(),
 
 	function ( thePlayer, seat, jacked )
-		outputChatBox( "(( Käsklused: /turvavöö, /mootor, /tuled))", thePlayer );
+		exports.phoenix_Chat:OocInfo( thePlayer, "(( Käsklused: /turvavöö, /mootor, /tuled))" );
 		if( seat == 0) then
 				
 			
