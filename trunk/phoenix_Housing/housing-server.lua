@@ -34,7 +34,7 @@ addEventHandler ( "onResourceStop", getResourceRootElement( getThisResource( ) )
 	
 );
 
-function checkMySQLConnection ( )
+function checkMySQLConnection( )
 
 	if( mysql_ping( connection ) == false ) then
 	
@@ -72,6 +72,8 @@ function LoadHousing( )
 end
 
 function SaveHousing( )
+
+	checkMySQLConnection( );
 
 	local houses = getElementsByType( "House" );
 	
@@ -122,17 +124,17 @@ function addHouse( address, posX, posY, posZ, trashX, trashY, trashZ, trashAng, 
 	else
 	
 		-- insert
-		local query = "INSET INTO ph_Houses(id, address, posX, posY, posZ, interior) VALUES(NULL, '" .. address .. "', '" .. posX .. "', '" .. posY .. "', '" .. posZ .. "', '" .. interior .. "')";
+		local query = "INSERT INTO ph_Houses(id, address, posX, posY, posZ, interior, trashX, trashY, trashZ, trashAng) VALUES(NULL, '" .. address .. "', '" .. posX .. "', '" .. posY .. "', '" .. posZ .. "', '" .. interior .. "', '" .. trashX .. "', '" .. trashY .. "', '" .. trashZ .. "', '" .. trashAng .. "')";
 		local result = mysql_query( connection, query );
 		if( result ~= false and result ~= nil ) then
 		
-			myId = mysql_insert_id();
+			myId = mysql_insert_id( connection );
 			mysql_free_result( result );
 			
 		end
 	
 	end
-	
+		
 	local element = createElement( "House" );
 
 	interior = tonumber( interior );
@@ -175,7 +177,7 @@ function addHouse( address, posX, posY, posZ, trashX, trashY, trashZ, trashAng, 
 		
 		end
 		
-		-- InfoSpotSetMarkerChild( "House." .. myId, element );
+		exports.phoenix_Infospots:InfoSpotSetManual( "House." .. myId, true );
 		
 	end	
 	return element;
@@ -208,7 +210,11 @@ function RealPrice( zoneName, curPrice )
 	
 	for k,v in ipairs( tbl ) do
 	
-		if( zoneName == getElementZoneName( v ) ) then
+		local x = getElementData( v, "posX" );
+		local y = getElementData( v, "posY" );
+		local z = getElementData( v, "posZ" );
+		local zone = string.gsub( getZoneName( x, y, z ), " ", "_" );	
+		if( zoneName == zone ) then
 		
 			if( tonumber( getElementData( v, "owner" ) ) == 0 ) then
 			
@@ -246,7 +252,7 @@ addEventHandler( "onHouseReg", getRootElement(),
 			if( acc ~= false and isGuestAccount( acc ) == false ) then
 			
 				local price, free, all = getHousePriceFromZone( houseInf[1], houseInf[2], houseInf[3] );
-				local addr = getZoneName( houseInf[1], houseInf[2], houseInf[3] ) .. (all+1);
+				local addr = getZoneName( houseInf[1], houseInf[2], houseInf[3] ) .. " " .. (all+1);
 				
 				addHouse( addr, houseInf[1], houseInf[2], houseInf[3], houseInf[4], houseInf[5], houseInf[6], houseInf[7], houseInf[8], price, 0, 0, 50, 0, nil, "", "{0,0},{0,0},{0,0},{0,0},{0,0}", "0", "0" );
 			

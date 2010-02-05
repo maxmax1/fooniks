@@ -14,11 +14,7 @@ addEventHandler ( "onPlayerChat", getRootElement(),
 	
 		if( msgType == 1 ) then
 		
-			if ( not setChatMessage( source, true, " ", "* ", "", 35, message, 218, 146, 229 ) ) then
-		
-				outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", source );
-		
-			end
+			EmoteMessage( source, message );
 		
 		elseif( msgType == 2 ) then
 		
@@ -137,17 +133,22 @@ addCommandHandler ( "me",
 	
 	function ( playerSource, commandName, ... )
 	
-		local arg = table.concat( {...}, " " );		
-		
-		if ( not setChatMessage( playerSource, true, " ", "* ", " ", 35, arg, 218, 146, 229 ) ) then
-		
-			outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", playerSource );
-		
-		end
+		local arg = table.concat( {...}, " " );
+		EmoteMessage( playerSource, arg );
 	
 	end
 	
 , false, true);
+
+function EmoteMessage( thePlayer, msg )
+
+	if ( not setChatMessage( thePlayer, true, " ", "* ", " ", 35, msg, 218, 146, 229 ) ) then
+	
+		outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", thePlayer );
+	
+	end
+
+end
 
 addCommandHandler ( "es",
 	

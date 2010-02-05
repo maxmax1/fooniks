@@ -1,11 +1,11 @@
 -- Some stuff...
 
 local showing = false;
-local ticks = false;
 local moveX = 0;
 drawText = "......";
 
 -- Some values needed everywhere...
+local player = getLocalPlayer( );
 local rootElement = getRootElement( );
 local sx, sy = guiGetScreenSize( );
 
@@ -34,7 +34,11 @@ end
 addEvent( "onShowSkillDraw", true );
 addEventHandler( "onShowSkillDraw", getRootElement( ), showSkillDraw );
 
-addCommandHandler( "test", showSkillDraw );
+function StartHide( )
+
+	moveX = 15;
+
+end
 
 addEventHandler( "onClientResourceStart", rootElement,  
 
@@ -58,25 +62,12 @@ addEventHandler( "onClientResourceStart", rootElement,
 						if( posX < sx - 125 ) then
 						
 							moveX = 0;
-							ticks = 0;
+							setTimer( StartHide, 3000, 1 );
 							
 						elseif( posX >= sx ) then
 						
 							moveX = 0;
 							showing = false;
-						
-						end
-					
-					end
-					
-					if( ticks ~= false ) then
-						
-						ticks = ticks + 1;
-						
-						if( ticks > 250 ) then
-						
-							moveX = 15;
-							ticks = false;
 						
 						end
 					
@@ -92,13 +83,13 @@ addEventHandler( "onClientResourceStart", rootElement,
 	
 );
 
-addEventHandler ( "onClientPlayerWeaponFire", getLocalPlayer( ), 
+addEventHandler ( "onClientPlayerWeaponFire", player, 
 
 	function ( weapon, ammo, ammoInClip, hitX, hitY, hitZ, hitElement )
 	
 		if( hitElement ~= false and hitElement ~= nil and getElementType( hitElement ) ~= false ) then
 		
-			triggerServerEvent( "onSkillWeaponShot", getLocalPlayer( ), weapon );
+			triggerServerEvent( "onSkillWeaponShot", player, weapon );
 		
 		end
 	

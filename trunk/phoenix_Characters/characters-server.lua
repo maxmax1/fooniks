@@ -92,13 +92,19 @@ end
 	
 function charactersRequest( )
 
-	if( not client ) then outputChatBox( "charRequestFeil" ); return false; end
+	if( not client ) then outputDebugString( "charRequestFeil" ); return false; end
 	
 	local sqlId = getElementData( client, "User.userid" );
 	if( not sqlId ) then
 	
 		kickPlayer( client, "VIGA: Sisselogimisel läks midagi sassi, proovi uusti. " );
 		return false;
+	
+	end
+	
+	if( getElementData( client, "Character.id" ) ) then
+	
+		savePlayer( client, true );
 	
 	end
 	
@@ -280,6 +286,8 @@ function savePlayer( thePlayer, timed )
 
 	checkMySQLConnection( );
 
+	if( not charFields ) then return false; end
+	
 	if( not thePlayer or not isElement ( thePlayer ) ) then
 	
 		return false;

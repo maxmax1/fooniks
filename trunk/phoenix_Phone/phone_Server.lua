@@ -356,3 +356,14 @@ addCommandHandler( "myPhone",
 	end
 	
 ,false, false );
+
+addEvent( "onPhoneShowRequest", true );
+addEventHandler( "onPhoneShowRequest", 
+
+	function ( pocketId, pType, pData )
+	
+		triggerClientEvent( source, "onPhoneShow", source );
+	
+	end
+	
+);

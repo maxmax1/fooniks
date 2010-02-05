@@ -5,7 +5,10 @@
 
 	<config src="interiors.xml" type="server" />
 
+	<export function="getIntByID" type="server"/>
+	<export function="getIntByID" type="client"/>
 	<export function="addInfoSpot" type="server"/>
+	<export function="InfoSpotSetManual" type="server"/>
 	<export function="InfoSpotSetLocked" type="server"/>
 	<export function="InfoSpotGetLocked" type="server"/>
 	<export function="InfoSpotSetMarkerChild" type="server"/>

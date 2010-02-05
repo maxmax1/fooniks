@@ -5,10 +5,13 @@
 		<setting name="#MYSQL_PASS" value="XR62dnrcthj9FBwf" />
 		<setting name="#MYSQL_USER" value="estrp_mtaServer" />
 		<setting name="#MYSQL_DB" value="estrpco_portal" />
+		<setting name="#VERSION" value="0.3" />
+		<setting name="#REVISION" value="223" />
 	</settings>
 
 	<script src="base-server.lua" type="server" />
 	<script src="base-client.lua" type="client" />
+	<script src="base-PhoenixTab.lua" type="client" />
 
 	<export function="getConnection" type="server" retval="MySQLConnection" params="void" description="Returns current MYSQL connection handle." />
 	<export function="MysqlUpdatebuild" type="server" />
