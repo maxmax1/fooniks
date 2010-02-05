@@ -6,7 +6,7 @@
 		<setting name="#MYSQL_USER" value="estrp_mtaServer" />
 		<setting name="#MYSQL_DB" value="estrpco_portal" />
 		<setting name="#VERSION" value="0.3" />
-		<setting name="#REVISION" value="225" />
+		<setting name="#REVISION" value="226" />
 	</settings>
 
 	<script src="base-server.lua" type="server" />
