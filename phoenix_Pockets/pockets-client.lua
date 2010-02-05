@@ -1,4 +1,3 @@
--- TODO: Pockets menu, actions(kasuta, viska maha, hävita).
 -- Trademenüü on eraldi asi tuleb onPlayerClickPlayer abiga. :)
 
 local pockGridList;
@@ -158,39 +157,40 @@ function BuildPockets( )
 	
 end
 
-bindKey("i", "down",
+addCommandHandler( "taskud", 
 
-        function()
-		
-			if( guiGetVisible( pockGridList ) == false ) then
-		
-				BuildPockets( );
-		
-				guiSetVisible( pockGridList, true );	
-				guiSetVisible( useBtn, true );	
-				guiSetVisible( dropBtn, true );	
-				guiSetVisible( destroyBtn, true );	
-				
-				if( isCursorShowing( ) == false ) then
-				
-					showCursor( true );
-				
-				end
+	function()
+	
+		if( guiGetVisible( pockGridList ) == false ) then
+	
+			BuildPockets( );
+	
+			guiSetVisible( pockGridList, true );	
+			guiSetVisible( useBtn, true );	
+			guiSetVisible( dropBtn, true );	
+			guiSetVisible( destroyBtn, true );	
 			
-			else
+			if( isCursorShowing( ) == false ) then
 			
-				guiSetVisible( pockGridList, false );	
-				guiSetVisible( useBtn, false );	
-				guiSetVisible( dropBtn, false );	
-				guiSetVisible( destroyBtn, false );	
-				
-				if( isCursorShowing( ) == true ) then
-				
-					showCursor( false );
-				
-				end
+				showCursor( true );
 			
 			end
+		
+		else
+		
+			guiSetVisible( pockGridList, false );	
+			guiSetVisible( useBtn, false );	
+			guiSetVisible( dropBtn, false );	
+			guiSetVisible( destroyBtn, false );	
 			
-        end
-);
+			if( isCursorShowing( ) == true ) then
+			
+				showCursor( false );
+			
+			end
+		
+		end
+		
+	end
+	
+, false, false );

@@ -15,6 +15,7 @@ function ShowCharacters( charTable, selected, isEnd )
 	if( charWindow ~= nil ) then
 	
 		destroyElement( charWindow );
+		charWindow = nil;
 		
 		if( isEnd == true ) then 
 		
@@ -76,10 +77,32 @@ function ShowCharacters( charTable, selected, isEnd )
 			
 				addEventHandler("onClientGUIClick", charList[i][1], 
 			
-					function ( )
-				
-						charTable[selected]["blurLevel"] = getBlurLevel();
-						ShowCharacters( charTable, i, false );
+					function ( button, state, aX, aY )
+					
+						if( button == "left" and state == "up" ) then
+													
+							-- Hack for guiparent bug.
+							local windX, windY = guiGetPosition( charWindow, false );
+							local tabX, tabY = guiGetPosition( tabPanel, false );
+							local scrollX, scrollY = guiGetPosition( charScrollPane, false );
+							
+							local startX = windX + tabX + scrollX;
+							local startY = windY + tabY + scrollY;
+							
+							local height, width = guiGetSize( charList[i][1], false );
+							local sHeight, sWidth = guiGetSize( charScrollPane, false );
+							
+							local endX = startX + ( sWidth * 0.8 );
+							local endY = startY + sHeight;
+							
+							if( aX >= startX and aX <= endX and aY >= startY and aY <= endY ) then
+										
+								charTable[selected]["blurLevel"] = getBlurLevel();
+								ShowCharacters( charTable, i, false );
+							
+							end
+							
+						end
 				
 					end
 				

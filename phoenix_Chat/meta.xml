@@ -4,6 +4,7 @@
 	<script src="chat-client.lua" type="client" />
 	
 	<export function="setChatMessage" type="server" />
+	<export function="EmoteMessage" type="server" />
 	<export function="OocInfo" type="server" />
 	<export function="OocInfo" type="client" />
 	

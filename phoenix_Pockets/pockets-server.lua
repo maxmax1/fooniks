@@ -440,7 +440,7 @@ addEventHandler( "onUseItem", getRootElement(),
 			else
 			
 				local ret = triggerEvent( items[myItem]["useEvent"], client, pocketid, pockets[client][pocketid]["pType"], pockets[client][pocketid]["pData"] );
-				
+			
 			end
 		
 		end

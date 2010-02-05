@@ -5,32 +5,21 @@ local houseTabPanel = nil;
 local infoTab = nil;
 local picturesTab = nil;
 local ownerTab = nil;
-local ownerTab = nil;
+local currentImage = 1;
 local windShowing = false;
 
 sx, sy = guiGetScreenSize( );
 
-function createHouseMenu( )
+function createHouseMenu( addr )
 
-	houseWind = guiCreateWindow( (sx-300)/2, (sy-250)/2, 300, 250, "Maja Aadress", false );
+	houseWind = guiCreateWindow( (sx-300)/2, (sy-250)/2, 300, 250, addr, false );
 	houseTabPanel = guiCreateTabPanel( 0.05, 0.1, 0.9, 0.9, true, houseWind );	
 	guiSetVisible( houseWind, false );
 	windShowing = false;
 
 end
 
-
-addEventHandler("onClientResourceStart", getResourceRootElement(getThisResource()), 
-
-	function ()
-	
-		createHouseMenu( );
-	
-	end
-	
-);
-
-function createHouseTabs( price, addonsTbl, okStr )
+function createHouseTabs( price, addonsTbl, okStr, interiorId, numImages )
 
 	if( infoTab ~= nil ) then guiDeleteTab( infoTab ); end
 	if( picturesTab ~= nil ) then guiDeleteTab( picturesTab ); end
@@ -56,14 +45,55 @@ function createHouseTabs( price, addonsTbl, okStr )
 		function ( )
 		
 			destroyElement( houseWind );
-			createHouseMenu( );
+			windShowing = false;
 		
 		end
 	, false);
 	
 	picturesTab = guiCreateTab( "Pildid", houseTabPanel );
 	
-	guiCreateLabel( 0.1, 0.1, 0.8, 0.8, "Tulekul...", true, picturesTab );
+	if( numImages > 0 ) then
+	
+		currentImage = 1;
+		local img = guiCreateStaticImage( 0.1, 0.1, 0.8, 0.7, "images/" .. interiorId .. "_1.jpg", true, picturesTab );		
+		local backBtn = guiCreateButton( 0.1, 0.85, 0.2, 0.1, "<<", true, picturesTab );
+		local forwardBtn = guiCreateButton( 0.7, 0.85, 0.2, 0.1, ">>", true, picturesTab );
+		
+		addEventHandler("onClientGUIClick", backBtn, 
+			
+			function (  )
+		
+				if( currentImage > 1 ) then
+				
+					currentImage = currentImage - 1;
+					guiStaticImageLoadImage( img, "images/" .. interiorId .. "_" .. currentImage .. ".jpg" );
+				
+				end
+		
+			end
+			
+		, false);	
+		
+		addEventHandler("onClientGUIClick", forwardBtn, 
+			
+			function (  )
+			
+				if( currentImage+1 <= numImages ) then
+				
+					currentImage = currentImage + 1;
+					guiStaticImageLoadImage( img, "images/" .. interiorId .. "_" .. currentImage .. ".jpg" );
+				
+				end
+		
+			end
+			
+		, false);	
+	
+	else
+	
+		guiCreateLabel( 0.1, 0.1, 0.8, 0.8, "Pole...", true, picturesTab );
+		
+	end
 	
 	guiSetVisible( houseWind, true );
 	windShowing = true;
@@ -100,8 +130,7 @@ function CreateOwnerTabs( house, tabName, sellStr )
 		function ( )
 		
 			destroyElement( houseWind );
-			createHouseMenu( );
-			
+			windShowing = false;
 			triggerServerEvent( "onPropertyLockedChange", getLocalPlayer( ), house );
 		
 		end
@@ -111,7 +140,7 @@ function CreateOwnerTabs( house, tabName, sellStr )
 		function ( )
 		
 			destroyElement( houseWind );
-			createHouseMenu( );
+			windShowing = false;
 		
 		end
 	, false);	
@@ -127,6 +156,7 @@ function showHouseMenu( hElement, absX, absY )
 
 	local owner = tonumber( getElementData( hElement, "owner" ) );
 	local myId = tonumber( getElementData( player, "Character.id" ) );
+	local interiorId = tonumber( getElementData( hElement, "scriptInt" ) );
 	
 	if( owner ~= nil and owner ~= false ) then
 		
@@ -136,18 +166,29 @@ function showHouseMenu( hElement, absX, absY )
 		if( not safe ) then safe = "0"; end
 		
 		houseAddons[1] = "Seif: " .. safe;	
+		
+		local found, intElem = exports.phoenix_Infospots:getIntByID( interiorId );		
+		local numImages = 0;
+		
+		if( found ) then
+		
+			houseAddons[2] = "Tube: " .. getElementData( intElem, "rooms" );
+			houseAddons[3] = "WC: " .. getElementData( intElem, "bathrooms" );
+			numImages = tonumber( getElementData( intElem, "images" ) );
+		
+		end
 	
 		local price = tonumber( getElementData( hElement, "price" ) );
 	
 		if( owner == 0 ) then
 		
-			local btn = createHouseTabs( price, houseAddons, "Osta" );	
+			local btn = createHouseTabs( price, houseAddons, "Osta", interiorId, numImages );	
 
 			addEventHandler("onClientGUIClick", btn, 
 				function ( )
 				
 					destroyElement( houseWind );
-					createHouseMenu( );
+					windShowing = false;
 					
 					if( getPlayerMoney( player ) < price ) then
 					
@@ -170,7 +211,7 @@ function showHouseMenu( hElement, absX, absY )
 				function ( )
 				
 					destroyElement( houseWind );
-					createHouseMenu( );
+					windShowing = false;
 					
 					triggerServerEvent( "onPropertyUnRent", getLocalPlayer( ), hElement );
 				
@@ -184,13 +225,13 @@ function showHouseMenu( hElement, absX, absY )
 		
 			if( rentable == 1 ) then
 		
-				local btn = createHouseTabs( rentPrice, houseAddons, "Rendi" );
+				local btn = createHouseTabs( rentPrice, houseAddons, "Rendi", interiorId, numImages );
 				
 				addEventHandler("onClientGUIClick", btn, 
 					function ( )
 					
 						destroyElement( houseWind );
-						createHouseMenu( );
+						windShowing = false;
 						
 						if( getPlayerMoney( player ) < rentPrice ) then
 						
@@ -219,8 +260,7 @@ function showHouseMenu( hElement, absX, absY )
 				function ( )
 				
 					destroyElement( houseWind );
-					createHouseMenu( );
-					
+					windShowing = false;					
 					triggerServerEvent( "onPropertySell", getLocalPlayer( ), hElement );
 				
 				end
@@ -283,7 +323,7 @@ function showHouseMenu( hElement, absX, absY )
 					end
 					
 					destroyElement( houseWind );
-					createHouseMenu( );
+					windShowing = false;
 					
 				end
 			
@@ -296,7 +336,7 @@ function showHouseMenu( hElement, absX, absY )
 					if( rentable == 0 ) then lockStr = "1"; end
 					setElementData( hElement, "rentable", lockStr );
 					destroyElement( houseWind );
-					createHouseMenu( );
+					windShowing = false;
 				
 				end
 			, false);
@@ -317,7 +357,7 @@ function showHouseMenu( hElement, absX, absY )
 						triggerServerEvent( "onPropertyUnRent", getLocalPlayer( ), hElement, sel );
 						
 						destroyElement( houseWind );
-						createHouseMenu( );
+						windShowing = false;
 					
 					end
 				
@@ -328,7 +368,7 @@ function showHouseMenu( hElement, absX, absY )
 				function ( )
 				
 					destroyElement( houseWind );
-					createHouseMenu( );
+					windShowing = false;
 					
 					triggerServerEvent( "onPropertyKickRenters", getLocalPlayer( ), hElement );
 				
@@ -361,7 +401,7 @@ function showHouseMenu( hElement, absX, absY )
 				
 						setElementData( hElement, "isUpgrading", "1" );							
 						destroyElement( houseWind );
-						createHouseMenu( );
+						windShowing = false;
 					
 					end
 				
@@ -447,46 +487,51 @@ function houseMenu( screenX, screenY )
 	
 	local myX, myY, myZ = getElementPosition( getLocalPlayer( ) );
 	local markers = getElementsByType( "marker" );
-	
-	
+		
 	for k,v in ipairs( markers ) do
 	
 		local markerX, markerY, markerZ  = getElementPosition( v );
-		local freeView = processLineOfSight ( myX, myY, myZ, markerX, markerY, markerZ );
+		local dist1 = getDistanceBetweenPoints3D( myX, myY, myZ, markerX, markerY, markerZ );
 		
-		if( freeView == false ) then
+		if( dist1 < 30 ) then
+		
+			local freeView = processLineOfSight ( myX, myY, myZ, markerX, markerY, markerZ );
 			
-			local msX, msY = getScreenFromWorldPosition( markerX, markerY, markerZ );
-			
-			if( msX ~= false and msY ~= false ) then
-					
-				local dist = getDistanceBetweenPoints2D( screenX, screenY, msX, msY );
+			if( freeView == false ) then
 				
-				if( dist < 100 ) then
-			
-					local id = getElementData( v, "infoId" );
+				local msX, msY = getScreenFromWorldPosition( markerX, markerY, markerZ );
+				
+				if( msX ~= false and msY ~= false ) then
+						
+					local dist = getDistanceBetweenPoints2D( screenX, screenY, msX, msY );
+					outputChatBox( dist );
+					if( dist < 60 ) then
+				
+						local id = getElementData( v, "infoId" );
 
-					if( id ~= false ) then				
-						
-						if( string.find( id, "House." ) ~= nil ) then
+						if( id ~= false ) then				
 							
-							local houseId = tonumber( findpattern( id, "%d+", 7 ) );
-							
-							if( houseId ~= nil and houseId ~= false ) then
-						
-								local parent = getHouseByIndex( houseId );
+							if( string.find( id, "House." ) ~= nil ) then
 								
-								if( parent ~= false ) then
+								local houseId = tonumber( findpattern( id, "%d+", 7 ) );
+								
+								if( houseId ~= nil and houseId ~= false ) then
+							
+									local parent = getHouseByIndex( houseId );
 									
-									return showHouseMenu( parent, screenX, screenY );
-								
+									if( parent ~= false ) then
+									
+										createHouseMenu( getElementData( parent, "Address" ) );
+										return showHouseMenu( parent, screenX, screenY );
+									
+									end
+									
 								end
 								
 							end
-							
-						end
-					
-					end		
+						
+						end		
+					end
 				end
 			end
 		end
@@ -498,7 +543,7 @@ addEventHandler( "onClientClick", getRootElement(),
 
 	function ( button, state, absoluteX, absoluteY, worldX, worldY, worldZ, clickedElement )
 	
-		if( button == "right" and windShowing == false ) then
+		if( button == "left" and windShowing == false ) then
 		
 			if( state == "down" ) then
 			

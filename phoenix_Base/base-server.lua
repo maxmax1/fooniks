@@ -38,7 +38,7 @@ addEventHandler( "onResourceStart", getResourceRootElement( getThisResource( ) )
 
 function checkMySQLConnection ( )
 
-	if( mysql_ping( connection ) == false ) then
+	if( not connection or mysql_ping( connection ) == false ) then
 	
 		outputDebugString( "Lost connection to the MySQL server, reconnecting ..." );
 		mysql_close( connection );
@@ -331,3 +331,14 @@ function PayDayTax( player, desc, cost )
 	table.insert( tax[player], tbl );
 
 end
+
+addEvent( "onScriptInfoRequestS", true );
+addEventHandler( "onScriptInfoRequestS", getRootElement( ), 
+
+	function ()
+	
+		triggerClientEvent( client, "onScriptInfoRequest", client, get( "#VERSION" ), get( "#REVISION" ) );
+	
+	end
+	
+);

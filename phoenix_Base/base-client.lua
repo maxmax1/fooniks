@@ -14,6 +14,10 @@ preAuth = nil;
 
 sx, sy = guiGetScreenSize( );
 
+local sVersion = "0.0";
+local sRev = "0";
+local txtColor = tocolor( 255, 255, 255, 200 );
+
 function showLogin( )
 
 	if( not loginWindow) then
@@ -199,3 +203,34 @@ function checkForRemember( )
 	end
 
 end
+
+addEvent( "onScriptInfoRequest", true );
+addEventHandler( "onScriptInfoRequest", getRootElement( ), 
+
+	function ( ver, rev ) 
+	
+		sVersion = ver;
+		sRev = rev;
+	
+	end
+	
+);
+
+addEventHandler( "onClientResourceStart", getRootElement( ),  
+
+	function ()
+	
+		triggerServerEvent( "onScriptInfoRequestS", getLocalPlayer( ) );	
+		addEventHandler("onClientRender", getRootElement( ), 
+		
+			function ()
+			
+				dxDrawText( "Phoenix " .. sVersion .. " r" .. sRev, sx-150, sy-40, sx-3, sy-10, txtColor, 1, "default", "right", "bottom" );
+			
+			end
+			
+		);
+		
+	end
+	
+);

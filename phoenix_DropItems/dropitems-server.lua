@@ -106,7 +106,7 @@ function SaveDropItems( )
 			
 		else
 		
-			local query = "INSERT INTO `ph_dropitems` (`id`, `dropName`, `dropType`, `dropAmount`, `dropX`, `dropY`, `dropZ`, `dropAng`, `dropInt`, `dropDimension`) VALUES (NULL, '" .. name .. "', '" .. myType .. "', '" .. myData .. "', '" .. x .. "', '" .. y .. "', '" .. z .. "', '" .. ang .. "', '" .. int .. "', '" .. dim .. "')";
+			local query = "INSERT INTO `ph_dropitems` (`id`, `dropName`, `dropType`, `dropAmount`, `dropX`, `dropY`, `dropZ`, `dropAng`, `dropInt`, `dropDimension`) VALUES (NULL, '" .. name .. "', '" .. myType .. "', '" .. myData .. "', '" .. dropX .. "', '" .. dropY .. "', '" .. dropY .. "', '" .. ang .. "', '" .. int .. "', '" .. dim .. "')";
 			local result = mysql_query( connection, query );
 			if( result ~= false and result ~= nil ) then
 			

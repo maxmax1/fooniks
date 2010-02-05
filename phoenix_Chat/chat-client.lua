@@ -2,7 +2,6 @@ local showing = false;
 local alpha = 0;
 local fadeIn = 0;
 local text = "...";
-local ticks = false;
 
 -- Some values needed everywhere...
 local rootElement = getRootElement( );
@@ -39,6 +38,12 @@ addEventHandler( "onOOCInfo", rootElement,
 	
 );
 
+function StartHide( )
+
+	fadeIn = -3;
+
+end
+
 addEventHandler( "onClientResourceStart", rootElement,  
 
 	function ()
@@ -57,7 +62,7 @@ addEventHandler( "onClientResourceStart", rootElement,
 						if( alpha + fadeIn >= 255 ) then
 						
 							fadeIn = 0;
-							ticks = 0;
+							setTimer( StartHide, 3000, 1 );
 						
 						elseif( alpha + fadeIn <= 0 ) then
 						
@@ -69,19 +74,7 @@ addEventHandler( "onClientResourceStart", rootElement,
 						alpha = alpha + fadeIn;
 					
 					end
-					
-					if( ticks ~= false ) then
-							
-						ticks = ticks + 1;
-						
-						if( ticks > 150 ) then
-						
-							fadeIn = -3;
-							ticks = false;
-						
-						end
-
-					end
+				
 				end
 			
 			end

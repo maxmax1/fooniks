@@ -234,7 +234,7 @@ function UpdateVehicle( v )
 	query = exports.phoenix_Base:UpdateFinish( query, "vehicleId", sqlId);
 	
 	local result = mysql_query( connection, query );
-	if( result ~= false ) then mysql_free_result( result ); end
+	if( result ) then mysql_free_result( result ); end
 	
 	return true;
 

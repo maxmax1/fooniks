@@ -54,3 +54,48 @@ addEventHandler( "onClientResourceStart", rootElement,
 	end
 
 );]]--
+
+function SetMyPos( x, y, z )
+
+	local player = getLocalPlayer( );
+	
+	setElementPosition( player, x, y, z );	
+	local newZ = getGroundPosition( x, y, z ) + math.abs( getElementDistanceFromCentreOfMassToBaseOfModel( player ) );
+	setElementPosition( player, x, y, newZ );	
+
+end
+
+addEvent( "onInteriorPosRequest", true );
+addEventHandler( "onInteriorPosRequest", getRootElement( ), SetMyPos );
+
+function getIntByID( id )
+
+	if( type( id ) == "number" ) then
+	
+		id = tostring( id);
+	
+	end
+	
+	if( type( id ) ~= "string" ) then
+	
+		return false, -1;
+	
+	end
+
+	local ints = getElementsByType( "sInterior" );
+	
+	for k, v in ipairs( ints ) do
+	
+    	local myId = getElementData( v, "infoId" );
+    	
+    	if( id == tostring( myId ) ) then
+    	
+    		return true, v;
+    	
+    	end
+    	
+    end
+    
+    return false, -2;
+    
+end
