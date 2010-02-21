@@ -90,9 +90,15 @@ function checkMySQLConnection ( )
   
 end
 	
-function charactersRequest( )
+function charactersRequest( thePlayer )
 
-	if( not client ) then outputDebugString( "charRequestFeil" ); return false; end
+	if( not client and not thePlayer ) then
+	
+		outputDebugString( "charRequestFeil" );
+		return false; 
+	
+	end
+	if( not client ) then client = thePlayer; end
 	
 	local sqlId = getElementData( client, "User.userid" );
 	if( not sqlId ) then
@@ -332,8 +338,28 @@ function savePlayer( thePlayer, timed )
 	
 	end
 	
-	triggerEvent( "onSkillsSave", thePlayer, thePlayer ); -- Save Skills to. :)	
-	triggerEvent( "onPocketsSave", thePlayer, thePlayer ); -- Save Skills to. :)	
+	triggerEvent( "onSkillsSave", thePlayer, thePlayer ); -- Save Skills too. :)	
+	triggerEvent( "onPocketsSave", thePlayer, thePlayer ); -- Save Pockets too. :)	
 	return true;
 
 end
+
+addEvent( "onNewCharacterDone", true );
+addEventHandler( "onNewCharacterDone", getRootElement( ),
+
+	function ( newData )
+	
+		newData["story"] = mysql_escape_string( connection, newData["story"] );
+	
+		local userId = getElementData( client, "User.userid" );
+		local query = "INSERT INTO ph_characters(id, userid, name, sex, age, model, ethnicity, backStory) " ..
+					  "VALUES(NULL, '" .. userId .. "', '" .. newData["name"] .. "', '" .. newData["sex"] .. "', '" .. newData["age"] .. "', '" .. newData["skin"] .. "', '" .. newData["race"] .. "', '" .. newData["story"] .. "')";
+		mysql_query( connection, query );
+		outputConsole( query );
+		
+		if( result ~= false and result ~= nil ) then mysql_free_result( result ); end
+		charactersRequest( client );
+	
+	end
+
+);
