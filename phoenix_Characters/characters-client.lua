@@ -1,3 +1,5 @@
+max_characters = 3;
+
 charWindow = nil;
 tabPanel = nil;
 charTab = nil;
@@ -20,12 +22,15 @@ function ShowCharacters( charTable, selected, isEnd )
 		if( isEnd == true ) then 
 		
 			showCursor( false );
-			guiSetInputEnabled( false );
+			guiSetInputEnabled( false );			
+			showPlayerHudComponent( "radar", true );
 			return 1;
 			
 		end
 	
 	end
+	
+	showPlayerHudComponent( "radar", false );
 	
 	charWindow = guiCreateWindow( sx*0.1, sy*0.3, 256, 410, "Karakterid", false );
 	guiWindowSetMovable( charWindow, false );
@@ -38,15 +43,36 @@ function ShowCharacters( charTable, selected, isEnd )
 	charScrollPane = guiCreateScrollPane( 0.05, 0.05, 0.9, 0.8, true, charTab );
 	guiScrollPaneSetScrollBars( charScrollPane, false, true );
 	
-	charSpawnButton = guiCreateButton( 0.1, 0.85, 0.8, 0.1, "Mine mängima", true, charTab );
+	charSpawnButton = guiCreateButton( 0.1, 0.85, 0.35, 0.1, "Mine mängima", true, charTab );
 	guiSetEnabled( charSpawnButton, false );
+	
+	charCreateButton = guiCreateButton( 0.55, 0.85, 0.35, 0.1, "Loo Uus", true, charTab );
+
+	if( #charTable < max_characters ) then
+	
+		guiSetEnabled( charCreateButton, true );
+		
+	else
+	
+		guiSetEnabled( charCreateButton, false );
+	
+	end
+	
+	addEventHandler("onClientGUIClick", charCreateButton, 
+		function ( )
+		
+			ShowCharacters( nil, nil, true );
+			triggerEvent( "onStartCharacterCreation", getLocalPlayer() );
+			
+		end
+	, false);	
 	
 	addEventHandler("onClientGUIClick", charSpawnButton, 
 		function ( )
 		
 			if( selectedChar == nil ) then
 			
-				outputChatBox( "Sul pole karakterit." );
+				exports.phoenix_Chat:OocInfo("Sul pole veel karakterit.");
 			
 			else
 			
@@ -67,8 +93,8 @@ function ShowCharacters( charTable, selected, isEnd )
 			
 			charList[i] = { };
 			
-			local file = "files/images/gui-Black.png";
-			if( i == selected ) then file = "files/images/gui-White.png"; end
+			local file = "files/images/gui-black.png";
+			if( i == selected ) then file = "files/images/gui-white.png"; end
 			
 			charList[i][1] = guiCreateStaticImage( 0.1, y, 0.8, 0.2, file, true, charScrollPane );
 			guiSetAlpha ( charList[i][1], 0.3 );
@@ -147,7 +173,7 @@ function ShowCharacters( charTable, selected, isEnd )
 		
 	else
 	
-		outputChatBox( "Sul pole karakterit. " );
+		exports.phoenix_Chat:OocInfo("Sul pole veel karakterit.");
 	
 	end
 	

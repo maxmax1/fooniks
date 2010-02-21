@@ -175,7 +175,7 @@ addEventHandler( "pickupDropItem", getRootElement(),
 
 	function ( element )
 	
-		if( client ) then
+		if( element and client ) then
 		
 			local myType = getElementData( element, "dropType" );
 			local myData = getElementData( element, "dropAmount" );
