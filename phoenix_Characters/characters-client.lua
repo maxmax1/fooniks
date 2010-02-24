@@ -246,3 +246,75 @@ function getCharacterName( sqlId )
 	return allCharacters[tonumber(sqlId)];
 
 end
+
+-- CharInfo
+local charInf = nil;
+local charFields = { };
+
+function AddCharField(all)
+
+	charFields = {};
+
+	for k, v in ipairs( all ) do
+	
+		local tbl = { };
+		tbl["prettyName"] = v["prettyName"];
+		tbl["valueName"] = v["valueName"];
+	
+		table.insert( charFields, tbl );
+	
+	end
+
+end
+
+addEvent( "onNewCharField", true );
+addEventHandler( "onNewCharField", getRootElement(), AddCharField );
+
+function ShowCharInfo( hide )
+
+	if( charInf ) then
+	
+		destroyElement( charInf );
+		
+		if( hide ) then return false; end
+	
+	end
+	
+	local player = getLocalPlayer( );
+	
+	local charName = getElementData( player, "Character.name" );	
+	
+	charInf = guiCreateWindow( sx-306, 50, 256, 410, charName, false );
+	local scroll = guiCreateScrollPane( 0.05, 0.1, 0.9, 0.7, true, charInf );
+	
+	local y = 50;
+	
+	for k,v in ipairs( charFields ) do
+	
+		local label = guiCreateLabel( 5, y, 95, 15, v["prettyName"] .. ": ", false, scroll );
+		guiSetFont(label, "default-bold");
+		
+		local rVal = getElementData( player, v["valueName"] );
+		guiCreateLabel( 100, y, 100, 15, rVal, false, scroll );
+		
+		guiCreateStaticImage( 5, y+15, 200, 2, "files/images/gui-white.png", false, scroll );
+		y = y + 20;
+	
+	end
+	
+	guiScrollPaneSetScrollBars( scroll, false, true );
+	
+	local nextBtn = guiCreateButton( 0.1, 0.85, 0.8, 0.1, "Sulge", true, charInf );
+		
+	addEventHandler("onClientGUIClick", nextBtn, 
+		function ( )
+		
+			ShowCharInfo( true );
+		
+		end
+	, false);
+
+end
+
+addEvent( "onShowPlayerInfo", true );
+addEventHandler( "onShowPlayerInfo", getRootElement(), ShowCharInfo );

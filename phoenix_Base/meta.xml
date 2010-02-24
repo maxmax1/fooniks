@@ -6,7 +6,7 @@
 		<setting name="#MYSQL_USER" value="estrpin" />
 		<setting name="#MYSQL_DB" value="estrpin_portal" />
 		<setting name="#VERSION" value="0.3" />
-		<setting name="#REVISION" value="227" />
+		<setting name="#REVISION" value="228" />
 	</settings>
 
 	<script src="base-server.lua" type="server" />

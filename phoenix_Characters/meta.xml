@@ -6,6 +6,7 @@
 	
 	<export function="getCharacterName" type="server" />
 	<export function="getCharacterName" type="client" />
+	<export function="AddCharField" type="server" />
 
 	<!-- Files -->
 	<file src="files/images/gui-black.png" />

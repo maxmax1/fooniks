@@ -27,10 +27,10 @@ addEventHandler( "onResourceStart", getResourceRootElement( getThisResource( ) )
 
 function checkMySQLConnection ( )
 
-	if( mysql_ping( connection ) == false ) then
+	if( not connection or mysql_ping( connection ) == false ) then
 	
 		outputDebugString( "Lost connection to the MySQL server, reconnecting ..." );
-		mysql_close( connection );
+		if( connection ) then mysql_close( connection ); end
 		
 		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
 		
@@ -180,7 +180,7 @@ addEventHandler( "pickupDropItem", getRootElement(),
 			local myType = getElementData( element, "dropType" );
 			local myData = getElementData( element, "dropAmount" );
 			
-			if( myType and myData and exports.Phoenix_Pockets:giveItem( client, myType, myData ) == 0 ) then
+			if( myType and myData and exports.Phoenix_Pockets:giveItem( client, myType, myData ) == true ) then
 			
 				removeDropFromSql( element );
 				destroyElement( element );
