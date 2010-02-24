@@ -76,6 +76,8 @@ function RegisterSkills( )
             		skills[id]["otherIds"] = tonumber( xmlNodeGetAttribute( node, "otherIds" ) );
             		
             		otherIds[tonumber( skills[id]["otherIds"] )] = id;
+					
+					exports.phoenix_Characters:AddCharField( id, "Skill." .. id );
             		
             		outputDebugString( "Registred Skill: " .. id );
             	
@@ -156,6 +158,8 @@ function LoadSkillsForPlayer( thePlayer )
     				pSkillLevel[field["name"]][thePlayer] = getLevel( field["name"], tonumber( v ) );
     				pXp[field["name"]][thePlayer] = tonumber ( v );
     				OnLevelUp( thePlayer, field["name"], false );
+					
+					setElementData( thePlayer, "Skill." .. field["name"], tostring( pSkillLevel[field["name"]][thePlayer] ) );		
     			
     			end
     				
@@ -224,7 +228,6 @@ function OnLevelUp( thePlayer, skillId, showMsg )
 
 	if( not thePlayer or not isElement ( thePlayer )  ) then return false; end
 	if( showMsg == nil ) then showMsg = false end
-		
 	
 	if( showMsg == true ) then
 	
@@ -254,6 +257,7 @@ function xpAdd( thePlayer, skillId, howMuch )
 	if( pXp[skillId][thePlayer] >= neededXP ) then
 	
 		pSkillLevel[skillId][thePlayer] = pSkillLevel[skillId][thePlayer] + 1;
+		setElementData( thePlayer, "Skill." .. skillId, tostring( pSkillLevel[skillId][thePlayer] ) );
 		OnLevelUp( thePlayer, skillId, true );
 		
 	end

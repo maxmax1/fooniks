@@ -2,6 +2,8 @@ connection = nil;
 charFields = nil;
 characters = { };
 
+local allFields = { };
+
 function displayLoadedRes( res )	
 	
 	if( not connection ) then
@@ -217,6 +219,9 @@ function firstSpawnHandler( selectedChar )
 	  		
 	  		triggerEvent( "onSkillsRequired", client, client );
 	  		triggerEvent( "onPocketsRequired", client, client );
+			
+			triggerClientEvent( client, "onNewCharField", client, allFields );
+
 	  		
 		end
 		
@@ -363,3 +368,35 @@ addEventHandler( "onNewCharacterDone", getRootElement( ),
 	end
 
 );
+
+addEvent( "onPlayerInfo", true );
+addEventHandler( "onPlayerInfo", getRootElement( ),
+
+	function ( )
+	
+		if( client ) then
+		
+			triggerClientEvent( client, "onShowPlayerInfo", client );
+		
+		end
+	
+	end
+
+);
+
+function AddCharField( p, t )
+
+	local tbl = { };
+	tbl["prettyName"] = p;
+	tbl["valueName"] = t;
+	table.insert( allFields, tbl );
+	
+	-- Sync
+	triggerClientEvent( getRootElement(), "onNewCharField", getRootElement(), allFields );
+
+end
+
+AddCharField("Nimi", "Character.name");
+AddCharField("Sugu", "Character.sex");
+AddCharField("Vanus", "Character.age");
+AddCharField("Rass", "Character.ethnicity");

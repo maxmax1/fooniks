@@ -53,6 +53,7 @@ table.insert( Menus, tbl );
 local tbl = { };
 tbl[1] = { };
 tbl[1]["name"] = "Info";
+tbl[1]["event"] = "onPlayerInfo";
 tbl[2] = { };
 tbl[2]["name"] = "Vaheta";
 tbl[2]["event"] = "onCharactersRequest";
