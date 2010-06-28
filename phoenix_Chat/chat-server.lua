@@ -8,6 +8,20 @@ addEventHandler ( "onPlayerJoin", getRootElement(),
 
 );
 
+addEventHandler ( "onEmoteMessage", getRootElement( ), 
+
+	function ( str, var )
+	
+		if( client ) then
+		
+			EmoteMessage( client, str, var );
+		
+		end
+	
+	end
+
+);
+
 addEventHandler ( "onPlayerChat", getRootElement(), 
 
 	function ( message, msgType )
@@ -140,9 +154,11 @@ addCommandHandler ( "me",
 	
 , false, true);
 
-function EmoteMessage( thePlayer, msg )
+function EmoteMessage( thePlayer, msg, isOOC )
 
-	if ( not setChatMessage( thePlayer, true, " ", "* ", " ", 35, msg, 218, 146, 229 ) ) then
+	if( not isOOC ) then isOOC = false; end
+
+	if ( not setChatMessage( thePlayer, not isOOC, " ", "* ", " ", 35, msg, 218, 146, 229 ) ) then
 	
 		outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", thePlayer );
 	

@@ -5,6 +5,7 @@
 	
 	<export function="setChatMessage" type="server" />
 	<export function="EmoteMessage" type="server" />
+	<export function="EmoteMessage" type="client" />
 	<export function="OocInfo" type="server" />
 	<export function="OocInfo" type="client" />
 	

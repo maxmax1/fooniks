@@ -21,11 +21,13 @@
     <command handler="setteam" call="setteam" args="P,T" />
     <command handler="setinterior" call="setinterior" args="P,i" />
     <command handler="setdimension" call="setdimension" args="P,i" />
+    <command handler="setrinterior" call="setrinterior" args="P,i" />
     <command handler="jetpack" call="jetpack" args="P" />
     <command handler="givevehicle" call="givevehicle" args="P,i" />
     <command handler="giveweapon" call="giveweapon" args="P,i,i" />
     <command handler="slap" call="slap" args="P,i" />
     <command handler="warpto" call="warp" args="P" />
+    <command handler="teleto" call="tele" args="P,s" />
   </player>
   <team>
     <command handler="createteam" call="createteam" args="s,i,i,i" />

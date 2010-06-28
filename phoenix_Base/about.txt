@@ -1,0 +1,26 @@
+Fööniks by eRP Gaming is licensed under a Creative Commons Attribution-Share Alike 3.0 Unported License.
+
+Current Developers:
+
+	Jyrno42
+	Nicholas
+	
+	iChris(inactive)
+
+Additional Contributurs:
+
+	Franco
+	Villem
+	Nicholas
+	
+Media & Modules from third party:
+
+	See used.txt.
+	
+Coding guidelines:
+
+	Intro
+	
+	
+	
+	

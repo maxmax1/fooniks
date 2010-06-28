@@ -1,0 +1,18 @@
+<meta>
+
+	<!--<script src="kroonid.lua" type="client" />
+	<export function="showFakeMoney" type="client" />-->
+	
+	
+	<script src="saar.lua" type="client" />	
+	<script src="saar_s.lua" type="server" />	
+	
+	<file src="lapp2.txd" type="client" />
+	<file src="lapp2.dff" type="client" />
+	<file src="lapp2.col" type="client" />
+	
+	<file src="maja.txd" type="client" />
+	<file src="maja.dff" type="client" />
+	<file src="maja.col" type="client" />
+
+</meta>

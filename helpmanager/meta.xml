@@ -7,5 +7,6 @@
 	<export function="addHelpTab" type="client"/>
 	<export function="removeHelpTab" type="client"/>
 	<export function="showHelp" type="client"/>
+	<export function="showHelpPopup" type="client"/>
 	<export function="hideHelp" type="client"/>
 </meta>

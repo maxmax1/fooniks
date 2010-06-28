@@ -38,6 +38,12 @@ addEventHandler( "onOOCInfo", rootElement,
 	
 );
 
+function EmoteMessage( str, var )
+
+	triggerServerEvent( "onEmoteMessage", player, str, var );
+
+end
+
 function StartHide( )
 
 	fadeIn = -3;

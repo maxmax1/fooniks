@@ -279,39 +279,6 @@ function AddSimCard( number, companyId, contactsTable, smsTable, sqlId )
 
 end
 
-addEvent( "onUseSimcard", true );
-addEventHandler( "onUseSimcard", getRootElement( ), 
-
-	function ( pocketId, pType, pData )
-	
-		local hasPhone = exports.phoenix_Pockets:getSlotByItem( source, 14 );
-		
-		if( not hasPhone ) then 
-		
-			outputChatBox( "Sul pole telefoni kuhu seda SIM-Kaarti panna", source );
-			
-		else
-		
-			local inSim = tonumber( getElementData( source, "Character.simCard" ) );
-			
-			if( not inSim or inSim == 0 ) then
-			
-				setElementData( source, "Character.simCard", pData );
-				exports.phoenix_Pockets:clearPocket( source, pocketId );
-				outputChatBox( "Panid oma telefoni simkaardi." .. pocketId, source );			
-			
-			else
-			
-				outputChatBox( "Su telefonis on juba SIM-Kaart, võta eelmine enne välja...", source );
-			
-			end
-		
-		end
-			
-	end
-	
-);
-
 addEvent( "onSimCardRemove", true );
 addEventHandler( "onSimCardRemove", getRootElement( ), 
 

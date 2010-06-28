@@ -79,6 +79,11 @@
       <player>You have been moved to the $data dimension.</player>
       <log>ADMIN: $admin has moved $player to the $data dimension</log>
     </group>
+    <group action="setrinterior" r="0" g="255" b="0">
+      <admin>$player has been moved to the $data interior.</admin>
+      <player>You have been moved to the $data interior.</player>
+      <log>ADMIN: $admin has moved $player to the $data interior</log>
+    </group>
     <group action="setstat" r="255" g="122" b="0">
       <admin>$player's $data has been set to $data2</admin>
       <player>$admin has set your $data to $data2</player>
@@ -122,6 +127,11 @@
       <admin>$player has been warped to $data</admin>
       <player>You have been warped to $data by $admin</player>
       <log>ADMIN: $admin has moved $player to $data</log>
+    </group>
+    <group action="teleto" r="0" g="200" b="50">
+      <admin>$player has been teleported to $data</admin>
+      <player>You have been teleported to $data by $admin</player>
+      <log>ADMIN: $admin has teleported $player to $data</log>
     </group>
   </player>
   <team>

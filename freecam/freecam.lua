@@ -280,11 +280,11 @@ function setFreecamOption(theOption, value)
 	end
 end
 
-addEvent("doSetFreecamEnabled")
+addEvent("doSetFreecamEnabled", true)
 addEventHandler("doSetFreecamEnabled", rootElement, setFreecamEnabled)
 
-addEvent("doSetFreecamDisabled")
+addEvent("doSetFreecamDisabled", true)
 addEventHandler("doSetFreecamDisabled", rootElement, setFreecamDisabled)
 
-addEvent("doSetFreecamOption")
+addEvent("doSetFreecamOption", true)
 addEventHandler("doSetFreecamOption", rootElement, setFreecamOption)

@@ -1,0 +1,25 @@
+<meta>
+	<info author="Alexander de Jong" version="1.0.0" type="script" name="RPG Vehicle lights." description="Real life vehicle lights, flashes, police flashers etc.." />
+	
+	<!-- Today it is a nice day exclude the server scripts, it is not needed everything is client side based. -->
+	<script src="vehicles.lua" type="client" />
+	<script src="indicators.lua" type="client" />
+	<script src="lights.lua" type="client" />
+	<script src="flashers.lua" type="client" />
+	<script src="police_flashers.lua" type="client" />
+	<!-- <script src="extra/engine.lua" type="client" /> -->
+	
+	<!-- exports -->
+	<export function="cmdToggleLights" type="client" />
+	<export function="cmdIndicator" type="client" />
+	<export function="cmdFlashers" type="client" />
+	<export function="cmdPoliceFlashers" type="client" />
+	<export function="cmdSetPoliceFlasherSpeed" type="client" />
+	<export function="GetIndicatorStatus" type="client" />
+	
+	<!-- includes -->
+	<include resource="helpmanager" />
+	
+	<!-- configs -->
+	<config src="help.xml" type="client" />
+</meta>

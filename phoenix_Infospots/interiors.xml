@@ -392,7 +392,7 @@
 		<images>2</images>
 	
 	</interior>
-	<interior id="50" name="Pig Pen" sampInt="2" posX="1204.8101" posY="-12.5868" posZ="1001.5219" rot="0.0">
+	<interior id="50" name="Pig Pen" sampInt="2" posX="1204.8101" posY="-12.5868" posZ="1001.1219" rot="0.0">
 	
 		<description>Stripiklubi Pig Pen</description>
 		<rooms>1</rooms>
@@ -408,7 +408,7 @@
 		<images>0</images>
 	
 	</interior>
-	<interior id="52" name="Grove Gym" sampInt="5" posX="376.94061279297" posY="-193.27430725098" posZ="1000.6328125" rot="0.0">
+	<interior id="52" name="Grove Gym" sampInt="5" posX="772.111" posY="-3.832" posZ="1000.728" rot="0.0">
 	
 		<description>-</description>
 		<rooms>0</rooms>
@@ -424,7 +424,7 @@
 		<images>3</images>
 	
 	</interior>
-	<interior id="54" name="Bank" sampInt="0" posX="2305.4048" posY="-16.0771" posZ="26.7496" rot="0.0">
+	<interior id="54" name="Bank" sampInt="0" posX="2305.602" posY="-15.972" posZ="26.749" rot="0.0">
 	
 		<description>Pangahoone</description>
 		<rooms>1</rooms>
@@ -438,6 +438,14 @@
 		<rooms>4</rooms>
 		<bathrooms>1</bathrooms>
 		<images>3</images>
+	
+	</interior>
+	<interior id="56" name="SEIF1" sampInt="3" posX="834.565" posY="7.316" posZ="1004.187" rot="0.0">
+	
+		<description>Seifiruum.</description>
+		<rooms>2</rooms>
+		<bathrooms>0</bathrooms>
+		<images>0</images>
 	
 	</interior>
 	

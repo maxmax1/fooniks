@@ -175,7 +175,7 @@ local function fadeIn(wnd)
 	addEventHandler("onClientRender", rootElement, raiseAlpha)
 end
 
-local function fadeOut(wnd)
+local function fadeOut(wnd, realText)
 	local function lowerAlpha()
 		local newAlpha = guiGetAlpha(wnd) - FADE_DELTA
 		if newAlpha >= 0 then
@@ -184,9 +184,11 @@ local function fadeOut(wnd)
 			removeEventHandler("onClientRender", rootElement, lowerAlpha)
 			destroyElement(wnd)
 			
-			table.remove(popupQueue, 1)
-			if #popupQueue > 0 then
-				showHelpPopup(popupQueue[1])
+			if( realText ) then
+				table.remove(popupQueue, 1)
+				if #popupQueue > 0 then
+					showHelpPopup(popupQueue[1])
+				end
 			end
 		end
 	end
@@ -211,26 +213,34 @@ function addHelpPopup(resource)
 	end
 end
 
-function showHelpPopup(resource)
+function showHelpPopup(resource, realText)
 	local screenX, screenY = guiGetScreenSize()
 	local wndPopup = guiCreateWindow(0, screenY - 20, screenX, 0, '', false) --350
+	local text = "";
 	
-	local restitle = getResourceName(resource)
-	local helpnode = getResourceConfig(":" .. getResourceName(resource) .. "/help.xml")
+	if( not realText ) then
 	
-	if helpnode then
-	
-		local nameattribute = xmlNodeGetAttribute(helpnode, "title");
+		local restitle = getResourceName(resource)
+		local helpnode = getResourceConfig(":" .. getResourceName(resource) .. "/help.xml")
 		
-		if nameattribute then
-			restitle = nameattribute;
+		if helpnode then
+		
+			local nameattribute = xmlNodeGetAttribute(helpnode, "title");
+			
+			if nameattribute then
+				restitle = nameattribute;
+			end
+			
 		end
 		
-	end
+		text =
+			"Help page available for ".. restitle .."! "..
+			"Press "..HELP_KEY.." or type /"..HELP_COMMAND.." to read it."
+	else
 	
-	local text =
-		"Help page available for ".. restitle .."! "..
-		"Press "..HELP_KEY.." or type /"..HELP_COMMAND.." to read it."
+		text = realText;
+	
+	end	
 		
 	guiSetText(wndPopup, text)
 	guiSetAlpha(wndPopup, 0)
@@ -238,5 +248,5 @@ function showHelpPopup(resource)
 	guiWindowSetSizable(wndPopup, false)
 	
 	fadeIn(wndPopup)
-	setTimer(fadeOut, POPUP_TIMEOUT, 1, wndPopup)
+	setTimer(fadeOut, POPUP_TIMEOUT, 1, wndPopup, realText)
 end

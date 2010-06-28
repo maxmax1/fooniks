@@ -7,11 +7,15 @@
 	<export function="getCharacterName" type="server" />
 	<export function="getCharacterName" type="client" />
 	<export function="AddCharField" type="server" />
+	<export function="PlayerDataToTable" type="server" />
 
 	<!-- Files -->
+	<file src="charfields.xml" type="server" />
+	
 	<file src="files/images/gui-black.png" />
 	<file src="files/images/gui-white.png" />
 	<file src="files/images/gui-red.png" />
+	<file src="files/images/gui-lblue.png" />
 	<file src="files/images/gui-green.png" />
 	
 	<!-- Skins -->

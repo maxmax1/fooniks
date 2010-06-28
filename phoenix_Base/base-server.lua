@@ -22,11 +22,25 @@ function displayLoadedRes( res )
 			
 			createObject(3059, 2522.0554199219, -1272.9189453125, 35.640998840332, 0.000000, 0.000000, 0.000000) 
 			
-			setTimer( checkMySQLConnection, 60000, 0 );
+			setTimer( checkMySQLConnection, 60000, 0 );   
 			setTimer( timeSync, 1000, 0 );
 			
 			setGameType( "Roleplay" );
 			setMapName( "Los Santos" );
+			setMapName( "Los Santos" );
+			
+			local motdTime = tonumber( get( "MotdTime" ) );
+			if( not motdTime ) then
+			
+				motdTime = 30000;
+			
+			end
+			
+			setTimer( ShowMotd, modtTime, 0 );
+			
+			AddMotdString( { "Seadeid saad muuta servertabi alt.", "Servertabi saad lahti vajutades lctrl+tab." } );
+			AddMotdString( { "Karakterit saad vahetada servertabi alt.", "Servertabi saad lahti vajutades lctrl+tab." } );
+			AddMotdString( { "Neid sonumeid saad keelata seadete alt.", "Servertabi saad lahti vajutades lctrl+tab." } );
 			
 		end	
 		
@@ -49,150 +63,18 @@ function checkMySQLConnection ( )
   
 end
 
-function AuthPlayer( userName, passWord, rememberMe, preAuth )
-
-	checkMySQLConnection( );
+function AuthPlayer( userName, passWord, rememberMe )
 
 	if( not client ) then return false; end
 	
 	local eName = mysql_escape_string( connection, userName );
 	local eWord = mysql_escape_string( connection, passWord );
 	
-	local query = "SELECT userid, usergroupid, salt FROM `user` WHERE username = '" .. eName .. "'";
-	local result = mysql_query( connection, query );
-	
-	local ret = 1;
-	local other = nil;
-	local usrId = 0;
-	local usrGroup = 0;
-	local salt = "nil";
-	
-	if( result ) then
-	
-		if( mysql_num_rows( result ) > 0) then
-		
-				local row = mysql_fetch_row(result);
-				if(row) then
-				
-					usrId = row[1];
-					usrGroup = tonumber( row[2] );
-					salt = row[3];
-					ret = 0;
-				
-				end				
-		
-		end
-		mysql_free_result( result );
-		
-	end
-		
-	local rPass;		
-		
-	if( ret == 0) then
-	
-		if( preAuth == true ) then
-		
-			rPass = eWord;
-		
-		else
-		
-			rPass = string.lower( md5( string.lower( md5( eWord ) ) .. salt ) );
-		
-		end
-		
-		if( rememberMe == true ) then
-			
-			other = rPass;
-				
-		end
-			
-		query = "SELECT userid FROM `user` WHERE userid = '" .. usrId .. "' AND '" .. rPass .. "' = password";
-		result = mysql_query( connection, query );
-		 
-		if( result ) then
-		 
-		 	if( mysql_num_rows( result ) < 1) then
-		
-				ret = 2;
-		
-			end
-		
-		else
-			
-			ret = 2;
-			
-		end
-	
-	end
-	
-	if(usrId ~= 0 and ret == 0) then
-	
-		setElementData( client, "User.userid", usrId, true );
-	
-	end
-	
-	local adminLevel = 0;
-
-	if( usrGroup == 8 ) then -- vbull banned group
-	
-		ret = 3; -- return an errorcode.
-		
-	elseif( usrGroup == 6 ) then -- vbull Admin
-	
-		adminLevel = 2;
-	
-	elseif( usrGroup == 12 or usrGroup == 7 ) then -- vbull dev / mode
-	
-		adminLevel = 1;
-	
-	end
-	
-	if( adminLevel > 0 and ret == 0 ) then -- vbull admin group
-	
-		local account = getAccount( userName );
-		local pass = string.sub( rPass, -16 ); -- Turvalisem, passil on vist maks pikkus, -16 peaks aitama:) :/
-		
-		if( account == false ) then
-	
-			account = addAccount( userName, pass );
-			
-			if( account ~= false ) then
-			
-				if( adminLevel == 2 ) then
-			
-					aclGroupAddObject( aclGetGroup( "Admin" ), "user." .. userName );
-				
-				else
-			
-					aclGroupAddObject( aclGetGroup( "Moderator" ), "user." .. userName );
-			
-				end
-				
-			end
-			
-		end
-		
-		if( account ~= false ) then
-		
-			logIn( client, account, pass );
-		
-		else	
-		
-			outputChatBox( "Adminiks/Modeks seadmisega oli mingi jama. (" ..  userName .. "->" .. pass .. ")", client );
-		
-		end
-		
-		setElementData( client, "User.AdminLevel", usrGroup, true );
-		
-	end
-	
-	if( ret == 0 ) then
-	
-		setElementData( client, "User.GroupId", usrGroup, true );
-	
-	end
-	
-	triggerClientEvent( client, "OnPlayerLogin", client, ret, other );
+	local theAuth = Authenticate:new( );
+	theAuth.Client = client;
+	theAuth.User = eName;
+	theAuth.Pass = eWord;	
+	theAuth:DoAuth( );
 
 end
 
@@ -200,11 +82,11 @@ addEvent( "OnAuthPlayer", true )
 addEventHandler( "OnAuthPlayer", getRootElement( ), AuthPlayer )
 
 
-function MysqlUpdatebuild( database )
+function MysqlUpdatebuild( theTable )
 
-	if( not database ) then return false end
+	if( not theTable ) then return false end
 
-	return "UPDATE " .. database .. " SET ";
+	return "UPDATE " .. theTable .. " SET ";
 
 end
 
@@ -220,6 +102,86 @@ function UpdateFinish( query, idfield, idval )
 	
 	if( not query or not idfield or not idval ) then return false end
 	return string.sub(query, 1, -3) .. " WHERE " .. idfield .. " = '" .. idval .. "'";
+
+end
+
+function DoSimpleQuery( query, wantId )
+
+	if( not query ) then return false end
+	checkMySQLConnection ( );
+
+	local theResult = mysql_query( connection, query );
+
+	if( theResult == nil  ) then
+	
+		outputDebugString( mysql_error( connection ), 1 );
+		outputDebugString( query, 3 );
+		return false;
+	
+	end
+
+	if( wantId == true ) then
+	
+		local id = mysql_insert_id( connection );
+		return id;
+	
+	end
+
+	--
+	return true;
+
+end
+
+function DoUpdateFinish( query, idfield, idval )
+	
+	local rQuery = UpdateFinish( query, idfield, idval );
+	if( rQuery ) then
+	
+		local theResult = DoSimpleQuery( rQuery );
+		if( theResult ) then
+		
+			return true;
+		
+		else
+		
+			outputDebugString( mysql_error( connection ), 1 );
+			outputDebugString( rQuery, 3 );
+		
+		end
+	end	
+	return false;
+
+end
+
+function SelectQuery( theQuery )
+
+	local result = mysql_query( connection, theQuery );
+	local allMyRows = { };
+		 
+	if( result ) then
+		 
+		for result ,row in mysql_rows( result ) do
+			
+			local allMyFields = { };
+  			mysql_field_seek( result, 1 );
+			
+  			for k,v in ipairs( row ) do
+  			
+    			local field = mysql_fetch_field( result );    			
+    			if (v == mysql_null()) then v = ''; end				
+      			allMyFields[field["name"]] = v;
+    		
+	  		end
+			table.insert( allMyRows, allMyFields );
+		
+		end
+	else
+	
+		outputDebugString( mysql_error( connection ), 1 );
+		outputDebugString( theQuery, 3 );
+	
+	end
+	return allMyRows;
 
 end
 
@@ -342,3 +304,19 @@ addEventHandler( "onScriptInfoRequestS", getRootElement( ),
 	end
 	
 );
+
+addEvent( "onSettingsRequest", true );
+addEventHandler( "onSettingsRequest", getRootElement( ), 
+
+	function ()
+	
+		if( client ) then
+		
+			triggerClientEvent( client, "onSettingsDisplay", client );
+		
+		end
+	
+	end
+	
+);
+
