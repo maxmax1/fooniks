@@ -34,8 +34,10 @@
     <right name="command.setstat" access="true" />
     <right name="command.jetpack" access="true" />
     <right name="command.warp" access="true" />
+    <right name="command.tele" access="true" />
     <right name="command.setdimension" access="true" />
     <right name="command.setinterior" access="true" />
+    <right name="command.setrinterior" access="true" />
     <!--Teams related-->
     <right name="command.createteam" access="true" />
     <right name="command.destroyteam" access="true" />

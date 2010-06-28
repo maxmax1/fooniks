@@ -1,64 +1,7 @@
---[[
-local markers = { };
-
-function checkFor3Dtext( )
-
-	outputChatBox( "check" );
-	local shape = createColSphere( x, y, z, 30.0 );
-	local marks = getElementsWithinColShape( shape, "marker" );
-	markers = { };
-	
-	for k, v in ipairs( marks ) do
-	
-		local txt = getElementData( v, "infoText" );
-		
-		if( txt ~= false ) then
-		
-			local tbl = { };
-			tbl["text"] = txt;
-			tbl["x"], tbl["y"], tbl["z"] = getElementPosition( v );		
-			table.insert( markers, tbl );
-		
-		end
-	
-	end	
-
-end
-
-addEventHandler( "onClientResourceStart", rootElement,  
-
-	function ()
-	
-		setTimer( checkFor3Dtext, 1000, 0 );
-	
-		addEventHandler("onClientRender", rootElement, 
-		
-			function ()	
-			
-				for k,v in ipairs( markers ) do
-				
-					local sx, sy = getScreenFromWorldPosition( v["x"], v["x"], v["z"] );
-					
-					if( sx ~= false and sy ~= false ) then
-																
-						dxDrawText ( v["text"], sx, sy, sx, sy, tocolor ( 0, 0, 0 ) );
-					
-					end
-				
-				end
-			
-			end
-		
-		);
-	
-	end
-
-);]]--
+local player = getLocalPlayer( );
 
 function SetMyPos( x, y, z )
 
-	local player = getLocalPlayer( );
-	
 	setElementPosition( player, x, y, z );	
 	local newZ = getGroundPosition( x, y, z ) + math.abs( getElementDistanceFromCentreOfMassToBaseOfModel( player ) );
 	setElementPosition( player, x, y, newZ );	
@@ -99,3 +42,44 @@ function getIntByID( id )
     return false, -2;
     
 end
+
+addEvent( "onInfospotClicked", false );
+addEventHandler( "onClientClick", getRootElement( ), 
+
+	function ( button, state, absoluteX, absoluteY, worldX, worldY, worldZ, clickedElement )
+			
+		if( clickedElement == false ) then
+		
+			local myX, myY, myZ = getElementPosition( player );
+			local markers = getElementsByType( "marker" );
+				
+			for k,v in ipairs( markers ) do
+			
+				local markerX, markerY, markerZ  = getElementPosition( v );
+				local dist1 = getDistanceBetweenPoints3D( myX, myY, myZ, markerX, markerY, markerZ );
+				if( dist1 < 15 ) then	
+				
+					local freeView = processLineOfSight( myX, myY, myZ, markerX, markerY, markerZ );
+					if( freeView == false ) then
+						
+						local msX, msY = getScreenFromWorldPosition( markerX, markerY, markerZ );						
+						if( msX ~= false and msY ~= false ) then
+								
+							local dist = getDistanceBetweenPoints2D( absoluteX, absoluteY, msX, msY );
+							if( dist < 60 ) then
+						
+								local id = getElementData( v, "infoId" );
+								if( id ~= false ) then								
+									triggerEvent( "onInfospotClicked", player, v, id, button, state, msX, msY );
+								
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	
+	end
+
+, true);

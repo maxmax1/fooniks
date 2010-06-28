@@ -1,5 +1,9 @@
 <meta>
 
 	<script src="business-server.lua" type="server" />
+	<script src="business-client.lua" type="client" />
+	<script src="business-services_c.lua" type="client" />
+	
+	<config src="ladu.map" type="server" />
 
 </meta>

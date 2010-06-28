@@ -4,8 +4,10 @@
 	<script src="infospots-client.lua" type="client" />
 
 	<config src="interiors.xml" type="server" />
+	<map src="bank.map" />
 
 	<export function="getIntByID" type="server"/>
+	<export function="doEnter" type="server"/>
 	<export function="getIntByID" type="client"/>
 	<export function="addInfoSpot" type="server"/>
 	<export function="InfoSpotSetManual" type="server"/>

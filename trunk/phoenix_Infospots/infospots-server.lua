@@ -7,12 +7,26 @@ function displayLoadedRes( res )
 	RegisterInteriors( );
 	
 	-- Add some default infospots.
-	addInfoSpot( "PIGPEN", 2421.3535, -1220.4412, 25.99, 0, 0, 0, 0, 50 );	
-	addInfoSpot( "GROVEGYM", 2229.9192, -1721.2841, 14.2616, 0, 0, 0, 0, 52 );
+	addInfoSpot( "PIGPEN", 2421.3535, -1220.4412, 25.59, 0, 0, 0, 0, 50 );	
+	addInfoSpot( "GROVEGYM", 2229.9192, -1721.2841, 13.6616, 0, 0, 0, 0, 52 );
 	addInfoSpot( "LSPD", 1554.7446, -1675.6805, 16.195, 0, 0, 0, 0, 41 );
-	addInfoSpot( "CITYHALL", 1480.9208,-1771.6025,19.3958, 0, 0, 0, 0, 53 );
-	addInfoSpot( "BANK1", 595.4461, -1249.9810, 19.0705, 0, 0, 0, 0, 54 );
-	addInfoSpot( "HAIGLA", 1172.971, -1323.282, 15.398, 0, 0, 0, 0, 55 );
+	addInfoSpot( "CITYHALL", 1480.9208, -1771.6025, 18.8958, 0, 0, 0, 0, 53 );
+	addInfoSpot( "BANK1", 1509.070, -1059.200, 25.062, 0, 0, 0, 0, 54 );
+	addInfoSpot( "SAFE1", 2315.574, -0.199, 26.862, 0, 0, 0, 0, 56 );
+	addInfoSpot( "HAIGLA", 2034.185, -1403.067, 17.294, 0, 0, 0, 0, 55 );
+
+	-- PIGPEN
+	createBlip( 2421.3535, -1220.4412, 25.59, 12 );
+	-- GROVEGYM
+	createBlip( 2229.9192, -1721.2841, 13.6616, 54 );
+	-- lspd
+	createBlip( 1554.7446, -1675.6805, 16.195, 30 );
+	-- cityhall
+	createBlip( 1480.9208, -1771.6025, 18.8958, 56 );
+	-- pank
+	createBlip( 1509.070, -1059.200, 25.062, 52 );
+	-- haigla
+	createBlip( 2034.185, -1403.067, 17.294, 22 );
 
 end
 
@@ -202,6 +216,14 @@ function addInfoSpot( id, x, y, z, rot, fromInt, fromDimension, toDimension, toS
 		
 		if( found ) then
 		
+			local elem = createElement( "InfoSpot" );
+			setElementData( elem, "infoId", id );
+			setElementData( elem, "infoX", x );
+			setElementData( elem, "infoY", y );
+			setElementData( elem, "infoZ", z );
+			
+			infoSpots[id]["element"] = elem;	
+		
 			local intx = getElementData( foundInt, "posX" );
 			local inty = getElementData( foundInt, "posY" );
 			local intz = getElementData( foundInt, "posZ" );
@@ -356,7 +378,7 @@ addEventHandler( "onPlayerMarkerHit", getRootElement( ),
 	function ( markerHit, matchingDimension )
 	
 		if( enterExitDisabled[source] ~= true and matchingDimension ) then
-		
+			
 			local id = getElementData( markerHit, "infoId" );
 		
 			if( id ~= false ) then
@@ -409,6 +431,13 @@ function EnterExit( thePlayer, key, state )
 end
 
 function doEnter( thePlayer, id )
+
+	if( not thePlayer ) then 
+	
+		outputChatBox( "WTF??" );
+		return false;
+	
+	end
 
 	enterExitDisabled[thePlayer] = true;
 	if( infoSpots[id]["toScriptinterior"] ~= nil ) then

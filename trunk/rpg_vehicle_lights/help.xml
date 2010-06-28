@@ -1,0 +1,44 @@
+<help>
+RPG Vehicle lights.
+
+This is created for rpg servers.
+
+This version contains:
+Vehicle lights (on or off)
+Left and right indicator
+Warning flashers
+Police flashers (only for goverment vehicles)
+
+A special thanks goes out to Tadpole for the idea of this resource. (mta forum profile: ...)
+
+This resource requires the resource helpmanager.
+
+Commands:
+toggle vehicle lights: tuled
+toggle indicator left: ic_left
+toggle indicator right: ic_right
+toggle warning flashers: ohutuled
+toggle police flashers (only in a goverment vehicle): police_flashers
+set the police flashers speed (only in a goverment vehicle): police_set_fspeed [number speed]
+get the police flashers pseed (only in a goverment vehicle): police_get_fspeed
+
+Key binds:
+toggle vehicle lights: l (L)
+toggle indicator left: , (coma)
+toggle indicator right: . (dot)
+toggle warning flashers: k
+toggle police flashers (only in a goverment vehicle): n
+
+For developers, there are some exported function.
+To use the exported function go to: http://wiki.multitheftauto.com/index.php?title=Call
+
+The exported functions with the arguments are:
+
+cmdToggleLights()
+cmdIndicator()
+cmdFlashers()
+cmdPoliceFlashers()
+cmdSetPoliceFlasherSpeed("", string speed) Example: cmdSetPoliceFlasherSpeed("", '20')
+
+All these functions are client side!
+</help>

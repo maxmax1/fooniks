@@ -1,0 +1,10 @@
+<map edf:definitions="editor_main">
+    <object id="object (cr_door_03) (1)" model="2946" interior="0" dimension="0" posX="2304.7316894531" posY="-17.701316833496" posZ="25.854349136353" rotX="0" rotY="0" rotZ="0" />
+    <object id="object (cr_door_03) (2)" model="2946" interior="0" dimension="0" posX="2304.7563476563" posY="-14.583982467651" posZ="25.840263366699" rotX="0" rotY="0" rotZ="179.333984375" />
+    <object id="object (cr_door_03) (3)" model="2946" interior="0" dimension="0" posX="2314.634765625" posY="0.70463836193085" posZ="25.7421875" rotX="0" rotY="0" rotZ="268.45202636719" />
+    <object id="object (kmb_crash3door) (1)" model="2924" interior="3" dimension="0" posX="824.46716308594" posY="10.769108772278" posZ="1004.4811035156" rotX="0" rotY="0" rotZ="90.293884277344" />
+    <object id="object (KEV_SAFE) (1)" model="2332" interior="3" dimension="0" posX="822.58538818359" posY="8.3774127960205" posZ="1004.4333496094" rotX="0" rotY="0" rotZ="179.333984375" />
+    <object id="object (man_safenew) (1)" model="1829" interior="3" dimension="0" posX="820.52282714844" posY="9.4388608932495" posZ="1003.6605834961" rotX="0" rotY="0" rotZ="90.371551513672" />
+    <object id="object (cr_safe_door) (2)" model="2004" interior="3" dimension="0" posX="820.73406982422" posY="11.984375" posZ="1004.7170410156" rotX="0" rotY="0" rotZ="0" />
+    <object id="object (sfx_alarms03) (1)" model="3803" interior="3" dimension="0" posX="824.32141113281" posY="8.3907089233398" posZ="1005.5922851563" rotX="0" rotY="0" rotZ="175.57171630859" />
+</map>

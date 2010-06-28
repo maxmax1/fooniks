@@ -766,6 +766,17 @@ addEventHandler ( "aPlayer", _root, function ( player, action, data, additional 
 			else
 				action = nil
 			end
+		elseif ( action == "setrinterior" ) then
+			local int = tonumber ( data )
+			if ( int ) then
+				if ( int > 255 ) or ( int < 0 ) then int = 0 end
+				if ( not setElementInterior ( player, int ) ) then
+					action = nil
+				end
+				mdata = int
+			else
+				action = nil
+			end
 		elseif ( action == "jetpack" ) then
 			if ( doesPedHaveJetPack ( player ) ) then
 				removePedJetPack ( player )
@@ -848,6 +859,13 @@ addEventHandler ( "aPlayer", _root, function ( player, action, data, additional 
 			else
 				action = nil
 			end
+		elseif ( action == "teleto" ) then
+		
+			exports.phoenix_InfoSpots:doEnter( player, data );
+			fadeCamera ( player, false, 1, 0, 0, 0 )
+			setTimer ( fadeCamera, 1000, 1, player, true, 1 )
+			mdata = data
+		
 		elseif ( action == "warp" ) or ( action == "warpto" ) then
     			function warpPlayer ( p, to )
 				function warp ( p, to )
@@ -889,6 +907,7 @@ addEventHandler ( "aPlayer", _root, function ( player, action, data, additional 
 				mdata = getPlayerName ( data )
 			end
 		else
+			outputDebugString( "Admin(UNKNOWN_ACTION): " .. action );
 			action = nil
 		end
 		if ( action ~= nil ) then aAction ( "player", action, admin, player, mdata, more ) end

@@ -1,7 +1,10 @@
 <meta>
 	<info name="Graphical speedometer" author="d0c" version="1.2" type="misc"/>
 	<script src="speedo.lua" type="client" />
-
-	<file src="disc.png" />
-	<file src="needle.png" />
+	
+	<file src="newDisc.png" />
+	<file src="needleS.png" />
+	<file src="needleF.png" />
+	<file src="blinker_l_on.png" />
+	<file src="blinker_r_on.png" />
 </meta>

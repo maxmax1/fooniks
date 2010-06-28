@@ -430,6 +430,7 @@ function createWindow( )
 	setElementAlpha( player, 255 );
 
 	showPlayerHudComponent( "radar", false );
+	exports.phoenix_Estonia:showFakeMoney( false );
 	showCursor( true );
 	guiSetInputEnabled( true );
 

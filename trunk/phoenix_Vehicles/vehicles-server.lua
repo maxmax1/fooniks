@@ -435,34 +435,6 @@ function engineStartEnd( thePlayer, theVehicle )
 end
 ]]--
 
-function toggleVehicleLights ( player, key, keyState )
-
-	local theVehicle = getPedOccupiedVehicle( player );
-	local theSeat = getPedOccupiedVehicleSeat ( player );
-	if( not theVehicle or theSeat > 1 ) then
-	
-		exports.phoenix_Chat:OocInfo( player, "Sa pead olema masinas / masina esiistmel." );
-		return 2;
-		
-	end
-	
-	local newState = getVehicleOverrideLights( theVehicle );
-	
-	if( newState == 1 ) then -- lights off
-	
-		newState = 2;
-		
-	else
-	
-		newState = 1;
-	
-	end
-	
-	setVehicleOverrideLights( theVehicle, newState );
-    
-end
-addCommandHandler ( "tuled", toggleVehicleLights, false, true ) --temporary
-
 function toggleVehicleSeatBelt ( player, key, keyState )
 
 	local theVehicle = getPedOccupiedVehicle( player );

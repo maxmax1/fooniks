@@ -189,16 +189,7 @@ function showHouseMenu( hElement, absX, absY )
 				
 					destroyElement( houseWind );
 					windShowing = false;
-					
-					if( getPlayerMoney( player ) < price ) then
-					
-						outputChatBox( "Sul pole piisavalt raha" );
-					
-					else
-					
-						triggerServerEvent( "onPropertyPurchase", getLocalPlayer( ), hElement );	
-					
-					end
+					triggerServerEvent( "onPropertyPurchase", getLocalPlayer( ), hElement, price );	
 				
 				end
 			, false);			
@@ -483,83 +474,32 @@ function findpattern(text, pattern, start)
 	
 end
 
-function houseMenu( screenX, screenY )
-	
-	local myX, myY, myZ = getElementPosition( getLocalPlayer( ) );
-	local markers = getElementsByType( "marker" );
-		
-	for k,v in ipairs( markers ) do
-	
-		local markerX, markerY, markerZ  = getElementPosition( v );
-		local dist1 = getDistanceBetweenPoints3D( myX, myY, myZ, markerX, markerY, markerZ );
-		
-		if( dist1 < 30 ) then
-		
-			local freeView = processLineOfSight ( myX, myY, myZ, markerX, markerY, markerZ );
-			
-			if( freeView == false ) then
-				
-				local msX, msY = getScreenFromWorldPosition( markerX, markerY, markerZ );
-				
-				if( msX ~= false and msY ~= false ) then
-						
-					local dist = getDistanceBetweenPoints2D( screenX, screenY, msX, msY );
-					outputChatBox( dist );
-					if( dist < 60 ) then
-				
-						local id = getElementData( v, "infoId" );
+function HouseMenu( element, infoId, button, state, screenX, screenY )
 
-						if( id ~= false ) then				
-							
-							if( string.find( id, "House." ) ~= nil ) then
-								
-								local houseId = tonumber( findpattern( id, "%d+", 7 ) );
-								
-								if( houseId ~= nil and houseId ~= false ) then
-							
-									local parent = getHouseByIndex( houseId );
-									
-									if( parent ~= false ) then
-									
-										createHouseMenu( getElementData( parent, "Address" ) );
-										return showHouseMenu( parent, screenX, screenY );
-									
-									end
-									
-								end
-								
-							end
-						
-						end		
-					end
+	if( button == "left" and state == "down" and windShowing == false ) then
+		
+		if( string.find( infoId, "House." ) ~= nil ) then
+		
+			local houseId = tonumber( findpattern( infoId, "%d+", 7 ) );
+			if( houseId ~= nil and houseId ~= false ) then
+		
+				local parent = getHouseByIndex( houseId );				
+				if( parent ~= false ) then
+				
+					createHouseMenu( getElementData( parent, "Address" ) );
+					return showHouseMenu( parent, screenX, screenY );
+				
 				end
+				
 			end
+			
 		end
+	
 	end
+
 end
 
-
-addEventHandler( "onClientClick", getRootElement(), 
-
-	function ( button, state, absoluteX, absoluteY, worldX, worldY, worldZ, clickedElement )
-	
-		if( button == "left" and windShowing == false ) then
-		
-			if( state == "down" ) then
-			
-				if( clickedElement == false ) then
-				
-					houseMenu( absoluteX, absoluteY )
-				
-				end
-			
-			end
-		
-		end
-	
-	end
-
-, true);
+addEventHandler( "onInfospotClicked", player, HouseMenu, true);
 
 local adPosX = nil;
 local adPosY = nil;

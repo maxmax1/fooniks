@@ -271,7 +271,7 @@ addEventHandler( "onHouseReg", getRootElement(),
 addEvent( "onPropertyPurchase", true );
 addEventHandler( "onPropertyPurchase", getRootElement(),
 
-	function ( houseElem )
+	function ( houseElem, price )
 	
 		if( client ) then
 		
@@ -280,13 +280,21 @@ addEventHandler( "onPropertyPurchase", getRootElement(),
 
 				return false;
 
-			end		
+			end	
+			
+			if( getPlayerMoney( client ) < price ) then
+			
+				exports.phoenix_Chat:OocInfo( client, "Sul pole piisavalt raha" );
+			
+			else
 		
-			local price = tonumber( getElementData( houseElem, "price" ) );
-			takePlayerMoney( client, price );
-			setElementData( houseElem, "owner", charId );
-			setElementData( houseElem, "rentable", "0" );
-			setElementData( houseElem, "Renters", "" );
+				takePlayerMoney( client, price );
+				setElementData( houseElem, "owner", charId );
+				setElementData( houseElem, "rentable", "0" );
+				setElementData( houseElem, "Renters", "" );
+				exports.phoenix_Chat:OocInfo( client, "Ost sooritatud!" );
+			
+			end
 		
 		end
 	

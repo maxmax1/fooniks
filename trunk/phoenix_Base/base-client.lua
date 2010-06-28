@@ -10,7 +10,7 @@ passRight = false;
 nameVal = "";
 passVal = "";
 isChecked = false;
-preAuth = nil;
+wantRemember = false;
 
 sx, sy = guiGetScreenSize( );
 
@@ -62,30 +62,15 @@ addEventHandler( "OnPlayerLogin", getRootElement( ),
 	
 	function ( ret, other )
 	
-		if( ret == 1 ) then
+		if( ret == 0 ) then
 		
-			outputChatBox( "Vale Kasutajanimi.", 255, 0, 0 );
-			guiSetEnabled( loginBtn, false );
-			userRight = false;
-			
-		elseif( ret == 2) then
-		
-			outputChatBox( "Vale Parool.", 255, 0, 0 );
-			guiSetEnabled( loginBtn, false );
-			passRight = false;
-			
-		elseif( ret == 3) then
-		
-			outputChatBox( "See kasutaja on blokeeritud.", 255, 0, 0 );
-			guiSetEnabled( loginBtn, false );
-			userRight = false;
-			passRight = false;
+			outputChatBox( other, 255, 0, 0 );
 		
 		else
 		
-			if( other ~= nil ) then
+			if( wantRemember ) then
 			
-				saveForRemember( guiGetText(usrName), other );
+				saveForRemember( guiGetText( usrName ), guiGetText( passWord ) );
 				
 			else
 			
@@ -127,8 +112,6 @@ function editChange( element )
 	
 	end
 	
-	preAuth = false;
-	
 	guiSetEnabled( loginBtn, ( userRight and passRight ) );
 	   
 end
@@ -140,15 +123,14 @@ function resourceHandler( )
 		function ( )
 		
 			guiSetEnabled( loginBtn, false );
-			triggerServerEvent( "OnAuthPlayer", getLocalPlayer( ), guiGetText(usrName), guiGetText(passWord), guiCheckBoxGetSelected(remember), preAuth );
+			wantRemember = guiCheckBoxGetSelected( remember );
+			triggerServerEvent( "OnAuthPlayer", getLocalPlayer( ), guiGetText(usrName), guiGetText(passWord) );
 		
 		end
 	, false);
 	addEventHandler( "onClientGUIChanged", usrName, editChange );
 	addEventHandler( "onClientGUIChanged", passWord, editChange );
-	
-	local img = guiCreateStaticImage( 0.044, 0.88, 0.18, 0.1, "files/images/logo.png", true );
-	
+		
 	local realtime = getRealTime( );
 	setTime( realtime.hour, realtime.minute )
     setMinuteDuration( 60000 );
@@ -195,7 +177,6 @@ function checkForRemember( )
 			passVal = xmlNodeGetAttribute( child, "rem" );
 			passRight = true;
 			isChecked = true;
-			preAuth = true;
 			
 		end
 	
@@ -225,7 +206,7 @@ addEventHandler( "onClientResourceStart", getRootElement( ),
 		
 			function ()
 			
-				dxDrawText( "Phoenix " .. sVersion .. " r" .. sRev, sx-150, sy-40, sx-3, sy-10, txtColor, 1, "default", "right", "bottom" );
+				dxDrawText( "Phoenix " .. sVersion .. "." .. sRev, sx-150, sy-40, sx-3, sy-10, txtColor, 1, "default", "right", "bottom" );
 			
 			end
 			

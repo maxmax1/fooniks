@@ -50,6 +50,7 @@ function aViewMessagesClose ( destroy )
 end
 
 function aMessagesSync ( action, data )
+
 	if ( action == "get" ) then
 		_messages = data
 		guiGridListClear ( aMessagesList )

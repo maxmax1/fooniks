@@ -3,7 +3,6 @@ max_characters = 3;
 charWindow = nil;
 tabPanel = nil;
 charTab = nil;
-setTab = nil;
 levelLabel = nil;
 charScrollPane = nil;
 charList = {};
@@ -24,6 +23,7 @@ function ShowCharacters( charTable, selected, isEnd )
 			showCursor( false );
 			guiSetInputEnabled( false );			
 			showPlayerHudComponent( "radar", true );
+			showPlayerHudComponent( "money", true );
 			return 1;
 			
 		end
@@ -31,6 +31,7 @@ function ShowCharacters( charTable, selected, isEnd )
 	end
 	
 	showPlayerHudComponent( "radar", false );
+	showPlayerHudComponent( "money", false );
 	
 	charWindow = guiCreateWindow( sx*0.1, sy*0.3, 256, 410, "Karakterid", false );
 	guiWindowSetMovable( charWindow, false );
@@ -123,7 +124,6 @@ function ShowCharacters( charTable, selected, isEnd )
 							
 							if( aX >= startX and aX <= endX and aY >= startY and aY <= endY ) then
 										
-								charTable[selected]["blurLevel"] = getBlurLevel();
 								ShowCharacters( charTable, i, false );
 							
 							end
@@ -151,16 +151,6 @@ function ShowCharacters( charTable, selected, isEnd )
 				setElementAlpha( thePlayer, 255 );
 				setElementModel( thePlayer, charTable[i]["model"] );
 				
-				charTable[i]["blurLevel"] = tonumber( charTable[i]["blurLevel"] );
-				
-				if( charTable[i]["blurLevel"] == nil or charTable[i]["blurLevel"] < 0 or charTable[i]["blurLevel"] > 255 ) then
-					
-					charTable[i]["blurLevel"] = 36;
-					outputChatBox( "ResetBlur" );
-					
-				end
-				
-				setBlurLevel( charTable[i]["blurLevel"] );
 				selectedChar = charTable[i]["id"];
 				guiSetEnabled( charSpawnButton, true );
 			
@@ -176,35 +166,6 @@ function ShowCharacters( charTable, selected, isEnd )
 		exports.phoenix_Chat:OocInfo("Sul pole veel karakterit.");
 	
 	end
-	
-	local lvl = math.ceil( 100 / ( 255 / getBlurLevel() ) );
-	setTab = guiCreateTab( "Seaded", tabPanel );
-	guiCreateLabel(0.15, 0.325, 0.5, 0.1, "MotionBlur Tase: ", true, setTab );
-	levelLabel = guiCreateLabel(0.15, 0.4, 0.1, 0.1, tostring( lvl ), true, setTab );
-	blurScroll = guiCreateScrollBar ( 0.25, 0.4, 0.7, 0.05, true, true, setTab );
-	guiScrollBarSetScrollPosition( blurScroll, lvl );
-	
-	addEventHandler("onClientGUIScroll", blurScroll, 
-	
-		function ( Scrolled )
-		
-			guiSetText ( levelLabel, math.floor( guiScrollBarGetScrollPosition( blurScroll ) ) );
-		
-		end
-	
-	);
-	
-	local save = guiCreateButton( 0.1, 0.85, 0.8, 0.1, "Salvesta", true, setTab );	
-	addEventHandler("onClientGUIClick", save, 
-	
-		function ( )
-		
-			local level = ( guiScrollBarGetScrollPosition( blurScroll ) / 100 ) * 255;
-			setBlurLevel( level );
-		
-		end
-		
-	);	
 
 	guiSetVisible( charWindow, true );
 	showCursor( true );
@@ -307,8 +268,10 @@ function ShowCharInfo( hide )
 	local nextBtn = guiCreateButton( 0.1, 0.85, 0.8, 0.1, "Sulge", true, charInf );
 		
 	addEventHandler("onClientGUIClick", nextBtn, 
-		function ( )
+		function ( button, state )
 		
+			if( button ~= "left" or state ~= "up" ) then return false; end
+			if( source ~= nextBtn ) then return false; end
 			ShowCharInfo( true );
 		
 		end

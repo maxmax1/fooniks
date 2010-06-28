@@ -57,6 +57,9 @@ tbl[1]["event"] = "onPlayerInfo";
 tbl[2] = { };
 tbl[2]["name"] = "Vaheta";
 tbl[2]["event"] = "onCharactersRequest";
+tbl[3] = { };
+tbl[3]["name"] = "Seaded";
+tbl[3]["event"] = "onSettingsRequest"; -- TODO
 table.insert( Menus, tbl );
 
 -- Code Start
@@ -207,6 +210,7 @@ function OnTabStatus( )
 	showPlayerHudComponent( "armour", not tabShowing );
 	showPlayerHudComponent( "breath", not tabShowing );
 	showPlayerHudComponent( "clock", not tabShowing );
+	showPlayerHudComponent( "health", not tabShowing );
 	showPlayerHudComponent( "health", not tabShowing );
 	showPlayerHudComponent( "money", not tabShowing );
 	showPlayerHudComponent( "radar", not tabShowing );
@@ -441,6 +445,5 @@ function LoadBtns( )
 	ChangeButtons( t1, t2 );
 
 end
-
 
 addEventHandler( "onClientResourceStart", getResourceRootElement( getThisResource( ) ), LoadBtns );

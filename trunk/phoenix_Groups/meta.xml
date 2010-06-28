@@ -1,0 +1,18 @@
+<meta>
+
+	<script src="groups-server.lua" type="server" />
+	
+	<script src="groups-controlpanel.lua" type="client" />
+	<script src="editors.lua" type="client" />
+	<script src="altDisplay.lua" type="client" />
+	
+	<script src="combobox_rep.lua" type="client" /> <!-- Until my patch goes to merge -->
+	
+	<file src="images/dropdown.png" />	
+	<file src="images/edit.png" />	
+	<file src="images/delete.png" />	
+	<file src="images/add.png" />
+	<file src="images/up.png" />
+	<file src="images/down.png" />
+	
+</meta>

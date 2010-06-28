@@ -1,0 +1,32 @@
+<map edf:definitions="editor_main">
+    <object type="object" model="14784" interior="0" dimension="0" posX="5295.8251953125" posY="-1222.884765625" posZ="62.809410095215" rotX="0" rotY="0" rotZ="0" />
+    <object type="object" model="10841" interior="0" dimension="0" posX="5307.4560546875" posY="-1184.5625" posZ="61.332538604736" rotX="0" rotY="0" rotZ="0" />
+    <object type="object" model="10828" interior="0" dimension="0" posX="5315.7294921875" posY="-1222.2978515625" posZ="64.977462768555" rotX="0" rotY="0" rotZ="0" />
+    <object type="object" model="10828" interior="0" dimension="0" posX="5290.1943359375" posY="-1222.0615234375" posZ="64.970497131348" rotX="0" rotY="0" rotZ="0" />
+    <object type="object" model="10828" interior="0" dimension="0" posX="5263.0830078125" posY="-1222.0830078125" posZ="64.984100341797" rotX="0" rotY="0" rotZ="0" />
+    <object type="kast" model="2971" interior="0" dimension="0" posX="5265.4267578125" posY="-1187.484375" posZ="53.430557250977" rotX="0" rotY="0" rotZ="0" />
+    <object type="kast" model="3630" interior="0" dimension="0" posX="5264.943359375" posY="-1195.583984375" posZ="54.423652648926" rotX="0" rotY="0" rotZ="269.76928710938" />
+    <object type="kast" model="3630" interior="0" dimension="0" posX="5273.296875" posY="-1187.2229003906" posZ="54.65998840332" rotX="0" rotY="0" rotZ="186.76208496094" />
+    <object type="kast" model="3630" interior="0" dimension="0" posX="5273.7236328125" posY="-1199.171875" posZ="54.911407470703" rotX="0" rotY="0" rotZ="269.76379394531" />
+    <object type="kast" model="3630" interior="0" dimension="0" posX="5268.1484375" posY="-1218.6181640625" posZ="54.420520782471" rotX="0" rotY="0" rotZ="180.08239746094" />
+    <object type="kast"model="3577" interior="0" dimension="0" posX="5275.5498046875" posY="-1218.6611328125" posZ="54.201293945313" rotX="0" rotY="0" rotZ="0" />
+    <object type="kast" model="3577" interior="0" dimension="0" posX="5284.59375" posY="-1188.416015625" posZ="54.204486846924" rotX="0" rotY="0" rotZ="0" />
+    <object type="object" model="3761" interior="0" dimension="0" posX="5263.611328125" posY="-1212.8681640625" posZ="55.431308746338" rotX="0" rotY="0" rotZ="174.58374023438" />
+    <object type="kast" model="3630" interior="0" dimension="0" posX="5268.8798828125" posY="-1205.294921875" posZ="54.419807434082" rotX="0" rotY="0" rotZ="0" />
+    <object type="kast" model="3630" interior="0" dimension="0" posX="5278.6171875" posY="-1205.4453125" posZ="54.411407470703" rotX="0" rotY="0" rotZ="0" />
+    <object type="kast" model="1421" interior="0" dimension="0" posX="5279.6728515625" posY="-1186.4228515625" posZ="54.180335998535" rotX="0" rotY="0" rotZ="0" />
+    <object type="kast" model="3630" interior="0" dimension="0" posX="5289.955078125" posY="-1205.4343261719" posZ="54.661979675293" rotX="0" rotY="0" rotZ="0" />
+    <object type="kast" model="3630" interior="0" dimension="0" posX="5289.333984375" posY="-1208.7880859375" posZ="54.662284851074" rotX="0" rotY="0" rotZ="0" />
+    <object type="object" model="7040" interior="0" dimension="0" posX="5298.6171875" posY="-1194.029296875" posZ="56.840297698975" rotX="0" rotY="0" rotZ="0" />
+    <object type="object" model="8885" interior="0" dimension="0" posX="5303.0458984375" posY="-1216.400390625" posZ="56.838752746582" rotX="0" rotY="0" rotZ="270.26916503906" />
+    <object type="kast" model="1438" interior="0" dimension="0" posX="5279.7353515625" posY="-1188.4248046875" posZ="53.420700073242" rotX="0" rotY="0" rotZ="0" />
+    <object type="kast" model="1438" interior="0" dimension="0" posX="5287.8774414063" posY="-1187.6091308594" posZ="53.420372009277" rotX="0" rotY="0" rotZ="0" />
+    <object type="kast" model="3630" interior="0" dimension="0" posX="5279.5419921875" posY="-1202.2563476563" posZ="53.231407165527" rotX="0" rotY="0" rotZ="0" />
+    <object type="kast" model="3630" interior="0" dimension="0" posX="5280.2641601563" posY="-1195.9338378906" posZ="54.661407470703" rotX="0" rotY="0" rotZ="168.63061523438" />
+    <object type="Konteiner1" model="3571" interior="0" dimension="0" posX="5282.0546875" posY="-1218.6062011719" posZ="54.771156311035" rotX="0" rotY="0" rotZ="0" />
+    <object type="Konteiner2 ( asub konteiner1 otsas )" model="3570" interior="0" dimension="0" posX="5281.9775390625" posY="-1218.5969238281" posZ="57.468482971191" rotX="0" rotY="0" rotZ="0" />
+    <object type="kast" model="5261" interior="0" dimension="0" posX="5294.1674804688" posY="-1219.7376708984" posZ="55.650119781494" rotX="0" rotY="0" rotZ="180.54052734375" />
+    <object type="kast" model="5262" interior="0" dimension="0" posX="5310.3588867188" posY="-1215.0152587891" posZ="56.380535125732" rotX="0" rotY="0" rotZ="0" />
+    <object type="kast" model="5259" interior="0" dimension="0" posX="5319.6044921875" posY="-1189.1525878906" posZ="53.671981811523" rotX="0" rotY="0" rotZ="0" />
+    <object type="sein 5" model="2929" interior="0" dimension="0" posX="5321.9995117188" posY="-1184.9781494141" posZ="62.085819244385" rotX="0" rotY="0" rotZ="0" />
+</map>
