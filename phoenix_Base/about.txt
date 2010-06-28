@@ -1,4 +1,11 @@
-Fööniks by eRP Gaming is licensed under a Creative Commons Attribution-Share Alike 3.0 Unported License.
+	
+PROJECT:     Phoenix
+LICENSE:     See LICENSE in the phoenix_Base directory
+FILE:        about.txt
+PURPOSE:     Some info about the project.
+DEVELOPERS:  Jyrno42
+
+Phoenix is available from http://estrp.com/
 
 Current Developers:
 
