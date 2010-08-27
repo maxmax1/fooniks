@@ -123,7 +123,6 @@ function cmdIndicator(cmd)
 	end
 	
 	if not vehicle then
-		outputChatBox("You need to be in a vehicle to use this function.", player);
 		return;
 	end
 	
@@ -192,10 +191,19 @@ addEventHandler("onClientVehicleEnter", getRootElement(), function()
 	setVehicleOverrideLights(source, 1);
 end);
 
-addEventHandler("onClientResourceStart", getResourceRootElement(getThisResource()), function()
-	bindKey(KEY_LEFT_INDICATOR, "down", CMD_LEFT_INDICATOR);
-	bindKey(KEY_RIGHT_INDICATOR, "down", CMD_RIGHT_INDICATOR);
-end);
+addEventHandler("onClientResourceStart", getResourceRootElement( getThisResource( ) ),
+
+	function()
+	
+		if( BINDS_ENABLED ) then
+		
+			bindKey(KEY_LEFT_INDICATOR, "down", CMD_LEFT_INDICATOR);
+			bindKey(KEY_RIGHT_INDICATOR, "down", CMD_RIGHT_INDICATOR);
+		
+		end
+	
+	end
+);
 
 function GetIndicatorStatus( )
 

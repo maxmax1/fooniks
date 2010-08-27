@@ -1,0 +1,7 @@
+<meta>
+
+	<script src="cookies.lua" type="client" />	
+	
+	<export function="Cookie" type="client" />
+
+</meta>

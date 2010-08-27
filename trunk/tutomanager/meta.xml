@@ -1,0 +1,7 @@
+<meta>
+	
+	<script src="tutorial_c.lua" type="client" />
+	
+	<export function="ShowTutorial" type="client" />
+
+</meta>

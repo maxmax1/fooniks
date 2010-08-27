@@ -1,0 +1,42 @@
+<tutorials>
+
+	<tuto title="Masinate Tuled" uniqueid="veh_lights" specialcmd="tuleabi">
+
+		<page name="Tuled">
+			Masinate tulesi on võimalik kontrollida mitmeti. See õpetus seletab teile lähemalt kuidas seda teha.
+		</page>
+		
+		<page name="Esituled">
+			Esitulesi saad sisse/välja lülitada kasutades käsku /tuled. Et tulede lülitamist kiirendada võite te selle ka omale ära bindida.
+			Selleks peate avama konsooli( vaikimisi F8 vajutades ) ning sinna sisestama käsu:
+
+			bind nupp tuled
+		</page>
+		
+		<page name="Suunatuled">
+			Suunatulesi saad kasutada käsu ic_left või siis ic_right abil. Et tulede lülitamist kiirendada võite te need ka omale ära bindida.
+			Selleks peate avama konsooli( vaikimisi F8 vajutades ) ning sinna sisestama käsu:
+
+			bind nupp ic_left
+			bind nupp ic_right
+		</page>
+		
+		<page name="Ohutuled">
+			Ohutulesi saad sisse/välja lülitada kasutades käsku /ohutuled. Et tulede lülitamist kiirendada võite te selle ka omale ära bindida.
+			Selleks peate avama konsooli( vaikimisi F8 vajutades ) ning sinna sisestama käsu:
+
+			bind nupp ohutuled
+		</page>
+		
+		<page name="Vilkurid">
+			Masinatel millel on vilkurid saab neid tööle/seisma panna kasutades käsku /vilkurid. Vilkurite vilkumiskiirust saate muuta käsuga /kvilkurid.
+			Ka neid käske saate bindida oma soovitud nupu alla.
+		</page>
+		
+		<page name="Tehtud!">
+			Nüüd kui oled tutvunud masinate tuledega on sul loodetavasti lihtsam neid kasutada. Vajuta Tehtud, et sulle enam seda õpetust ei meenutataks.		
+		</page>		
+
+	</tuto>
+
+</tutorials>

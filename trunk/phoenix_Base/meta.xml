@@ -1,5 +1,6 @@
 <meta>
-	<info author="eRP-Gaming" version="0.1" type="gamemode" name="Phoenix" description="Phoenix Base system." />
+
+	<info author="eRP-Gaming" version="0.3" type="gamemode" name="Phoenix" description="Phoenix Base system." />
 	<settings>
 		<setting name="#MYSQL_HOST" value="localhost" />
 		<setting name="#MYSQL_PASS" value="" />
@@ -15,7 +16,6 @@
 	<script src="Authenticate_Class.lua" type="server" />
 	<script src="base-server.lua" type="server" />
 	<script src="base-client.lua" type="client" />
-	<script src="base-PhoenixTab.lua" type="client" />
 	<script src="motd.lua" type="server" />
 	<script src="motd_c.lua" type="client" />
 	<script src="settings.lua" type="client" />
@@ -30,7 +30,8 @@
 	<export function="PayDayIncome" type="server" />
 	<export function="PayDayTax" type="server" />
 	<export function="AddMotdString" type="server" />
- 
+	
+	<include resource="phoenix_ServerTab" />
 	<include resource="phoenix_Estonia" />
 	<include resource="phoenix_Vehicles" />
 	<include resource="phoenix_Characters" />
@@ -45,7 +46,13 @@
 	<include resource="phoenix_Housing" />
 	<include resource="phoenix_Business" />
 	<include resource="phoenix_Groups" />
+	
+	<include resource="phoenix_CityHall" />	
+	<include resource="phoenix_Cops" />
+	
 	<include resource="rpg_vehicle_lights" />
+	
+	<include resource="tutomanager" />
 
 	<config src="help.xml" type="client"/>
 

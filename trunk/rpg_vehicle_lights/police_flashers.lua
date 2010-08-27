@@ -21,10 +21,10 @@
 ]]
 
 -- Config variables
-CMD_PFLASHERS = "police_flashers";
-CMD_PFLASHERS_SPEED = "police_set_fspeed";
-CMD_PFLASHERS_SPEED_GET = "police_set_fspeed";
-KEY_PFLASHERS = false; -- "n";
+CMD_PFLASHERS = "vilkurid";
+CMD_PFLASHERS_SPEED = "kvilkurid";
+CMD_PFLASHERS_SPEED_GET = "kvilkurid";
+KEY_PFLASHERS = "n";
 POLICE_FLASHING_SPEED = 10; -- Frame count.
 ALLOWED_POLICE_FLASHING_SPEED = {'10', '15', '20', '25'};
 
@@ -101,7 +101,6 @@ function cmdSetPoliceFlasherSpeed(cmd, speed)
 	vehicle = getPedOccupiedVehicle(player);
 	
 	if not vehicle then
-		outputChatBox("You need to be in a vehicle to use this function.", player);
 		return;
 	end
 	
@@ -138,8 +137,18 @@ addCommandHandler(CMD_PFLASHERS, cmdPoliceFlashers);
 
 if( KEY_PFLASHERS ) then
 
-	addEventHandler("onClientResourceStart", getResourceRootElement(getThisResource()), function()
-		bindKey(KEY_PFLASHERS, "down", CMD_PFLASHERS);
-	end);
+	addEventHandler("onClientResourceStart", getResourceRootElement( getThisResource( ) ),
+	
+		function()
+		
+			if( BINDS_ENABLED ) then
+			
+				bindKey(KEY_PFLASHERS, "down", CMD_PFLASHERS);
+			
+			end
+		
+		end
+	
+	);
 
 end

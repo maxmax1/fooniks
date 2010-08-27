@@ -247,7 +247,7 @@ function InitPlayerGroups( thePlayer, playerData )
 	local sqlid = tonumber( playerData["groupId"] );
 	local rank = tonumber( playerData["groupRank"] );
 
-	if( sqlid and sqlid > 0 ) then
+	if( sqlid and sqlid > 0 and groups[sqlid] ) then
 	
 		groups[sqlid]["members"][myid]["online"] = 1;
 		groups[sqlid]["members"][myid]["element"] = thePlayer;
@@ -268,17 +268,6 @@ function InitPlayerGroups( thePlayer, playerData )
 
 end
 addEventHandler( "onCharacterSpawn", getRootElement( ), InitPlayerGroups );
-
-function teamName ( source, key, newTeamName )
-    local playerTeam = getPlayerTeam ( source )          -- get the player's team
-    if ( playerTeam ) then                               -- if he's on a team
-        local oldTeamName = getTeamName ( playerTeam )   -- get the team's current name
-        outputChatBox ( "Changed " .. oldTeamName )
-    else
-        outputChatBox ( getPlayerName ( source ) .. " isn't on a team" )
-    end
-end
-addCommandHandler ( "teamname", teamName )
 
 addEvent( "onGroupDataInit", true );
 addEventHandler( "onGroupDataInit", getRootElement( ),
@@ -470,3 +459,37 @@ addEventHandler( "onGroupDataSave", getRootElement( ),
 	end
 
 );
+
+-- Groups exports
+
+
+function GetPlayerGroupId( thePlayer )
+
+	local team = getPlayerTeam( thePlayer );
+	if( team ) then
+	
+		local teamId = getElementData( team, "sqlid" );
+		if( teamId ) then
+		
+			return tonumber( teamId );
+		
+		end
+	
+	end
+	
+	return 0;
+
+end
+
+function GetGroupTeam( groupId )
+
+	groupId = tonumber( groupId );
+	if( groups[groupId] ) then
+	
+		return groups[groupId]["team"];
+	
+	end
+	
+	return false
+
+end

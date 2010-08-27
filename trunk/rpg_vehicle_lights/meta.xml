@@ -18,8 +18,9 @@
 	<export function="GetIndicatorStatus" type="client" />
 	
 	<!-- includes -->
-	<include resource="helpmanager" />
+	<include resource="tutomanager" />
 	
 	<!-- configs -->
-	<config src="help.xml" type="client" />
+	<config src="tutorials.xml" type="client"/>
+	
 </meta>

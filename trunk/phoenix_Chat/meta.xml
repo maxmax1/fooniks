@@ -10,5 +10,6 @@
 	<export function="OocInfo" type="client" />
 	
 	<config src="help.xml" type="client"/>
+	<config src="tutorials.xml" type="client"/>
 
 </meta>

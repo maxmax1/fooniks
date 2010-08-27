@@ -214,7 +214,7 @@ function aClientACLClick ( button )
 			aMessageBox ( "warning", "Are you sure to destroy "..aAclData["current"].." group?", "triggerServerEvent ( \"aAdmin\", getLocalPlayer(), \"acldestroy\", \"group\", \""..aAclData["current"].."\" )" )
 		elseif ( source == aACLDestroyACL ) then
 			aMessageBox ( "warning", "Are you sure to destroy "..aAclData["current"].." ACL?", "triggerServerEvent ( \"aAdmin\", getLocalPlayer(), \"acldestroy\", \"acl\", \""..aAclData["current"].."\" )" )
-		elseif ( ( source == aACLRemoveObject ) or ( source == aACLAddACL ) or ( source == aACLRemoveACL ) ) then
+		elseif ( ( source == aACLRemoveObject ) or ( source == aACLAddACL ) or ( source == aACLRemoveACL ) or ( source == aACLAddObject ) ) then
 			guiSetVisible ( aACLAddObject, false )
 			guiSetVisible ( aACLRemoveObject, false )
 			guiSetVisible ( aACLAddACL, false )
@@ -228,8 +228,10 @@ function aClientACLClick ( button )
 			local table = {}
 			guiSetText ( aACLActionLabel, guiGetText ( source )..":" )
 			if ( source == aACLRemoveObject ) then table = aAclData["group_objects"][aAclData["current"]]
+			elseif ( source == aACLAddObject ) then table =  GetResourceList( );
 			elseif ( source == aACLAddACL ) then table = aAclData["acl"]
 			elseif ( source == aACLRemoveACL ) then table = aAclData["group_acls"][aAclData["current"]] end
+			
 			if ( #table >= 1 ) then guiSetText ( aACLDropCurrent, table[1] ) end
 			for id, object in ipairs ( table ) do
 				guiGridListSetItemText ( aACLDropList, guiGridListAddRow ( aACLDropList ), 1, object, false, false )
@@ -243,6 +245,8 @@ function aClientACLClick ( button )
 			local action = guiGetText ( aACLActionLabel )
 			if ( action == "Remove Object:" ) then
 				triggerServerEvent ( "aAdmin", getLocalPlayer(), "aclremove", "object", aAclData["current"], guiGetText ( aACLDropCurrent ) )
+			elseif ( action == "Add Object:" ) then
+				triggerServerEvent ( "aAdmin", getLocalPlayer(), "acladd", "object", aAclData["current"], "resource." .. guiGetText ( aACLDropCurrent ) )
 			elseif ( action == "Add ACL:" ) then
 				triggerServerEvent ( "aAdmin", getLocalPlayer(), "acladd", "acl", aAclData["current"], guiGetText ( aACLDropCurrent ) )
 			elseif ( action == "Remove ACL:" ) then

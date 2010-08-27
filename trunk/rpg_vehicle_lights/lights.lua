@@ -30,7 +30,6 @@ function cmdToggleLights()
 	vehicle = getPedOccupiedVehicle(player);
 	
 	if not vehicle then
-		outputChatBox("You need to be in a vehicle to use this function.", player);
 		return;
 	end
 	
@@ -70,6 +69,16 @@ end
 
 addCommandHandler(CMD_TOGGLE_LIGHTS, cmdToggleLights);
 
-addEventHandler("onClientResourceStart", getResourceRootElement(getThisResource()), function()
-	bindKey(KEY_TOGGLE_LIGHTS, "down", CMD_TOGGLE_LIGHTS);
-end);
+addEventHandler("onClientResourceStart", getResourceRootElement( getThisResource( ) ),
+
+	function( )
+	
+		if( BINDS_ENABLED ) then
+		
+			bindKey(KEY_TOGGLE_LIGHTS, "down", CMD_TOGGLE_LIGHTS);
+		
+		end
+	
+	end
+
+);

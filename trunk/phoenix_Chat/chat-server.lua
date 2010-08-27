@@ -1,8 +1,60 @@
+--[[
+
+	THE CONF
+
+]]--
+
+local chatChannels = { };
+
+chatChannels["c"] = { true, " sosistab: ", "* ", "", 5, 242, 255, 172 };
+
+chatChannels["s"] = { true, " karjub: ", "* ", "", 35, 215, 255, 0 };
+
+chatChannels["say"] = { true, " ütleb: ", "", "", 20, 242, 255, 172 };
+chatChannels["ask"] = { true, " küsib: ", "", "", 20, 242, 255, 172 };
+
+chatChannels["ooc"] = { false, " OOC: ", "(( ", " ))", -1, 140, 248, 255 };
+chatChannels["o"] = chatChannels["ooc"];
+
+chatChannels["b"] = { false, " OOC: ", "(( ", " ))", 25, 242, 255, 172 };
+
+--[[
+
+	THE CODE
+
+]]--
+
+function doBinds( thePlayer )
+
+	if( thePlayer and isElement( thePlayer ) and getElementType( thePlayer ) == "player" ) then
+
+		-- Unused
+
+	end
+
+end
+
 addEventHandler ( "onPlayerJoin", getRootElement(), 
 
 	function ()
 	
-		unbindKey( source, "y" );
+		doBinds( source );
+	
+	end
+
+);
+
+addEventHandler("onResourceStart", getResourceRootElement( getThisResource( ) ), 
+
+	function ()
+		
+		local players = getElementsByType( "player" );
+	
+		for k, v in ipairs( players ) do
+		
+			doBinds( v );
+		
+		end
 	
 	end
 
@@ -22,6 +74,21 @@ addEventHandler ( "onEmoteMessage", getRootElement( ),
 
 );
 
+function ChatUsingChannel( thePlayer, theChannel, ... )
+
+	if( chatChannels[theChannel] ) then
+	
+		local arg = table.concat( {...}, " " );
+		if ( not setChatMessage( thePlayer, chatChannels[theChannel][1], chatChannels[theChannel][2], chatChannels[theChannel][3], chatChannels[theChannel][4], chatChannels[theChannel][5], arg, chatChannels[theChannel][6], chatChannels[theChannel][7], chatChannels[theChannel][8]  ) ) then
+	
+			outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", thePlayer );
+	
+		end
+	
+	end
+
+end
+
 addEventHandler ( "onPlayerChat", getRootElement(), 
 
 	function ( message, msgType )
@@ -32,26 +99,22 @@ addEventHandler ( "onPlayerChat", getRootElement(),
 		
 		elseif( msgType == 2 ) then
 		
-			if ( not setChatMessage( source, true, " sosistab: ", "* ", "", 10, message, 242, 255, 172  ) ) then
-		
-				outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", source );
-		
-			end
+			ChatUsingChannel( source, "c", message );
 		
 		else
 		
 			if( string.sub( message, -1 ) == "!" ) then
-						
-				if( not setChatMessage( source, true, " karjub: ", "* ", "", 35, message, 215, 255, 0 ) ) then
-				
-					outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", source );
-				
-				end
-		
-			elseif ( not setChatMessage( source, true, ": ", "", "", 35, message, 242, 255, 172 ) ) then
-		
-				outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", source );
-		
+			
+				ChatUsingChannel( source, "s", message );
+			
+			elseif( string.sub( message, -1 ) == "?" ) then
+			
+				ChatUsingChannel( source, "ask", message );
+			
+			else
+			
+				ChatUsingChannel( source, "say", message );
+			
 			end
 		
 		end
@@ -63,96 +126,15 @@ addEventHandler ( "onPlayerChat", getRootElement(),
 
 );
 
-addCommandHandler ( "ooc",
-	
-	function ( playerSource, commandName, ... )
-	
-		local arg = table.concat( {...}, " " );	
-	
-		if ( not setChatMessage( playerSource, false, " OOC: ", "(( ", " ))", -1, arg, 140, 248, 255 ) ) then
-		
-			outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", playerSource );
-		
-		end
-	
-	end
-	
-, false, true);
+addCommandHandler( "ooc", 	ChatUsingChannel, false, true);
+addCommandHandler( "o",   	ChatUsingChannel, false, true);
+addCommandHandler( "b", 	ChatUsingChannel, false, true);
 
-addCommandHandler ( "o",
-	
-	function ( playerSource, commandName, ... )
-	
-		local arg = table.concat( {...}, " " );		
-	
-		if ( not setChatMessage( playerSource, false, " OOC: ", "(( ", " ))", -1, arg, 140, 248, 255 ) ) then
-		
-			outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", playerSource );
-		
-		end
-	
-	end
-	
-, false, true);
+addCommandHandler( "c", 	ChatUsingChannel, false, true);
 
-addCommandHandler ( "b",
-	
-	function ( playerSource, commandName, ... )
+addCommandHandler( "s",		ChatUsingChannel, false, true);
 
-		local arg = table.concat( {...}, " " );
-	
-		if ( not setChatMessage( playerSource, false, " OOC: ", "(( ", " ))", 25, arg, 242, 255, 172 ) ) then
-		
-			outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", playerSource );
-		
-		end
-	
-	end
-	
-, false, true);
-
-addCommandHandler ( "c",
-	
-	function ( playerSource, commandName, ... )
-	
-		local arg = table.concat( {...}, " " );	
-	
-		if ( not setChatMessage( playerSource, true, " sosistab: ", "* ", "", 10, arg, 242, 255, 172  ) ) then
-		
-			outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", playerSource );
-		
-		end
-	
-	end
-	
-, false, true);
-
-addCommandHandler ( "s",
-	
-	function ( playerSource, commandName, ... )
-	
-		local arg = table.concat( {...}, " " );			
-	
-		if ( not setChatMessage( playerSource, true, " hüüab: ", "* ", "", 35, arg, 215, 255, 0 ) ) then
-		
-			outputChatBox( "Sa pead olema oma karakteriga sisse logitud.", playerSource );
-		
-		end
-	
-	end
-	
-, false, true);
-
-addCommandHandler ( "me",
-	
-	function ( playerSource, commandName, ... )
-	
-		local arg = table.concat( {...}, " " );
-		EmoteMessage( playerSource, arg );
-	
-	end
-	
-, false, true);
+addCommandHandler ( "me",	ChatUsingChannel, false, true);
 
 function EmoteMessage( thePlayer, msg, isOOC )
 

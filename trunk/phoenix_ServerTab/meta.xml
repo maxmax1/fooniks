@@ -1,0 +1,24 @@
+<meta>
+
+	<script src="PhoenixTab_v3.lua" type="client" />
+	
+	<!-- <file src="back_1024x768.png" type="client" /> -->
+	
+	<file src="images/bottom_open.png" type="client" />
+	<file src="images/bottom_closed.png" type="client" />
+	<file src="images/top_open.png" type="client" />
+	<file src="images/top_closed.png" type="client" />
+	
+	<file src="images/karakterid.png" type="client" />
+	<file src="images/s6brad.png" type="client" />
+	<file src="images/abi.png" type="client" />
+	<file src="images/s6numid.png" type="client" />
+	<file src="images/seaded.png" type="client" />
+	
+	<file src="images/karakterid_hover.png" type="client" />
+	<file src="images/s6brad_hover.png" type="client" />
+	<file src="images/abi_hover.png" type="client" />
+	<file src="images/s6numid_hover.png" type="client" />
+	<file src="images/seaded_hover.png" type="client" />
+
+</meta>

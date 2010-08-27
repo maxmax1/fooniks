@@ -1,4 +1,5 @@
-local modelId = 3522;
+local reloadAmount = tonumber( exports.cookies:Cookie( "cModelRemember" ) ) or 3;
+local reloadTimes = 0;
 
 -- 
 
@@ -6,7 +7,7 @@ addEventHandler( "onClientResourceStart", getResourceRootElement( getThisResourc
 
 	function ( )
 	
-		LoadAllModels( );
+		setTimer( LoadAllModels, 100, reloadAmount );
 	
 	end
 
@@ -24,23 +25,28 @@ addCommandHandler( "models",
 
 function LoadAllModels( )
 
-	LoadCustomModel( 3522, "lapp2" ); -- vgsn_flwbdcrb
-	LoadCustomModel( 1675, "maja" ); -- wshxrefhse1
+	LoadCustomModel( 3781, "models/office_floors" ); -- vgsn_flwbdcrb
+	--LoadCustomModel( 1675, "maja" ); -- wshxrefhse1
+	
+	reloadTimes = reloadTimes + 1;
+	exports.cookies:Cookie( "cModelRemember", reloadTimes );
+	
+	outputChatBox( "Model laetud, kui tekstuurid on valged kasuta /models, et need taaslaadida." );
 
 end
 
-function LoadCustomModel( modelId, fileName )
+function LoadCustomModel( modelId, fileName, text )
 	
-	local txd = engineLoadTXD( fileName .. ".txd" );
+	--local txdFile = text or fileName;
+	
+	local txd = engineLoadTXD( fileName .. ".txd", true );
 	local col = engineLoadCOL( fileName .. ".col" );	
 	local mdl = engineLoadDFF( fileName .. ".dff", 0 );
 	
 	if( txd ) then engineImportTXD ( txd, modelId ); end
-	engineReplaceCOL( col, modelId );		
+	if( col ) then engineReplaceCOL( col, modelId ); end
 	engineReplaceModel( mdl, modelId );
 	
 	engineSetModelLODDistance( modelId, 1000 );	
-	
-	outputChatBox( "Model laetud, kui tekstuurid on valged kasuta /models, et need taaslaadida." );
 
 end

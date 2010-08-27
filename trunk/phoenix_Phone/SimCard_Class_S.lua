@@ -31,6 +31,7 @@ SimCards = {
 	allCards = { },
 	allPlayers = { },
 	fastNumbers = { },
+	endCall = { },
 	phoneCost = {
 	
 		{ name = "Smart", sms = 0.79, callMin = 0.75, theNumbers = { 4, 5 } },
@@ -38,7 +39,8 @@ SimCards = {
 		{ name = "Diil"	, sms = 0.79, callMin = 1.5, theNumbers = { 3 } },
 		{ name = "TeleYks"	, sms = 0.79, callMin = 0.79, theNumbers = { 6 } }
 	
-	}
+	},
+	connectingCalls = {} -- theCalled => theCaller
 
 };
 
@@ -387,8 +389,113 @@ function SimCards:InitCall( theCaller, theOther )
 	
 	else
 	
+		self.connectingCalls[theOther] = theCaller;
+	
 		triggerClientEvent( self.allPlayers[theCaller], "onSimStuffDone", self.allPlayers[theCaller], "Kutsub...", true );
 		triggerClientEvent( self.allPlayers[theOther], "onCallRecive", self.allPlayers[theOther], self.allCards[theCaller].number );
+	
+	end
+
+end
+
+function SimCards:CallResult( thePlayer, theSim, theResult )
+
+	if( theResult ) then
+		
+		triggerClientEvent( self.connectingCalls[thePlayer], "onSimStuffDone", self.connectingCalls[thePlayer], "Keeldus!" );
+	
+	else
+	
+		self.endCall[self.connectingCalls[thePlayer]] = nil;
+		self.endCall[thePlayer] = nil;
+	
+		local tbl = { };
+		tbl.caller = self.connectingCalls[thePlayer];
+		tbl.called = thePlayer;
+		tbl.cTime = 0;
+		tbl.cMin = 0;
+		table.insert(self.allCalls, tbl);
+	
+		triggerClientEvent( self.connectingCalls[thePlayer], "onCallConnected", self.connectingCalls[thePlayer], tbl );
+		triggerClientEvent( thePlayer, "onCallConnected", thePlayer, tbl );
+	
+	end
+	
+	self.connectingCalls[thePlayer] = nil;
+
+end
+
+function EndCall( theCall, reason )
+
+	theCall = tonumber( theCall );
+	if( self.allCalls[theCall] ) then
+	
+		if( self.allCalls[theCall].called and isElement( self.allCalls[theCall].called ) ) then
+		
+			triggerClientEvent( self.allCalls[theCall].called, "onCallEnd", self.allCalls[theCall], reason );
+		
+		end
+		
+		if( self.allCalls[theCall].caller and isElement( self.allCalls[theCall].caller ) ) then
+		
+			triggerClientEvent( self.allCalls[theCall].caller, "onCallEnd", self.allCalls[theCall], reason );
+		
+		end
+		
+		table.remove( self.allCalls, theCall );
+	
+	end
+
+end
+
+function SimCards:CallHandlers( )
+
+	local del = { };
+
+	for k, v in ipairs( self.allCalls ) do
+	
+		if( not isElement( v.called ) or getElementType( v.called ) ~= "player" or not isElement( v.caller ) or getElementType( v.caller ) ~= "player" ) then
+		
+			table.insert( del, { k, "Kõne katkes!" } );
+		
+		elseif( self.endCall[v.called] ) then
+		
+			self.endCall[v.called] = nil;
+			table.insert( del, { k, "Kõne lõpp!" } );
+			
+		elseif( self.endCall[v.caller] ) then
+		
+			self.endCall[v.caller] = nil;
+			table.insert( del, { k, "Kõne lõpp!" } );
+		
+		else
+		
+			v.cTime = v.cTime + 1;
+			self.allCalls[k].cTime = v.cTime;
+			
+			v.cMin = math.floor( ( v.cTime / 60 ) ) 
+			
+			if( v.cMin >  v.pTime ) then
+			
+				local times = v.cMin - v.pTime;				
+				self.allCards[v.callerSim].credit = self.allCards[v.callerSim].credit - ( self.phoneCost[self.allCards[v.callerSim].cid].callMin * times );
+				
+				if( self.allCards[v.callerSim].credit < self.phoneCost[self.allCards[v.callerSim].cid].callMin ) then
+				
+					table.insert( del, { k, "Ettemaksu viga!" } );
+				
+				end
+				v.pTime = v.cMin;
+			
+			end
+		
+		end
+	
+	end
+	
+	for k, v in ipairs( del ) do
+	
+		self:EndCall( v[1], v[2] );
 	
 	end
 
@@ -634,5 +741,40 @@ function SimCards:DoEvents( )
 		end 
 	
 	); 
+	
+	addEvent( "onCallResult", true );
+	addEventHandler( "onCallResult", getRootElement( ),
+	
+		function( theResult )
+		
+			if( client ) then
+			
+				local simId = tonumber( getElementData( client, "Character.simCard" ) );
+				if( simId and simId > 0 ) then
+				
+					self:CallResult( client, simId, theResult );
+				
+				end
+			
+			end
+		
+		end 
+	
+	);
+	
+	addEvent( "onCallCancel", true );
+	addEventHandler( "onCallCancel", getRootElement( ),
+	
+		function( )
+		
+			if( client ) then
+			
+				self.endCall[client] = true;
+			
+			end
+		
+		end 
+	
+	);
 
 end

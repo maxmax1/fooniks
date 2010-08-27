@@ -1,6 +1,7 @@
 <meta>
 
 	<script src="groups-server.lua" type="server" />
+	<script src="groups-client.lua" type="client" />
 	
 	<script src="groups-controlpanel.lua" type="client" />
 	<script src="editors.lua" type="client" />
@@ -8,11 +9,19 @@
 	
 	<script src="combobox_rep.lua" type="client" /> <!-- Until my patch goes to merge -->
 	
+	<export function="GetPlayerGroupId" type="server" />
+	<export function="GetGroupTeam" type="server" />
+	<export function="GetPlayerGroupId" type="client" />
+	
 	<file src="images/dropdown.png" />	
 	<file src="images/edit.png" />	
 	<file src="images/delete.png" />	
 	<file src="images/add.png" />
 	<file src="images/up.png" />
 	<file src="images/down.png" />
+	
+	<!-- Tagging -->
+	
+	<include resource="sprayTagging" />
 	
 </meta>

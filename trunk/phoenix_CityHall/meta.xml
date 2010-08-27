@@ -1,0 +1,10 @@
+<meta>
+
+	<script src="cityHall_s.lua" type="server" />
+	
+	<script src="MyTabPanel.lua" type="client" />
+	<script src="cityHall_c.lua" type="client" />
+	
+	<file src="court.png" />
+
+</meta>

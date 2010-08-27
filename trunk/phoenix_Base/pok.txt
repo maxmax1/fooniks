@@ -1,1 +1,30 @@
-http://www.iconarchive.com/category/application/iphone-icons-by-judge.html
+tables
+
+	table
+
+		cards
+			card
+				name
+				suit
+		
+		table of int's deckorder
+
+		players
+			
+			player
+			
+				tablepos
+				stack
+				cCards
+					1
+					2
+			
+			player
+			
+				tablepos
+				stack
+				cCards
+					1
+					2
+			
+hands

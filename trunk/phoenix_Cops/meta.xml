@@ -1,0 +1,26 @@
+<meta>
+	<info author="eRP-Gaming" version="0.4" type="script" name="Phoenix_Cops" description="Phoenix Cops special systems!" />
+	
+	<script src="cops_s.lua" type="server" />
+	<script src="cops_c.lua" type="client" />
+	
+	<!-- SpikeStrips -->
+	<script src="spikeStrips/strips_s.lua" type="server" />
+	<script src="spikeStrips/strips_c.lua" type="client" />
+	<file src="spikeStrips/strips.xml" type="server" />
+	
+	
+	<!-- Badge Showing -->
+	<script src="badge/badge_s.lua" type="server" />
+	<script src="badge/badge_c.lua" type="client" />	
+	<file src="badge/badge.png" type="client" />
+	<file src="badge/closeBut.png" type="client" />
+	<file src="badge/closeBut_hover.png" type="client" />
+	
+	<settings>
+		<setting name="#COPS_GROUPID" value="1" />
+		
+		<setting name="#MAX_SPIKES"   value="3" />
+	</settings>
+	
+</meta>

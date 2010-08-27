@@ -14,4 +14,7 @@
   <skill id="POWER" nextLevel="7500" levelRatio="1.9" type="SKILL_OTHER" name="Tugevuse" setFunc="setPedStat" setMultiply="10" setId="23" otherIds="0" />
   <skill id="STAMINA" nextLevel="5000" levelRatio="1.7" type="SKILL_OTHER" name="Vastupidavuse" setFunc="setPedStat" setMultiply="10" setId="22" otherIds="0" />
 
+  <skill id="LEGAL" nextLevel="1000" levelRatio="1.05" type="SKILL_OTHER" name="Advokaadi" />
+  <skill id="MYCHAR" nextLevel="1300" levelRatio="1.9" type="SKILL_OTHER" name="Karakteri" />
+ 
 </skills>
