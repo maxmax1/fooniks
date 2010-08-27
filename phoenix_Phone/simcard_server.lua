@@ -2,6 +2,8 @@ theSims = SimCards:new( );
 theSims:Load( );
 theSims:DoEvents( );
 
+setTimer( function () theSims:CallHandlers( ) end, 1000, 0 );
+
 addCommandHandler( "giveSim", 
 
 	function ( thePlayer )

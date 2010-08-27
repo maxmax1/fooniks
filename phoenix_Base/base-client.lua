@@ -215,3 +215,22 @@ addEventHandler( "onClientResourceStart", getRootElement( ),
 	end
 	
 );
+
+addCommandHandler( "save", 
+
+	function ( strCmd, wantXml )
+	
+		local posX, posY, posZ = getElementPosition( getLocalPlayer( ) );
+		local rotZ = getPedRotation( getLocalPlayer( ) );
+		local formatStr = "%.3f, %.3f, %.3f,  %.3f";
+		if( wantXml ) then
+		
+			formatStr = "posX=\"%.3f\" posY=\"%.3f\" posX=\"%.3f\" rotZ=\"%.3f\"";
+		
+		end
+	
+		outputConsole( string.format( formatStr, posX, posY, posZ, rotZ ) );		
+	
+	end
+	
+);

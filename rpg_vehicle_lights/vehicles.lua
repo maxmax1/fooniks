@@ -47,6 +47,8 @@ no_light_vehicle = {
 	'469', '487', '513'
 }
 
+BINDS_ENABLED = false;
+
 function table.find(t, s)
 	for k, v in pairs(t) do
 		--outputChatBox("k: " .. tostring(k) .. " v: " .. tostring(v));

@@ -61,7 +61,7 @@ addEventHandler( "onClientResourceStart", rootElement,
 				if( showing ) then
 			
 					local col = tocolor( 255, 255, 0, alpha );
-					dxDrawText( text, sx*0.2, sy-30, sx*0.8, sy, col, 1, "pricedown", "center", "cetner" );
+					dxDrawText( text, sx*0.2, sy-30, sx*0.8, sy, col, 1, "pricedown", "center", "center", false, false, true );
 					
 					if( fadeIn ~= 0 ) then
 					

@@ -84,6 +84,18 @@ function SimCard:CallSomeone( theNumber )
 
 end
 
+function SimCard:CallResult( theAction )
+
+	triggerServerEvent( "onCallResult", self.player, theAction );
+
+end
+
+function SimCard:CallEnd( theAction )
+
+	triggerServerEvent( "onCallCancel", self.player, theAction );
+
+end
+
 function SimCard:DeleteContact( theId )
 
 	if( self.contacts[theId] ) then
@@ -221,6 +233,33 @@ function SimCard:DoEvents( )
 	
 	triggerServerEvent( "onSimInfoRequest", self.player ); -- Request info from server...
 	
-	-- Next UP: onCallRecive
+	addEvent( "onCallRecive", true );
+	addEventHandler( "onCallRecive", self.player,
+	
+		function( theNumber )
+		
+			theNumber = tonumber( theNumber );
+		
+			self.savedName = self:GetName( theNumber );
+		
+			self.phone:Vibrate( true );
+			self.phone:IncomingCall( self.savedName );
+		
+		end 
+	
+	);
+	
+	addEvent( "onCallConnected", true );
+	addEventHandler( "onCallConnected", self.player,
+	
+		function( thePlayer, callInfo )
+		
+			self.phone:ConnectedCall( self.savedName, callInfo );
+		
+		end 
+	
+	);	
+	
+	-- NEXT UP: onCallConnected
 
 end

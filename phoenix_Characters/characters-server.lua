@@ -164,6 +164,8 @@ function charactersRequest( thePlayer )
 	setElementAlpha( client, 0 );
 	fadeCamera( client, true );
 	
+	setElementData( client, "isInCharSelection", "1" );
+	
 	setCameraMatrix( client, 256.7190, -42.1370, 1003.0230, 255.7190, -41.1370, 1002.0230 );
 	
 	local charInf = GetUserCharactersAsTable( sqlId );
@@ -258,8 +260,12 @@ function firstSpawnHandler( selectedChar )
 	  		setPlayerMoney( client, tonumber( playerStuff["money"] ) );
 	  		setCameraTarget( client, client );
 	  		setPlayerNametagText( client, playerStuff["name"] );
+			
+			setElementData( client, "isInCharSelection", "0" );
 	  		
 	  		triggerEvent( "onSkillsRequired", client, client );
+			exports.phoenix_Skills:LoadSkillsForPlayer( client );			
+			
 	  		triggerEvent( "onPocketsRequired", client, client );
 			
 			triggerClientEvent( client, "onNewCharField", client, allFields );
@@ -295,6 +301,13 @@ addEventHandler ( "onPlayerQuit", getRootElement(),
 function updatePlayer( thePlayer ) -- Updates player status for saving...
 
 	if( not thePlayer ) then return false; end
+	
+	local isInCharSel = getElementData( thePlayer, "isInCharSelection" );
+	if( isInCharSel and isInCharSel == "1" ) then
+	
+		return false;
+	
+	end
 	
 	local x, y, z = getElementPosition( thePlayer );
 	local rot = getPedRotation( thePlayer );
@@ -424,7 +437,7 @@ function savePlayer( thePlayer, timed )
 	
 	end
 	
-	triggerEvent( "onSkillsSave", thePlayer, thePlayer ); -- Save Skills too. :)	
+	exports.phoenix_Skills:SaveSkillsForPlayer( thePlayer );
 	triggerEvent( "onPocketsSave", thePlayer, thePlayer ); -- Save Pockets too. :)	
 	return true;
 

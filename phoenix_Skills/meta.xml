@@ -1,14 +1,35 @@
 <meta>
-	
-	<script src="skills-server.lua" type="server" />
-	<script src="skills-client.lua" type="client" />
 
-	<export function="getPlayerLevel" />
-	<export function="getLevel" />
-	<export function="xpAdd" />
+	<script src="skills-client.lua" type="client" />	
+	<script src="skills-server.lua" type="server" />
+
+	<export function="LoadSkillsForPlayer" type="server" />
+	<export function="SaveSkillsForPlayer" type="server" />
+	<export function="getPlayerLevel" type="server" />
+	<export function="getLevel" type="server" />
+	<export function="xpAdd" type="server" />
+	<export function="xpSet" type="server" />
+	
+	<export function="GetSkillLevelData" type="server" />
+	<export function="GetSkillLevelData" type="client" />
+		
+	<config src="skills.xml" type="server" />
 	
 	<file src="images/levelup.png" />
-	
-	<config src="skills.xml" type="server" />
 
+	<file src="images/PISTOL.png" />
+	<file src="images/PISTOLS.png" />
+	<file src="images/DEAGLE.png" />
+	<file src="images/SHOTGUN.png" />
+	<file src="images/SAWNOFF.png" />
+	<file src="images/SPAS12.png" />
+	<file src="images/UZI.png" />
+	<file src="images/MP5.png" />
+	<file src="images/AK47.png" />
+	<file src="images/M4.png" />
+	<file src="images/RIFLE.png" />
+	<file src="images/POWER.png" />
+	<file src="images/STAMINA.png" />
+	<file src="images/LEGAL.png" />
+  
 </meta>

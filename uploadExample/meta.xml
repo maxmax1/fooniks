@@ -1,0 +1,10 @@
+<meta>
+	<info author="Jyrno42" version="1.0" type="script" name="uploadExample" description="Example for my source patch." />
+	
+	<script src="uploadExample.lua" type="server" />
+	
+	<export function="uploadFiles" http="true" />
+	
+	<html src="index.html" default="true" raw="false" />
+	
+</meta>

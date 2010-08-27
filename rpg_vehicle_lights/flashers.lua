@@ -58,7 +58,6 @@ function cmdFlashers()
 	vehicle = getPedOccupiedVehicle(player);
 	
 	if not vehicle then
-		outputChatBox("You need to be in a vehicle to use this function.", player);
 		return;
 	end
 	
@@ -97,7 +96,7 @@ end
 
 addCommandHandler(CMD_FLASHERS, cmdFlashers);
 
-if( KEY_FLASHERS ) then
+if( BINDS_ENABLED and KEY_FLASHERS ) then
 
 	addEventHandler("onClientResourceStart", getResourceRootElement(getThisResource()), function()
 		bindKey(KEY_FLASHERS, "down", CMD_FLASHERS);

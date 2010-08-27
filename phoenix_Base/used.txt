@@ -1,31 +1,10 @@
-tables
+http://www.iconarchive.com/category/application/iphone-icons-by-judge.html
 
-	table
+http://www.iconspedia.com/pack/guns-2214/
+http://www.iconspedia.com/pack/weapons-250/
+http://www.iconspedia.com/icon/boxing-gloves-5770.html
+http://www.iconspedia.com/icon/elite-776.html
+http://www.iconspedia.com/icon/nike-dunk-army-2784.html
+http://www.iconspedia.com/icon/shirt-12174.html
 
-		cards
-			card
-				name
-				suit
-		
-		table of int's deckorder
-
-		players
-			
-			player
-			
-				tablepos
-				stack
-				cCards
-					1
-					2
-			
-			player
-			
-				tablepos
-				stack
-				cCards
-					1
-					2
-			
-hands
-
+http://www.clker.com/clipart-29717.html

@@ -1,0 +1,16 @@
+<meta>
+
+	<script src="sprayTags.lua" type="server" />
+	
+	<file src="tags/tags_1490.txd" type="client" />
+	<file src="tags/tags_1524.txd" type="client" />
+	<file src="tags/tags_1524.txd" type="client" />
+	<file src="tags/tags_1525.txd" type="client" />
+	<file src="tags/tags_1526.txd" type="client" />
+	<file src="tags/tags_1527.txd" type="client" />
+	<file src="tags/tags_1528.txd" type="client" />
+	<file src="tags/tags_1529.txd" type="client" />
+	<file src="tags/tags_1530.txd" type="client" />
+	<file src="tags/tags_1531.txd" type="client" />
+
+</meta>

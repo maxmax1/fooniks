@@ -1181,6 +1181,35 @@ function Phone:IncomingCall( theName )
 	self.button1.txt = "Vasta";
 	self.button2.txt = false;
 	self.button3.txt = "Keeldu";
+	
+	self.button1.tFunc = function () self.button1.tFunc = false; self.mySim:CallResult( true ); end;
+	self.button2.tFunc = false;
+	self.button3.tFunc = function () self.button3.tFunc = false; self.mySim:CallResult( false ); self:ShowHide( false, true ); end;
+	
+	self.button1.tAction = false;
+	self.button2.tAction = false;
+	self.button3.tAction = false;	
+
+end
+
+function Phone:ConnectedCall( theName, info )
+
+	self.textAreaLbl = "Ühendatud:";
+	self.textAreaRealTxt = "\t" .. theName .. "\n\t" .. info.cTime .. ":" .. info.cMin;
+	self.FormatText( );
+	self:SetStatus( 3 );
+	
+	self.button1.txt = false;
+	self.button2.txt = "Lõpeta";
+	self.button3.txt = false;
+	
+	self.button1.tFunc = false;
+	self.button2.tFunc = function () self.button2.tFunc = false; self.mySim:CallResult( false ); self:ShowHide( false, true ); end;
+	self.button3.tFunc = false;
+	
+	self.button1.tAction = false;
+	self.button2.tAction = false;
+	self.button3.tAction = false;
 
 end
 
@@ -1208,7 +1237,7 @@ function Phone:OnDraw( )
 			
 				self:DrawMenu( );
 			
-			elseif( self.theStatus == 2 or self.theStatus == 4 or self.theStatus == 6 or self.theStatus == 7 or self.theStatus == 8 ) then
+			elseif( self.theStatus == 2 or self.theStatus == 3 or self.theStatus == 4 or self.theStatus == 6 or self.theStatus == 7 or self.theStatus == 8 ) then
 			
 				if( self.theStatus == 8 ) then
 				

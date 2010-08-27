@@ -1,0 +1,107 @@
+<tutorials>
+
+	<tuto title="Suhtlemine" uniqueid="r22kimine" specialcmd="suhtlemine">
+
+		<page name="Suhtlemine">
+			Meie serveris on mitmeid suhtluskanaleid. Selle tutoriali abiga saad sa nendest 
+			loodetavasti rohkem aimu.
+		</page>
+		
+		<page name="Ooc Kanal">
+			OOC ehk Out Of Character, ehk tegelaseväline suhtlemine. See väljendab kõike mida räägib isik kes istub klaviatuuri taga, mitte isik, kes mängus parajasti rooli keerab. OOC kanalis võite rääkida, mis parajasti jalka seis on, ent keelatud on paluda  OOC kanalis, et teile politsei appi tuleks kuna keegi teie autot varastab. 
+			
+			OOC teksti tunnete ära topeltsulgude (( OOC TEKST )) abil, sulud tähistavad seda, et teie karakter pole võimeline antud teksti kuulma/lugema.
+		</page>
+		
+		<page name="Globaalne OOC">
+			Globaalne OOC kanal on nähtav kõikidele serveri mängijatele, olenemata kus asukohas nad on. Selle abil on näiteks võimalik arutada erinevate päevakajaliste sündmuste üle.
+			
+			KÄSK:       /ooc tekst
+			
+			NÄIDE:      /ooc Tere kõigile!
+			
+			TULEMUS:    (( Madis Mets OOC: Tere kõigile! ))
+			
+			LÜHEND:     /o
+		</page>
+		
+		<page name="Lokaalne OOC">
+			Lokaalne OOC kanal on nähtav ainult mängijatele kes asuvad sinust 25 ühiku kaugusel. Selle abil on näiteks võimalik arutada kuidas mingit RP olukorda oleks huvitavam edasi mängida.
+			
+			KÄSK:       /b tekst
+			
+			NÄIDE:      /b Tere kõigile!
+			
+			TULEMUS:    (( Madis Mets OOC: Tere kõigile! ))
+		</page>
+		
+		<page name="Ic Kanal">
+			IC ehk In Character, ehk tegelasesisene suhtlemine. See väljendab kõike mida mõtleb/räägib isik kes parajasti mängus ringi liigub. IC kanalis võite rääkida, oma karakteri vaatevinklist, samas IC kanalis on keelatud kasutada OOC kanalitest saadud infot!
+			
+			Kõige lihtsam on karakteri eest rääkida kasutades MTA rääkimise nuppu(algselt T) ning sinna lihtsalt kirjutades mida öelda soovite. Antud teksti kuulevad karakteri ümber olevad karakterid 20 ühiku kauguselt.
+			
+			SISESTUS:   Mina olen Madis Mets.
+			
+			TULEMUS:    Madis Mets ütleb: Mina olen Madis Mets.
+		</page>
+		
+		<page name="Ic Karjumine">
+			Karjumiseks IC kanalis on kaks võimalust, mõlemat kuulevad kõik karakterid 35 ühiku kauguselt. 
+			
+			Aeglasem on kasutades käsku /s.
+			KÄSK:       /s tekst
+			NÄIDE:      /s Tere kõigile!
+			TULEMUS:    * Madis Mets karjub: Tere kõigile!
+			
+			Kiirem nipp on aga lisada oma tavarääkimise lõppu hüüumärk. See toimib lühendina /s käsule.
+			
+			SISESTUS:   Tere kõigile!			
+			TULEMUS:    * Madis Mets karjub: Tere kõigile!
+		
+		</page>
+		
+		<page name="Ic Sosistamine">
+			Karjumiseks IC kanalis on kaks võimalust, mõlemat kuulevad kõik karakterid 5 ühiku kauguselt. 
+			
+			Aeglasem on kasutades käsku /c.
+			KÄSK:       /c tekst
+			NÄIDE:      /c Salajutt läheb haisema...
+			TULEMUS:    * Madis Mets sosistab: Salajutt läheb haisema...
+			
+			Kiirem nipp on kasutada MTA teamsay nuppu(algselt Y). See toimib lühendina /c käsule.
+		
+		</page>
+		
+		<page name="/me ehk Emote">
+			/me, ehk emote käsk on väga võimas abimees erinevate RP olukordade välja mängimiseks kui mängus pole võimalik antud tegevust väljendada.
+
+			KÄSK:       /me tegevus
+			
+			NÄIDE:      /me naerab.
+			
+			TULEMUS:    * Madis Mets naerab.
+			
+			Seda mis on ja ei ole lubatud /me käsu all vaadake täpsemalt powergaming õpetuse alt. Lühidalt võib öelda, et lubatud on reaalsed tegevused ja keelatud ebareaalsed(/me kraabib küünega vangla betoonseina augu).
+			/me käsk ON 100% IC!
+		
+		</page>
+		
+		<page name="Privaatsõnumid">
+			Kui sa soovid mõne teise mängijaga privaatselt ooc suhelda siis kasuta selleks /es käsku.
+			
+			KÄSK:       /es id tekst | või | /es osanimest tekst
+			
+			NÄIDE:      /es errpeePro lalala
+			
+			SAATJA TULEMUS:    -&gt; errpeePro: lalala
+			SAAJA TULEMUS:     &lt;- madisMets: lalala
+			
+		</page>
+		
+		<page name="Tehtud!">
+			Nüüd kui oled tutvunud rääkimisvõimalustega meie serveris on sul loodetavasti lihtsam erinevaid rääkimistiile kasutada. Vajuta Tehtud, et sulle enam seda õpetust ei meenutataks.		
+		</page>
+
+	</tuto>
+
+</tutorials>

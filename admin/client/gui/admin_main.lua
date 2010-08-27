@@ -16,7 +16,14 @@ aCurrentAmmo = 90
 aCurrentSlap = 20
 aPlayers = {}
 aBans = {}
+myResourceList = { }
 aLastSync = 0
+
+function GetResourceList( )
+
+	return myResourceList;
+
+end
 
 function aAdminMenu ()
 	if ( aAdminForm == nil ) then
@@ -408,6 +415,8 @@ function aClientSync ( type, table )
 			guiGridListSetItemText ( aTab2.ResourceList, row, 1, resource["name"], false, false )
 			guiGridListSetItemText ( aTab2.ResourceList, row, 2, resource["numsettings"] > 0 and tostring(resource["numsettings"]) or "", false, false )
 			guiGridListSetItemText ( aTab2.ResourceList, row, 3, resource["state"], false, false )
+			
+			myResourceList[id] = resource["name"];
 		end
 	elseif ( type == "admins" ) then
 		--if ( guiGridListGetRowCount ( aTab5.AdminPlayers ) > 0 ) then guiGridListClear ( aTab5.AdminPlayers ) end
