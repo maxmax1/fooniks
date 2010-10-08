@@ -1,3 +1,5 @@
+-- TODO: Has player right to interact with vehicle...
+
 local veh = nil
 alarmedMasinh = {}
 aknata = { [424]=true, [429]=true, [439]=true, [457]=true, [476]=true, [480]=true, [485]=true, [486]=true, [500]=true, [506]=true, [530]=true, [531]=true, [532]=true, [533]=true, [536]=true, [539]=true, [567]=true, [568]=true, [571]=true, [572]=true, [575]=true }
@@ -99,6 +101,7 @@ function carclick(button, state, ax, ay, wx, wy, wz, element)
 				guiSetVisible ( btnPagasnik, true )
 				guiSetVisible ( btnLukk, true )
 				guiSetVisible ( btnAken, true )
+				guiSetEnabled ( btnAken, true );
 			end
 		end
 	end
@@ -166,3 +169,8 @@ function CarMenuAken(button, state)
 		CarMenuSulge(button, state)
 	end
 end
+
+--------------------------------------------
+--------------------------------------------
+--------------------------------------------
+--------------------------------------------

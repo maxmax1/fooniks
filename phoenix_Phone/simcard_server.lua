@@ -1,8 +1,15 @@
-theSims = SimCards:new( );
-theSims:Load( );
-theSims:DoEvents( );
-
+theSims = SimCards.new( );
+theSims:DoEvents( );	
 setTimer( function () theSims:CallHandlers( ) end, 1000, 0 );
+
+function displayLoadedRes( )
+
+	theSims:Load( );
+
+end
+addEventHandler( "onResourceStart", getResourceRootElement( getResourceFromName( "phoenix_Base" ) ), displayLoadedRes );
+addEventHandler( "onResourceStart", getResourceRootElement( getThisResource() ), function () if( getResourceState( getResourceFromName( "phoenix_Base" ) ) == "running" ) then displayLoadedRes( ); end end );
+
 
 addCommandHandler( "giveSim", 
 

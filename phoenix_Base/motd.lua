@@ -27,3 +27,12 @@ function ShowMotd( )
 	end
 
 end
+
+local motdTime = tonumber( get( "MotdTime" ) );
+if( not motdTime ) then
+
+	motdTime = 30000;
+
+end
+
+setTimer( ShowMotd, motdTime, 0 );

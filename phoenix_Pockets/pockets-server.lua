@@ -1,81 +1,36 @@
-connection = nil;
-
 items = { };
 pockets = { };
 max_items = 0;
 
 function displayLoadedRes( res )	
 
-	if( not connection ) then
-	
-		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
-		
-		if( not connection ) then
-		
-			outputDebugString( "Phoenix-Pockets: Ei saanud mysql ühendust kätte." );
-			stopResource( res );
-		
-		else
-		
-			outputDebugString( "Phoenix-Pockets: Mysql serveriga ühendatud." );
-			local ret = RegisterItems( );
-			max_items = tonumber( get( "#NUM_POCKETS" ) ) + ret;
-			outputDebugString( "Max Items is: " .. max_items );
-			PocketsSafe();
-		
-		end	
-		
-	end
+	local ret = RegisterItems( );
+	max_items = tonumber( get( "#NUM_POCKETS" ) ) + ret;
+	outputDebugString( "Max Items is: " .. max_items );
+	PocketsSafe();
 
 end
 
-addEventHandler( "onResourceStart", getResourceRootElement( getThisResource( ) ), displayLoadedRes );
-
-function checkMySQLConnection ( )
-
-	if( mysql_ping( connection ) == false ) then
-	
-		outputDebugString( "Lost connection to the MySQL server, reconnecting ..." );
-		mysql_close( connection );
-		
-		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
-		
-	end
-  
-end
+addEventHandler( "onResourceStart", getResourceRootElement( getResourceFromName( "phoenix_Base" ) ), displayLoadedRes );
+addEventHandler( "onResourceStart", getResourceRootElement( getThisResource() ), function () if( getResourceState( getResourceFromName( "phoenix_Base" ) ) == "running" ) then displayLoadedRes( ); end end );
 
 function PocketsSafe( )
 
 	for i = 1, max_items, 1 do
 	
 		local added = false;
-		local query = "SHOW COLUMNS FROM ph_Pockets LIKE 'Pocket_" .. i .. "'";
-		local result = mysql_query( connection, query );
+		local result = exports.phoenix_Base:SelectQuery( "SHOW COLUMNS FROM ph_Pockets LIKE 'Pocket_" .. i .. "'" );
 		
-		if( result ~= false ) then
+		if( result and #result > 0  ) then
 		
-			if( mysql_num_rows( result ) > 0 ) then
-		
-				mysql_free_result( result );
-				added = true;
-			
-			end
-		
-			mysql_free_result( result );
+			added = true;
 		
 		end
 		
 		if( added ~= true ) then
 		
 			-- Add the more spots to database so players can use them. :)
-			query = "ALTER TABLE `ph_Pockets` ADD `Pocket_" .. i .. "` VARCHAR( 32 ) NOT NULL DEFAULT '{0,0}'";
-			result = mysql_query( connection, query );
-			
-			if( result ~= false and result ~= nil ) then	
-			
-				mysql_free_result( result );
-			
-			end	
+			exports.phoenix_Base:DoSimpleQuery( "ALTER TABLE `ph_Pockets` ADD `Pocket_" .. i .. "` VARCHAR( 32 ) NOT NULL DEFAULT '{0,0}'" );
 		
 		end
 	
@@ -126,11 +81,12 @@ function RegisterItems( )
             		items[id]["name"] = xmlNodeGetAttribute( node, "name" );
             		items[id]["canDrop"] = xmlNodeGetAttribute( node, "canDrop" );
             		
-            		outputDebugString( "Registred Item: " .. id .. "->" .. items[id]["name"] );
             	
             	end
             
       		end
+			
+			outputDebugString( "phoenix-Pockets: Registred Items." );
       		
       	else
       	
@@ -152,41 +108,37 @@ end
 
 function LoadPocketsForPlayer( thePlayer )
 
-	checkMySQLConnection( );
-
 	if( not thePlayer or not isElement ( thePlayer )  ) then return false; end
 	local charId = getElementData( thePlayer, "Character.id" );
 	if( not charId ) then return false; end	
 	
-	local query = "SELECT * FROM ph_Pockets WHERE cid = '" .. charId .. "'";
-	local result = mysql_query( connection, query );
+	local result = exports.phoenix_Base:SelectQuery( "SELECT * FROM ph_Pockets WHERE cid = '" .. charId .. "'" );
 	
 	pockets[thePlayer] = { };
 	clearPockets( thePlayer );
 	
-	if( result ~= false ) then
+	if( result ) then
 	
-		if( mysql_num_rows( result ) > 0 ) then
-		
-			mysql_field_seek( result, 1 );
+		if( #result > 0 ) then
 			
-  			for k,v in ipairs( mysql_fetch_row( result ) ) do
-  				
-    			local field = mysql_fetch_field( result );
-    			if (v == mysql_null()) then v = ''; end
-    			
-				if( #field["name"] > 4 ) then -- We dont want the cid field, do we?
-				
-					local pocketId = tonumber( string.sub( field["name"], 8 ) ); -- escape Pocket_ in front of field name, and get the number only.
+  			for k, v in ipairs( result ) do
+			
+				for k2, v2 in pairs( v ) do
+  									
+					if( #k2 > 4 ) then -- We dont want the cid field, do we?
 					
-					if( pocketId ~= nil ) then
+						local pocketId = tonumber( string.sub( k2, 8 ) ); -- escape Pocket_ in front of field name, and get the number only.
 						
-						-- v holds something like this: {1,2}
-						local id, data = string.match(v, "%{(%d+),(%d+)%}");
-						if( id ~= nil and data ~= nil ) then
-						
-							giveItem( thePlayer, id, data );
+						if( pocketId ~= nil ) then
 							
+							-- v2 holds something like this: {1,2}
+							local id, data = string.match(v2, "%{(%d+),(%d+)%}");
+							if( id ~= nil and data ~= nil ) then
+							
+								giveItem( thePlayer, id, data );
+								
+							end
+						
 						end
 					
 					end
@@ -196,16 +148,13 @@ function LoadPocketsForPlayer( thePlayer )
 	  		end
 		
 		else
-	
-			mysql_free_result( result );
-			query = "INSERT INTO ph_Pockets(cid) VALUES('" .. charId .. "')";
-			result = mysql_query( connection, query );
+		
+			result = exports.phoenix_Base:DoSimpleQuery( "INSERT INTO ph_Pockets(cid) VALUES('" .. charId .. "')" );
 			
-			if( result ~= false ) then
+			if( result ) then
 			
-				mysql_free_result( result );
 				setTimer( LoadPocketsForPlayer, 600, 1, thePlayer );
-				
+			
 			end
 		
 		end
@@ -218,8 +167,6 @@ addEvent( "onPocketsRequired", true );
 addEventHandler( "onPocketsRequired", getRootElement(), LoadPocketsForPlayer );
 
 function SavePockets( thePlayer )
-
-	checkMySQLConnection( );
 
 	if( not thePlayer or not isElement ( thePlayer )  ) then return false; end
 	local charId = getElementData( thePlayer, "Character.id" );
@@ -236,15 +183,13 @@ function SavePockets( thePlayer )
 	end
 	
 	-- Finish query.
-	query = exports.phoenix_Base:UpdateFinish( query, "cid", charId);
-	
-	local result = mysql_query( connection, query );
-	if( result ~= false ) then mysql_free_result( result ); end	
+	query = exports.phoenix_Base:DoUpdateFinish( query, "cid", charId);
 
 end
 
 addEvent( "onPocketsSave", true );
 addEventHandler( "onPocketsSave", getRootElement(), SavePockets );
+addEventHandler( "onCharacterSave", getRootElement( ), SavePockets );
 
 
 function findFreeSlot( playerid, forItem )
@@ -291,6 +236,36 @@ function getSlotByItem( playerid, item )
 	
 	return false;
 	
+end
+
+function getSlotData( thePlayer, slot )
+
+	if( thePlayer and slot ) then
+	
+		if( pockets[thePlayer] and pockets[thePlayer][slot] ) then
+		
+			return pockets[thePlayer][slot]["pData"];
+		
+		end
+	
+	end
+
+end
+
+function setSlotData( thePlayer, slot, data )
+
+	if( thePlayer and slot and data ) then
+	
+		if( pockets[thePlayer] and pockets[thePlayer][slot] ) then
+		
+			pockets[thePlayer][slot]["pData"] = data;
+			sync( thePlayer )
+			return pockets[thePlayer][slot]["pData"];
+		
+		end
+	
+	end
+
 end
 
 function clearPockets( playerid )
@@ -343,6 +318,7 @@ function sync( thePlayer )
 				tbl2['type'] = items[pockets[thePlayer][i]["pType"]]["name"];
 				tbl2['data'] = pockets[thePlayer][i]["pData"];
 				tbl2['id'] = i;
+				tbl2['pType'] = pockets[thePlayer][i]["pType"];
 				table.insert( tbl, tbl2 );
 			
 			end
@@ -437,7 +413,7 @@ addEventHandler( "onUseItem", getRootElement(),
 			
 				outputChatBox( "Seda ei saa kasutada." );
 			
-			else
+			elseif( items[myItem]["useEvent"] ) then
 			
 				local ret = triggerEvent( items[myItem]["useEvent"], client, pocketid, pockets[client][pocketid]["pType"], pockets[client][pocketid]["pData"] );
 			

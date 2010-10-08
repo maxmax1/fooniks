@@ -318,7 +318,7 @@ end
 
 function CheckName( str )
 
-	if( not string.find( str, "_" ) ) then return false, "Puudub '_'"; end
+	if( not str or not string.find( str, "_" ) ) then return false, "Puudub '_'"; end
 	
 	local tbl = str:split("_");
 	if(#tbl < 2) then
@@ -435,6 +435,43 @@ function createWindow( )
 	guiSetInputEnabled( true );
 
 	createWind = guiCreateWindow( sx-306, 50, 256, 410, "Loo Karakter - Samm " .. currentStep, false );
+	
+	cancelButton = guiCreateButton( sx-306, 470, 256, 25, "Katkesta", false );
+	addEventHandler("onClientGUIClick", cancelButton, 
+		function ( )
+		
+			newDat = { };
+			currentStep = 1;
+			
+			myName = "";
+
+			selRace = 1;
+			race = {"Europiid", "Afrikaan", "Asiaat", "Latiino"};
+
+			selAge = 1;
+			curSkin = 0;
+			fake = false;			
+			
+			destroyElement( createWind );			
+			destroyElement( cancelButton );
+
+			createWind = nil;
+			nameEdit = nil;
+			nameHelper = nil;
+			sexSelect = nil;
+			img = nil;
+			nextBtn = nil;
+			backImg = nil;
+			
+			removeEventHandler( "onClientRender", getRootElement(), drawName );
+			
+			triggerServerEvent( "onCharactersRequest", player, player );
+		
+		end
+	, false);		
+	
+	guiWindowSetMovable( createWind, false );
+	guiWindowSetSizable( createWind, false );
 	
 	if(currentStep == 1) then
 
@@ -575,7 +612,7 @@ function createWindow( )
 	
 		nextBtn = guiCreateButton( 0.1, 0.85, 0.8, 0.1, "Edasi", true, createWind );
 		guiSetEnabled( nextBtn, false );
-		
+				
 		addEventHandler("onClientGUIClick", nextBtn, 
 			function ( )
 			
@@ -587,6 +624,7 @@ function createWindow( )
 			
 				currentStep = currentStep + 1;
 				destroyElement( createWind );
+				destroyElement( cancelButton );
 				
 				createWindow( );
 			
@@ -674,6 +712,7 @@ function createWindow( )
 			
 				currentStep = currentStep + 1;
 				destroyElement( createWind );
+				destroyElement( cancelButton );
 				
 				createWindow( );
 			
@@ -693,6 +732,7 @@ function createWindow( )
 				newDat["story"] = guiGetText( memo );
 				currentStep = currentStep + 1;
 				destroyElement( createWind );
+				destroyElement( cancelButton );
 				
 				removeEventHandler( "onClientRender", getRootElement(), drawName );
 				

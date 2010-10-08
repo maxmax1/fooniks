@@ -1,134 +1,91 @@
-connection = nil;
 oSpeeds = { };
 pSeatbelt = { };
 engineStarting = { };
 
 function displayLoadedRes( res )	
-	
-	if( not connection ) then
-	
-		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
-		
-		if( not connection ) then
-		
-			outputDebugString( "phoenix_Vehicles ei saanud mysql Ã¼hendust kÃ¤tte." );
-			stopResource( res );
-		
-		else
-		
-			outputDebugString( "Mysql serveriga Ã¼hendatud." );
-			LoadVehicles();
-		
-		end	
-		
-	end
-	
+
+	LoadVehicles();
+
 end
 
-addEventHandler( "onResourceStart", getResourceRootElement( getThisResource( ) ), displayLoadedRes );
-
-function checkMySQLConnection ( )
-
-	if( mysql_ping( connection ) == false ) then
-	
-		outputDebugString( "Lost connection to the MySQL server, reconnecting ..." );
-		mysql_close( connection );
-		
-		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
-		
-	end
-  
-end
+addEventHandler( "onResourceStart", getResourceRootElement( getResourceFromName( "phoenix_Base" ) ), displayLoadedRes );
+addEventHandler( "onResourceStart", getResourceRootElement( getThisResource() ), function () if( getResourceState( getResourceFromName( "phoenix_Base" ) ) == "running" ) then displayLoadedRes( ); end end );
 
 function LoadVehicles()	
-	
-	local query = "SELECT * FROM ph_vehicles";
-	local result = mysql_query( connection, query );
+
+	local result = exports.phoenix_Base:SelectQuery( "SELECT * FROM ph_vehicles" );
 	local added = 0;
 		 
 	if( result ) then
 		 
-		for result ,row in mysql_rows( result ) do
-			
-  			mysql_field_seek( result, 1 );
-  			
-  			local vehicleStuff = {};
-  			
-  			for k,v in ipairs( row ) do
-  				
-    			local field = mysql_fetch_field( result );
-    				
-    			if (v == mysql_null()) then v = ''; end
-    				
-      			vehicleStuff[field["name"]] = v;
-    				
-	  		end
-	  		
+		for k, v in ipairs( result ) do
+	  	
 	  		local newveh = createVehicle( 
-	  						vehicleStuff["vModel"], 
-	  						vehicleStuff["vPosXd"],
-	  						vehicleStuff["vPosYd"],
-	  						vehicleStuff["vPosZd"],
-	  						vehicleStuff["vAngXd"], 
-	  						vehicleStuff["vAngYd"],
-	  						vehicleStuff["vAngZd"],
-	  						vehicleStuff["vVehNumber"]); 
+	  						v["vModel"], 
+	  						v["vPosXd"],
+	  						v["vPosYd"],
+	  						v["vPosZd"],
+	  						v["vAngXd"], 
+	  						v["vAngYd"],
+	  						v["vAngZd"],
+	  						v["vVehNumber"]); 
 							
 
 							
 	  						
 	  		if( newveh ~= false ) then
 	  		
-	  			setElementData( newveh, "vehicleId", vehicleStuff["vehicleId"]);
-	  			setElementData( newveh, "vType", vehicleStuff["vType"]);
-	  			setElementData( newveh, "vOwner", vehicleStuff["vOwner"]);
-	  			setElementData( newveh, "vValue", vehicleStuff["vValue"]);
-	  			setElementData( newveh, "vDeaths", vehicleStuff["vDeaths"]);
-				setElementData(newveh, "vAlarm", vehicleStuff["vAlarm"]);
-				setElementData(newveh, "vWindow", vehicleStuff["vWindow"]);
-				setElementHealth( newveh, vehicleStuff["vHealth"] );
+	  			setElementData( newveh, "vehicleId", v["vehicleId"]);
+	  			setElementData( newveh, "vType", v["vType"]);
+	  			setElementData( newveh, "vOwner", v["vOwner"]);
+	  			setElementData( newveh, "vValue", v["vValue"]);
+	  			setElementData( newveh, "vDeaths", v["vDeaths"]);
+				setElementData(newveh, "vAlarm", v["vAlarm"]);
+				setElementData(newveh, "vWindow", v["vWindow"]);
+				setElementHealth( newveh, v["vHealth"] );
 				
-				if vehicleStuff["vLocked"] == 1 then
+				if( tonumber( v["vLocked"] ) == 1 ) then
 					setVehicleLocked( newveh, true)
 				else
 					setVehicleLocked( newveh, false)
 				end
 				
-				if vehicleStuff["vEngine"] == 1 then
+				if( tonumber( v["vEngine"] ) == 1 ) then
 					setVehicleEngineState( newveh, true)
 				else
 					setVehicleEngineState( newveh, false)
 				end
 	  			
-				setVehicleDoorState( newveh, 0, vehicleStuff["vDoor0State"])
-				setVehicleDoorState( newveh, 1, vehicleStuff["vDoor1State"]) 
-				setVehicleDoorState( newveh, 2, vehicleStuff["vDoor2State"])   
-				setVehicleDoorState( newveh, 3, vehicleStuff["vDoor3State"])
-				setVehicleDoorState( newveh, 4, vehicleStuff["vDoor4State"])
-				setVehicleDoorState( newveh, 5, vehicleStuff["vDoor5State"])
+				setVehicleDoorState( newveh, 0, v["vDoor0State"])
+				setVehicleDoorState( newveh, 1, v["vDoor1State"]) 
+				setVehicleDoorState( newveh, 2, v["vDoor2State"])   
+				setVehicleDoorState( newveh, 3, v["vDoor3State"])
+				setVehicleDoorState( newveh, 4, v["vDoor4State"])
+				setVehicleDoorState( newveh, 5, v["vDoor5State"])
 				
-				setVehicleLightState( newveh, 0, vehicleStuff["vLight0State"])
-				setVehicleLightState( newveh, 1, vehicleStuff["vLight1State"])
-				setVehicleLightState( newveh, 2, vehicleStuff["vLight2State"])
-				setVehicleLightState( newveh, 3, vehicleStuff["vLight3State"])
+				setVehicleLightState( newveh, 0, v["vLight0State"])
+				setVehicleLightState( newveh, 1, v["vLight1State"])
+				setVehicleLightState( newveh, 2, v["vLight2State"])
+				setVehicleLightState( newveh, 3, v["vLight3State"])
 				
-				setVehicleOverrideLights( newveh, vehicleStuff["vOverrideLights"])
+				setVehicleOverrideLights( newveh, v["vOverrideLights"])
 				
-				setVehiclePanelState( newveh, 0, vehicleStuff["vPanel0State"])
-				setVehiclePanelState( newveh, 1, vehicleStuff["vPanel1State"])
-				setVehiclePanelState( newveh, 2, vehicleStuff["vPanel2State"])
-				setVehiclePanelState( newveh, 3, vehicleStuff["vPanel3State"])
-				setVehiclePanelState( newveh, 4, vehicleStuff["vPanel4State"])
-				setVehiclePanelState( newveh, 5, vehicleStuff["vPanel5State"])
-				setVehiclePanelState( newveh, 6, vehicleStuff["vPanel6State"])
+				setVehiclePanelState( newveh, 0, v["vPanel0State"])
+				setVehiclePanelState( newveh, 1, v["vPanel1State"])
+				setVehiclePanelState( newveh, 2, v["vPanel2State"])
+				setVehiclePanelState( newveh, 3, v["vPanel3State"])
+				setVehiclePanelState( newveh, 4, v["vPanel4State"])
+				setVehiclePanelState( newveh, 5, v["vPanel5State"])
+				setVehiclePanelState( newveh, 6, v["vPanel6State"])
 				
-				setVehicleWheelStates( newveh, vehicleStuff["vWheel1State"], vehicleStuff["vWheel2State"], vehicleStuff["vWheel3State"], vehicleStuff["vWheel4State"])
+				setVehicleWheelStates( newveh, v["vWheel1State"], v["vWheel2State"], v["vWheel3State"], v["vWheel4State"])
 				
 				
-	  			setVehicleColor( newveh, vehicleStuff["vColor1"], vehicleStuff["vColor2"], vehicleStuff["vColor3"], vehicleStuff["vColor4"] );
+	  			setVehicleColor( newveh, v["vColor1"], v["vColor2"], v["vColor3"], v["vColor4"] );
 				
-				setVehiclePaintjob( newveh, vehicleStuff["vPaintjob"])
+				setVehiclePaintjob( newveh, v["vPaintjob"] );
 				
+				InitSecurity( newveh, v["vSecurity"] );				
 	  			
 	  			added = added + 1;
 	  		
@@ -146,6 +103,7 @@ function LoadVehicles()
 	else
 	
 		outputDebugString( "phoenix_Vehicles laadis " .. added .. " autot." );
+		set("NUM_VEHICLES", tostring(added));
 		setTimer( UpdateVehicleVelForCrash, 3000, 0 );
 	
 	end
@@ -160,8 +118,6 @@ end
 addEventHandler ( "onResourceStop", getResourceRootElement ( getThisResource () ), ResourceStop, true )
 
 function SaveVehicles()
-
-	checkMySQLConnection( );
 
 	local arr = getElementsByType( "vehicle" );
 	
@@ -228,14 +184,11 @@ function UpdateVehicle( v )
 	query = exports.phoenix_Base:MysqlSetField( query, "vWindow", getElementData( v, "vWindow" ) );
 	
 	query = exports.phoenix_Base:MysqlSetField( query, "vPaintjob", getVehiclePaintjob( v ) );
+	query = exports.phoenix_Base:MysqlSetField( query, "vSecurity", SaveSecurity( v ) );
 
 	
 	-- Finish query.
-	query = exports.phoenix_Base:UpdateFinish( query, "vehicleId", sqlId);
-	
-	local result = mysql_query( connection, query );
-	if( result ) then mysql_free_result( result ); end
-	
+	query = exports.phoenix_Base:DoUpdateFinish( query, "vehicleId", sqlId);	
 	return true;
 
 end
@@ -378,7 +331,7 @@ function canPlayerStartVehicle( thePlayer, theVehicle )
     
 end
 
-function toggleVehicleEngine ( player, key, keyState )
+function toggleVehicleEngine ( player, cmd, wireStart )
 
 	--if( keyState ~= "up" ) then return 1; end
 
@@ -398,26 +351,40 @@ function toggleVehicleEngine ( player, key, keyState )
     	return 3;
     
     end
+
+	local oldState = getVehicleEngineState ( theVehicle );	
+	if( oldState ) then
+	
+		setVehicleEngineState ( theVehicle, false );
+		return 4;
+	
+	end
     
     if( canPlayerStartVehicle( player, theVehicle ) == false ) then
     
-    	exports.phoenix_Chat:OocInfo( player, "Sul pole selle masina võtmeid" );
-    
-    else
-	
-		local oldState = getVehicleEngineState ( theVehicle );
-
-		if( oldState == false ) then
+    	
+		if( wireStart and wireStart == "juhtmed" ) then
 		
-			-- setTimer( setVehicleEngineState, 1000, 1, theVehicle );
-			setVehicleEngineState( theVehicle, true ); -- Ajutine, hiljem vÃµtaks mootori kÃ¤ivitamine aega.
+			if( getVehicleSecurity( theVehicle, "hotwire" ) ) then
+			
+				exports.phoenix_Chat:EmoteMessage( player, "üritab masinat juhtmetest käivitada kuid saab elektrit." );
+				setElementHealth( player, getElementHealth( player ) - 3 );
+			
+			else
+			
+				triggerClientEvent( player, "onCarWireStart", player, theVehicle );
+			
+			end
 		
 		else
 		
-			setVehicleEngineState( theVehicle, false );
+			exports.phoenix_Chat:OocInfo( player, "Sul pole selle masina võtmeid. Kasuta /mootor juhtmed, et masinat juhtmetest." );
 		
 		end
-		
+    
+    else
+	
+		setVehicleEngineState( theVehicle, not oldState );
 		return 0;
 		
 	end
@@ -500,6 +467,140 @@ addEventHandler ( "onVehicleEnter", getRootElement(),
 );
 ]]
 
+function NeedWrenchOrKey( theVehicle )
+
+	local vType = getVehicleType( theVehicle );
+	local windOpen = getElementData( theVehicle, "vWindow" );
+
+	local pState = getVehiclePanelState( theVehicle, 4 );
 	
+	if( not isVehicleLocked( theVehicle ) ) then
+	
+		return false;
+	
+	elseif( ( pState and pState > 2 ) ) then 
+	
+		return false;
+	
+	elseif( vehTypes[vType] and not vehTypes[vType][2] ) then -- vehicle type doesent need key
+	
+		return false;
+	
+	elseif( vehData[vModel] and not vehData[vModel][2] ) then -- vehicle has no roof || windows
+	
+		return false;
+	
+	elseif( windOpen and windOpen == 1 ) then
 
+		return false;
+	
+	end
+	
+	return true;
 
+end
+
+function onStartEnter( thePlayer, theSeat, theJacked, theDoor )
+
+	if( theSeat == 0 and not canPlayerStartVehicle( thePlayer, source ) ) then
+	
+		local vType = getVehicleType( source );
+		if( vehTypes[vType] and not vehTypes[vType][1] ) then
+		
+			cancelEvent( );
+			exports.phoenix_Chat:OocInfo( thePlayer, "Seda masinat ei saa varastada." );
+		
+		elseif( NeedWrenchOrKey( source ) ) then
+		
+			cancelEvent( );		
+			exports.phoenix_Chat:OocInfo( thePlayer, "Kasuta nuppu \"e\", et masinat lahti muukida, samas saad ka aknad puruks lasta." );
+		
+		elseif( isVehicleLocked( source ) ) then
+		
+			setVehicleLocked( source, false );
+			exports.phoenix_Chat:EmoteMessage( thePlayer, "avab ukse akna kaudu." );
+		
+		end
+	
+	end
+
+end
+
+addEventHandler ( "onVehicleStartEnter", getRootElement( ), onStartEnter );
+
+addEvent( "onWireStarted", true );
+addEventHandler( "onWireStarted", getRootElement( ),
+
+	function ( )
+	
+		if( client ) then
+		
+			local theVehicle = getPedOccupiedVehicle( client );
+			if( theVehicle ) then
+			
+				setVehicleEngineState( theVehicle, true );
+			
+			end
+		
+		end
+	
+	end
+
+);
+
+function ReloadVehicles( )
+
+	-- saveStates
+	-- delete
+	-- load
+	outputDebugString( "RELOAD PHOENIX VEHICLES!" );
+
+end
+
+function randomVehicleNumber( )
+
+	local letters = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "o", "p", "q", "r", "s", "t", "u", "w", "x", "y", "z" };
+
+	local num = tonumber( get( "NUM_VEHICLES" ) );
+	num = num + 1;
+	set( "NUM_VEHICLES", tostring( num ) );
+	
+	local lDif2to3 = 999 * ( #letters - 1 );
+	local lDif1to2 = lDif2to3 * ( #letters - 1 );
+
+	local level_1 = 0;
+	if( num > lDif1to2 ) then level_1 = math.floor( num / lDif1to2 ); end
+	num = clamp( num, 0, lDif1to2 );
+	
+	local level_2 = 0;
+	if( num > lDif2to3 ) then level_2 = math.floor( num / lDif2to3 ); end	
+	num = clamp( num, 0, lDif2to3 );
+	
+	local level_3 = 0;
+	if( num > 999 ) then level_3 = math.floor( num / 999 ); end	
+	num = clamp( num, 0, 999 );
+	
+	return sprintf("%s%s%s-%03d", letters[level_1], letters[level_2], letters[level_3], level_4);
+
+end
+
+function addVeh( thePlayer )
+
+	local vehicle = getPedOccupiedVehicle( thePlayer );
+	if( vehicle ) then
+	
+		local vModel = getElementModel( vehicle );
+		local vX, vY, vZ = getElementPosition( vehicle );
+		local vRX, vRY, vRZ = getElementRotation( vehicle );
+	
+		local query = string.format("INSERT INTO ph_vehicles(" ..
+				"vehicleId, vModel, vType, vPosXd, vPosYd, vPosZd, vAngXd, vAngYd, vAngZd, vPosX, vPosY, vPosZ, vAngZ, vVehNumber )" ..
+				" VALUES(NULL, '%d', '%d', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%s')",
+				vModel, 2, vX, vY, vZ, vRX, vRY, vRZ, vX, vY, vZ, vRZ, randomVehicleNumber( ) );
+		exports.phoenix_Base:DoSimpleQuery( query );
+		ReloadVehicles( );
+	
+	end
+
+end
+addCommandHandler ( "lisaveh", addVeh, false, true ) --temporary

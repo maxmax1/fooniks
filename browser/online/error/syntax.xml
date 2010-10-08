@@ -1,0 +1,17 @@
+<root>
+
+	<head>
+	
+		<title>Vigane Leht</title>
+	
+	</head>
+	
+	<body background="white" padding="30">
+	
+		<label color="255,0,0" font="sa-gothic">Vigane Leht</label>
+		<br />
+		<label color="0,0,0" font="clear-normal">Veebileht millele te minna soovisite, ei ole valideeruv. Palun andke teada lehe administratsioonile.</label>
+	
+	</body>
+
+</root>

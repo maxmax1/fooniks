@@ -38,6 +38,7 @@ needleS_offset = 81;
 
 local vehSpeed = 0;
 local fuelTimer = nil;
+local oldStatus = false;
 
 function drawNeedle()
     if not isPedInVehicle(g_Player) then
@@ -49,7 +50,17 @@ function drawNeedle()
 	
     vehSpeed = getVehicleSpeed()
     vehFuel = getVehicleFuel()
-    
+	if( oldStatus ~= getVehicleEngineState( getPedOccupiedVehicle( g_Player ) ) ) then
+	
+		oldStatus = not oldStatus;
+		if( oldStatus ) then
+		
+			tempSpike = 1;
+		
+		end
+	
+	end	
+	
 	-- Draw rotated needle image
     -- Image is scaled exactly 1 degree per kmh of speed, so we can use vehSpeed directly
     
@@ -86,6 +97,7 @@ function hideSpeedometer()
     guiSetVisible( disc, false)
     guiSetVisible( gage, false)
 	removeEventHandler("onClientRender", g_root, drawNeedle)
+	oldStatus = not oldStatus;
 end
 
 function getVehicleSpeed()

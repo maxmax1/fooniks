@@ -29,18 +29,9 @@ function displayLoadedRes( res )
 			setMapName( "Los Santos" );
 			setMapName( "Los Santos" );
 			
-			local motdTime = tonumber( get( "MotdTime" ) );
-			if( not motdTime ) then
-			
-				motdTime = 30000;
-			
-			end
-			
-			setTimer( ShowMotd, modtTime, 0 );
-			
-			AddMotdString( { "Seadeid saad muuta servertabi alt.", "Servertabi saad lahti vajutades lctrl+tab." } );
-			AddMotdString( { "Karakterit saad vahetada servertabi alt.", "Servertabi saad lahti vajutades lctrl+tab." } );
-			AddMotdString( { "Neid sonumeid saad keelata seadete alt.", "Servertabi saad lahti vajutades lctrl+tab." } );
+			AddMotdString( { "Seadeid saad muuta servertabi alt.", "Servertabi saad lahti liigutades hiire ekraani allaossa." } );
+			AddMotdString( { "Karakterit saad vahetada servertabi alt.", "Servertabi saad lahti liigutades hiire ekraani allaossa." } );
+			AddMotdString( { "Neid sonumeid saad keelata seadete alt.", "Servertabi saad lahti liigutades hiire ekraani allaossa." } );
 			
 		end	
 		

@@ -18,6 +18,10 @@ local sVersion = "0.0";
 local sRev = "0";
 local txtColor = tocolor( 255, 255, 255, 200 );
 
+--local formatstr = "Phoenix %s.%s";
+local formatstr = "Phoenix - WIP Demo";
+local theStr = string.format( formatstr, sVersion, sRev );
+
 function showLogin( )
 
 	if( not loginWindow) then
@@ -192,29 +196,33 @@ addEventHandler( "onScriptInfoRequest", getRootElement( ),
 	
 		sVersion = ver;
 		sRev = rev;
+		theStr = string.format( formatstr, sVersion, sRev );
 	
 	end
 	
 );
 
-addEventHandler( "onClientResourceStart", getRootElement( ),  
+local hidden = false;
+
+function drawVersion( )
+
+	dxDrawText( theStr, sx-150, sy-40, sx-3, sy-10, txtColor, 1, "default", "right", "bottom" );
+
+end
+
+addEventHandler( "onClientResourceStart", getResourceRootElement( getThisResource( ) ),  
 
 	function ()
 	
 		triggerServerEvent( "onScriptInfoRequestS", getLocalPlayer( ) );	
-		addEventHandler("onClientRender", getRootElement( ), 
-		
-			function ()
-			
-				dxDrawText( "Phoenix " .. sVersion .. "." .. sRev, sx-150, sy-40, sx-3, sy-10, txtColor, 1, "default", "right", "bottom" );
-			
-			end
-			
-		);
-		
+		addEventHandler("onClientRender", getRootElement( ), drawVersion);
+		hidden = false;
+	
 	end
 	
 );
+
+addCommandHandler( "hideversion", function ( ) if( not hidden ) then removeEventHandler( "onClientRender", getRootElement( ), drawVersion ); hidden = true; else hidden = false; addEventHandler("onClientRender", getRootElement( ), drawVersion); end end );
 
 addCommandHandler( "save", 
 

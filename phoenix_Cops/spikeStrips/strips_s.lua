@@ -251,7 +251,10 @@ end
 
 function SpikeStrips:BlipVisibility( spikeElem )
 
-	local cops = getPlayersInTeam( getCopTeam( ) );
+	local copTeam = getCopTeam( );
+	if( not copTeam ) then return false; end
+	
+	local cops = getPlayersInTeam( copTeam );
 
 	if( not spikeElem ) then
 	

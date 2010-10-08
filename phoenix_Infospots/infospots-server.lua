@@ -82,13 +82,13 @@ function RegisterInteriors( )
 					
 					child = xmlFindChild( node, "images", 0 );
             		setElementData( element, "images", xmlNodeGetValue( child ) );
-					
-            		outputDebugString( "Registred Interior: " .. id .. type(id) );
-            	
+				            	
             	end
-            
+			
       		end
-      		
+			
+			outputDebugString( "phoenix-Infospots: Interiors loaded.", 1 );
+      	
       	else
       	
       		outputDebugString( "phoenix-Infospots: Bad Interiors Database syntax.", 1 );

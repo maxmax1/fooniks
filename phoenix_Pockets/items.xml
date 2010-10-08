@@ -15,6 +15,7 @@
 	<item id="13" type="DATA" useEvent="onUseSimcard" eventType="server" parent="-1" name="SIM-Kaart" canDrop="1" />
 	<item id="14" type="DATA1" useEvent="onPhoneShowRequest" eventType="server" parent="-1" name="Telefon" canDrop="0" />
 	<item id="15" type="DATA1" useEvent="onUseBankcard" eventType="server" parent="-1" name="PangaKaart" canDrop="0" />		
-	<item id="16" type="DATA" useEvent="onMedKitUse" eventType="server" parent="-1" name="Esmaabipakk" canDrop="0" />		
+	<item id="16" type="DATA" useEvent="onMedKitUse" eventType="server" parent="-1" name="Esmaabipakk" canDrop="1" />		
+	<item id="17" type="DATA" parent="-1" name="Muukraud" canDrop="0" />		
 
 </items>

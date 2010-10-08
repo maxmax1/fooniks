@@ -26,29 +26,28 @@ SimCards
 
 ]]--
 
-SimCards = {
+SimCards = { };
+SimCards.__index = SimCards;
 
-	allCards = { },
-	allPlayers = { },
-	fastNumbers = { },
-	endCall = { },
-	phoneCost = {
+function SimCards.new( )
+
+	local o = { };
+	setmetatable( o, SimCards );
+	
+	o.allCards = { };
+	o.allPlayers = { };
+	o.fastNumbers = { };
+	o.endCall = { };
+	o.phoneCost = {
 	
 		{ name = "Smart", sms = 0.79, callMin = 0.75, theNumbers = { 4, 5 } },
 		{ name = "Simpel", sms = 3, callMin = 2, theNumbers = { 3 } },
 		{ name = "Diil"	, sms = 0.79, callMin = 1.5, theNumbers = { 3 } },
 		{ name = "TeleYks"	, sms = 0.79, callMin = 0.79, theNumbers = { 6 } }
 	
-	},
-	connectingCalls = {} -- theCalled => theCaller
-
-};
-
-function SimCards:new( o )
-
-	o = o or { };
-	setmetatable( o, self );
-	self.__index = self;
+	};
+	o.connectingCalls = { };-- theCalled => theCaller	
+	o.allCalls = { };-- theCalled => theCaller	
 	
 	return o;
 
@@ -452,6 +451,8 @@ function SimCards:CallHandlers( )
 
 	local del = { };
 
+	if( not self.allCalls ) then self.allCalls = { }; end
+	
 	for k, v in ipairs( self.allCalls ) do
 	
 		if( not isElement( v.called ) or getElementType( v.called ) ~= "player" or not isElement( v.caller ) or getElementType( v.caller ) ~= "player" ) then
@@ -778,3 +779,10 @@ function SimCards:DoEvents( )
 	);
 
 end
+
+
+--------------------------------------------------------------
+--------------------------------------------------------------
+--------------------------------------------------------------
+--------------------------------------------------------------
+--------------------------------------------------------------

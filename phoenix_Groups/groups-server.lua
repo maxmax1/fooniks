@@ -1,43 +1,26 @@
-local connection = nil;
-
 local groups = { };
 
 function displayLoadedRes( res )	
+
+	LoadGroups( );
+	setTimer( SaveGroups, 110000, 0 );
 	
-	if( not connection ) then
+	local players = getElementsByType( "player" );
+	for k, v in ipairs( players ) do
 	
-		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
+		local data = exports.Phoenix_Characters:PlayerDataToTable( v );
+		if( data ) then
 		
-		if( not connection ) then
+			setTimer( InitPlayerGroups, 1000, 1, v, data );
 		
-			outputDebugString( "phoenix_Groups: Ei saanud mysql ühendust kätte." );
-			stopResource( res );
-		
-		else
-		
-			outputDebugString( "phoenix_Groups: Mysql serveriga ühendatud." );
-			LoadGroups( );
-			setTimer( SaveGroups, 110000, 0 );
-			
-			local players = getElementsByType( "player" );
-			for k, v in ipairs( players ) do
-			
-				local data = exports.Phoenix_Characters:PlayerDataToTable( v );
-				if( data ) then
-				
-					setTimer( InitPlayerGroups, 1000, 1, v, data );
-				
-				end
-			
-			end
-		
-		end	
-		
+		end
+	
 	end
-	
+
 end
 
-addEventHandler( "onResourceStart", getResourceRootElement( getThisResource( ) ), displayLoadedRes );
+addEventHandler( "onResourceStart", getResourceRootElement( getResourceFromName( "phoenix_Base" ) ), displayLoadedRes );
+addEventHandler( "onResourceStart", getResourceRootElement( getThisResource() ), function () if( getResourceState( getResourceFromName( "phoenix_Base" ) ) == "running" ) then displayLoadedRes( ); end end );
 
 addEventHandler ( "onResourceStop", getResourceRootElement( getThisResource( ) ), 
     function ( resource )
@@ -50,28 +33,15 @@ addEventHandler ( "onResourceStop", getResourceRootElement( getThisResource( ) )
 
 function LoadGroups( )
 
-	local query = "SELECT * FROM ph_groups";
-	local result = mysql_query( connection, query );
+	local result = exports.phoenix_Base:SelectQuery( "SELECT * FROM ph_groups" );
 
 	if( result ) then
 	
-		for result, row in mysql_rows( result ) do
+		for k, v in ipairs( result ) do
 			
-  			mysql_field_seek( result, 1 );
-  			
-  			local stuff = {};
-			
-			for k,v in ipairs( row ) do
-  				
-    			local field = mysql_fetch_field( result );
-    			if (v == mysql_null()) then v = ''; end
-      			stuff[field["name"]] = v;
-    		
-	  		end
-			
-			local lRank, ranks = LoadGroupRanks( stuff["id"] );
-			local members, num = LoadGroupMembers( stuff["id"] );
-			addGroup( stuff["name"], stuff["gCash"], stuff["type"], stuff["red"], stuff["green"], stuff["blue"], ranks, lRank, members, num, stuff["id"] );
+			local lRank, ranks = LoadGroupRanks( v["id"] );
+			local members, num = LoadGroupMembers( v["id"] );
+			addGroup( v["name"], v["gCash"], v["type"], v["cRed"], v["cGreen"], v["cBlue"], ranks, lRank, members, num, v["safename"], v["id"] );
 		
 		end
 	
@@ -83,24 +53,20 @@ function LoadGroupRanks( gid )
 
 	local tbl = { };
 	local num = 0;
-	local query = "SELECT * FROM ph_groupRanks WHERE groupId = '" .. gid .. "'";
-	local result = mysql_query( connection, query );
+	local result = exports.phoenix_Base:SelectQuery( "SELECT * FROM ph_groupRanks WHERE groupId = '" .. gid .. "'" );
 	
 	if( result ) then
 	
-		while true do
-		
-			local row = mysql_fetch_row( result );
-    		if(not row) then break end
-			
-			local id = tonumber( row[3] );
+		for k, v in ipairs( result ) do
+				
+			local id = tonumber( row["rank"] );
 			
 			num = num + 1;
 			tbl[id] = { };
-			tbl[id]["sqlid"] = tonumber( row[1] );
+			tbl[id]["sqlid"] = tonumber( row["id"] );
 			tbl[id]["groupId"] = gid;
-			tbl[id]["label"] = row[4];		
-			tbl[id]["isLeader"] = row[5];
+			tbl[id]["label"] = row["label"];		
+			tbl[id]["isLeader"] = row["isLeader"];
 		
 		end
 	
@@ -114,22 +80,18 @@ function LoadGroupMembers( gid )
 
 	local tbl = { };
 	local num = 0;
-	local query = "SELECT id, name, groupRank FROM ph_characters WHERE groupId = '" .. gid .. "'";
-	local result = mysql_query( connection, query );
+	local result = exports.phoenix_Base:SelectQuery( "SELECT id, name, groupRank FROM ph_characters WHERE groupId = '" .. gid .. "'" );
 	
 	if( result ) then
 	
-		while true do
-		
-			local row = mysql_fetch_row( result );
-    		if(not row) then break end
-			
-			local id = tonumber( row[1] );
+		for k, v in ipairs( result ) do
+					
+			local id = tonumber( row["id"] );
 			
 			tbl[id] = { };
 			tbl[id]["groupId"] = gid;
-			tbl[id]["name"] = row[2];
-			tbl[id]["rank"] = row[3];
+			tbl[id]["name"] = row["name"];
+			tbl[id]["rank"] = row["groupRank"];
 			tbl[id]["online"] = 0;
 			tbl[id]["element"] = nil;
 			num = num + 1;
@@ -151,9 +113,7 @@ function SaveGroups( )
 		query = exports.phoenix_Base:MysqlSetField( query, "name", v["name"] );
 		
 		-- Finish query.
-		query = exports.phoenix_Base:UpdateFinish( query, "id", k );
-		local result = mysql_query( connection, query );
-		if( result ) then mysql_free_result( result ); end		
+		query = exports.phoenix_Base:DoUpdateFinish( query, "id", k );
 		
 		SaveRanks( k );
 	
@@ -171,37 +131,32 @@ function SaveRanks( gid )
 		query = exports.phoenix_Base:MysqlSetField( query, "isLeader", v["isLeader"] );
 		
 		-- Finish query.
-		query = exports.phoenix_Base:UpdateFinish( query, "id", v["sqlid"] );
-		local result = mysql_query( connection, query );
-		if( result ) then mysql_free_result( result ); end	
+		query = exports.phoenix_Base:DoUpdateFinish( query, "id", v["sqlid"] );
 	
 	end
 end
 
 
-function addGroup( name, gCash, gType, red, green, blue, ranks, lRank, members, num, sqlid )
+function addGroup( name, gCash, gType, red, green, blue, ranks, lRank, members, num, safename, sqlid )
 
 	if( not sqlid ) then
 	
-		local query = "INSERT INTO `ph_groups` (`id`, `type`, `name`, `cRed`, `cGreen`, `cBlue`) VALUES (NULL, '" .. gType .. "', '" .. name .. "', '" .. red .. "', '" .. green .. "', '" .. blue .. "');";
-		mysql_query(query);
-		sqlid = mysql_insert_id();
+		local query = "INSERT INTO `ph_groups` (`id`, `safename`, `type`, `name`, `cRed`, `cGreen`, `cBlue`) VALUES (NULL, '" .. safename .. "', '" .. gType .. "', '" .. name .. "', '" .. red .. "', '" .. green .. "', '" .. blue .. "');";
+		sqlid = exports.phoenix_Base:DoSimpleQuery( query, true );
 		if( not sqlid ) then return false; end
 		
 		query = "INSERT INTO ph_groupRanks(id, groupId, rank, label, isLeader) " ..
 				"VALUES(NULL, '" .. sqlid .. "', '1', 'Liige', '0')";
-		mysql_query( connection, query );
 		ranks[1] = { };
-		ranks[1]["sqlid"] = mysql_insert_id( connection );
+		ranks[1]["sqlid"] = exports.phoenix_Base:DoSimpleQuery( query, true );
 		ranks[1]["groupId"] = sqlid;
 		ranks[1]["label"] = "Liige";
 		ranks[1]["isLeader"] = "0";
 		
 		query = "INSERT INTO ph_groupRanks(id, groupId, rank, label, isLeader) " ..
 				"VALUES(NULL, '" .. sqlid .. "', '6', 'Liider', '1')";
-		mysql_query( connection, query );
 		ranks[6] = { };
-		ranks[6]["sqlid"] = mysql_insert_id( connection );
+		ranks[6]["sqlid"] = exports.phoenix_Base:DoSimpleQuery( query, true );
 		ranks[6]["groupId"] = sqlid;
 		ranks[6]["label"] = "Liider";
 		ranks[6]["isLeader"] = "1";
@@ -213,6 +168,7 @@ function addGroup( name, gCash, gType, red, green, blue, ranks, lRank, members, 
 	
 	groups[sqlid] = { };
 	groups[sqlid]["name"] = name;
+	groups[sqlid]["safename"] = safename;
 	groups[sqlid]["sqlid"] = sqlid;
 	groups[sqlid]["gCash"] = gCash;
 	groups[sqlid]["ranks"] = ranks;
@@ -253,7 +209,7 @@ function InitPlayerGroups( thePlayer, playerData )
 		groups[sqlid]["members"][myid]["element"] = thePlayer;
 		
 		setPlayerTeam( thePlayer, groups[sqlid]["team"] );
-		
+				
 		if( not groups[sqlid]["ranks"][rank] ) then
 		
 			-- Set to first if there isnt one.
@@ -310,7 +266,8 @@ addEventHandler( "onGroupPlayerKick", getRootElement( ),
 				local member = groups[sqlid]["members"][memberSql]["element"];
 				if( member ) then
 				
-					setPlayerTeam( member, nil );				
+					setPlayerTeam( member, nil );	
+					
 					local str = "Sind visati grupeeringust välja %s poolt.";
 					string.format( str, getPlayerName( client ) );
 					outputChatBox( str, member );
@@ -322,7 +279,7 @@ addEventHandler( "onGroupPlayerKick", getRootElement( ),
 			if( noKick ) then
 			
 				local query = "UPDATE ph_Characters SET groupId = '0', groupRank = '0' WHERE id = '" .. memberSql .. "'";
-				mysql_query( connection, query );
+				exports.phoenix_Base:DoSimpleQuery( query );
 			
 			end
 			
@@ -378,7 +335,7 @@ addEventHandler( "onGroupMemberEdit", getRootElement( ),
 			if( noKick ) then
 			
 				local query = "UPDATE ph_Characters SET groupRank = '" .. newRank .. "' WHERE id = '" .. memberSql .. "'";
-				mysql_query( connection, query );
+				exports.phoenix_Base:DoSimpleQuery( query );
 			
 			end
 			
@@ -420,7 +377,7 @@ addEventHandler( "onGroupDataSave", getRootElement( ),
 							if( v2["status"] and v2["status"] == "deleted" ) then
 							
 								local query = "DELETE FROM  ph_groupRanks WHERE id = '" .. groups[sqlid]["ranks"][k2]["sqlid"] .. "'";
-								mysql_query( connection, query );
+								exports.phoenix_Base:DoSimpleQuery( query );
 								groups[sqlid]["ranks"][k2] = nil;
 							
 							elseif( not groups[sqlid]["ranks"][k2] ) then -- a new value :)
@@ -429,8 +386,7 @@ addEventHandler( "onGroupDataSave", getRootElement( ),
 								groups[sqlid]["ranks"][k2] = v2;
 								local query = "INSERT INTO ph_groupRanks(id, groupId, rank, label, isLeader) " ..
 											  "VALUES(NULL, '" .. sqlid .. "', '" .. k2 .. "', '" .. v2["label"] .. "', '0')";
-								mysql_query( connection, query );
-								groups[sqlid]["ranks"][k2]["sqlid"] = mysql_insert_id( connection );	
+								groups[sqlid]["ranks"][k2]["sqlid"] = exports.phoenix_Base:DoSimpleQuery( query, true );
 							
 							else
 							
@@ -465,6 +421,10 @@ addEventHandler( "onGroupDataSave", getRootElement( ),
 
 function GetPlayerGroupId( thePlayer )
 
+	if( not thePlayer or not isElement ( thePlayer )  ) then return false; end
+	local charId = getElementData( thePlayer, "Character.id" );
+	if( not charId ) then return false; end	
+	
 	local team = getPlayerTeam( thePlayer );
 	if( team ) then
 	

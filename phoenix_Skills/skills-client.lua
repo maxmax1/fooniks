@@ -59,13 +59,17 @@ function GetSkillLevelData( skillId, levelId )
 
 end
 
-function showSkillDraw( text, image )
+function showSkillDraw( text, image, isFullPath )
 
 	if( showing ~= false ) then return false; end
 	
-	if( image ) then
+	if( image and not isFullPath ) then
 	
 		drawImage = ":phoenix_Skills/images/" .. image .. ".png";
+	
+	elseif( image ) then
+	
+		drawImage = image;
 	
 	end
 	

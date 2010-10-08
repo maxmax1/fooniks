@@ -4,7 +4,7 @@
 
 ]]--
 
-connection = nil;
+local loaded = false;
 skills = { };
 otherIds = { };
 pSkillLevel = { };
@@ -16,54 +16,30 @@ sLevels = { };
 
 function displayLoadedRes( res )	
 
-	if( not connection ) then
+	if( loaded ) then return false; end
+
+	RegisterSkills( );
+	CalculateSkillLevels( );
 	
-		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
+	if( getResourceLastStartTime( getResourceFromName( "phoenix_Characters" ) ) > 30 ) then
+	
+		outputDebugString( "Phoenix_Skills: Started while Phoenix is already running syncing info for online players!" );
 		
-		if( not connection ) then
+		local players = getElementsByType( "player" );
+		for k, v in ipairs( players ) do
 		
-			outputDebugString( "Phoenix-Skills: Ei saanud mysql ühendust kätte." );
-			stopResource( res );
+			LoadSkillsForPlayer( v );
 		
-		else
-		
-			outputDebugString( "Phoenix-Skills: Mysql serveriga ühendatud." );
-			RegisterSkills( );
-			CalculateSkillLevels( );
-			
-			if( getResourceLastStartTime( getResourceFromName( "phoenix_Characters" ) ) > 30 ) then
-			
-				outputDebugString( "Phoenix_Skills: Started while Phoenix is already running syncing info for online players!" );
-				
-				local players = getElementsByType( "player" );
-				for k, v in ipairs( players ) do
-				
-					LoadSkillsForPlayer( v );
-				
-				end
-			
-			end
-		
-		end	
-		
+		end
+	
 	end
+	
+	loaded = true;
 
 end
 
-addEventHandler( "onResourceStart", getResourceRootElement( getThisResource( ) ), displayLoadedRes );
-
-function checkMySQLConnection ( )
-
-	if( mysql_ping( connection ) == false ) then
-	
-		outputDebugString( "Lost connection to the MySQL server, reconnecting ..." );
-		mysql_close( connection );
-		
-		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
-		
-	end
-  
-end
+addEventHandler( "onResourceStart", getResourceRootElement( getResourceFromName( "phoenix_Base" ) ), displayLoadedRes );
+addEventHandler( "onResourceStart", getResourceRootElement( getThisResource() ), function () if( getResourceState( getResourceFromName( "phoenix_Base" ) ) == "running" ) then displayLoadedRes( ); end end );
 
 function RegisterSkills( )
 
@@ -106,13 +82,13 @@ function RegisterSkills( )
 					end
 					
 					exports.phoenix_Characters:AddCharField( id, "Skill." .. id );
-            		
-            		outputDebugString( "Registred Skill: " .. id );
             	
             	end
             
       		end
-      		
+            		
+            outputDebugString( "Registred Skills." );
+      	
       	else
       	
       		outputDebugString( "phoenix-Skills: Bad Database syntax.", 1 );
@@ -131,77 +107,60 @@ end
 
 function SkillSafe( skillId )
 
-	local query = "SHOW COLUMNS FROM ph_Skills LIKE '" .. skillId .. "'";
-	local result = mysql_query( connection, query );
+	local result = exports.phoenix_Base:SelectQuery( "SHOW COLUMNS FROM ph_Skills LIKE '" .. skillId .. "'" );
 	
-	if( result ~= false ) then
+	if( result ) then
 	
-		if( mysql_num_rows( result ) > 0 ) then
+		if( #result > 0 ) then
 		
-			mysql_free_result( result );
 			return true;
 			
 		end -- Field exists, nothing to do.
-		
-		mysql_free_result( result );
 	
 	end
 	
 	-- Add the new registred skill to database so players can use it. :)
-	query = "ALTER TABLE `ph_Skills` ADD `" .. skillId .. "` INT NOT NULL DEFAULT '0'";
-	result = mysql_query( connection, query );
-	
-	if( result ~= false ) then	
-	
-		mysql_free_result( result );
-	
-	end	
-	
+	exports.phoenix_Base:DoSimpleQuery( "ALTER TABLE `ph_Skills` ADD `" .. skillId .. "` INT NOT NULL DEFAULT '0'" );
+
 end
 
 function LoadSkillsForPlayer( thePlayer )
-
-	checkMySQLConnection( );
 
 	if( not thePlayer or not isElement ( thePlayer )  ) then return false; end
 	local charId = getElementData( thePlayer, "Character.id" );
 	if( not charId ) then return false; end	
 	
-	local query = "SELECT * FROM ph_Skills WHERE cid = '" .. charId .. "'";
-	local result = mysql_query( connection, query );
+	local result = exports.phoenix_Base:SelectQuery( "SELECT * FROM ph_Skills WHERE cid = '" .. charId .. "'" );
 	
 	if( result ~= false ) then
 	
-		if( mysql_num_rows( result ) > 0 ) then
-			
-			mysql_field_seek( result, 1 );
-			
-  			for k,v in ipairs( mysql_fetch_row( result ) ) do
-  				
-    			local field = mysql_fetch_field( result );
-    			if (v == mysql_null()) then v = ''; end
-    			
-    			if( skills[field["name"]] ~= nil ) then
-    			
-    				pSkillLevel[field["name"]][thePlayer] = getLevel( field["name"], tonumber( v ) );
-    				pXp[field["name"]][thePlayer] = tonumber ( v );
-    				OnLevelUp( thePlayer, field["name"], false );
+		if( #result > 0 ) then
+		
+  			for k, v in ipairs( result ) do
+  			
+				for k2, v2 in pairs( v ) do
+				
+					if( skills[k2] ~= nil ) then
 					
-					setElementData( thePlayer, "Skill." .. field["name"], tostring( pSkillLevel[field["name"]][thePlayer] ) );		
-    			
-    			end
-    				
+						pSkillLevel[k2][thePlayer] = getLevel( k2, tonumber( v2 ) );
+						pXp[k2][thePlayer] = tonumber ( v2 );
+						OnLevelUp( thePlayer, k2, false );
+						
+						setElementData( thePlayer, "Skill." .. k2, tostring( pSkillLevel[k2][thePlayer] ) );		
+					
+					end
+				
+				end
+			
 	  		end
 		
 		else
-	
-			mysql_free_result( result );
+		
 			query = "INSERT INTO ph_Skills(cid) VALUES('" .. charId .. "')";
-			result = mysql_query( connection, query );
+			result = exports.phoenix_Base:DoSimpleQuery( query );
 			
 			if( result ~= false ) then
 			
-				mysql_free_result( result );
 				setTimer( LoadSkillsForPlayer, 500, 1, thePlayer );
 				return false;
 				
@@ -229,8 +188,6 @@ end
 
 function SaveSkillsForPlayer( thePlayer )
 
-	checkMySQLConnection( );
-
 	if( not thePlayer or not isElement ( thePlayer )  ) then return false; end
 	local charId = getElementData( thePlayer, "Character.id" );
 	if( not charId ) then return false; end	
@@ -249,7 +206,7 @@ function SaveSkillsForPlayer( thePlayer )
 	if( added ) then
 	
 		-- Finish query.
-		query = exports.phoenix_Base:DoUpdateFinish( query, "cid", charId);
+		query = exports.phoenix_Base:DoUpdateFinish( query, "cid", charId );
 	
 	end
 	
@@ -411,6 +368,16 @@ addEventHandler( "onSkillDebugRequest", getRootElement( ),
 	function ( )
 	
 		debuggers[client] = true;
+	
+	end
+
+);
+
+addEventHandler( "onCharacterSave", getRootElement( ),
+
+	function ( thePlayer )
+	
+		SaveSkillsForPlayer( thePlayer );
 	
 	end
 
