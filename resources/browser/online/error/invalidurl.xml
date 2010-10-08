@@ -15,3 +15,20 @@
 	</body>
 
 </html>
+<html>
+
+	<head>
+	
+		<title>Vigane URL</title>
+	
+	</head>
+	
+	<body background="white" padding="30">
+	
+		<label color="255,0,0" font="sa-gothic">Vigane URL</label>
+		<br />
+		<label color="0,0,0" font="clear-normal">URL sisaldab keelatud t2hti.</label>
+	
+	</body>
+
+</html>
