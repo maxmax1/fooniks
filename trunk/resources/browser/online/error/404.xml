@@ -32,3 +32,20 @@
 	</body>
 
 </html>
+<html>
+
+	<head>
+	
+		<title>404 Ei Leidnud</title>
+	
+	</head>
+	
+	<body background="white" padding="30">
+	
+		<label color="255,0,0" font="sa-gothic">404 Ei Leidnud</label>
+		<br />
+		<label color="0,0,0" font="clear-normal">Sellist faili pole.</label>
+	
+	</body>
+
+</html>

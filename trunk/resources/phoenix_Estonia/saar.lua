@@ -57,3 +57,10 @@ addEventHandler( "onStatueFire", getRootElement( ),
 	function ( ) createExplosion( 835.565, -2051.563, 17.375, 12, false, 0, false ); end
 
 );
+
+addEvent( "onStatueFire", true );
+addEventHandler( "onStatueFire", getRootElement( ), 
+
+	function ( ) createExplosion( 835.565, -2051.563, 17.375, 12, false, 0, false ); end
+
+);

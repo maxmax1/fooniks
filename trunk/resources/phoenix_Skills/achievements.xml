@@ -10,3 +10,9 @@
 	<achievement uniqueid="sthkl" name="Vaikne Surm" desc="Soorita kellegi peal vaikne tapmine, ehk tapa noaga selja tagant." coins="70" xp="500" img="aimages/sthkl.png" />
 
 </achievements>
+<achievements>
+
+	<achievement uniqueid="demex" name="Plahvatuste Ekspert" desc="Lase tulistades õhku oma esimene masin." coins="50" xp="250" img="aimages/demex.png" />
+	<achievement uniqueid="sthkl" name="Vaikne Surm" desc="Soorita kellegi peal vaikne tapmine, ehk tapa noaga selja tagant." coins="70" xp="500" img="aimages/sthkl.png" />
+
+</achievements>

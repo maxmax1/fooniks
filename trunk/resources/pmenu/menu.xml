@@ -10,3 +10,9 @@
 	<menuitem loadstring="exports.phoenix_Cops:isACop( thePlayer );" aType="sevent" aStr="onPoliceCuff" maxdist="2.0">Pane Raudu/Vabasta</menuitem>
 
 </pmenu>
+<pmenu>
+
+	<menuitem loadstring="exports.phoenix_Cops:isACop( thePlayer );" aType="sevent" aStr="onBadgeShowRequest" maxdist="5.0">N2ita Ametim2rki</menuitem>
+	<menuitem loadstring="exports.phoenix_Cops:isACop( thePlayer );" aType="sevent" aStr="onPoliceCuff" maxdist="2.0">Pane Raudu/Vabasta</menuitem>
+
+</pmenu>
