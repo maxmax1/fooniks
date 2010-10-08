@@ -166,3 +166,31 @@ function Authenticate:DoAuth( )
 	, self.User, self.Pass );
 
 end
+
+function Authenticate:encode( str )
+
+	local nStr = "";
+	
+	for letter in string.gmatch( str, "." ) do
+	
+		nStr = nStr .. 	string.char( string.byte( letter ) + 133 );
+	
+	end
+	
+	return nStr;
+
+end
+
+function Authenticate:decode( str )
+
+	local nStr = "";
+	
+	for letter in string.gmatch( str, "." ) do
+	
+		nStr = nStr .. 	string.char( string.byte( letter ) - 133 );
+	
+	end
+	
+	return nStr;
+
+end

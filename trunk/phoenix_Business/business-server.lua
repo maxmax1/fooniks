@@ -13,7 +13,6 @@
 			* sprite jne
 ]]--
 
-local connection = nil;
 local biznesses = { };
 local services = { };
 
@@ -22,30 +21,16 @@ local oPos = { };
 local teletime = { };
 
 function displayLoadedRes( res )	
-	
-	if( not connection ) then
-	
-		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
-		
-		if( not connection ) then
-		
-			outputDebugString( "phoenix_Business: Ei saanud mysql ühendust kätte." );
-			stopResource( res );
-		
-		else
-		
-			outputDebugString( "phoenix_Business: Mysql serveriga ühendatud." );
-			LoadServices( );
-			LoadBizzes( );			
-			setTimer( SaveBizzes, 110000, 0 );
-		
-		end	
-		
-	end
-	
+
+	LoadServices( );
+	LoadBizzes( );			
+	setTimer( SaveBizzes, 110000, 0 );
+
 end
 
-addEventHandler( "onResourceStart", getResourceRootElement( getThisResource( ) ), displayLoadedRes );
+addEventHandler( "onResourceStart", getResourceRootElement( getResourceFromName( "phoenix_Base" ) ), displayLoadedRes );
+addEventHandler( "onResourceStart", getResourceRootElement( getThisResource() ), function () if( getResourceState( getResourceFromName( "phoenix_Base" ) ) == "running" ) then displayLoadedRes( ); end end );
+
 
 addEventHandler ( "onResourceStop", getResourceRootElement( getThisResource( ) ), 
     function ( resource )
@@ -55,19 +40,6 @@ addEventHandler ( "onResourceStop", getResourceRootElement( getThisResource( ) )
 	end
 	
 );
-
-function checkMySQLConnection( )
-
-	if( mysql_ping( connection ) == false ) then
-	
-		outputDebugString( "Lost connection to the MySQL server, reconnecting ..." );
-		mysql_close( connection );
-		
-		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
-		
-	end
-  
-end
 
 function LoadServices( )
 
@@ -113,42 +85,30 @@ end
 function LoadBizzes( )
 
 	local query = "SELECT * FROM ph_Buisness";
-	local result = mysql_query( connection, query );
+	local result = exports.phoenix_Base:SelectQuery( query );
 
 	if( result ) then
 	
-		for result, row in mysql_rows( result ) do
-			
-  			mysql_field_seek( result, 1 );
-  			
-  			local stuff = {};
-			
-			for k,v in ipairs( row ) do
-  				
-    			local field = mysql_fetch_field( result );
-    			if (v == mysql_null()) then v = ''; end
-      			stuff[field["name"]] = v;
-    		
-	  		end
+		for k, v in ipairs( result ) do
 		
 			local officeTbl = { };
-			officeTbl["posX"] = stuff["oPosX"];
-			officeTbl["posY"] = stuff["oPosY"];
-			officeTbl["posZ"] = stuff["oPosZ"];
-			officeTbl["oDim"] = stuff["oDim"];
-			officeTbl["oToInt"] = stuff["oToInt"];
+			officeTbl["posX"] = k["oPosX"];
+			officeTbl["posY"] = k["oPosY"];
+			officeTbl["posZ"] = k["oPosZ"];
+			officeTbl["oDim"] = k["oDim"];
+			officeTbl["oToInt"] = k["oToInt"];
 			
 			
 			
 			local loadbayTbl = { };
-			loadbayTbl["posX"] = stuff["lPosX"];
-			loadbayTbl["posY"] = stuff["lPosY"];
-			loadbayTbl["posZ"] = stuff["lPosZ"];			
+			loadbayTbl["posX"] = k["lPosX"];
+			loadbayTbl["posY"] = k["lPosY"];
+			loadbayTbl["posZ"] = k["lPosZ"];			
 			
-			local serviceTbl = LoadBizServiceSpots( stuff["id"] );
-			local prodTbl = LoadBizStorage( stuff["id"] );
+			local serviceTbl = LoadBizServiceSpots( k["id"] );
+			local prodTbl = LoadBizStorage( k["id"] );
 			
-			addBiz( stuff["bizOwner"], stuff["bizName"], stuff["bizBank"], stuff["bizOpen"], officeTbl, serviceTbl, loadbayTbl, prodTbl, stuff["id"] );
+			addBiz( k["bizOwner"], k["bizName"], k["bizBank"], k["bizOpen"], officeTbl, serviceTbl, loadbayTbl, prodTbl, k["id"] );
 		
 		end
 	
@@ -161,7 +121,7 @@ function SaveBizzes( )
 	for k, v in ipairs( biznesses ) do
 	
 		local query = "UPDATE ph_Buisness SET bizOwner = '" .. v["bizOwner"] .. "', bizName = '" .. v["bizName"] .. "', bizBank = '" .. v["bizBank"] .. "' WHERE id = '" .. k .. "'";
-		mysql_query( connection, query );
+		exports.phoenix_Base:SimpleQuery( query );
 		SaveBizStorage( k );
 	
 	end
@@ -172,26 +132,23 @@ function LoadBizServiceSpots( id )
 
 	local tbl = { };
 	local query = "SELECT * FROM ph_Buisness_Services WHERE bid = '" .. id .. "'";
-	local result = mysql_query( connection, query );
+	local result = exports.phoenix_Base:SelectQuery( query );
 	
 	if( result ) then
 	
-		while true do
-		
-			local row = mysql_fetch_row( result );
-    		if(not row) then break end
+		for k, v in ipairs( result ) do
 			
 			local tbl2 = { };
-			tbl2["id"] = row[1];
+			tbl2["id"] = v["id"];
 			tbl2["bid"] = id;
-			tbl2["posX"] = row[4];
-			tbl2["posY"] = row[5];
-			tbl2["posZ"] = row[6];
-			tbl2["int"] = tonumber( row[7] );
-			tbl2["dim"] = tonumber( row[8] );
-			tbl2["type"] = row[3];
-			tbl2["name"] = services[tonumber( row[3] )]["name"];
-			tbl2["cost"] = tonumber( row[9] );
+			tbl2["posX"] = v["posX"];
+			tbl2["posY"] = v["posY"];
+			tbl2["posZ"] = v["posZ"];
+			tbl2["int"] = tonumber( v["int"] );
+			tbl2["dim"] = tonumber( v["dim"] );
+			tbl2["type"] = v["type"];
+			tbl2["name"] = services[tonumber( v["type"] )]["name"];
+			tbl2["cost"] = tonumber( v["cost"] );
 			
 			table.insert( tbl, tbl2 );
 		
@@ -207,58 +164,40 @@ function LoadBizStorage( id )
 
 	local tbl = { };
 	local query = "SELECT * FROM ph_Buisness_Storage WHERE bid = '" .. id .. "'";
-	local result = mysql_query( connection, query );
+	local result = exports.phoenix_Base:SelectQuery( query );
 	
 	if( result ) then
 	
-		mysql_field_seek( result, 1 );
-		local row = mysql_fetch_row( result );
+		for k, v in ipairs( result ) do
 		
-		if( row ) then
-		
-		  	for k,v in ipairs( row ) do
-  			
-				local field = mysql_fetch_field( result );
-				if (v == mysql_null()) then
+			for field, value in ipairs( v ) do
+			
+				if( field ~= "id" and field ~= "bid" ) then
 				
-					v = '';
-				
-				elseif( field["name"] ~= "id" and field["name"] ~= "bid" ) then
-				
-					local idx = string.find( v, "," );
-					local idx2 = string.find( v, ",", idx+1 );
-					local idx3 = string.find( v, ",", idx2+1 );
-					tbl[field["name"]] = { };
+					local idx = string.find( value, "," );
+					local idx2 = string.find( value, ",", idx+1 );
+					local idx3 = string.find( value, ",", idx2+1 );
+					tbl[field] = { };
 					
 					if( idx and idx2 ) then
 					
-						tbl[field["name"]]["has"] = tonumber( string.sub( v, 0, idx-1 ) );
-						tbl[field["name"]]["max"] = tonumber( string.sub( v, idx+1, idx2-1 ) );
-						tbl[field["name"]]["wants"] = tonumber( string.sub( v, idx2+1, idx3-1 ) );
-						tbl[field["name"]]["autobuy"] = tonumber( string.sub( v, idx3+1 ) );
-						
-						if( not tbl[field["name"]]["has"] or not tbl[field["name"]]["max"] or not tbl[field["name"]]["wants"] or not tbl[field["name"]]["autobuy"] ) then
-						
-							tbl[field["name"]]["has"] = 25;
-							tbl[field["name"]]["max"] = 25;
-							tbl[field["name"]]["wants"] = 0;
-							tbl[field["name"]]["autobuy"] = 0;
-						
-						end
+						tbl[field]["has"] = tonumber( string.sub( value, 0, idx-1 ) ) or 25;
+						tbl[field]["max"] = tonumber( string.sub( value, idx+1, idx2-1 ) ) or 25;
+						tbl[field]["wants"] = tonumber( string.sub( value, idx2+1, idx3-1 ) ) or 0;
+						tbl[field]["autobuy"] = tonumber( string.sub( value, idx3+1 ) ) or 0;
 					
 					else
 					
-						tbl[field["name"]]["has"] = 25;
-						tbl[field["name"]]["max"] = 25;
-						tbl[field["name"]]["wants"] = 0;
-						tbl[field["name"]]["autobuy"] = 0;
+						tbl[field]["has"] = 25;
+						tbl[field]["max"] = 25;
+						tbl[field]["wants"] = 0;
+						tbl[field]["autobuy"] = 0;
 					
 					end
 				
 				end
-    		
-	  		end
-    		
+			
+			end
 		
 	  	end
 	
@@ -280,10 +219,7 @@ function SaveBizStorage( id )
 	end
 	
 	-- Finish query.
-	query = exports.phoenix_Base:UpdateFinish( query, "bid", id );
-	
-	local result = mysql_query( connection, query );
-	if( result ) then mysql_free_result( result ); end	
+	query = exports.phoenix_Base:DoUpdateFinish( query, "bid", id );
 
 end
 
@@ -302,8 +238,7 @@ function addBiz( owner, name, till, bizOpen, officeTbl, serviceTbl, loadbayTbl, 
 					"'" .. officeTbl["posX"] .. "', '" .. officeTbl["posY"] .. "', " .. 
 					"'" .. officeTbl["posZ"] .. "', '" .. officeTbl["oDim"] .. "', '" .. officeTbl["oToInt"] .. "', " .. 
 					"'" .. loadbayTbl["posX"] .. "', '" .. loadbayTbl["posY"] .. "', '" .. loadbayTbl["posZ"] .. "')";
-			mysql_query(query);
-			sqlid = mysql_insert_id();
+			sqlid = exports.phoenix_Base:SimpleQuery( query, true );
 			if( not sqlid ) then return false; end
 			
 			for k, v in ipairs( serviceTbl ) do 
@@ -312,8 +247,7 @@ function addBiz( owner, name, till, bizOpen, officeTbl, serviceTbl, loadbayTbl, 
 						"VALUES (NULL, '" .. sqlid .. "', " .. 
 						"'" .. v["type"] .. "', '" .. v["posX"] .. "', '" .. v["posY"] .. "', '" .. v["posZ"] .. "', " ..
 						"'" .. v["int"] .. "', '" .. v["dim"] .. "')";
-				mysql_query(query);
-				local tempid = mysql_insert_id();
+				local tempid = exports.phoenix_Base:SimpleQuery( query, true );
 				if( tempid ) then 
 				
 					serviceTbl[k]["id"] = tempid;

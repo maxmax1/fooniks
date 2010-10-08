@@ -1,0 +1,9 @@
+<meta>
+	<info author="eRP-Gaming" type="script" name="pmenu" description="A player interaction menu system using xml config and loadstring." />
+	
+	<script src="pmenu_s.lua" type="server" />
+	<script src="pmenu_c.lua" type="client" />
+	
+	<file src="menu.xml" type="server" />
+	
+</meta>

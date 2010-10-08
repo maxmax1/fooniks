@@ -1,13 +1,30 @@
 <meta>
 	<info author="eRP-Gaming" version="0.2" type="script" name="Phoenix_Vehicles" description="Phoenix Vehicles system." />
+	
+	<script src="vehData.lua" type="server" />
+	<script src="vehSecurity.lua" type="server" />
+	
+	<script src="hotwire.lua" type="client" />
+	
 	<script src="vehicles-server.lua" type="server" />
 	<script src="vehmenu-server.lua" type="server" />
 	<script src="vehmenu-client.lua" type="client" />
 	<!--<script src="vehicles-client.lua" type="client" /> 
-
 	<file src="files/sounds/engine.wav" />-->
+	
+	
+	<script src="jacking.lua" type="client" />
+	<script src="jacking_s.lua" type="server" />
+	
 	<file src="files/sounds/alarmkinni.wav" />
 	<file src="files/sounds/alarmon.wav" />
 	<file src="files/sounds/alarmlahti.wav" />
+	
+	<!-- Picklock -->
+	<file src="jacking/lock.png" />
+	<file src="jacking/pick.png" />
+	<file src="jacking/pin.png" />
+	
+	
 	
 </meta>

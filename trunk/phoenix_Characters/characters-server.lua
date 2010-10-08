@@ -1,35 +1,22 @@
-connection = nil;
 charFields = { };
 characters = { };
 
 local allFields = { };
 
+addEvent( "onCharacterSave", true );
+
 function displayLoadedRes( res )	
-	
-	if( not connection ) then
-	
-		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
-		
-		if( not connection ) then
-		
-			outputDebugString( "Phoenix-Characters ei saanud mysql ühendust kätte." );
-			stopResource( res );
-		
-		else
-		
-			loadCharfields( );
-			getCharNames( );
-			outputDebugString( "Phoenix-Characters: Mysql serveriga ühendatud." );
-			setTimer( updatePlayers, 10000, 0 );
-			setTimer( savePlayers, 45000, 0 );
-		
-		end	
-		
-	end
+
+	loadCharfields( );
+	getCharNames( );
+	outputDebugString( "Phoenix-Characters: Mysql serveriga ühendatud." );
+	setTimer( updatePlayers, 10000, 0 );
+	setTimer( savePlayers, 45000, 0 );
 	
 end
 
-addEventHandler( "onResourceStart", getResourceRootElement( getThisResource( ) ), displayLoadedRes );
+addEventHandler( "onResourceStart", getResourceRootElement( getResourceFromName( "phoenix_Base" ) ), displayLoadedRes );
+addEventHandler( "onResourceStart", getResourceRootElement( getThisResource() ), function () if( getResourceState( getResourceFromName( "phoenix_Base" ) ) == "running" ) then displayLoadedRes( ); end end );
 
 function loadCharfields( )
 
@@ -80,17 +67,14 @@ function getCharNames( triggerFor )
 	characters = { };
 	
 	local query = "SELECT id, name FROM ph_characters";
-	local result = mysql_query( connection, query );
+	local result = exports.phoenix_Base:SelectQuery( query );
 	if( result ) then
 	
- 		while true do
+ 		for k, v in ipairs( result ) do
   		
-    		local row = mysql_fetch_row( result );
-    		if(not row) then break end
-		
-			local sqlId = tonumber( row[1] );
+			local sqlId = tonumber( v["id"] );
 			if( sqlId ~= nil and sqlId ~= false ) then
-				characters[sqlId] = row[2];
+				characters[sqlId] = v["name"];
 			end		
 		
 		end
@@ -122,19 +106,6 @@ function getCharacterName( sqlId )
 
 end
 
-function checkMySQLConnection ( )
-
-	if( mysql_ping( connection ) == false ) then
-	
-		outputDebugString( "Lost connection to the MySQL server, reconnecting ..." );
-		mysql_close( connection );
-		
-		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
-		
-	end
-  
-end
-	
 function charactersRequest( thePlayer )
 
 	if( not client and not thePlayer ) then
@@ -166,7 +137,8 @@ function charactersRequest( thePlayer )
 	
 	setElementData( client, "isInCharSelection", "1" );
 	
-	setCameraMatrix( client, 256.7190, -42.1370, 1003.0230, 255.7190, -41.1370, 1002.0230 );
+	--setCameraMatrix( client, 256.7190, -42.1370, 1003.2230, 255.7190, -41.1370, 1002.0230 );
+	triggerClientEvent( client, "rotateAroundPlayer", client, true, client, 1, 2 );
 	
 	local charInf = GetUserCharactersAsTable( sqlId );
 	triggerClientEvent( client, "onShowCharacters", client, charInf, 1, false );
@@ -181,7 +153,7 @@ addEventHandler( "onCharactersRequest", getRootElement(), charactersRequest );
 function GetUserCharactersAsTable( sqlId )
 
 	local query = "SELECT id, name, sex, age, model FROM ph_characters WHERE userid = '" .. sqlId .. "'";
-	local result = mysql_query( connection, query );
+	local result = exports.phoenix_Base:SelectQuery( query );
 	
 	local tabel = { };
 	
@@ -189,17 +161,14 @@ function GetUserCharactersAsTable( sqlId )
 	
 		local i = 1;
 		
-  		while true do
-  		
-    		local row = mysql_fetch_row( result );
-    		if(not row) then break end
-  			
+  		for k, v in ipairs( result ) do
+  					
   			tabel[i] = { };
-   			tabel[i]["id"] = row[1];
-   			tabel[i]["name"] = row[2];
-   			tabel[i]["sex"] = row[3];
-   			tabel[i]["age"] = row[4];
-   			tabel[i]["model"] = row[5];
+   			tabel[i]["id"] = v["id"];
+   			tabel[i]["name"] = v["name"];
+   			tabel[i]["sex"] = v["sex"];
+   			tabel[i]["age"] = v["age"];
+   			tabel[i]["model"] = v["model"];
    			i = i+1;
 	  		
 		end
@@ -215,30 +184,22 @@ function firstSpawnHandler( selectedChar )
 	if ( not client ) then return 1; end
 	
 	local query = "SELECT * FROM ph_characters WHERE id = '" .. selectedChar .. "'";
-	local result = mysql_query( connection, query );
+	local result = exports.phoenix_Base:SelectQuery( query );
 	
 	local someChange = false;
 	
 	if( result ) then
 		 
-		for result ,row in mysql_rows( result ) do
+		for k, v in ipairs( result ) do
 			
-  			mysql_field_seek( result, 1 );
   			
-  			local playerStuff = {};
-  			
-  			for k,v in ipairs( row ) do
+  			for k2, v2 in ipairs( v ) do
   				
-    			local field = mysql_fetch_field( result );
-    				
-    			if (v == mysql_null()) then v = ''; end
-    				
-      			playerStuff[field["name"]] = v;
-      			setElementData( client, "Character." .. field["name"], v, true );
+      			setElementData( client, "Character." .. k2, v2, true );
       			
-      			if( not charFields[field["name"]] ) then
+      			if( not charFields[k2] ) then
       			
-					charFields[field["name"]] = "1";
+					charFields[k2] = "1"; -- Do not sync unless explitly set!
 					someChange = true;
       				
       			end
@@ -247,30 +208,32 @@ function firstSpawnHandler( selectedChar )
 	  				
 			setElementAlpha( client, 255 );
 	  		
-	  		if( tonumber( playerStuff["health"] ) < 5 ) then playerStuff["health"] = 15; end
+	  		if( tonumber( v["health"] ) < 5 ) then v["health"] = 15; end
 	  		
-	  		setElementInterior( client, tonumber( playerStuff["interior"] ) );	
-  			setElementDimension( client, tonumber( playerStuff["dimension"] ) );
+	  		setElementInterior( client, tonumber( v["interior"] ) );	
+  			setElementDimension( client, tonumber( v["dimension"] ) );
 	  		
-	  		setPedSkin( client, playerStuff["model"] );	  
+	  		setPedSkin( client, v["model"] );	  
 			
-	  		setElementPosition( client, playerStuff["posX"], playerStuff["posY"], playerStuff["posZ"] );
-	  		setPedRotation( client, playerStuff["angle"] );
-	  		setElementHealth( client, tonumber( playerStuff["health"] ) );
-	  		setPlayerMoney( client, tonumber( playerStuff["money"] ) );
+	  		setElementPosition( client, v["posX"], v["posY"], v["posZ"] );
+	  		setPedRotation( client, v["angle"] );
+	  		setElementHealth( client, tonumber( v["health"] ) );
+	  		setPlayerMoney( client, tonumber( v["money"] ) );
+			triggerClientEvent( client, "rotateAroundPlayer", client );
 	  		setCameraTarget( client, client );
-	  		setPlayerNametagText( client, playerStuff["name"] );
+	  		setPlayerNametagText( client, v["name"] );
 			
-			setElementData( client, "isInCharSelection", "0" );
+			removeElementData( client, "isInCharSelection" );
 	  		
 	  		triggerEvent( "onSkillsRequired", client, client );
 			exports.phoenix_Skills:LoadSkillsForPlayer( client );			
+			exports.phoenix_Skills:LoadAchForPlayer( client );			
 			
 	  		triggerEvent( "onPocketsRequired", client, client );
 			
 			triggerClientEvent( client, "onNewCharField", client, allFields );
 			
-			triggerEvent( "onCharacterSpawn", client, client, playerStuff );
+			triggerEvent( "onCharacterSpawn", client, client, v );
 	  		
 		end
 		
@@ -303,7 +266,7 @@ function updatePlayer( thePlayer ) -- Updates player status for saving...
 	if( not thePlayer ) then return false; end
 	
 	local isInCharSel = getElementData( thePlayer, "isInCharSelection" );
-	if( isInCharSel and isInCharSel == "1" ) then
+	if( isInCharSel ) then
 	
 		return false;
 	
@@ -382,8 +345,7 @@ end
 function savePlayer( thePlayer, timed )
 
 	outputDebugString( "Saving Player" );
-	checkMySQLConnection( );
-
+	
 	if( not charFields ) then return false; end	
 	if( not thePlayer or not isElement ( thePlayer ) ) then
 	
@@ -424,21 +386,18 @@ function savePlayer( thePlayer, timed )
 	if( added ) then
 	
 		-- Finish query.
-		query = exports.phoenix_Base:UpdateFinish( query, "id", charId);
-		
-		local result = mysql_query( connection, query );
+		local result = exports.phoenix_Base:DoUpdateFinish( query, "id", charId);
 		if( not result ) then
 		
 			outputDebugString( "Updated Player: (" .. tostring( result ) .. ")" );
 			outputDebugString( tostring( query ) );
 		
 		end
-		if( result ~= false and result ~= nil ) then mysql_free_result( result ); end
 	
 	end
 	
-	exports.phoenix_Skills:SaveSkillsForPlayer( thePlayer );
-	triggerEvent( "onPocketsSave", thePlayer, thePlayer ); -- Save Pockets too. :)	
+	outputDebugString( "Saved Player" );	
+	triggerEvent( "onCharacterSave", thePlayer, thePlayer ); -- Let other scripts know it's time to save.
 	return true;
 
 end
@@ -453,10 +412,9 @@ addEventHandler( "onNewCharacterDone", getRootElement( ),
 		local userId = getElementData( client, "User.userid" );
 		local query = "INSERT INTO ph_characters(id, userid, name, sex, age, model, ethnicity, backStory) " ..
 					  "VALUES(NULL, '" .. userId .. "', '" .. newData["name"] .. "', '" .. newData["sex"] .. "', '" .. newData["age"] .. "', '" .. newData["skin"] .. "', '" .. newData["race"] .. "', '" .. newData["story"] .. "')";
-		mysql_query( connection, query );
+		exports.phoenix_Base:SimpleQuery(query);
 		outputConsole( query );
 		
-		if( result ~= false and result ~= nil ) then mysql_free_result( result ); end
 		charactersRequest( client );
 	
 	end

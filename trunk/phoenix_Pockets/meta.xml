@@ -10,6 +10,9 @@
 	<export function="getSlotByItem" type="client" />
 	<export function="clearPocket" type="server" />
 	<export function="clearPockets" type="server" />
+	
+	<export function="getSlotData" type="server" />
+	<export function="setSlotData" type="server" />
 
 	<settings>
 		<setting name="#NUM_POCKETS" value="6" />

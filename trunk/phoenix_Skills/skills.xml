@@ -16,5 +16,7 @@
 
   <skill id="LEGAL" nextLevel="1000" levelRatio="1.05" type="SKILL_OTHER" name="Advokaadi" />
   <skill id="MYCHAR" nextLevel="1300" levelRatio="1.9" type="SKILL_OTHER" name="Karakteri" />
+  
+  <skill id="LOCKPICK" nextLevel="1100" levelRatio="1.2" type="SKILL_OTHER" name="Muukimise" />
  
 </skills>

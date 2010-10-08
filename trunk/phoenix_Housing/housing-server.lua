@@ -1,29 +1,12 @@
-connection = nil;
-
 function displayLoadedRes( res )	
-	
-	if( not connection ) then
-	
-		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
-		
-		if( not connection ) then
-		
-			outputDebugString( "phoenix_Housing: Ei saanud mysql ühendust kätte." );
-			stopResource( res );
-		
-		else
-		
-			outputDebugString( "phoenix_Housing: Mysql serveriga ühendatud." );
-			LoadHousing();			
-			setTimer( SaveHousing, 110000, 0 );
-		
-		end	
-		
-	end
+
+	LoadHousing();			
+	setTimer( SaveHousing, 110000, 0 );
 	
 end
 
-addEventHandler( "onResourceStart", getResourceRootElement( getThisResource( ) ), displayLoadedRes );
+addEventHandler( "onResourceStart", getResourceRootElement( getResourceFromName( "phoenix_Base" ) ), displayLoadedRes );
+addEventHandler( "onResourceStart", getResourceRootElement( getThisResource() ), function () if( getResourceState( getResourceFromName( "phoenix_Base" ) ) == "running" ) then displayLoadedRes( ); end end );
 
 addEventHandler ( "onResourceStop", getResourceRootElement( getThisResource( ) ), 
     function ( resource )
@@ -34,82 +17,41 @@ addEventHandler ( "onResourceStop", getResourceRootElement( getThisResource( ) )
 	
 );
 
-function checkMySQLConnection( )
-
-	if( mysql_ping( connection ) == false ) then
-	
-		outputDebugString( "Lost connection to the MySQL server, reconnecting ..." );
-		mysql_close( connection );
-		
-		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
-		
-	end
-  
-end
-
 function LoadHousing( )
 
-	local query = "SELECT * FROM ph_Houses";
-	local result = mysql_query( connection, query );
+	local result = exports.phoenix_Base:SelectQuery( "SELECT * FROM ph_Houses" );
 	
 	if( result ) then
 	
 		local i = 1;
 		
-  		while true do
-  		
-    		local row = mysql_fetch_row( result );
-    		if(not row) then break end
-			
-			-- TODO: By field name, so editing sql field order doesent mess everything up. :)
-			
-			local ret = addHouse( row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[12], row[11], row[13], row[14], row[18], row[1], row[15], row[16], row[17], row[18] );
-			
+  		for k, v in ipairs( result ) do
+		
+			local ret = addHouse( 
+							v["address"],
+							v["posX"],
+							v["posY"],
+							v["posZ"],
+							v["trashX"],
+							v["trashY"],
+							v["trashZ"],
+							v["trashAng"],
+							v["interior"],
+							v["Price"],
+							v["Owner"],
+							v["Rentable"],
+							v["RentCost"],
+							v["locked"],
+							v["id"],
+							v["Renters"],
+							v["Safe"],
+							v["HasSafe"],
+							v["houseUpgrading"]
+			);
+		
 		end
 		
   	end
-
-end
-
-function SaveHousing( )
-
-	checkMySQLConnection( );
-
-	local houses = getElementsByType( "House" );
-	
-	for k,v in ipairs( houses ) do
-	
-		local myId = getElementData( v, "houseId" );	
-		local price = getElementData( v, "price" );
-		local owner = getElementData( v, "owner" );
-		local rentable = getElementData( v, "rentable" );
-		local rentcost = getElementData( v, "rentcost" );
-		local renters = getElementData( v, "Renters" );
-		local locked = getElementData( v, "locked" );
-		local safeInf = getElementData( v, "Safe" );
-		local hasSafe = getElementData( v, "HasSafe" );
-		
-		if( myId ~= false ) then
-		
-			local query = exports.phoenix_Base:MysqlUpdatebuild("ph_Houses");
-				
-			query = exports.phoenix_Base:MysqlSetField( query, "Price", price );
-			query = exports.phoenix_Base:MysqlSetField( query, "Owner", owner );
-			query = exports.phoenix_Base:MysqlSetField( query, "Rentable", rentable );
-			query = exports.phoenix_Base:MysqlSetField( query, "RentCost", rentcost );
-			query = exports.phoenix_Base:MysqlSetField( query, "Renters", renters );
-			query = exports.phoenix_Base:MysqlSetField( query, "locked", locked );
-			query = exports.phoenix_Base:MysqlSetField( query, "HasSafe", hasSafe );
-			query = exports.phoenix_Base:MysqlSetField( query, "Safe", safeInf );
-			
-			query = exports.phoenix_Base:UpdateFinish( query, "id", myId );
-		
-			local result = mysql_query( connection, query );
-			if( result ~= false and result ~= nil ) then mysql_free_result( result ); end
-		
-		end
-	
-	end
 
 end
 
@@ -125,11 +67,10 @@ function addHouse( address, posX, posY, posZ, trashX, trashY, trashZ, trashAng, 
 	
 		-- insert
 		local query = "INSERT INTO ph_Houses(id, address, posX, posY, posZ, interior, trashX, trashY, trashZ, trashAng) VALUES(NULL, '" .. address .. "', '" .. posX .. "', '" .. posY .. "', '" .. posZ .. "', '" .. interior .. "', '" .. trashX .. "', '" .. trashY .. "', '" .. trashZ .. "', '" .. trashAng .. "')";
-		local result = mysql_query( connection, query );
-		if( result ~= false and result ~= nil ) then
+		local result = exports.phoenix_Base:SimpleQuery( query, true );
+		if( result ) then
 		
-			myId = mysql_insert_id( connection );
-			mysql_free_result( result );
+			myId = result;
 			
 		end
 	
@@ -182,6 +123,43 @@ function addHouse( address, posX, posY, posZ, trashX, trashY, trashZ, trashAng, 
 	end	
 	return element;
 	
+end
+
+function SaveHousing( )
+
+	local houses = getElementsByType( "House" );
+	
+	for k,v in ipairs( houses ) do
+	
+		local myId = getElementData( v, "houseId" );	
+		local price = getElementData( v, "price" );
+		local owner = getElementData( v, "owner" );
+		local rentable = getElementData( v, "rentable" );
+		local rentcost = getElementData( v, "rentcost" );
+		local renters = getElementData( v, "Renters" );
+		local locked = getElementData( v, "locked" );
+		local safeInf = getElementData( v, "Safe" );
+		local hasSafe = getElementData( v, "HasSafe" );
+		
+		if( myId ~= false ) then
+		
+			local query = exports.phoenix_Base:MysqlUpdatebuild("ph_Houses");
+				
+			query = exports.phoenix_Base:MysqlSetField( query, "Price", price );
+			query = exports.phoenix_Base:MysqlSetField( query, "Owner", owner );
+			query = exports.phoenix_Base:MysqlSetField( query, "Rentable", rentable );
+			query = exports.phoenix_Base:MysqlSetField( query, "RentCost", rentcost );
+			query = exports.phoenix_Base:MysqlSetField( query, "Renters", renters );
+			query = exports.phoenix_Base:MysqlSetField( query, "locked", locked );
+			query = exports.phoenix_Base:MysqlSetField( query, "HasSafe", hasSafe );
+			query = exports.phoenix_Base:MysqlSetField( query, "Safe", safeInf );
+			
+			query = exports.phoenix_Base:DoUpdateFinish( query, "id", myId );
+		
+		end
+	
+	end
+
 end
 
 function getHousePriceFromZone( x, y, z )

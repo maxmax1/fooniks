@@ -113,6 +113,7 @@ addEventHandler("SyncItem", getResourceRootElement( getThisResource( ) ),
 			items[k]['type'] = v['type'];
 			items[k]['data'] = v['data'];
 			items[k]['id'] = v['id'];
+			items[k]['pType'] = v['pType'];
 		
 		end
 		
@@ -126,9 +127,9 @@ function getSlotByItem( item )
 
 	for k, v in ipairs( items ) do
 	
-		if( tonumber( items[k]['type'] ) == item ) then
+		if( tonumber( items[k]['pType'] ) == item ) then
 		
-			return i;
+			return v['id'];
 		
 		end
 		

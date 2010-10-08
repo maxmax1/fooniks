@@ -121,6 +121,7 @@ function PhoenixTab:Calculate( )
 	self.buttons[5] = { };
 	self.buttons[5].pos = { };
 	self.buttons[5].file = "seaded";
+	self.buttons[5].func = function () cSettings:Show( ); end;
 	
 	self.buttons[5].pos[1] = 876 * self.scale;
 	self.buttons[5].pos[2] = self.sy - butH;
@@ -164,12 +165,20 @@ function PhoenixTab:Calculate( )
 	self.allElems[3][2] = self.sy - ( 390 * self.scale );
 	self.allElems[3][3] = 120 * self.scale;
 	self.allElems[3][4] = ( 98 * self.scale );
+	
+	-- changeChars
+	
+	self.changeChars = { };
+	self.changeChars[1] = 522 * self.scale;
+	self.changeChars[2] = self.sy - ( 65 * self.scale );
+	self.changeChars[3] = ( 143 * self.scale );
+	self.changeChars[4] = ( 27 * self.scale );	
 
 end
 
 function PhoenixTab:IsMouseOver( mouseX, mouseY, eCords )
 
-	return ( mouseX >= eCords[1] and mouseX <= eCords[1]+eCords[3] and mouseY >= eCords[2] and mouseY <= eCords[2]+eCords[4] );
+	return ( mouseX and mouseY and mouseX >= eCords[1] and mouseX <= eCords[1]+eCords[3] and mouseY >= eCords[2] and mouseY <= eCords[2]+eCords[4] );
 
 end
 
@@ -200,6 +209,7 @@ function PhoenixTab:DoAlpha( )
 	end
 	
 	self.alphaW = tocolor( 255, 255, 255, self.cAlpha );
+	self.alphaHW = tocolor( 255, 255, 255, 25 * ( self.cAlpha / 255 ) );
 	self.alphaY = tocolor( 200, 200, 0, self.cAlpha );
 
 end
@@ -244,8 +254,13 @@ end
 function PhoenixTab:DrawButtons( )
 
 	local mX, mY = getCursorPosition( );
-	mX = mX * self.sx;
-	mY = mY * self.sy;
+	
+	if( mX and mY ) then
+	
+		mX = mX * self.sx;
+		mY = mY * self.sy;
+	
+	end
 	local noHov = false;
 
 	for k, v in ipairs( self.buttons ) do
@@ -264,6 +279,12 @@ function PhoenixTab:DrawButtons( )
 		end
 		local imgS = "images/" .. v.file .. hov .. ".png";
 		dxDrawImage( v.pos[1], v.pos[2], v.pos[3], v.pos[4], imgS, 0, 0, 0, self.alphaW, true );
+	
+	end
+	
+	if( self.bIsOpen and self:IsMouseOver( mX, mY, self.changeChars ) ) then
+	
+		dxDrawRectangle( self.changeChars[1], self.changeChars[2], self.changeChars[3], self.changeChars[4], self.alphaHW, true );
 	
 	end
 
@@ -299,14 +320,25 @@ function PhoenixTab:DoEvents( )
 						
 						end
 						
-						self.buttons[k].hover = false;
-						self.bIsOpen = false;
+						--[[self.buttons[k].hover = false;
+						self.bIsOpen = false;]]--
+						self.cAlpha = 255;
+						self.alphaChange = -1 * self.ALPHA_THRESHOLD;
 						return false;
 					
 					end
 				
-				end			
-			
+				end
+				
+				if( self.bIsOpen and self:IsMouseOver( aX, aY, self.changeChars ) ) then
+				
+					triggerServerEvent( "onCharactersRequest", self.player, self.player ); 
+					
+					self.cAlpha = 255;
+					self.alphaChange = -3 * self.ALPHA_THRESHOLD;
+				
+				end	
+				
 				if( self.bIsOpen ) then
 				
 					for k, v in ipairs( self.allElems ) do
@@ -324,28 +356,7 @@ function PhoenixTab:DoEvents( )
 				
 				end
 			
-			end
-		
-		end
-	
-	);
-
-	addEventHandler( "onClientCloseTutoGui", self.rootElement,
-	
-		function ( )
-		
-			self.bIsOpen = true;
-		
-		end
-	
-	);
-
-	addEventHandler( "onClientTutorialStart", self.rootElement,
-	
-		function ( )
-		
-			self.cAlpha = 255;
-			self.alphaChange = -1 * self.ALPHA_THRESHOLD;
+			end		
 		
 		end
 	
@@ -369,10 +380,10 @@ function PhoenixTab:DoEvents( )
 				self:DrawButtons( );
 				
 				-- Draw Center Text
-				dxDrawText( "Mängimise jätkamiseks kliki tühjale ekraaniosale", 0, self.sy - 80, self.sx, self.sy - 3, self.alphaW, 0.9, "default-bold", "center", "bottom", true, true, true );
+				dxDrawText( "MÃ¤ngimise jÃ¤tkamiseks kliki tÃ¼hjale ekraaniosale", 0, self.sy - 80, self.sx, self.sy - 3, self.alphaW, 0.9, "default-bold", "center", "bottom", true, true, true );
 					
 			
-			elseif( isCursorShowing( ) ) then
+			elseif( isCursorShowing( ) and not self.inCharSelection ) then
 			
 				local mx, my, wx, wy, wz = getCursorPosition( );
 				if( my > 0.95 ) then
@@ -421,6 +432,9 @@ end -- function commas
 
 function PhoenixTab:OnShow( )
 
+	self.inCharSelection = ( getElementData( self.player, "isInCharSelection" ) );
+	outputDebugString( tostring( self.inCharSelection ) );
+	
 	-- Update char data...
 	self.charName = getPlayerNametagText( self.player );
 	self.charAge = getElementData( self.player, "Character.age" );
@@ -438,5 +452,21 @@ function PhoenixTab:OnShow( )
 
 end
 
+function PhoenixTab:cacheFiles( )
+
+	local oW = tocolor( 0, 0, 0, 0 );
+	local tbl = { "images/bottom_open.png", "images/bottom_closed.png", "images/top_closed.png", "images/top_open.png", "images/karakterid.png", "images/s6brad.png", "images/abi.png", "images/s6numid.png", "images/seaded.png", "images/karakterid_hover.png", "images/s6brad_hover.png", "images/abi_hover.png", "images/s6numid_hover.png", "images/seaded_hover.png" };
+	for k,v in ipairs( tbl ) do dxDrawImage( 0, 0, 0, 0, v, 0, 0, 0, oW ); end
+
+end
+
 theTab = PhoenixTab:new( );
+theTab:cacheFiles( );
 theTab:DoEvents( );
+
+function onTimer( )
+
+	theTab.inCharSelection = getElementData( theTab.player, "isInCharSelection" );
+
+end
+setTimer( onTimer, 3000, 0 );

@@ -4,6 +4,8 @@
 	<script src="characters-client.lua" type="client" />
 	<script src="character-creation.lua" type="client" />
 	
+	<script src="rotator.lua" type="client" />
+	
 	<export function="getCharacterName" type="server" />
 	<export function="getCharacterName" type="client" />
 	<export function="AddCharField" type="server" />

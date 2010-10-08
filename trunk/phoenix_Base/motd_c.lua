@@ -42,6 +42,12 @@ end
 
 function showHelpPopup( realText )
 
+	if( tonumber( exports.cookies:Cookie( "showmotd" ) ) == 0 ) then
+	
+		return false;
+	
+	end
+	
 	local screenX, screenY = guiGetScreenSize( )
 	local wndPopup = guiCreateWindow( 0, screenY - 20, screenX, 0, '', false ) --350
 	local text = "";

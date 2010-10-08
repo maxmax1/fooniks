@@ -156,6 +156,10 @@ function PoliceBadge:Show( thePlayer )
 	
 		self:SetData( thePlayer );
 	
+	else
+	
+		if( self.isShowing ) then self:Hide(  ); end
+	
 	end
 
 	self.isShowing = true;
@@ -228,6 +232,8 @@ end
 
 function PoliceBadge:DrawButton( )
 
+	if( not isCursorShowing( ) ) then showCursor( true ); end
+
 	local mX, mY = getCursorPosition( );
 	mX = mX * self.sx;
 	mY = mY * self.sy;
@@ -258,13 +264,10 @@ function PoliceBadge:DoEvents( )
 			
 				if( self:IsMouseOver( aX, aY, self.buttonPos ) ) then
 				
+					triggerServerEvent( "doNotWantBadge", self.player );
 					self:Hide( );
 				
 				end
-			
-			elseif( clickElem ) then
-			
-				clickElem
 			
 			end
 		
@@ -294,6 +297,17 @@ function PoliceBadge:DoEvents( )
 		end
 	
 	);
+	
+	addEvent( "onWantSeeBadge", true );
+	addEventHandler( "onWantSeeBadge", self.rootElement, 
+	
+		function ( thePlayer  )
+		
+			theBadge:Show( thePlayer );
+		
+		end
+	
+	);
 
 end
 
@@ -301,5 +315,3 @@ theBadge = PoliceBadge:new( );
 theBadge:DoEvents( );
 
 -- theBadge:Show( );
-
-addCommandHandler( "m2rk", function( ) theBadge:Show( getLocalPlayer( ) ); end );

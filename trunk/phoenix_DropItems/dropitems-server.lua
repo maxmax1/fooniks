@@ -1,56 +1,23 @@
-connection = nil;
-
 function displayLoadedRes( res )	
-	
-	if( not connection ) then
-	
-		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
-		
-		if( not connection ) then
-		
-			outputDebugString( "phoenix_DropItems ei saanud mysql ühendust kätte." );
-			stopResource( res );
-		
-		else
-		
-			outputDebugString( "Mysql serveriga ühendatud." );
-			LoadDropitems();
-			setTimer( SaveDropItems, 120000, 0 );--120000, 0 );
-		
-		end	
-		
-	end
-	
+
+	LoadDropitems();
+	setTimer( SaveDropItems, 120000, 0 );--120000, 0 );
+
 end
 
-addEventHandler( "onResourceStart", getResourceRootElement( getThisResource( ) ), displayLoadedRes );
-
-function checkMySQLConnection ( )
-
-	if( not connection or mysql_ping( connection ) == false ) then
-	
-		outputDebugString( "Lost connection to the MySQL server, reconnecting ..." );
-		if( connection ) then mysql_close( connection ); end
-		
-		connection = mysql_connect( get( "#phoenix_Base.MYSQL_HOST" ), get( "#phoenix_Base.MYSQL_USER" ), get( "#phoenix_Base.MYSQL_PASS" ), get( "#phoenix_Base.MYSQL_DB" ) );
-		
-	end
-  
-end
-
+addEventHandler( "onResourceStart", getResourceRootElement( getResourceFromName( "phoenix_Base" ) ), displayLoadedRes );
+addEventHandler( "onResourceStart", getResourceRootElement( getThisResource() ), function () if( getResourceState( getResourceFromName( "phoenix_Base" ) ) == "running" ) then displayLoadedRes( ); end end );
 
 function LoadDropitems( )
 
-	local query = "SELECT * FROM ph_dropitems";
-	local result = mysql_query( connection, query );
-	local added = 0;
+	local result = exports.phoenix_Base:SelectQuery( "SELECT * FROM ph_dropitems" );
 		 
 	if( result ) then
 		 
-		for result ,row in mysql_rows( result ) do
+		for k, v in ipairs( result ) do
 		
-			-- id 	dropName 	dropType 	dropAmount 	dropX 	dropY 	dropZ 	dropAng 	dropInt 	dropDimension
-			addDropItem( row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[1] );
+			-- id 	dropName 	dropType 	dropAmount 	dropX 	dropY 	dropZ 	dropAng 	dropInt 	dropDim
+			addDropItem( v["dropName"], v["dropType"], v["dropAmount"], v["dropX"], v["dropY"], v["dropZ"], v["dropAng"], v["dropInt"], v["dropDim"], v["id"] );
 		
 		end
 		
@@ -59,8 +26,6 @@ function LoadDropitems( )
 end
 
 function SaveDropItems( )
-
-	checkMySQLConnection( );
 
 	local alldrops = getElementsByType( "DropItems" );
 	
@@ -93,25 +58,17 @@ function SaveDropItems( )
 				query = exports.phoenix_Base:MysqlSetField( query, "dropInt", int );
 				query = exports.phoenix_Base:MysqlSetField( query, "dropDim", dim );
 				
-				query = exports.phoenix_Base:UpdateFinish( query, "id", myId );
-		
-				if( query ~= false) then
-				
-					local result = mysql_query( connection, query );
-					if( result ~= false and result ~= nil ) then mysql_free_result( result ); end
-					
-				end
+				query = exports.phoenix_Base:DoUpdateFinish( query, "id", myId );
 				
 			end
 			
 		else
 		
-			local query = "INSERT INTO `ph_dropitems` (`id`, `dropName`, `dropType`, `dropAmount`, `dropX`, `dropY`, `dropZ`, `dropAng`, `dropInt`, `dropDimension`) VALUES (NULL, '" .. name .. "', '" .. myType .. "', '" .. myData .. "', '" .. dropX .. "', '" .. dropY .. "', '" .. dropY .. "', '" .. ang .. "', '" .. int .. "', '" .. dim .. "')";
-			local result = mysql_query( connection, query );
-			if( result ~= false and result ~= nil ) then
+			local query = "INSERT INTO `ph_dropitems` (`id`, `dropName`, `dropType`, `dropAmount`, `dropX`, `dropY`, `dropZ`, `dropAng`, `dropInt`, `dropDim`) VALUES (NULL, '" .. name .. "', '" .. myType .. "', '" .. myData .. "', '" .. dropX .. "', '" .. dropY .. "', '" .. dropY .. "', '" .. ang .. "', '" .. int .. "', '" .. dim .. "')";
+			local result = exports.phoenix_Base:DoSimpleQuery( query, true );
+			if( result ) then
 			
-				setElementData( v, "dropId", mysql_insert_id( connection ) );
-				mysql_free_result( result );
+				setElementData( v, "dropId", result );
 				
 			end
 		
@@ -143,6 +100,13 @@ function addDropItem( name, iType, data, x, y, z, ang, int, dim, id )
 		setElementData( element, "dropInt", int );
 		setElementData( element, "dropDim", dim );
 		
+		x = tonumber( x );
+		y = tonumber( y );
+		z = tonumber( z );
+		ang = tonumber( ang );
+		int = tonumber( int );
+		dim = tonumber( dim );		
+		
 		local obj = createObject( 1210, x, y, z );
 		setElementParent( obj, element );
 		setElementInterior( element, int );
@@ -162,8 +126,7 @@ function removeDropFromSql( element )
 	if( myId ~= false ) then
 	
 		local query = "DELETE FROM ph_dropitems WHERE id = '" .. myId  .. "' LIMIT 1";
-		local result = mysql_query( connection, query );
-		if( result ~= false and result ~= nil ) then mysql_free_result( result ); end
+		local result = exports.phoenix_Base:DoSimpleQuery( query );
 	
 	end
 

@@ -9,13 +9,24 @@
 	<script src="spikeStrips/strips_c.lua" type="client" />
 	<file src="spikeStrips/strips.xml" type="server" />
 	
-	
 	<!-- Badge Showing -->
 	<script src="badge/badge_s.lua" type="server" />
 	<script src="badge/badge_c.lua" type="client" />	
 	<file src="badge/badge.png" type="client" />
 	<file src="badge/closeBut.png" type="client" />
 	<file src="badge/closeBut_hover.png" type="client" />
+	
+	<!-- Cuffing -->
+	<script src="cuffing/cuffing_s.lua" type="server" />
+	
+	<!-- throwClub -->
+	<script src="throwClub/throw_s.lua" type="server" />
+	<script src="throwClub/throw_c.lua" type="client" />
+	
+	<export function="isACop" type="server" />
+	
+	<include resource="phoenix_Groups" />
+	<include resource="trajectory" />
 	
 	<settings>
 		<setting name="#COPS_GROUPID" value="1" />

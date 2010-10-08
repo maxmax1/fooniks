@@ -2,7 +2,12 @@
 
 	<script src="skills-client.lua" type="client" />	
 	<script src="skills-server.lua" type="server" />
-
+	
+	<script src="achievements_s.lua" type="server" />
+	<script src="achievements_c.lua" type="client" />
+	
+	<script src="someach_c.lua" type="client" />
+	
 	<export function="LoadSkillsForPlayer" type="server" />
 	<export function="SaveSkillsForPlayer" type="server" />
 	<export function="getPlayerLevel" type="server" />
@@ -12,9 +17,16 @@
 	
 	<export function="GetSkillLevelData" type="server" />
 	<export function="GetSkillLevelData" type="client" />
+	
+	<export function="doneAchivement" type="server" />
+	<export function="LoadAchForPlayer" type="server" />
 		
 	<config src="skills.xml" type="server" />
+	<config src="achievements.xml" type="server" />
 	
+	<file src="levelUpBack.png" />
+	<file src="coins.png" />
+	<file src="xp.png" />
 	<file src="images/levelup.png" />
 
 	<file src="images/PISTOL.png" />
@@ -31,5 +43,9 @@
 	<file src="images/POWER.png" />
 	<file src="images/STAMINA.png" />
 	<file src="images/LEGAL.png" />
+	
+	<file src="aimages/achievement.png" />
+	<file src="aimages/demex.png" />
+	<file src="aimages/sthkl.png" />
   
 </meta>
