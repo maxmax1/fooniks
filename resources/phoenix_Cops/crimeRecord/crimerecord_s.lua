@@ -121,3 +121,33 @@ function CrimeRecord:GetSuspects( theStr, start, limit )
 	return tbl;
 
 end
+
+function CrimeRecord:GetSuspects( theStr, start, limit )
+
+	local tbl = { };
+	for k, v in pairs( self.allCrimes ) do
+	
+		local match = false;
+		local name = getCharacterName( tonumber( k ) );
+		
+		if( theStr ) then
+		
+			local i, j = string.find( theStr, name );
+			if( not i ) then match = false; else match = true; end
+		
+		end
+		if( match ) then
+			table.insert( tbl, { ["id"] = tonumber( k ), ["name"] = name } );
+		end
+	
+	end
+	
+	local tbl2 = { };
+	for i = start,limit do
+	
+		table.insert( tbl2, tbl[i] );
+	
+	end
+	return tbl;
+
+end
