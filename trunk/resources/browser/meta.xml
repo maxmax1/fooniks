@@ -10,3 +10,15 @@
 	<file src="online/error/syntax.xml" type="client" />
 
 </meta>
+<meta>
+
+	<script src="browser.lua" type="client" />
+	
+	<file src="img/white.png" type="client" />
+	
+	<file src="online/about/blank.xml" type="client" />
+	<file src="online/error/404.xml" type="client" />
+	<file src="online/error/invalidurl.xml" type="client" />
+	<file src="online/error/syntax.xml" type="client" />
+
+</meta>

@@ -14,3 +14,19 @@
 	<file src="files/images/arrow_right.png" />
 	
 </meta>
+<meta>
+
+	<script src="spawn-server.lua" type="server" />
+	<script src="spawn-client.lua" type="client" />
+	<script src="minigame-client.lua" type="client" />
+	
+	<map src="haiglavalmis.map" dimension="0" />
+
+	<file src="files/images/theRound.png" />
+	
+	<file src="files/images/arrow_up.png" />
+	<file src="files/images/arrow_down.png" />
+	<file src="files/images/arrow_left.png" />
+	<file src="files/images/arrow_right.png" />
+	
+</meta>
