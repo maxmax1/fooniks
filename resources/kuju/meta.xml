@@ -2,11 +2,3 @@
     <info type="script" version="1.0.0" />
 	<script src="kuju.lua" type="server" />
 </meta>
-<meta>
-    <info type="script" version="1.0.0" />
-	<script src="kuju.lua" type="server" />
-</meta>
-<meta>
-    <info type="script" version="1.0.0" />
-	<script src="kuju.lua" type="server" />
-</meta>

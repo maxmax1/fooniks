@@ -22,15 +22,3 @@
 	<include resource="phoenix_AdManager" />
 
 </meta>
-<meta>
-
-	<info author="eRP-Gaming" version="1.0" type="script" name="Phoenix Ads" description="Special ads system." />
-
-	<config src="adboards.xml" type="server" />
-	
-	<script src="adSystem.lua" type="server" />
-	<script src="adCreator.lua" type="client" />
-	
-	<include resource="phoenix_AdManager" />
-
-</meta>
