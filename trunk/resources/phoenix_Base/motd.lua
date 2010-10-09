@@ -36,12 +36,3 @@ if( not motdTime ) then
 end
 
 setTimer( ShowMotd, motdTime, 0 );
-
-local motdTime = tonumber( get( "MotdTime" ) );
-if( not motdTime ) then
-
-	motdTime = 30000;
-
-end
-
-setTimer( ShowMotd, motdTime, 0 );
