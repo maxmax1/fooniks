@@ -380,7 +380,7 @@ function PhoenixTab:DoEvents( )
 				self:DrawButtons( );
 				
 				-- Draw Center Text
-				dxDrawText( "MÃ¤ngimise jÃ¤tkamiseks kliki tÃ¼hjale ekraaniosale", 0, self.sy - 80, self.sx, self.sy - 3, self.alphaW, 0.9, "default-bold", "center", "bottom", true, true, true );
+				dxDrawText( "Mängimise jätkamiseks kliki tühjale ekraaniosale", 0, self.sy - 80, self.sx, self.sy - 3, self.alphaW, 0.9, "default-bold", "center", "bottom", true, true, true );
 					
 			
 			elseif( isCursorShowing( ) and not self.inCharSelection ) then

@@ -1,0 +1,17 @@
+<html>
+
+	<head>
+	
+		<title>About Blank</title>
+	
+	</head>
+	
+	<body background="white" padding="30">
+	
+		<label color="0,0,0" font="sa-gothic">About Blank</label>
+		<br />
+		<label color="0,0,0" font="clear-normal">Ausalt ka, siin ei ole mitte midagi...</label>
+	
+	</body>
+
+</html>
