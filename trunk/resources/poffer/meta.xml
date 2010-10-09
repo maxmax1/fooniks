@@ -1,0 +1,9 @@
+<meta>
+	<info author="eRP-Gaming" type="script" name="poffer" description="A player accept/decline gui." />
+	
+	<script src="poffer_s.lua" type="server" />
+	<script src="poffer_c.lua" type="client" />
+	
+	<export function="AddOffer" type="server" />
+	
+</meta>
