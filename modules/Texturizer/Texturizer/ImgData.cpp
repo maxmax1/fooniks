@@ -118,6 +118,16 @@ void * GdImgManager::AddImage( lua_State * luaVM, int width, int height )
 	return NULL;
 }
 
+void GdImgManager::RemoveImage( void * userData )
+{
+	gdImagePtr im = GetImage(userData);
+	if(im != NULL)
+	{
+		gdImageDestroy(im);
+		mImages.erase( mImages.find( userData ) );
+	}
+}
+
 gdImagePtr GdImgManager::GetImage( void * userData )
 {
 	std::map< void *, gdImagePtr >::iterator idx = mImages.find( userData );

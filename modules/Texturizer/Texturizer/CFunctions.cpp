@@ -99,7 +99,7 @@ int CFunctions::TxdContainerAddImage ( lua_State* luaVM )
 
 							tex.data_size = img.fileData.size();
 							tex.data = new uint8_t[img.fileData.size()];
-							for(int i = 0; i < img.fileData.size(); i++)
+							for(int i = 0; i < (int)img.fileData.size(); i++)
 							{
 								tex.data[i] = (uint8_t)img.fileData[i];
 							}
@@ -230,6 +230,8 @@ int CFunctions::imgPng ( lua_State* luaVM )
 						fNewPath,
 						fMetaPath;
 
+					bool noDel = lua_toboolean(luaVM, 3)?true:false;
+
 					if( ParseResourcePathInput( std::string(fName), mResource, fNewPath, fMetaPath ) )
 					{
 						std::fstream out(fNewPath.c_str(), std::fstream::out | std::fstream::binary );
@@ -243,7 +245,9 @@ int CFunctions::imgPng ( lua_State* luaVM )
 							out.close();
 							gdFree(result);
 
-							printf( "%d", sis );
+							if(!noDel) mImgManager->RemoveImage( lua_touserdata( luaVM, 1 ) );
+
+							//printf( "%d", sis );
 
 							lua_pushboolean( luaVM, true );
 							return 1;
@@ -491,5 +495,33 @@ int CFunctions::imgTtfBBox ( lua_State* luaVM )
 		}
 		return 1;
     }
+    return 0;
+}
+
+int CFunctions::imgDestroy ( lua_State* luaVM )
+{
+	// bool/int imageDestroy( userdata im )
+    if ( luaVM )
+    {
+        if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
+		{
+			gdImagePtr im = mImgManager->GetImage( lua_touserdata( luaVM, 1 ) );
+			if( im != NULL )
+			{
+				mImgManager->RemoveImage( lua_touserdata( luaVM, 1 ) );
+				lua_pushboolean( luaVM, true );
+			}
+			else
+			{
+				lua_pushboolean( luaVM, false );
+			}
+			return 1;
+		}
+		else
+		{
+			pModuleManager->DebugPrintf( luaVM, "Incorrect parameters in: imageDestroy" );
+		}
+    }
+	lua_pushboolean( luaVM, false );
     return 0;
 }

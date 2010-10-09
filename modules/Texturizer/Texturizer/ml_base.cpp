@@ -55,6 +55,9 @@ MTAEXPORT void RegisterFunctions ( lua_State * luaVM )
 
 		pModuleManager->RegisterFunction ( luaVM, "imageTtfText", CFunctions::imgTtfText );
 		pModuleManager->RegisterFunction ( luaVM, "imageTtfBBox", CFunctions::imgTtfBBox );
+		
+		pModuleManager->RegisterFunction ( luaVM, "imageDestroy", CFunctions::imgDestroy );
+		
     }
 }
 
