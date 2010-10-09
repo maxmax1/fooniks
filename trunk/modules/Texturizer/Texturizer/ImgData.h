@@ -63,6 +63,8 @@ public:
 	void * AddImage( lua_State * luaVM, int width, int height );
 	//void * AddImage( lua_State * luaVM, std::string rFilePath );
 
+	void RemoveImage( void * userData );
+
 };
 
 #endif // __IMGDATA_H

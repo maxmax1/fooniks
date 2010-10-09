@@ -53,5 +53,7 @@ public:
 
 		static int      imgTtfText					( lua_State* luaVM );
 		static int      imgTtfBBox					( lua_State* luaVM );
+
+		static int      imgDestroy					( lua_State* luaVM );
 };
 #endif
