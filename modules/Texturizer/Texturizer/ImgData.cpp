@@ -128,7 +128,7 @@ void TextureImage::LoadImageToData( uint32_t filter, bool mAlpha )
 
 void TextureImage::Compress( )
 {
-	/*u8 * pixels = new u8[width*height*4];
+	u8 * pixels = new u8[width*height*4];
 
 	for( int i = 0; i < fileData.size(); i++)
 	{
@@ -142,7 +142,7 @@ void TextureImage::Compress( )
 	for( int i = 0; i < width*height/2; i++)
 	{
 		fileData.push_back(block[i]);
-	}*/
+	}
 
 	//squish::Compress
 }

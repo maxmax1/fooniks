@@ -17,4 +17,4 @@ ADD_LIBRARY( Texturizer SHARED ${include_SRCS} ${extra_SRCS} ${mta_SRCS} ${txdCo
 target_link_libraries (Texturizer TextureWriter)
 target_link_libraries (Texturizer lua5.1.lib)
 target_link_libraries (Texturizer ${GD_LIBRARIES})
-# target_link_libraries (Texturizer ${SQUISH_LIBRARIES})
+target_link_libraries (Texturizer ${SQUISH_LIBRARIES})
