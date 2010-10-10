@@ -7,12 +7,3 @@
 	<file src="textures/lahillsads.txd" />
 
 </meta>
-<meta>
-
-	<info author="eRP-Gaming" version="1.0" type="script" name="Phoenix AdManager" description="Special ads system filemanager." />
-
-	<script src="system.lua" type="client" />
-	
-	<file src="textures/lahillsads.txd" />
-
-</meta>

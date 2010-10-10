@@ -1,21 +1,9 @@
 <adboards>
 
-	<adboard objectid="13890" posX="231.982" posY="-1477.974" posZ="19.090">
+	<adboard objectid="13890" posX="759.385" posY="-953.386" posZ="55.248">
 	
 		<img w="128" h="64">:phoenix_AdManager/images/diderSachs01.png</img>
-		<txd innerName="diderSachs01">:phoenix_AdManager/textures/lahillsads.txd</txd>
-		<textpos x="14" y="5" w="100" h="54" />
-	
-	</adboard>
-
-</adboards>
-<adboards>
-
-	<adboard objectid="13890" posX="231.982" posY="-1477.974" posZ="19.090">
-	
-		<img w="128" h="64">:phoenix_AdManager/images/diderSachs01.png</img>
-		<txd innerName="diderSachs01">:phoenix_AdManager/textures/lahillsads.txd</txd>
-		<textpos x="14" y="5" w="100" h="54" />
+		<txd>diderSachs01</txd>
 	
 	</adboard>
 

@@ -1,0 +1,9 @@
+<textures>
+
+	<texture id="13890" file=":phoenix_AdManager/textures/lahillsads.txd">
+		<img innername="diderSachs01">:phoenix_AdManager/images/diderSachs01.png</img>
+		<img innername="Victim_bboard">:phoenix_AdManager/images/Victim_bboard.png</img>
+		<img innername="heat_02">:phoenix_AdManager/images/heat_02.png</img>
+	</texture>
+
+</textures>
