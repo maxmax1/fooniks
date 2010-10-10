@@ -288,7 +288,7 @@ int CFunctions::imgPng ( lua_State* luaVM )
 						if( out.is_open() )
 						{
 							int sis = 0;
-							char * result = (char *)gdImagePngPtr( im, &sis );
+							char * result = (char *)gdImagePngPtrEx( im, &sis, 0 );
 
 							out.write(result, sis);
 							
@@ -545,6 +545,37 @@ int CFunctions::imgTtfBBox ( lua_State* luaVM )
 		}
 		return 1;
     }
+    return 0;
+}
+
+int CFunctions::imgFill ( lua_State* luaVM )
+{
+	// bool/int imageFill( userdata im, int x, int y, int color )
+    if ( luaVM )
+    {
+        if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA &&
+			lua_type ( luaVM, 2 ) == LUA_TNUMBER &&
+			lua_type ( luaVM, 3 ) == LUA_TNUMBER &&
+			lua_type ( luaVM, 4 ) == LUA_TNUMBER )
+		{
+			gdImagePtr im = mImgManager->GetImage( lua_touserdata( luaVM, 1 ) );
+			if( im != NULL )
+			{
+				gdImageFill( im, lua_tonumber( luaVM, 2 ), lua_tonumber( luaVM, 3 ), lua_tonumber( luaVM, 4 ) );
+				lua_pushboolean( luaVM, true );
+			}
+			else
+			{
+				lua_pushboolean( luaVM, false );
+			}
+			return 1;
+		}
+		else
+		{
+			pModuleManager->DebugPrintf( luaVM, "Incorrect parameters in: imageDestroy" );
+		}
+    }
+	lua_pushboolean( luaVM, false );
     return 0;
 }
 
