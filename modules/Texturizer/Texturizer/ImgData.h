@@ -32,10 +32,8 @@ using namespace squish;
 #define FORMAT_EXT_PAL4        0x4000 // (2^4 = 16 palette colors)
 #define FORMAT_EXT_MIPMAP      0x8000 // (mipmaps included)
 
-#define ORDER_RED			   0
-#define ORDER_GREEN			   1
-#define ORDER_BLUE			   2
-#define ORDER_ALPHA			   3
+#define ORDER_RGBA			   0
+#define ORDER_BGRA			   1
 
 class TextureImage
 {
@@ -44,7 +42,7 @@ private:
 	std::string 
 		fileName;
 
-	std::map<uint32_t, int*> 
+	std::map<uint32_t, int> 
 		fOrder;
 
 	uint32_t 

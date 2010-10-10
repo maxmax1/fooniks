@@ -20,53 +20,14 @@ void TextureImage::Init( )
 {
 	cFilter = FORMAT_DEFAULT;
 
-	fOrder[FORMAT_DEFAULT] = new int [4];
-	fOrder[FORMAT_DEFAULT][0] = ORDER_RED;
-	fOrder[FORMAT_DEFAULT][1] = ORDER_GREEN;
-	fOrder[FORMAT_DEFAULT][2] = ORDER_BLUE;
-	fOrder[FORMAT_DEFAULT][3] = ORDER_ALPHA;
-
-	fOrder[FORMAT_1555] = new int [4];
-	fOrder[FORMAT_1555][0] = ORDER_RED;
-	fOrder[FORMAT_1555][1] = ORDER_GREEN;
-	fOrder[FORMAT_1555][2] = ORDER_BLUE;
-	fOrder[FORMAT_1555][3] = ORDER_ALPHA;
-
-	fOrder[FORMAT_565] = new int [4];
-	fOrder[FORMAT_565][0] = ORDER_RED;
-	fOrder[FORMAT_565][1] = ORDER_GREEN;
-	fOrder[FORMAT_565][2] = ORDER_BLUE;
-	fOrder[FORMAT_565][3] = ORDER_ALPHA;
-
-	fOrder[FORMAT_4444] = new int [4];
-	fOrder[FORMAT_4444][0] = ORDER_RED;
-	fOrder[FORMAT_4444][1] = ORDER_GREEN;
-	fOrder[FORMAT_4444][2] = ORDER_BLUE;
-	fOrder[FORMAT_4444][3] = ORDER_ALPHA;
-
-	fOrder[FORMAT_LUM8] = new int [4];
-	fOrder[FORMAT_LUM8][0] = ORDER_RED;
-	fOrder[FORMAT_LUM8][1] = ORDER_GREEN;
-	fOrder[FORMAT_LUM8][2] = ORDER_BLUE;
-	fOrder[FORMAT_LUM8][3] = ORDER_ALPHA;
-
-	fOrder[FORMAT_8888] = new int [4];
-	fOrder[FORMAT_8888][0] = ORDER_BLUE;
-	fOrder[FORMAT_8888][1] = ORDER_GREEN;
-	fOrder[FORMAT_8888][2] = ORDER_RED;
-	fOrder[FORMAT_8888][3] = ORDER_ALPHA;
-
-	fOrder[FORMAT_888] = new int [4];
-	fOrder[FORMAT_888][0] = ORDER_BLUE;
-	fOrder[FORMAT_888][1] = ORDER_GREEN;
-	fOrder[FORMAT_888][2] = ORDER_RED;
-	fOrder[FORMAT_888][3] = ORDER_ALPHA;
-
-	fOrder[FORMAT_555] = new int [4];
-	fOrder[FORMAT_555][0] = ORDER_RED;
-	fOrder[FORMAT_555][1] = ORDER_GREEN;
-	fOrder[FORMAT_555][2] = ORDER_BLUE;
-	fOrder[FORMAT_555][3] = ORDER_ALPHA;
+	fOrder[FORMAT_DEFAULT] = ORDER_RGBA;
+	fOrder[FORMAT_1555] = ORDER_RGBA;
+	fOrder[FORMAT_565] = ORDER_RGBA;
+	fOrder[FORMAT_4444] = ORDER_RGBA;
+	fOrder[FORMAT_LUM8] = ORDER_RGBA;
+	fOrder[FORMAT_8888] = ORDER_BGRA;
+	fOrder[FORMAT_888] = ORDER_BGRA;
+	fOrder[FORMAT_555] = ORDER_RGBA;
 }
 
 void TextureImage::LoadImageToData( uint32_t filter, bool mAlpha )
@@ -107,12 +68,19 @@ void TextureImage::LoadImageToData( uint32_t filter, bool mAlpha )
 				{
 					int c = gdImageGetPixel( im, x, y );
 					
-					for( int i = 0; i < 3; i++ )
+					if( fOrder[cFilter] == ORDER_RGBA )
 					{
-						if(fOrder[cFilter][i] == ORDER_BLUE)		fileData.push_back( (unsigned char)gdImageBlue( im, c ) );
-						else if(fOrder[cFilter][i] == ORDER_GREEN)	fileData.push_back( (unsigned char)gdImageGreen( im, c ) );
-						else if(fOrder[cFilter][i] == ORDER_RED)	fileData.push_back( (unsigned char)gdImageRed( im, c ) );
-						else if(fOrder[cFilter][i] == ORDER_ALPHA)	fileData.push_back( mAlpha?0xFF*(gdImageAlpha( im, c )/127):0xFF );
+						fileData.push_back( (unsigned char)gdImageRed( im, c ) );
+						fileData.push_back( (unsigned char)gdImageGreen( im, c ) );
+						fileData.push_back( (unsigned char)gdImageBlue( im, c ) );
+						fileData.push_back( mAlpha?0xFF*(gdImageAlpha( im, c )/127):0xFF );
+					}
+					else
+					{
+						fileData.push_back( (unsigned char)gdImageBlue( im, c ) );
+						fileData.push_back( (unsigned char)gdImageGreen( im, c ) );
+						fileData.push_back( (unsigned char)gdImageRed( im, c ) );
+						fileData.push_back( mAlpha?0xFF*(gdImageAlpha( im, c )/127):0xFF );
 					}
 				}
 			}

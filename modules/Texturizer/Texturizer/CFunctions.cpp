@@ -53,7 +53,7 @@ int CFunctions::TxdContainerAddImage ( lua_State* luaVM )
 				int contId = (int)lua_tonumber(luaVM, 1);
 				const char* tName = lua_tostring(luaVM, 2);
 				const char* fName = lua_tostring(luaVM, 3);
-				bool compress = lua_type ( luaVM, 4 ) == LUA_TBOOLEAN?true:false;
+				bool compress = true; //lua_type ( luaVM, 4 ) == LUA_TBOOLEAN?true:false;
 
 				const char* alphaName;
 				bool hasAlpha = false;
@@ -561,7 +561,7 @@ int CFunctions::imgFill ( lua_State* luaVM )
 			gdImagePtr im = mImgManager->GetImage( lua_touserdata( luaVM, 1 ) );
 			if( im != NULL )
 			{
-				gdImageFill( im, lua_tonumber( luaVM, 2 ), lua_tonumber( luaVM, 3 ), lua_tonumber( luaVM, 4 ) );
+				gdImageFill( im, (int)lua_tonumber( luaVM, 2 ), (int)lua_tonumber( luaVM, 3 ), (int)lua_tonumber( luaVM, 4 ) );
 				lua_pushboolean( luaVM, true );
 			}
 			else
