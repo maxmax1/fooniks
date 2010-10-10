@@ -15,8 +15,8 @@
 
 #include "pstdint.h"
 
-//#include <squish.h>
-//using namespace squish;
+#include <squish.h>
+using namespace squish;
 
 #define FORMAT_DEFAULT         0x0000
 #define FORMAT_1555            0x0100 // (1 bit alpha, RGB 5 bits each; also used for DXT1 with alpha)
