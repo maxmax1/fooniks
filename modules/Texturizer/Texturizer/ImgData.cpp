@@ -176,6 +176,26 @@ void * GdImgManager::AddImage( lua_State * luaVM, int width, int height )
 	return NULL;
 }
 
+void * GdImgManager::AddImage( lua_State * luaVM, std::string rFilePath )
+{
+	void * ptr = lua_newuserdata(luaVM, 128);
+	if( ptr != NULL )
+	{
+		FILE * in = fopen(rFilePath.c_str(), "rb");
+		if( in != NULL )
+		{
+			gdImagePtr imgPtr = gdImageCreateFromPng( in );
+			fclose(in);
+			if(imgPtr != NULL)
+			{
+				mImages[ptr] = imgPtr;
+				return ptr;
+			}
+		}
+	}
+	return NULL;
+}
+
 void GdImgManager::RemoveImage( void * userData )
 {
 	gdImagePtr im = GetImage(userData);
