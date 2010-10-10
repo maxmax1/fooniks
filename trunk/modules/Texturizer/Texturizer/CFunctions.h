@@ -45,7 +45,10 @@ public:
         static int      SaveTxdContainer            ( lua_State* luaVM );
 
 		// GD Functions...
+
 		static int      imgCreateTrueColor          ( lua_State* luaVM );
+		static int      imgCreateFromPng            ( lua_State* luaVM );
+
 		static int      imgPng                      ( lua_State* luaVM );
 
 		static int      imgColorAllocate            ( lua_State* luaVM );

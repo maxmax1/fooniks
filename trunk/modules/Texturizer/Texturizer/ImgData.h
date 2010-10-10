@@ -90,7 +90,7 @@ public:
 	gdImagePtr GetImage( void * userData );
 
 	void * AddImage( lua_State * luaVM, int width, int height );
-	//void * AddImage( lua_State * luaVM, std::string rFilePath );
+	void * AddImage( lua_State * luaVM, std::string rFilePath );
 
 	void RemoveImage( void * userData );
 

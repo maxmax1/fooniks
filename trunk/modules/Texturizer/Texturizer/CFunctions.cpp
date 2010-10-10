@@ -223,6 +223,44 @@ int CFunctions::imgCreateTrueColor ( lua_State* luaVM )
     return 0;
 }
 
+int CFunctions::imgCreateFromPng ( lua_State* luaVM )
+{
+	// bool/userdata imageCreateFromPng( string File )
+    if ( luaVM )
+    {
+        if ( lua_type ( luaVM, 1 ) == LUA_TSTRING )
+		{
+			std::string mResource;
+			if( pModuleManager->GetResourceName(luaVM, mResource) )
+			{
+				const char* fName = lua_tostring(luaVM, 1);
+				std::string 
+					fNewPath,
+					fMetaPath;
+
+				if( ParseResourcePathInput( std::string(fName), mResource, fNewPath, fMetaPath ) )
+				{
+					void * ret = mImgManager->AddImage( luaVM, fNewPath );
+					if( ret != NULL )
+					{
+						lua_pushlightuserdata( luaVM, ret );
+						return 1;
+					}
+				}
+			}
+			lua_pushboolean( luaVM, false );
+			return 1;
+		}
+		else
+		{
+			pModuleManager->DebugPrintf( luaVM, "Incorrect parameters in: imageCreateFromPng" );
+			lua_pushboolean( luaVM, false );
+		}
+		return 1;
+    }
+    return 0;
+}
+
 int CFunctions::imgPng ( lua_State* luaVM )
 {
 	// bool imagePng( userdata im, string fPath )

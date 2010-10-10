@@ -48,6 +48,8 @@ MTAEXPORT void RegisterFunctions ( lua_State * luaVM )
 
 		// GD Functions...
 		pModuleManager->RegisterFunction ( luaVM, "imageCreateTrueColor", CFunctions::imgCreateTrueColor );
+		pModuleManager->RegisterFunction ( luaVM, "imageCreateFromPng", CFunctions::imgCreateFromPng );
+
 		pModuleManager->RegisterFunction ( luaVM, "imagePng", CFunctions::imgPng );
 
 		pModuleManager->RegisterFunction ( luaVM, "imageColorAllocate", CFunctions::imgColorAllocate );
