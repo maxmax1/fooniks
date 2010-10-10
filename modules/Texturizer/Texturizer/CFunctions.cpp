@@ -40,7 +40,7 @@ int CFunctions::CreateTxdContainer ( lua_State* luaVM )
 
 int CFunctions::TxdContainerAddImage ( lua_State* luaVM )
 {
-	// bool txdContainerAddImage( int container, string name, string filePath )
+	// bool txdContainerAddImage( int container, string name, string filePath[, bool compress, string alphaname] )
     if ( luaVM )
     {
         if ( lua_type ( luaVM, 1 ) == LUA_TNUMBER &&
@@ -53,6 +53,15 @@ int CFunctions::TxdContainerAddImage ( lua_State* luaVM )
 				int contId = (int)lua_tonumber(luaVM, 1);
 				const char* tName = lua_tostring(luaVM, 2);
 				const char* fName = lua_tostring(luaVM, 3);
+				bool compress = lua_type ( luaVM, 4 ) == LUA_TBOOLEAN?true:false;
+
+				const char* alphaName;
+				bool hasAlpha = false;
+				if( lua_type ( luaVM, 5 ) == LUA_TSTRING )
+				{
+					alphaName = lua_tostring(luaVM, 5);
+					hasAlpha = true;
+				}
 
 				if( mTextureContainer->HasMember( contId ) )
 				{
@@ -62,8 +71,10 @@ int CFunctions::TxdContainerAddImage ( lua_State* luaVM )
 
 					if( ParseResourcePathInput( std::string(fName), mResource, fNewPath, fMetaPath ) )
 					{
+						uint32_t format = compress?(hasAlpha?FORMAT_1555:FORMAT_565):(hasAlpha?FORMAT_8888:FORMAT_888);
+
 						TextureImage img(fNewPath);
-						img.LoadImageToData();
+						img.LoadImageToData(format, hasAlpha);
 
 						if( img.errorCode != 0 )
 						{
@@ -72,7 +83,7 @@ int CFunctions::TxdContainerAddImage ( lua_State* luaVM )
 						}
 						else
 						{
-							img.Compress();
+							if(compress) img.Compress();
 
 							txd_texture_data_t tex;
 
@@ -85,15 +96,16 @@ int CFunctions::TxdContainerAddImage ( lua_State* luaVM )
 							memset(tex.alpha_name, 0x0, 32 ); 
 
 							strcpy(tex.texture_name, tName);
+							if(hasAlpha) strcpy(tex.alpha_name, alphaName);
 
-							tex.alpha_flags = 0x0200;
-							tex.direct3d_texture_format = 0x31545844; // DXT1
+							tex.alpha_flags = format;
+							tex.direct3d_texture_format = compress?0x31545844:0x0; // DXT1
 							tex.width = (uint16_t)img.width;
 							tex.height = (uint16_t)img.height;
 							tex.depth = 0x10;
 							tex.mipmap_count = 1;
 							tex.texcode_type = 0x04;
-							tex.flags = 8;
+							tex.flags = compress?(hasAlpha?9:8):(hasAlpha?1:0);
 
 							tex.palette = NULL;
 
