@@ -3,7 +3,7 @@ AdBoards = {
 	xmlFile = nil,
 	
 	adBoards = { },
-	qMarkers = { },
+	Bought = { },
 	
 	textures = { }
 
@@ -37,10 +37,12 @@ function AdBoards:Load( )
 				local children = { };
 				for k2, v2 in ipairs( child ) do children[xmlNodeGetName(v2)] = v2; end
 				
-				if( attr["objectid"] and attr["posX"] and attr["posY"] and attr["posZ"] and children["img"] and children["txd"] ) then
+				if( attr["id"] and attr["objectid"] and attr["posX"] and attr["posY"] and attr["posZ"] and children["img"] and children["txd"] and children["cameras"] ) then
 				
-					local id = tonumber( attr["objectid"] );
+					local id = tonumber( attr["id"] );
 					self.adBoards[id] =  { };
+					
+					self.adBoards[id]["objectid"] = tonumber( attr["objectid"] );
 					
 					self.adBoards[id]["posX"] = tonumber( attr["posX"] );
 					self.adBoards[id]["posY"] = tonumber( attr["posY"] );
@@ -53,10 +55,13 @@ function AdBoards:Load( )
 					self.adBoards[id]["h"] = tonumber( imgA["h"] ) or 32;
 					self.adBoards[id]["txdN"] = xmlNodeGetValue( children["txd"] );
 					
-					self.adBoards[id]["marker"] = createMarker( self.adBoards[id]["posX"], self.adBoards[id]["posY"], self.adBoards[id]["posZ"], "arrow", 1.0, 34, 60, 230 );
-					self.qMarkers[self.adBoards[id]["marker"]] = id;
+					self.adBoards[id]["cameras"] = { };
+					local cameras = xmlNodeGetChildren( children["cameras"] );
+					for k2, v2 in ipairs( cameras ) do
 					
-					addEventHandler( "onMarkerHit", self.adBoards[id]["marker"], function ( hElem, mDim ) if( hElem and mDim ) then self:MarkerHit( hElem, source ); end end );
+						table.insert( self.adBoards[id]["cameras"], xmlNodeGetAttributes( v2 ) );
+					
+					end
 				
 				end
 			
@@ -114,17 +119,87 @@ function AdBoards:Load( )
 		xmlUnloadFile ( self.xmlFile );
 	
 	end
+	
+	self.xmlFile =  xmlLoadFile ( "ads.xml" );
+	if ( self.xmlFile ~= false ) then
+	
+		local allElements = xmlNodeGetChildren( self.xmlFile );
+		
+		for k, v in ipairs( allElements ) do
+		
+			if( xmlNodeGetName( v ) == "single" ) then
+			
+				local attr = xmlNodeGetAttributes( v );
+				
+				if( attr["creator"] and attr["text"] and attr["ticksLeft"] and attr["aid"] ) then
+				
+					local id = tonumber( attr["aid"] );
+					self.Bought[id] = { ["text"] = attr["text"], ["creator"] = attr["creator"], ["ticksLeft"] = attr["ticksLeft"] };
+				
+				end
+			
+			end
+		
+		end
+		
+		xmlUnloadFile ( self.xmlFile );
+	
+	end
+	
+	self.adTime = tonumber( get( "#AD_TIME" ) ) or 30; -- 15 min
+	self.adPrice = tonumber( get( "#AD_PRICE" ) ) or 50;
 
 end
 
-function AdBoards:MarkerHit( thePlayer, source )
+function AdBoards:DoTick( )
+
+	for k, v in pairs( self.Bought ) do
 	
-	local theAd = self.qMarkers[source];
-	if( thePlayer and self.adBoards[theAd] ) then
-	
-		triggerClientEvent( thePlayer, "onAdBoardDraw", thePlayer, theAd );
+		self.Bought[k]["ticksLeft"] = self.Bought[k]["ticksLeft"] - 1;
+		if( self.Bought[k]["ticksLeft"] < 0 ) then
+		
+			self.Bought[k] = nil;
+		
+		end
 	
 	end
+	
+	self:SyncBought( );
+
+end
+
+function AdBoards:SyncBought( theElem )
+
+	if( not theElem ) then theElem = getRootElement( ); end
+	
+	local tempTbl = { };
+	local conf = xmlCreateFile( "ads.xml", "adstable" );
+	if( conf ) then
+	
+		for k, v in pairs( self.Bought ) do
+		
+			tempTbl[k] = true; -- save some bits.
+		
+			local node = xmlCreateChild( conf, "single" );
+			xmlNodeSetAttribute( node, "aid", k );
+			xmlNodeSetAttribute( node, "creator", v["creator"] );
+			xmlNodeSetAttribute( node, "text", v["text"] );
+			xmlNodeSetAttribute( node, "ticksLeft", v["ticksLeft"] );
+		
+		end
+	
+		--xmlSaveFile( conf );
+		xmlUnloadFile( conf );
+	
+	end
+	
+	triggerClientEvent( theElem, "onAdSync", theElem, tempTbl );
+
+end
+
+function AdBoards:MarkerHit( thePlayer )
+
+	triggerClientEvent( thePlayer, "onAdBoardRequest", thePlayer );
 
 end
 
@@ -167,7 +242,7 @@ function AdBoards:SetText( adBoardId, col, theTexts )
 					
 				imagePng( im, self.adBoards[adBoardId]["img"] );
 
-				local res, eStr = self:RefreshTxd( adBoardId );
+				local res, eStr = self:RefreshTxd( self.adBoards[adBoardId]["objectid"] );
 				if( res ~= 0 ) then
 				
 					return -6, eStr;
@@ -234,18 +309,64 @@ setTimer(
 
 	function ( )
 	
-		theAds:SetText( 13890, {255, 0, 0}, { { ["type"] = "TextElement", ["text"] = "TextElement", ["col"] = { 255, 255, 255 }, ["pos"] = { 5, 5 } }, { ["type"] = "TextElement", ["text"] = "TextElement", ["col"] = { 255, 255, 255 }, ["pos"] = { 5, 25 } } } );
-	
+		theAds.marker = createMarker( 1685.170, -1343.282, 18.035, "arrow", 1.0, 34, 60, 230 );
+		addEventHandler( "onMarkerHit", theAds.marker, function ( hElem, mDim ) if( hElem and mDim ) then theAds:MarkerHit( hElem ); end end );
+
 	end
 
 , 1000, 1 );
+
+setTimer( 
+
+	function ( )
+	
+		theAds:DoTick( )
+
+	end
+
+, 30000, 0 );
 
 addEvent( "onAdBoardDrawn", true );
 addEventHandler( "onAdBoardDrawn", getRootElement( ), 
 
 	function ( theAd, col, texts )
 	
-		outputDebugString( theAd .. " - " .. tostring( theAds:SetText( theAd, col, texts ) ) );
+		if( client ) then
+		
+			local money = getPlayerMoney( client );
+			
+			if( theAds.Bought[theAd] ) then
+			
+				exports.phoenix_Chat:OocInfo( client, "See reklaam ei ole myygis." );
+			
+			elseif( money >= theAds.adPrice ) then
+			
+				takePlayerMoney( client, theAds.adPrice );
+				
+				-- TODO: Increment the adComp money or give money to the city.
+				
+				theAds:SetText( theAd, col, texts );
+				theAds.Bought[theAd] =  { ["creator"] = getPlayerNametagText( client ), ["ticksLeft"] = theAds.adTime };
+				theAds:SyncBought( );
+			
+			else
+			
+				exports.phoenix_Chat:OocInfo( client, "Pole piisavalt raha." );
+			
+			end
+		
+		end
+	
+	end
+
+);
+
+addEvent( "onAdSyncRequest", true );
+addEventHandler( "onAdSyncRequest", getRootElement( ),
+
+	function ( )
+	
+		theAds:SyncBought( client );
 	
 	end
 

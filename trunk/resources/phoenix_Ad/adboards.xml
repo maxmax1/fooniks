@@ -1,9 +1,13 @@
 <adboards>
 
-	<adboard objectid="13890" posX="759.385" posY="-953.386" posZ="55.248">
+	<adboard id="1" objectid="13890" posX="759.385" posY="-953.386" posZ="55.248">
 	
 		<img w="128" h="64">:phoenix_AdManager/images/diderSachs01.png</img>
 		<txd>diderSachs01</txd>
+		<cameras>
+			<camera posX="795.217" posY="-984.427" posZ="66.154" lookX="762.545" lookY="-956.927" lookZ="58.266" />
+			<camera posX="807.563" posY="-937.758" posZ="86.504" lookX="798.325" lookY="-901.524" lookZ="71.977" />
+		</cameras>
 	
 	</adboard>
 
