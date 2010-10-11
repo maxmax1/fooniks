@@ -156,8 +156,15 @@ function AdCreator:build_Form()
 			if( button ~= "left" or state ~= "up" ) then return false; end
 			if( source ~= self.gui["acceptB"] ) then return false; end
 			
-			-- TriggerServerEvent...			
-			triggerServerEvent( "onAdBoardDrawn", self.thePlayer, self.Index, self.Back, self.textElements );
+			-- TriggerServerEvent...	
+			local theElements = { };
+			local rScale = 1 / self.scale;
+			for k, v in ipairs( self.textElements ) do
+			
+				table.insert( theElements, { ["type"] = v["type"], ["text"] = v["text"], ["col"] = { v["col"][1], v["col"][2], v["col"][3] }, ["pos"] = { v["pos"][1] * rScale, v["pos"][2] * rScale } } );
+			
+			end
+			triggerServerEvent( "onAdBoardDrawn", self.thePlayer, self.Index, self.Back, theElements );
 			
 			self:ShowHide( false );
 		
