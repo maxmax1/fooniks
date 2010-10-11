@@ -198,8 +198,10 @@ function AdCreator:ShowHide( show )
 		addEventHandler( "onClientRender", self.rootElement, onDraw );
 		self.Shown = true;
 		guiSetVisible( self.gui["_root"], true );
-		--guiSetInputEnabled( true );
-		showCursor( true );
+		
+		showCursor( true, false );
+		toggleAllControls( false );
+		setPedFrozen( self.thePlayer, true );
 	
 	elseif( not show and self.Shown ) then
 	
@@ -207,8 +209,12 @@ function AdCreator:ShowHide( show )
 		removeEventHandler( "onClientRender", self.rootElement, onDraw );
 		self.Shown = false;
 		guiSetVisible( self.gui["_root"], false );
-		--guiSetInputEnabled( false );
-		showCursor( false );
+		
+		showCursor( false, false );
+		toggleAllControls( true );
+		setPedFrozen( self.thePlayer, false );
+		
+		triggerEvent( "resetAdShop", self.thePlayer );
 	
 	end
 
@@ -438,12 +444,6 @@ end
 theCreator = AdCreator:new();
 theCreator:build_Form();
 
-function onStart( )
-
-
-end
-addEventHandler( "onClientResourceStart", getResourceRootElement( getThisResource( ) ), onStart );
-
 function onDraw( )
 
 	theCreator:OnDraw( );
@@ -460,13 +460,13 @@ end
 addEvent( "onAdBoardDraw", true );
 addEventHandler( "onAdBoardDraw", getRootElement( ),
 
-	function ( theAd )
+	function ( theAd, theW, theH )
 	
-		if( not theCreator.Shown ) then
+		if( not theCreator.Shown and theAd and theW and theH ) then
 		
 			theCreator.Index = theAd;
-			theCreator.imgH = 64;
-			theCreator.imgW = 128;			
+			theCreator.imgH = tonumber( theH ) or 64;
+			theCreator.imgW = tonumber( theW ) or 128;
 			theCreator:ShowHide( true );
 		
 		end

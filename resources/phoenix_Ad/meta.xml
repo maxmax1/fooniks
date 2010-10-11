@@ -3,8 +3,12 @@
 	<info author="eRP-Gaming" version="1.0" type="script" name="Phoenix Ads" description="Special ads system." />
 
 	<config src="adboards.xml" type="server" />
+	<config src="ads.xml" type="server" /> <!-- Here we store our db -->
+	
+	<file src="adboards.xml" type="client" />
 	
 	<script src="adSystem.lua" type="server" />
+	<script src="adShop.lua" type="client" />
 	<script src="adCreator.lua" type="client" />
 	
 	<file src="textW.png" type="client" />
